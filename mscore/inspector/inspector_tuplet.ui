@@ -226,6 +226,11 @@
         </item>
         <item>
          <property name="text">
+          <string>Slur</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string comment="no tuplet bracket style">None</string>
          </property>
         </item>

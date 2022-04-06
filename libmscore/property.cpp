@@ -109,7 +109,7 @@ static constexpr PropertyMetaData propertyList[] = {
       { Pid::BOX_HEIGHT,              false, "height",                P_TYPE::SPATIUM,             DUMMY_QT_TRANSLATE_NOOP("propertyName", "height")           },
 
       { Pid::BOX_WIDTH,               false, "width",                 P_TYPE::SPATIUM,             DUMMY_QT_TRANSLATE_NOOP("propertyName", "width")            },
-      { Pid::BOX_AUTOSIZE,            false, "boxAutoSize",           P_TYPE::BOOL,                DUMMY_QT_TRANSLATE_NOOP("prooertyName", "autosize frame")   },
+      { Pid::BOX_AUTOSIZE,            false, "boxAutoSize",           P_TYPE::BOOL,                DUMMY_QT_TRANSLATE_NOOP("propertyName", "autosize frame")   },
       { Pid::TOP_GAP,                 false, "topGap",                P_TYPE::SP_REAL,             DUMMY_QT_TRANSLATE_NOOP("propertyName", "top gap")          },
       { Pid::BOTTOM_GAP,              false, "bottomGap",             P_TYPE::SP_REAL,             DUMMY_QT_TRANSLATE_NOOP("propertyName", "bottom gap")       },
       { Pid::LEFT_MARGIN,             false, "leftMargin",            P_TYPE::REAL,                DUMMY_QT_TRANSLATE_NOOP("propertyName", "left margin")      },
@@ -355,6 +355,9 @@ static constexpr PropertyMetaData propertyList[] = {
       { Pid::PATH,                    false, "path",                  P_TYPE::PATH,                DUMMY_QT_TRANSLATE_NOOP("propertyName", "path") },
 
       { Pid::PREFER_SHARP_FLAT,       true,  "preferSharpFlat",       P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "prefer sharps or flats") },
+
+      { Pid::SET_KEY_TYPE,           false,  "set_key_type",          P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "set Key Type")     },
+	  { Pid::LYRICS_STAFF_SHIFT,     false,  "lyricsStaffShift",      P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "Notenzeilen verschibung") },
 
       { Pid::END, false, "++end++", P_TYPE::INT, DUMMY_QT_TRANSLATE_NOOP("propertyName", "<invalid property>") }
       };

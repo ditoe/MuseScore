@@ -37,10 +37,11 @@ QList<TablatureDurationFont> StaffType::_durationFonts  = QList<TablatureDuratio
 const char StaffType::groupNames[STAFF_GROUP_MAX][STAFF_GROUP_NAME_MAX_LENGTH] = {
       QT_TRANSLATE_NOOP("Staff type group name", "Standard"),
       QT_TRANSLATE_NOOP("Staff type group name", "Percussion"),
-      QT_TRANSLATE_NOOP("Staff type group name", "Tablature")
+      QT_TRANSLATE_NOOP("Staff type group name", "Tablature"),
+      QT_TRANSLATE_NOOP("Staff type group name", "Numeric"),
       };
 
-const QString StaffType::fileGroupNames[STAFF_GROUP_MAX] = { "pitched", "percussion", "tablature" };
+const QString StaffType::fileGroupNames[STAFF_GROUP_MAX] = { "pitched", "percussion", "tablature", "numeric" };
 
 //---------------------------------------------------------
 //   StaffType
@@ -138,7 +139,7 @@ bool StaffType::operator==(const StaffType& st) const
       if (!isSameStructure(st) || st._xmlName != _xmlName) {        // common to all type groups
             return false;
             }
-      if (_group == StaffGroup::TAB) {                      // TAB-specific
+      if ((_group == StaffGroup::TAB) || (_group == StaffGroup::NUMERIC)) {                      // TAB-specific
             bool v = st._durationFontIdx  == _durationFontIdx
                && st._durationFontSize  == _durationFontSize
                && st._durationFontUserY == _durationFontUserY
@@ -171,7 +172,7 @@ bool StaffType::isSameStructure(const StaffType& st) const
       if (_group == StaffGroup::STANDARD)                   // standard specific
             if (st._noteHeadScheme != _noteHeadScheme)
                   return false;
-      if (_group != StaffGroup::TAB) {                      // common to pitched and percussion
+      if ((_group != StaffGroup::TAB) && (_group != StaffGroup::NUMERIC)) {                      // common to pitched and percussion
             return st._genKeysig      == _genKeysig
                && st._showLedgerLines == _showLedgerLines
                ;
@@ -273,6 +274,8 @@ void StaffType::read(XmlReader& e)
       QString group = e.attribute("group", fileGroupNames[(int)StaffGroup::STANDARD]);
       if (group == fileGroupNames[(int)StaffGroup::TAB])
             _group = StaffGroup::TAB;
+      else if (group == fileGroupNames[(int)StaffGroup::NUMERIC])
+            _group = StaffGroup::NUMERIC;
       else if (group == fileGroupNames[(int)StaffGroup::PERCUSSION])
             _group = StaffGroup::PERCUSSION;
       else if (group == fileGroupNames[(int)StaffGroup::STANDARD])
@@ -731,7 +734,7 @@ static const qreal      LEDGER_LINE_RIGHTX      = 0.75;     // in % of cursor re
 
 void StaffType::drawInputStringMarks(QPainter *p, int string, int voice, QRectF rect) const
       {
-      if (_group != StaffGroup::TAB)
+      if ((_group != StaffGroup::TAB) && (_group != StaffGroup::NUMERIC))
             return;
       qreal       spatium     = SPATIUM20;
       qreal       lineDist    = _lineDistance.val() * spatium;
@@ -773,7 +776,7 @@ void StaffType::drawInputStringMarks(QPainter *p, int string, int voice, QRectF 
 
 int StaffType::numOfTabLedgerLines(int string) const
       {
-      if (_group != StaffGroup::TAB || !_useNumbers)
+      if (((_group != StaffGroup::TAB) && (_group != StaffGroup::NUMERIC)) || !_useNumbers)
             return 0;
 
       int   numOfLedgers= string < 0 ? -string : string - _lines + 1;
@@ -1296,7 +1299,8 @@ bool StaffType::fontData(bool bDuration, int nIdx, QString* pFamily, QString* pD
 static const int _defaultPreset[STAFF_GROUP_MAX] =
       { 0,              // default pitched preset is "stdNormal"
         3,              // default percussion preset is "perc5lines"
-        5               // default tab preset is "tab6StrCommon"
+        5,              // default tab preset is "tab6StrCommon"
+        5               // default num preset is "tab6StrCommon"
       };
 
 static const QString _emptyString = QString();
@@ -1376,6 +1380,7 @@ void StaffType::initStaffTypes()
          StaffType(StaffGroup::TAB, "tab6StrFrench", QObject::tr("Tab. 6-str. French"), 6, 0,     1.5, false, true, true,  true,  false,  Qt::black, "MuseScore Tab French", 15, 0, true,  "MuseScore Tab Renaiss",10, 0, TablatureSymbolRepeat::NEVER, true,  TablatureMinimStyle::NONE,   false, false, false, false, false, false, false,false),
          StaffType(StaffGroup::TAB, "tab7StrCommon", QObject::tr("Tab. 7-str. common"), 7, 0,     1.5, true,  true, false, false, false,  Qt::black, "MuseScore Tab Modern", 15, 0, false, "MuseScore Tab Serif",   9, 0, TablatureSymbolRepeat::NEVER, false, TablatureMinimStyle::SHORTER,true,  false, true,  false, false, false, true, true),
          StaffType(StaffGroup::TAB, "tab8StrCommon", QObject::tr("Tab. 8-str. common"), 8, 0,     1.5, true,  true, false, false, false,  Qt::black, "MuseScore Tab Modern", 15, 0, false, "MuseScore Tab Serif",   9, 0, TablatureSymbolRepeat::NEVER, false, TablatureMinimStyle::SHORTER,true,  false, true,  false, false, false, true, true),
+         StaffType(StaffGroup::NUMERIC, "numStrCommon", QObject::tr("Num. common"), 1, 0,     1.5, false,  true, false, true, false,  Qt::black, "Nimbus Roman D Regular", 15, 0, false, "MuseScore Tab Serif",   9, 0, TablatureSymbolRepeat::NEVER, false, TablatureMinimStyle::NONE,true,  false, true,  false, false, false, true, true),
          };
       }
 

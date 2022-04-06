@@ -364,6 +364,9 @@ enum class Pid {
 
       PREFER_SHARP_FLAT,
 
+      SET_KEY_TYPE,
+	  LYRICS_STAFF_SHIFT,
+
       END
       };
 

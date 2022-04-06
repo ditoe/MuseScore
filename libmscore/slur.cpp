@@ -62,6 +62,11 @@ void SlurSegment::draw(QPainter* painter) const
                   pen.setWidthF(score()->styleP(Sid::SlurDottedWidth) * mag);
                   break;
             }
+
+      if(slur()->staff() && slur()->staff()->isNumericStaff(slur()->tick())){
+
+            pen.setWidthF(score()->styleD(Sid::numericSlurThick));
+            }
       painter->setPen(pen);
       painter->drawPath(path);
       }
@@ -284,10 +289,18 @@ void SlurSegment::computeBezier(QPointF p6o)
 
       shoulderH -= p6o.y();
 
+      qreal c    = p2.x();
+      qreal w = 0.0;
+      if(slur()->staff() && slur()->staff()->isNumericStaff(slur()->tick())){
+            shoulderH = slur()->get_numericHigth()*score()->styleD(Sid::numericSlurHeigth);
+            shoulderW = (c-slur()->get_numericHigth()*score()->styleD(Sid::numericSlurEckenform))/c;
+            }
+      else {
+            w = score()->styleP(Sid::SlurMidWidth) - score()->styleP(Sid::SlurEndWidth);
+            }
       if (!slur()->up())
             shoulderH = -shoulderH;
 
-      qreal c    = p2.x();
       qreal c1   = (c - c * shoulderW) * .5 + p6o.x();
       qreal c2   = c1 + c * shoulderW       + p6o.x();
 
@@ -296,7 +309,6 @@ void SlurSegment::computeBezier(QPointF p6o)
       QPointF p3(c1, -shoulderH);
       QPointF p4(c2, -shoulderH);
 
-      qreal w = score()->styleP(Sid::SlurMidWidth) - score()->styleP(Sid::SlurEndWidth);
       if (staff())
             w *= staff()->mag(slur()->tick());
       if ((c2 - c1) <= _spatium)
@@ -636,6 +648,14 @@ void Slur::slurPos(SlurPos* sp)
       if (note2 && !note2->mirror())
             sp->p2.rx() += note2->x();
 
+      if(staff() && note1 && note2&& staff()->isNumericStaff(endCR()->tick())){
+            _numericHigth=note1->get_numericHigth();
+            sp->p1.rx() +=-note1->get_numericHigth()*score()->styleD(Sid::numericSlurUberhang);
+            sp->p2.rx() += note2->get_numericWidth() + note1->get_numericHigth()*score()->styleD(Sid::numericSlurUberhang);
+            sp->p1.ry() = note1->y()+note1->get_numericHigth()*0.5+note1->get_numericHigth()*score()->styleD(Sid::numericSlurShift);
+            sp->p2.ry() = note2->y()+note2->get_numericHigth()*0.5+note2->get_numericHigth()*score()->styleD(Sid::numericSlurShift);
+            return;
+            }
       qreal xo, yo;
 
       Stem* stem1 = sc && staffHasStems ? sc->stem() : 0;
@@ -1049,12 +1069,24 @@ SpannerSegment* Slur::layoutSystem(System* system)
                         _up = !(startCR()->up());
 
                         Measure* m1 = startCR()->measure();
+#if 0
+                        // the following code was in place until 3.6,
+                        // to force "long" slurs (duration > one measure) above
+                        // but it's much too aggressive - one measure isn't necessarily long
                         if ((endCR()->tick() - startCR()->tick()) > m1->ticks()) // long slurs are always above
                               _up = true;
-                        else
-                              _up = !startCR()->up();
-
-                        if (c1 && c2 && isDirectionMixture(c1, c2) && !c1->isGrace()) {
+#endif
+                        if (staff() && staff()->isNumericStaff( tick())) {
+                              // slurs go above if start and end note have different stem directions,
+                              // but grace notes are exceptions
+                              _up = false;
+                              }
+                        else if (c1 && c2 && isDirectionMixture(c1, c2) && !c1->isGrace()) {
+                              // slurs go above if start and end note have different stem directions,
+                              // but grace notes are exceptions
+                              _up = false;
+                              }
+                        else if (c1 && c2 && isDirectionMixture(c1, c2) && !c1->isGrace()) {
                               // slurs go above if start and end note have different stem directions,
                               // but grace notes are exceptions
                               _up = true;

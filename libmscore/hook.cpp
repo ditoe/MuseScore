@@ -14,6 +14,7 @@
 #include "sym.h"
 #include "chord.h"
 #include "stem.h"
+#include "staff.h"
 #include "score.h"
 
 namespace Ms {
@@ -66,8 +67,22 @@ void Hook::setHookType(int i)
 
 void Hook::layout()
       {
-      setbbox(symBbox(_sym));
-      }
+      if (staff() && staff()->isNumericStaff( tick())) {
+
+            _numericLineThick=_numericHigth*score()->styleD(Sid::numericThickLine);
+            _numericLineSpace=_numericHigth*(score()->styleD(Sid::numericDistanceBetweenLines)*-1);
+            _numericHigthLine=_numericHigth*score()->styleD(Sid::numericHeightDisplacement)-_numericHigth-_numericHigth*score()->styleD(Sid::numericHeigthLine);
+            qreal linienlaenge=_numericLineWidht*score()->styleD(Sid::numericWideLine);
+            QRectF hookbox = QRectF(score()->styleD(Sid::numericOffsetLine)+((_numericLineWidht-linienlaenge)/2),
+                                    _numericHigthLine+((qAbs(_hookType)-1)*_numericLineSpace)-_numericLineThick, linienlaenge,
+                                    ( _numericHigthLine+((qAbs(_hookType)-1)*_numericLineSpace)-_numericLineThick)*-1-_numericHigthLine*-1);
+            setbbox(hookbox);
+
+            }
+      else{
+            setbbox(symBbox(_sym));
+            }
+}
 
 //---------------------------------------------------------
 //   draw
@@ -75,12 +90,23 @@ void Hook::layout()
 
 void Hook::draw(QPainter* painter) const
       {
-      // hide if belonging to the second chord of a cross-measure pair
-      if (chord() && chord()->crossMeasure() == CrossMeasure::SECOND)
-            return;
 
+      if (staff() && staff()->isNumericStaff( tick())) {
+            painter->setPen(QPen(curColor(), _numericLineThick));
+            for (int i = 0; i < qAbs(_hookType); ++i){
+
+                  painter->drawLine(QLineF(score()->styleD(Sid::numericOffsetLine)+(_numericLineWidht/2-(_numericLineWidht*score()->styleD(Sid::numericWideLine))/2),
+                                           _numericHigthLine+(i*_numericLineSpace),
+                                           score()->styleD(Sid::numericOffsetLine)+(_numericLineWidht/2+(_numericLineWidht*score()->styleD(Sid::numericWideLine))/2),
+                                           _numericHigthLine+(i*_numericLineSpace)));
+                  }
+            }
+      else{
+            // hide if belonging to the second chord of a cross-measure pair
+            if (chord() && chord()->crossMeasure() == CrossMeasure::SECOND)
+                  return;
       painter->setPen(curColor());
       drawSymbol(_sym, painter);
+            }
       }
-
 }

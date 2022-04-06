@@ -88,6 +88,8 @@ class Staff final : public ScoreElement {
       QColor _color            { MScore::defaultColor };
       qreal _userDist          { 0.0   };       ///< user edited extra distance
 
+      qreal _numericHigth;
+
       StaffTypeList _staffTypeList;
 
       QMap<int,int> _channelList[VOICES];
@@ -187,6 +189,8 @@ class Staff final : public ScoreElement {
       void setBarLineFrom(int val)   { _barLineFrom = val;  }
       void setBarLineTo(int val)     { _barLineTo = val;    }
       qreal height() const;
+      void set_numericHeight(qreal h) {_numericHigth = h; }
+      qreal get_numericHeight()     {return _numericHigth; }
 
       int channel(const Fraction&, int voice) const;
 
@@ -213,6 +217,7 @@ class Staff final : public ScoreElement {
       void removeStaffType(const Fraction&);
       void staffTypeListChanged(const Fraction&);
 
+      bool isNumericStaff(const Fraction&) const;
       bool isPitchedStaff(const Fraction&) const;
       bool isTabStaff(const Fraction&) const;
       bool isDrumStaff(const Fraction&) const;

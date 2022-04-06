@@ -39,7 +39,7 @@ enum TelemetryDataCollectionType : unsigned char {
       COLLECT_CRASH_FREE_DATA = 1,
       COLLECT_INSPECTOR_DATA = 1 << 1,
       COLLECT_SHORTCUT_AND_MENU_DATA = 1 << 2,
-      COLLECT_ALL_DATA = COLLECT_CRASH_FREE_DATA & COLLECT_INSPECTOR_DATA & COLLECT_SHORTCUT_AND_MENU_DATA
+      COLLECT_ALL_DATA = COLLECT_CRASH_FREE_DATA | COLLECT_INSPECTOR_DATA | COLLECT_SHORTCUT_AND_MENU_DATA
 };
 
 constexpr TelemetryDataCollectionType enabledTelemetryDataTypes = TelemetryDataCollectionType::COLLECT_CRASH_FREE_DATA;
@@ -80,7 +80,8 @@ enum ScoreState {
       STATE_PLAY                                = 1 << 13,
       STATE_FOTO                                = 1 << 14,
       STATE_LOCK                                = 1 << 15,
-      STATE_NOTE_ENTRY_METHOD_TIMEWISE          = 1 << 16,
+      STATE_NOTE_ENTRY_METHOD_TIMEWISE          = 1 << 16, 
+	  STATE_NOTE_ENTRY_STAFF_NUMERIC			= 1 << 17,
 
       STATE_NEVER                               = 1 << 31,
 
@@ -90,7 +91,7 @@ enum ScoreState {
                                         | STATE_NOTE_ENTRY_METHOD_REALTIME_AUTO
                                         | STATE_NOTE_ENTRY_METHOD_REALTIME_MANUAL
                                         | STATE_NOTE_ENTRY_METHOD_TIMEWISE,
-      STATE_NOTE_ENTRY 		= STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB,
+      STATE_NOTE_ENTRY 		= STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_TAB | STATE_NOTE_ENTRY_STAFF_NUMERIC,
       STATE_ALLTEXTUAL_EDIT	= STATE_TEXT_EDIT | STATE_LYRICS_EDIT | STATE_HARMONY_FIGBASS_EDIT,
       STATE_ALL        		= -1
       };

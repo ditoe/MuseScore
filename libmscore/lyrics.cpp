@@ -22,6 +22,7 @@
 #include "undo.h"
 #include "textedit.h"
 #include "measure.h"
+#include "stafflines.h"
 
 namespace Ms {
 
@@ -43,6 +44,7 @@ Lyrics::Lyrics(Score* s)
       _even       = false;
       initElementStyle(&lyricsElementStyle);
       _no         = 0;
+	  _staffShift = 0;
       _ticks      = Fraction(0,1);
       _syllabic   = Syllabic::SINGLE;
       _separator  = 0;
@@ -53,6 +55,7 @@ Lyrics::Lyrics(const Lyrics& l)
       {
       _even      = l._even;
       _no        = l._no;
+	  _staffShift = l._staffShift;
       _ticks     = l._ticks;
       _syllabic  = l._syllabic;
       _separator = 0;
@@ -95,6 +98,7 @@ void Lyrics::write(XmlWriter& xml) const
             }
       xml.tag("ticks", _ticks.ticks(), 0); // pre-3.1 compatibility: write integer ticks under <ticks> tag
       writeProperty(xml, Pid::LYRIC_TICKS);
+	  writeProperty(xml, Pid::LYRICS_STAFF_SHIFT);
 
       TextBase::writeProperties(xml);
       xml.etag();
@@ -131,6 +135,8 @@ bool Lyrics::readProperties(XmlReader& e)
 
       if (tag == "no")
             _no = e.readInt();
+	  else if (tag == "lyricsStaffShift")
+		  _staffShift = e.readInt();
       else if (tag == "syllabic") {
             QString val(e.readElementText());
             if (val == "single")
@@ -382,8 +388,11 @@ void Lyrics::layout2(int nAbove)
       {
       qreal lh = lineSpacing() * score()->styleD(Sid::lyricsLineHeight);
 
+	  int schift = staffIdx()+_staffShift;
+	  if (score()->nstaves() <= schift)
+		  schift = score()->nstaves() - 1;
       if (placeBelow()) {
-            qreal yo = segment()->measure()->system()->staff(staffIdx())->bbox().height();
+		    qreal yo = segment()->measure()->system()->staff(schift)->bbox().height();
             rypos()  = lh * (_no - nAbove) + yo - chordRest()->y();
             rpos()  += styleValue(Pid::OFFSET, Sid::lyricsPosBelow).toPointF();
             }
@@ -393,6 +402,31 @@ void Lyrics::layout2(int nAbove)
             }
       }
 
+//---------------------------------------------------------
+//   layout3
+//    compute vertical position
+//---------------------------------------------------------
+
+void Lyrics::layout3()
+{
+	
+	  if (placeBelow()) {
+		    int schift = staffIdx() + _staffShift;
+		    if (score()->nstaves() <= schift)
+			      schift = score()->nstaves() - 1;
+		    qreal y1 = segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
+		    qreal y2 = segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+		    rypos() += (y2 - y1);
+	        }
+	  else {
+		    int schift = staffIdx() - _staffShift;
+		    if (0> schift)
+			      schift = 0;
+		    qreal y1 = segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
+		    qreal y2 = segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+		    rypos() -= (y1 - y2);
+	        }
+      }
 //---------------------------------------------------------
 //   paste
 //---------------------------------------------------------
@@ -547,6 +581,8 @@ QVariant Lyrics::getProperty(Pid propertyId) const
                   return _ticks;
             case Pid::VERSE:
                   return _no;
+			case Pid::LYRICS_STAFF_SHIFT:
+				return _staffShift;
             default:
                   return TextBase::getProperty(propertyId);
             }
@@ -583,6 +619,9 @@ bool Lyrics::setProperty(Pid propertyId, const QVariant& v)
             case Pid::VERSE:
                   _no = v.toInt();
                   break;
+			case Pid::LYRICS_STAFF_SHIFT:
+				_staffShift = v.toInt();
+				break;
             default:
                   if (!TextBase::setProperty(propertyId, v))
                         return false;
@@ -609,6 +648,8 @@ QVariant Lyrics::propertyDefault(Pid id) const
                   return Fraction(0,1);
             case Pid::VERSE:
                   return 0;
+			case Pid::LYRICS_STAFF_SHIFT:
+				  return 0;
             case Pid::ALIGN:
                   if (isMelisma())
                         return score()->styleV(Sid::lyricsMelismaAlign);

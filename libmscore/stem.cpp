@@ -104,6 +104,9 @@ void Stem::layout()
                         }
                   // in other TAB types, no correction
                   }
+            else if (staff() && staff()->isNumericStaff(chord()->tick())){
+
+            }
             else {                              // non-TAB
                   // move stem start to note attach point
                   Note* n  = up() ? chord()->downNote() : chord()->upNote();

@@ -56,6 +56,7 @@ static void undoChangeBarLineType(BarLine* bl, BarLineType barType, bool allStav
 
       switch (barType) {
             case BarLineType::END:
+            case BarLineType::BEGIN:
             case BarLineType::NORMAL:
             case BarLineType::DOUBLE:
             case BarLineType::BROKEN:
@@ -203,6 +204,7 @@ const std::vector<BarLineTableItem> BarLine::barLineTable {
       { BarLineType::END_REPEAT,       Sym::symUserNames[int(SymId::repeatRight)],          "end-repeat" },
       { BarLineType::BROKEN,           Sym::symUserNames[int(SymId::barlineDashed)],        "dashed" },
       { BarLineType::END,              Sym::symUserNames[int(SymId::barlineFinal)],         "end" },
+      { BarLineType::BEGIN,            Sym::symUserNames[int(SymId::barlineStart)],    "begin" },
       { BarLineType::END_START_REPEAT, Sym::symUserNames[int(SymId::repeatRightLeft)],      "end-start-repeat" },
       { BarLineType::DOTTED,           Sym::symUserNames[int(SymId::barlineDotted)],        "dotted" },
       { BarLineType::REVERSE_END,      Sym::symUserNames[int(SymId::barlineReverseFinal)],  "reverse-end" },
@@ -462,6 +464,54 @@ void BarLine::getY() const
       qreal d  = st1->lineDistance().val() * spatium1;
       qreal yy = measure->staffLines(staffIdx1)->y1() - yp;
       qreal lw = score()->styleS(Sid::staffLineWidth).val() * spatium1 * .5;
+
+      if(staff()->isNumericStaff(tick)){
+
+            bool spanStavesbefor     = false;
+            int staffbefor=staffIdx1;
+            for (int i2 = staffIdx1 - 1; i2 >= 0; --i2)  {
+                  Staff* s = score()->staff(i2);
+                  if (s && !s->invisible(tick) && s->part()->show() && measure->visible(i2)) {
+                        BarLine* nbl = toBarLine(segment()->element(i2 * VOICES));
+                        if(nbl && nbl->spanStaff()){
+                              spanStavesbefor = true;
+                              staffbefor=i2;
+                              }
+                        break;
+                        }
+                  }
+            for (int i2 = staffIdx1 + 1; i2 < nstaves; ++i2)  {
+                  Staff* s = score()->staff(i2);
+                  if (s && !s->invisible(tick) && s->part()->show() && measure->visible(i2)) {
+                        BarLine* nbl = toBarLine(segment()->element(i2 * VOICES));
+                        if(nbl && nbl->spanStaff()){
+                              //spanStaves = true;
+                              staffIdx2=i2;
+                              }
+                        break;
+                        }
+                  }
+            if (_spanStaff){
+                  y1 = 0.0;
+                  if (spanStavesbefor){
+                        y1 = -(yp - measure->staffLines(staffbefor)->y1())*0.5;
+                        }
+
+                  y2 = (measure->staffLines(staffIdx2)->y1() - yp)*0.5;
+                  }
+            else if (spanStavesbefor){
+
+                  y1 = -(yp - measure->staffLines(staffbefor)->y1())*0.5;
+
+                  y2 = 0.0;
+                  }
+            else {
+
+                  y1 = -staff()->get_numericHeight() * score()->styleD(Sid::numericBarlineLength);
+                  y2 = staff()->get_numericHeight() * score()->styleD(Sid::numericBarlineLength);
+                  }
+            return;
+            }
       y1       = yy + from * d * .5 - lw;
       if (staffIdx2 != staffIdx1)
             y2 = measure->staffLines(staffIdx2)->y1() - yp - to * d * .5;
@@ -586,6 +636,19 @@ void BarLine::draw(QPainter* painter) const
                   qreal lw2 = score()->styleP(Sid::endBarWidth) * mag();
                   painter->setPen(QPen(curColor(), lw2, Qt::SolidLine, Qt::FlatCap));
                   x  += score()->styleP(Sid::endBarDistance) * mag();
+                  painter->drawLine(QLineF(x, y1, x, y2));
+                  }
+                  break;
+
+            case BarLineType::BEGIN: {
+                  qreal lw = score()->styleP(Sid::barWidth) * mag();
+                  painter->setPen(QPen(curColor(), lw, Qt::SolidLine, Qt::FlatCap));
+                  qreal x  = lw * .5;
+                  painter->drawLine(QLineF(x, y1, x, y2));
+
+                  qreal lw2 = score()->styleP(Sid::endBarWidth) * mag();
+                  painter->setPen(QPen(curColor(), lw2, Qt::SolidLine, Qt::FlatCap));
+                  x  -= score()->styleP(Sid::endBarDistance) * mag();
                   painter->drawLine(QLineF(x, y1, x, y2));
                   }
                   break;
@@ -1266,6 +1329,10 @@ qreal BarLine::layoutWidth(Score* score, BarLineType type)
                   break;
             case BarLineType::END:
             case BarLineType::REVERSE_END:
+                  w = (score->styleP(Sid::endBarWidth) + score->styleP(Sid::barWidth)) * .5
+                     + score->styleP(Sid::endBarDistance);
+                  break;
+            case BarLineType::BEGIN:
                   w = (score->styleP(Sid::endBarWidth) + score->styleP(Sid::barWidth)) * .5
                      + score->styleP(Sid::endBarDistance);
                   break;

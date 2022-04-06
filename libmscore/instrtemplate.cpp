@@ -495,6 +495,8 @@ void InstrumentTemplate::read(XmlReader& e)
                         staffGroup = StaffGroup::PERCUSSION;
                   else if (stfGroup == "tablature")
                         staffGroup = StaffGroup::TAB;
+                  else if (stfGroup == "numeric")
+                        staffGroup = StaffGroup::NUMERIC;
                   else
                         staffGroup = StaffGroup::STANDARD;
                   staffTypePreset = 0;

@@ -26,6 +26,12 @@ class Chord;
 class Hook final : public Symbol {
       int _hookType { 0 };
 
+      qreal _numericLineWidht;
+      qreal _numericLineThick;
+      qreal _numericLineSpace;
+      qreal _numericHigthLine;
+      qreal _numericHigth;
+
    public:
       Hook(Score* = 0);
 
@@ -33,6 +39,7 @@ class Hook final : public Symbol {
       qreal mag() const override          { return parent()->mag(); }
       ElementType type() const override   { return ElementType::HOOK; }
       void setHookType(int v);
+      void setNumericHookDimension(qreal widht, qreal higth) {_numericLineWidht = widht; _numericHigth = higth;}
       int hookType() const                { return _hookType; }
       void layout() override;
       void draw(QPainter*) const override;

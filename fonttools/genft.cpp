@@ -347,7 +347,9 @@ QMap<QString, QString> nmap {
       { "uniE1DD", "fClef15ma" },
 
       { "accidentals.sori", "accidentalSori" },
-      { "accidentals.koron", "accidentalKoron" }
+      { "accidentals.koron", "accidentalKoron" },
+      { "numericAccidentalFlat", "numericAccidentalFlat" },
+      { "numericAccidentalSharp", "numericAccidentalSharp" }
 
       };
 

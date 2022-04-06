@@ -1442,7 +1442,57 @@ static const StyleType styleTypes[] {
 
       { Sid::autoplaceEnabled,              "autoplaceEnabled",              true },
       { Sid::usePre_3_6_defaults,           "usePre_3_6_defaults",           false},
-      { Sid::defaultsVersion,               "defaultsVersion",               Ms::MSCVERSION}
+      { Sid::defaultsVersion,               "defaultsVersion",               Ms::MSCVERSION},
+
+      { Sid::numericHeightDisplacement,     "numericHeightDisplacement",     0.45 },
+      { Sid::numericDistanceOctave,         "numericDistanceOctave",         0.5 },
+      { Sid::numericHeigthLine,             "numericHeigthLine",             0.14},
+      { Sid::numericOffsetLine,             "numericOffsetLine",             0.0},
+      { Sid::numericDistanceBetweenLines,   "numericDistanceBetweenLines",   0.21 },
+      { Sid::numericWideLine,               "numericWideLine",               0.7 },
+      { Sid::numericThickLine,              "numericThickLine",              0.07 },
+      { Sid::numericSizeSignSharp,          "numericSizeSignSharp",          1.07 },
+      { Sid::numericSizeSignFlat,           "numericSizeSignFlat",           1.0 },
+      { Sid::numericDistanceSignSharp,      "numericDistanceSignSharp",      0.7 },
+      { Sid::numericDistanceSignFlat,       "numericDistanceSignFlat",       0.42 },
+      { Sid::numericHeigthSignSharp,        "numericHeigthSignSharp",        0.28 },
+      { Sid::numericHeigthSignFlat,         "numericHeigthSignFlat",         0.46 },
+      { Sid::numericFont,                   "numericFont",                   "Numeric" },
+      { Sid::numericSlurEckenform,          "numericSlurEckenform",          0.0 },
+      { Sid::numericSlurThick,              "numericSlurThick",              1.3 },
+      { Sid::numericSlurHeigth,             "numericSlurHeigth",             0.2 },
+      { Sid::numericSlurUberhang,           "numericSlurUberhang",           -0.08 },
+      { Sid::numericSlurShift,              "numericSlurShift",              0.0 },
+      { Sid::numericLedgerlineThick,        "numericLedgerlineThick",        0.06 },
+      { Sid::numericLedgerlineLength,       "numericLedgerlineLength",       1.2 },
+      { Sid::numericLedgerlineShift,        "numericLedgerlineShift",        0.0 },
+      { Sid::numericStaffDistans,           "numericStaffDistans",           Spatium(3.5) },
+      { Sid::numericTimeSigSize,            "numericTimeSigSize",            0.95 },
+      { Sid::numericTimeSigDistance,        "numericTimeSigDistance",        0.15 },
+      { Sid::numericTimeSigLineThick,       "numericTimeSigLineThick",       0.09 },
+      { Sid::numericTimeSigLineSize,        "numericTimeSigLineSize",        1.0 },
+      { Sid::numericTimeSigFont,            "numericTimeSigFont",            "Numeric" },
+      { Sid::numericKeySigFont,             "numericKeySigFont",             "Numeric" },
+      { Sid::numericKeySigSize,             "numericKeySigSize",             0.95 },
+      { Sid::numericKeySigHorizontalShift,  "numericKeySigHorizontalShift",  1.0 },
+      { Sid::numericKeySigHigth,            "numericKeySigHigth",            2.5 },
+      { Sid::numericKeysigNoteDistancLeft,  "numericKeysigNoteDistancLeft",  0.5 },
+      { Sid::numericKeysigNoteDistancReigth,"numericKeysigNoteDistancReigth",1.0 }, 
+      { Sid::numericBarlineLength,          "numericBarlineLength",          1.0 },
+      { Sid::numericFontSize,               "numericFontSize",               12.0 },
+      { Sid::numericRestDistanc,            "numericRestDistanc",            1.0 },
+      { Sid::numericNoteDistanc,            "numericNoteDistanc",            1.0 },
+      { Sid::numericAccidentalFont,         "numericAccidentalFont",         "Numeric" },
+      { Sid::numericTupletSlurEcke,         "numericTupletSlurEcke",         0.1 },
+      { Sid::numericTupletSlurhigth,        "numericTupletSlurhigth",        0.8 },
+      { Sid::numericTupletSlurdistans,      "numericTupletSlurdistans",      0.0 },
+      { Sid::numericTupletSlurshift,        "numericTupletSlurshift",        0.0 },
+      { Sid::numericTupletSluruberhang,     "numericTupletSluruberhang",     0.0 },
+      { Sid::numericTupletNummerHigth,      "numericTupletNummerHigth",      0.0 },
+      { Sid::numericTupletSlurThickness,    "numericTupletSlurThickness",    1.3 },
+      { Sid::numericTupletNummerFontSize,   "numericTupletNummerFontSize",   0.6 },
+      { Sid::numericTupletNummerFont,       "numericTupletNummerFont",       "Numeric" }
+
       };
 
 MStyle  MScore::_baseStyle;
@@ -2627,6 +2677,10 @@ const std::vector<Tid>& primaryTextStyles()
       {
       return _primaryTextStyles;
       }
+
+//---------------------------------------------------------
+//   pageStyles
+//---------------------------------------------------------
 
 QSet<Sid> pageStyles()
 {

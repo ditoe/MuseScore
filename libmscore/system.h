@@ -53,6 +53,7 @@ class SysStaff {
       qreal _continuousDist { -1.0 }; // distance for continuous mode
       bool _show  { true };         // derived from Staff or false if empty
                                     // staff is hidden
+	  qreal _distanceFirstStaff;
    public:
       //int idx     { 0    };
       QList<InstrumentName*> instrumentNames;
@@ -63,6 +64,7 @@ class SysStaff {
       qreal y() const               { return _bbox.y() + _yOff; }
       void setYOff(qreal offset)    { _yOff = offset; }
       qreal yOffset() const         { return _yOff; }
+      qreal yBottom() const;
 
       void saveLayout();
       void restoreLayout();
@@ -75,6 +77,9 @@ class SysStaff {
 
       const Skyline& skyline() const { return _skyline; }
       Skyline& skyline()             { return _skyline; }
+
+	  void set_distanceFirstStaff(qreal h) { _distanceFirstStaff = h; }
+	  qreal get_distanceFirstStaff() { return _distanceFirstStaff; }
 
       SysStaff() {}
       ~SysStaff();

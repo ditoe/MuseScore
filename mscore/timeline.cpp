@@ -869,6 +869,26 @@ Timeline::Timeline(TDockWidget* dockWidget, QWidget* parent)
                   "...#.##"
                   };
 
+      static const char* start_barline[] = {
+                  "7 14 2 1",
+                  "# c #000000",
+                  ". c None",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#",
+                  "...##.#"
+                  };
+
       static const char* doubleBarline[] = {
                   "7 14 2 1",
                   "# c #000000",
@@ -952,6 +972,7 @@ Timeline::Timeline(TDockWidget* dockWidget, QWidget* parent)
       QPixmap* startRepeatPixmap = new QPixmap(startRepeat);
       QPixmap* endRepeatPixmap = new QPixmap(endRepeat);
       QPixmap* endBarlinePixmap = new QPixmap(endBarline);
+      QPixmap* start_barline_pixmap = new QPixmap(start_barline);
       QPixmap* doubleBarlinePixmap = new QPixmap(doubleBarline);
       QPixmap* reverseEndBarlinePixmap = new QPixmap(reverseEndBarline);
       QPixmap* heavyBarlinePixmap = new QPixmap(heavyBarline);
@@ -960,6 +981,7 @@ Timeline::Timeline(TDockWidget* dockWidget, QWidget* parent)
       _barlines[BarLineType::START_REPEAT] = startRepeatPixmap;
       _barlines[BarLineType::END_REPEAT] = endRepeatPixmap;
       _barlines[BarLineType::END] = endBarlinePixmap;
+      _barlines[BarLineType::BEGIN] = start_barline_pixmap;
       _barlines[BarLineType::DOUBLE] = doubleBarlinePixmap;
       _barlines[BarLineType::REVERSE_END] = reverseEndBarlinePixmap;
       _barlines[BarLineType::HEAVY] = heavyBarlinePixmap;
@@ -1383,6 +1405,7 @@ void Timeline::barlineMeta(Segment* seg, int* stagger, int pos)
                   case BarLineType::START_REPEAT:
                   case BarLineType::END_REPEAT:
                   case BarLineType::END:
+                  case BarLineType::BEGIN:
                   case BarLineType::DOUBLE:
                   case BarLineType::REVERSE_END:
                   case BarLineType::HEAVY:
@@ -1603,6 +1626,7 @@ bool Timeline::addMetaValue(int x, int pos, QString metaText, int row, ElementTy
       // Adjust x for end repeats
       if ((barLineType == BarLineType::END_REPEAT ||
            barLineType == BarLineType::END ||
+           barLineType == BarLineType::BEGIN ||
            barLineType == BarLineType::DOUBLE ||
            barLineType == BarLineType::REVERSE_END ||
            barLineType == BarLineType::HEAVY ||
@@ -2514,10 +2538,13 @@ void Timeline::updateGridFromCmdState()
 
       const bool layoutAll = layoutChanged && (cState.startTick() < Fraction(0, 1) || cState.endTick() < Fraction(0, 1));
 
-      const int startMeasure = layoutAll ? 0 : _score->tick2measure(cState.startTick())->measureIndex();
-      const int endMeasure = layoutAll ? _score->nmeasures() : (_score->tick2measure(cState.endTick())->measureIndex() + 1);
+      const Measure* startMeasure = layoutAll ? nullptr : _score->tick2measure(cState.startTick());
+      const int startMeasureIndex = startMeasure ? startMeasure->measureIndex() : 0;
 
-      updateGrid(startMeasure, endMeasure);
+      const Measure* endMeasure = layoutAll ? nullptr : _score->tick2measure(cState.endTick());
+      const int endMeasureIndex = endMeasure ? (endMeasure->measureIndex() + 1) : _score->nmeasures();
+
+      updateGrid(startMeasureIndex, endMeasureIndex);
       }
 
 //---------------------------------------------------------

@@ -609,7 +609,7 @@ enum class PlayEventType : char {
 //---------------------------------------------------------
 
 enum class TupletNumberType  : char { SHOW_NUMBER, SHOW_RELATION, NO_TEXT         };
-enum class TupletBracketType : char { AUTO_BRACKET, SHOW_BRACKET, SHOW_NO_BRACKET };
+enum class TupletBracketType : char { AUTO_BRACKET, SHOW_BRACKET, SHOW_SLUR, SHOW_NO_BRACKET };
 
 #ifdef SCRIPT_INTERFACE
 Q_ENUM_NS(ElementType);

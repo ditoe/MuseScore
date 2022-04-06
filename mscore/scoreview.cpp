@@ -3211,6 +3211,8 @@ void ScoreView::startNoteEntry()
       switch (staffGroup) {
             case StaffGroup::STANDARD:
                   break;
+            case StaffGroup::NUMERIC:
+                  //break;
             case StaffGroup::TAB: {
                   int strg = 0;                 // assume topmost string as current string
                   // if entering note entry with a note selected and the note has a string
@@ -3949,7 +3951,9 @@ ScoreState ScoreView::mscoreState() const
                   case StaffGroup::STANDARD:
                         return STATE_NOTE_ENTRY_STAFF_PITCHED;
                   case StaffGroup::TAB:
-                        return STATE_NOTE_ENTRY_STAFF_TAB;
+					  return STATE_NOTE_ENTRY_STAFF_TAB;
+                  case StaffGroup::NUMERIC:
+                        return STATE_NOTE_ENTRY_STAFF_NUMERIC;
                   case StaffGroup::PERCUSSION:
                         return STATE_NOTE_ENTRY_STAFF_DRUM;
                   }

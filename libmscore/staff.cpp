@@ -308,6 +308,7 @@ ClefTypeList Staff::clefType(const Fraction& tick) const
 
             switch (staffGroup) {
                   case StaffGroup::TAB:
+                  case StaffGroup::NUMERIC:
                         {
                         ClefType sct = ClefType(score()->styleI(Sid::tabClef));
                         ct = staffType(tick)->lines() <= 4 ?  ClefTypeList(sct == ClefType::TAB ? ClefType::TAB4 : ClefType::TAB4_SERIF) : ClefTypeList(sct == ClefType::TAB ? ClefType::TAB : ClefType::TAB_SERIF);
@@ -1517,6 +1518,16 @@ bool Staff::isTabStaff(const Fraction& tick) const
       {
       return staffType(tick)->group() == StaffGroup::TAB;
       }
+
+//---------------------------------------------------------
+//   isNumericStaff
+//---------------------------------------------------------
+
+bool Staff::isNumericStaff(const Fraction& tick) const
+      {
+      return staffType(tick)->group() == StaffGroup::NUMERIC;
+      }
+
 
 //---------------------------------------------------------
 //   isDrumStaff

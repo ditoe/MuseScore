@@ -1246,6 +1246,7 @@ class Score : public QObject, public ScoreElement {
       void hideEmptyStaves(System* system, bool isFirstSystem);
       void layoutLyrics(System*);
       void createBeams(LayoutContext&, Measure*);
+	  void LyricsLayout3(System*, LayoutContext&);
 
       constexpr static double defaultTempo()  { return _defaultTempo; }
 

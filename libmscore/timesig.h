@@ -17,6 +17,7 @@
 #include "sig.h"
 #include "mscore.h"
 #include "groups.h"
+#include "numeric.h"
 
 namespace Ms {
 
@@ -43,6 +44,18 @@ enum class TimeSigType : char {
 class TimeSig final : public Element {
       QString _numeratorString;     // calculated from actualSig() if !customText
       QString _denominatorString;
+      QString _numeric_ns;
+      QString _numeric_ds;
+
+      qreal _numericlinethick;
+      qreal _numericXpos;
+	  qreal _numericHigthds;
+	  qreal _numericHigthns;
+      qreal _numericBarLinelenght;
+      bool _numericVisible;
+      bool _numericBegin;
+
+	  numeric _numeric;
 
       std::vector<SymId> ns;
       std::vector<SymId> ds;
@@ -51,6 +64,8 @@ class TimeSig final : public Element {
       QPointF pn;
       QPointF pointLargeLeftParen;
       QPointF pointLargeRightParen;
+      QLineF numericLine;
+      QLineF numericBarLine;
       Fraction _sig;
       Fraction _stretch;      // localSig / globalSig
       Groups _groups;
@@ -80,6 +95,7 @@ class TimeSig final : public Element {
       void read(XmlReader&) override;
       void layout() override;
       Shape shape() const override;
+      void layout2();
 
       Fraction sig() const               { return _sig; }
       void setSig(const Fraction& f, TimeSigType st = TimeSigType::NORMAL);
@@ -109,6 +125,13 @@ class TimeSig final : public Element {
       void setLargeParentheses(bool v)    { _largeParentheses = v;    }
 
       void setScale(const QSizeF& s)      { _scale = s; }
+
+      qreal numericGetWidth(StaffType* numeric, QString string)const;
+      void set_numericVisible(bool s)      { _numericVisible = s; }
+      bool get_numericVisible() const  { return _numericVisible; }
+      void set_numericXpos(qreal s)      { _numericXpos = s; }
+      qreal get_numericXpos() const  { return _numericXpos; }
+      void set_numericBarLinelength(qreal length)      { _numericBarLinelenght = length; }
 
 
       void setFrom(const TimeSig*);

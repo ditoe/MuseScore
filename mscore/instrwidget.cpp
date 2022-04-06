@@ -179,7 +179,7 @@ void StaffListItem::initStaffTypeCombo(bool forceRecreate)
       _staffTypeCombo->setAutoFillBackground(true);
       int idx = 0;
       for (const StaffType& st : StaffType::presets()) {
-            if ( (st.group() == StaffGroup::STANDARD && (!canUsePerc))    // percussion excludes standard
+            if ( (((st.group() == StaffGroup::STANDARD) || (st.group() == StaffGroup::NUMERIC)) && (!canUsePerc))    // percussion excludes standard
                         || (st.group() == StaffGroup::PERCUSSION && canUsePerc)
                         || (st.group() == StaffGroup::TAB && canUseTabs && st.lines() <= numFrettedStrings)) {
                   _staffTypeCombo->addItem(st.name(), idx);
@@ -386,6 +386,9 @@ void PartListItem::updateClefs()
                   case StaffGroup::TAB:
                         clefType = ClefTypeList(ClefType::TAB);
                         break;
+                  case StaffGroup::NUMERIC:
+                        clefType = ClefTypeList(ClefType::NUM);
+                        break;
                   case StaffGroup::PERCUSSION:
                         clefType = ClefTypeList(ClefType::PERC);
                         break;
@@ -426,7 +429,7 @@ PartListItem::PartListItem(Part* p, QTreeWidget* lv)
       part = p;
       it   = 0;
       op   = ListItemOp::KEEP;
-      _name = QString(p->instrument()->trackName());
+      _name = QString(p->partName().isEmpty() ? p->instrument()->trackName() : p->partName());
       setSoloist(false); //TODO, must be taken from part.
       setFlags(flags() | Qt::ItemIsUserCheckable);
       }

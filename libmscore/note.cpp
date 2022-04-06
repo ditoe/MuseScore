@@ -60,6 +60,8 @@
 #include <QPointF>
 #include <QtMath>
 #include <QVector2D>
+#include "keysig.h"
+#include "numeric.h"
 
 namespace Ms {
 
@@ -994,6 +996,14 @@ qreal Note::tabHeadWidth(const StaffType* tab) const
             QFontMetricsF fm(f, MScore::paintDevice());
             val  = fm.width(_fretString) * magS();
             }
+      else if (tab && _fretString != "" && (staff()->isNumericStaff(chord()->tick()))){
+
+          QFont font;
+          font.setFamily(score()->styleSt(Sid::numericFont));
+          font.setPointSizeF(score()->styleD(Sid::numericFontSize) *_trackthick);
+            QFontMetricsF fm(font, MScore::paintDevice());
+            val  = fm.width(_fretString) * magS();
+            }
       else
             val = headWidth();
       return val;
@@ -1253,7 +1263,38 @@ void Note::draw(QPainter* painter) const
             painter->drawText(QPointF(bbox().x(), tab->fretFontYOffset()), _fretString);
             }
 
-      // NOT tablature
+      else if (staff() && staff()->isNumericStaff(chord()->tick())) {
+
+            QFont font;
+            font.setFamily(score()->styleSt(Sid::numericFont));
+            font.setPointSizeF((score()->styleD(Sid::numericFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
+            painter->setFont(font);
+            painter->setPen(c);
+            painter->drawText(_numericTextPos, _fretString);
+            if (_accidental || _drawFlat || _drawSharp){
+                  if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
+                        QFont fontAccidental;
+                        fontAccidental.setFamily(score()->styleSt(Sid::numericAccidentalFont));
+                        fontAccidental.setPointSizeF((score()->styleD(Sid::numericFontSize) * score()->styleD(Sid::numericSizeSignSharp) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
+                        _numeric.drawShap(painter,_numericaccidentalPos, fontAccidental);
+                        //score()->scoreFont()->draw(SymId::numericAccidentalSharp, painter,( score()->styleD(Sid::numericSizeSignSharp)/100*_numericHigth), _numericaccidentalPos);
+                        }
+                  if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
+                        QFont fontAccidental;
+                        fontAccidental.setFamily(score()->styleSt(Sid::numericAccidentalFont));
+                        fontAccidental.setPointSizeF((score()->styleD(Sid::numericFontSize) * score()->styleD(Sid::numericSizeSignFlat) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
+                        _numeric.drawFlat(painter,_numericaccidentalPos, fontAccidental);
+                        //score()->scoreFont()->draw(SymId::numericAccidentalFlat, painter,( score()->styleD(Sid::numericSizeSignFlat)/100*_numericHigth),_numericaccidentalPos);
+                        }
+                  }
+            if(_trackthick!=1.0){
+
+                  painter->drawText(_numericKlammerPos, "(");
+                  painter->drawText((QPointF(_numericTextPos.x() + _numericWidth2,_numericTextPos.y())), ")");
+                  }
+            }
+
+      // NOT tablature and Numeric
 
       else {
             // skip drawing, if second note of a cross-measure value
@@ -2016,7 +2057,178 @@ void Note::setDotY(Direction pos)
             dot->rypos() = y;
             }
       }
+//---------------------------------------------------------
+//   numeric_setKeysigNote
+//---------------------------------------------------------
 
+void Note::numeric_setKeysigNote(KeySig* sig)
+      {
+      if(staff()->key(tick()) != staff()->key(tick() - Fraction::fromTicks(1)) && track() % 4 == 0){
+            bool drawFlatTemp=_drawFlat;
+            bool drawSharpTemp=_drawSharp;
+
+            _drawFlat = false;
+            _drawSharp = false;
+            int numtransposeInterval=part()->instrument(chord()->tick())->transpose().chromatic;
+            int clefshift=getNumericOktave();
+            int grundtonverschibung=getNumericTrans(staff()->key(tick() - Fraction::fromTicks(1)));
+            int zifferkomatik=((_pitch+grundtonverschibung+numtransposeInterval)%12)+1;
+            QString fretString = getNumericString(zifferkomatik);
+            qreal fretStringYShift=((_pitch+grundtonverschibung+numtransposeInterval)/12-5-clefshift)*_numericHigth*score()->styleD(Sid::numericDistanceOctave);
+            int accid = 0;
+            if(_drawFlat){
+                  accid--;
+                  }
+            if(_drawSharp){
+                  accid++;
+                  }
+
+            sig->set_numericNote(fretString+")",accid,fretStringYShift);
+            _drawFlat = drawFlatTemp;
+            _drawSharp = drawSharpTemp;
+            }
+
+      }
+//---------------------------------------------------------
+//   getNumeric
+//---------------------------------------------------------
+
+QString Note::getNumericString(int numkro)
+      {
+      switch (numkro) {
+              case 0:
+                    return "7";
+              case 1:
+                    return "1";
+              case 2:
+                    return getNumericString(numkro + setAccidentalTypeBack(-1));
+              case 3:
+                    return "2";
+              case 4:
+                  return getNumericString(numkro + setAccidentalTypeBack(1));
+              case 5:
+                    return "3";
+              case 6:
+                    return "4";
+              case 7:
+                  return getNumericString(numkro + setAccidentalTypeBack(-1));
+              case 8:
+                    return "5";
+              case 9:
+                  return getNumericString(numkro + setAccidentalTypeBack(-1));
+              case 10:
+                    return "6";
+              case 11:
+                  return getNumericString(numkro + setAccidentalTypeBack(1));
+              case 12:
+                    return "7";
+              case 13:
+                    return "1";
+              default:
+                    return "0";
+            }
+      }
+//---------------------------------------------------------
+//   get_numericGroundPitch
+//---------------------------------------------------------
+
+int Note::get_numericGroundPitch(){
+      if(_drawSharp)
+            return _pitch - 1;
+      if(_drawFlat)
+            return _pitch + 1;
+      return _pitch;
+      }
+//---------------------------------------------------------
+//   getAccidentalTypeBack
+//---------------------------------------------------------
+
+int Note::setAccidentalTypeBack(int defaultdirection) {
+      Note* n = 0;
+      int shift = defaultdirection;
+      if(staff() && chord()){
+            n = chord()->findNoteBack(_pitch);
+            }
+      while(n != 0 && n->accidentalType() != AccidentalType::SHARP &&
+            n->accidentalType() != AccidentalType::FLAT){
+            n = n->chord()->findNoteBack(_pitch);
+            }
+      if (n && n->accidentalType() != AccidentalType::NONE){
+            if (n->accidentalType() == AccidentalType::SHARP){
+                  shift = -1;
+                  }
+            if (n->accidentalType() == AccidentalType::FLAT){
+                  shift = 1;
+                  }
+            }
+      if (shift == -1)
+            _drawSharp = true;
+      else
+            _drawFlat = true;
+	  if (_accidental&& _accidental->accidentalType() == AccidentalType::SHARP && _drawFlat) {
+		  _drawFlat = false;
+		  _accidental->setAccidentalType(AccidentalType::NONE);
+		  shift = 1;
+	  }
+	  if (_accidental&& _accidental->accidentalType() == AccidentalType::FLAT && _drawSharp) {
+		  _drawSharp = false;
+		  _accidental->setAccidentalType(AccidentalType::NONE);
+		  shift = -1;
+	  }
+      return shift;
+      }
+//---------------------------------------------------------
+//   getNumericDuration
+//---------------------------------------------------------
+
+QString getNumericDuration[16]={
+      "","",",,",",","","","","","","","","","","","",""
+
+      };
+//---------------------------------------------------------
+//   getNumericDurationDot
+//---------------------------------------------------------
+
+QString getNumericDurationDot[3]={
+      "",".",".."
+
+      };
+//---------------------------------------------------------
+//   getNumericTrans
+//---------------------------------------------------------
+int Note::getNumericTrans(Key key) const{
+    switch(key) {
+        case Key::C_B:  return 1;
+        case Key::G_B:  return -6;
+        case Key::D_B:  return -1;
+        case Key::A_B:  return 4;
+        case Key::E_B:  return -3;
+        case Key::B_B:  return 2;
+        case Key::F:  return -5;
+        case Key::C:  return 0;
+        case Key::G:  return 5;
+        case Key::D:  return -2;
+        case Key::A:  return 3;
+        case Key::E:  return -4;
+        case Key::B:  return 1;
+        case Key::F_S:  return -6;
+        case Key::C_S:  return 1;
+          default:
+                return 0;
+                break;
+          }
+      }
+//---------------------------------------------------------
+//   getNumericOktave
+//---------------------------------------------------------voice.soprano
+int Note::getNumericOktave() const{
+      QString instname = part()->instrument(chord()->tick())->instrumentId();
+      if(instname == "voice.bass")
+            return -1;
+      if(instname == "voice.tenor")
+            return -1;
+    return 0;
+      }
 //---------------------------------------------------------
 //   layout
 //---------------------------------------------------------
@@ -2042,6 +2254,50 @@ void Note::layout()
                   _fretString = QString("(%1)").arg(_fretString);
             qreal w = tabHeadWidth(tab); // !! use _fretString
             bbox().setRect(0.0, tab->fretBoxY() * mags, w, tab->fretBoxH() * mags);
+            }
+      else if (staff() && staff()->isNumericStaff(chord()->tick())) {
+            StaffType* numeric = staff()->staffType(tick());
+
+            int accidentalshift=0;
+            _drawFlat = false;
+            _drawSharp = false;
+            int numtransposeInterval=part()->instrument(chord()->tick())->transpose().chromatic;
+            if (_accidental){
+                  if (_accidental->accidentalType() == AccidentalType::SHARP){
+                        accidentalshift=-1;
+                        }
+                  if (_accidental->accidentalType() == AccidentalType::FLAT){
+                        accidentalshift=1;
+                        }
+                  }
+            int clefshift=getNumericOktave();
+            int grundtonverschibung=getNumericTrans(staff()->key(tick()));
+            int zifferkomatik=((_pitch+grundtonverschibung+numtransposeInterval)%12)+1;
+            _fretString = getNumericString(zifferkomatik+accidentalshift);
+            _numericWidth=tabHeadWidth(numeric);
+            _fretString = _fretString+
+                        getNumericDuration[int(chord()->durationType().type())]+
+                        getNumericDurationDot[int(chord()->durationType().dots())];
+            _trackthick=1.0;
+            if(track()%4>0){
+                  _numericWidth *=0.7;
+                  _trackthick=0.7;
+                  }
+			QFont font;
+			font.setFamily(score()->styleSt(Sid::numericFont));
+			font.setPointSizeF((score()->styleD(Sid::numericFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
+			_numeric.set_FretFont(font);
+            _numericWidth2=tabHeadWidth(numeric);
+            _numericLedgerline = ((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)/2;
+            _fretStringYShift=((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)*_numericHigth*score()->styleD(Sid::numericDistanceOctave);
+            rypos() = -_fretStringYShift;
+            qreal w = tabHeadWidth(numeric); // !! use _fretString
+            _numericHigth =  _numeric.textHeigth(_numeric.getFretFont(),"1234567890");
+            _numeric.set_relativeSize(_numericHigth);
+            QRectF stringbox = QRectF(0.0, _numericHigth*score()->styleD(Sid::numericHeightDisplacement),
+                             w, _numericHigth);
+            setbbox(stringbox);
+            staff()->set_numericHeight(_numericHigth);
             }
       else {
             SymId nh = noteHead();
@@ -2070,6 +2326,71 @@ void Note::layout2()
       // for standard staves this is done in Score::layoutChords3()
       // so that the results are available there
 
+      if (staff()->isNumericStaff(chord()->tick())) {
+            //adjustReadPos();
+            StaffType* numeric1 = staff()->staffType(tick());
+            bool paren = false;
+            _fretHidden = false;
+            if (tieBack() && !numeric1->showBackTied() && !_fretString.startsWith("(")) {   // skip back-tied notes if not shown but between () if on another system
+                  if (chord()->measure()->system() != tieBack()->startNote()->chord()->measure()->system() || el().size() > 0)
+                        paren = true;
+                  else
+                        _fretHidden = true;
+                  }
+            if (paren)
+                  _fretString = QString("(%1)").arg(_fretString);
+            qreal w = tabHeadWidth(numeric1); // !! use _fretString
+            QRectF stringbox = QRectF(0.0,_numericHigth*-1 + _numericHigth*score()->styleD(Sid::numericHeightDisplacement),
+                             w, _numericHigth);
+            setbbox(stringbox);
+            _numericTextPos = QPointF(0.0,_numericHigth*score()->styleD(Sid::numericHeightDisplacement));
+            qreal ShapSize=_numeric.getFretFont().pointSize() * score()->styleD(Sid::numericSizeSignSharp);
+            qreal FlatSize= _numeric.getFretFont().pointSize() * score()->styleD(Sid::numericSizeSignFlat);
+            QFont fontAccidental;
+            fontAccidental.setFamily(score()->styleSt(Sid::numericAccidentalFont));
+            if (_accidental || _drawFlat || _drawSharp){
+                  if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
+                        _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignSharp),
+                                                        (_numericHigth*score()->styleD(Sid::numericHeigthSignSharp)));
+                        fontAccidental.setPointSizeF(ShapSize);
+                        addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
+                        }
+                  if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
+                        _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignFlat),
+                                                        (_numericHigth*score()->styleD(Sid::numericHeigthSignFlat)));
+                        fontAccidental.setPointSizeF(FlatSize);
+                        addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
+                        }
+                  }
+            if(_trackthick!=1.0){
+                  qreal xK = _numericTextPos.x();
+                  if (_accidental || _drawFlat || _drawSharp){
+                        if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
+                              _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignSharp)*0.7,
+                                                              (_numericHigth*score()->styleD(Sid::numericHeigthSignSharp)));
+                              fontAccidental.setPointSizeF(ShapSize);
+                              addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
+                              xK = _numericaccidentalPos.x();
+                              }
+                        if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
+                              _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignFlat)*0.7,
+                                                              (_numericHigth*score()->styleD(Sid::numericHeigthSignFlat)));
+                              fontAccidental.setPointSizeF(FlatSize);
+                              addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
+                              xK = _numericaccidentalPos.x();
+                              }
+                        }
+                  numeric n;
+                  qreal wr = n.textWidth(_numeric.getFretFont(),"(");
+                  _numericKlammerPos = QPointF(xK- wr,_numericTextPos.y());
+
+                  addbbox(QRectF(_numericKlammerPos.x(),_numericKlammerPos.y()-_numericHigth,wr, _numericHigth));
+                  addbbox(QRectF(_numericTextPos.x()+_numericWidth,_numericKlammerPos.y()-_numericHigth,wr, _numericHigth));
+                  }
+
+            }
+
+
       int dots = chord()->dots();
       if (dots) {
             qreal d  = score()->point(score()->styleS(Sid::dotNoteDistance)) * mag();
@@ -2079,6 +2400,19 @@ void Note::layout2()
             if (staff()->isTabStaff(chord()->tick())) {
                   const Staff* st = staff();
                   const StaffType* tab = st->staffTypeForElement(this);
+                  if (tab->stemThrough()) {
+                        // with TAB's, dot Y is not calculated during layoutChords3(),
+                        // as layoutChords3() is not even called for TAB's;
+                        // setDotY() actually also manages creation/deletion of NoteDot's
+                        setDotY(Direction::AUTO);
+
+                        // use TAB default note-to-dot spacing
+                        dd = STAFFTYPE_TAB_DEFAULTDOTDIST_X * spatium();
+                        d = dd * 0.5;
+                        }
+                  }
+            else if (staff()->isNumericStaff(chord()->tick())) {
+                  StaffType* tab = staff()->staffType(tick());
                   if (tab->stemThrough()) {
                         // with TAB's, dot Y is not calculated during layoutChords3(),
                         // as layoutChords3() is not even called for TAB's;
@@ -2111,6 +2445,10 @@ void Note::layout2()
                         if (staff()->isTabStaff(chord()->tick())) {
                               const Staff* st = staff();
                               const StaffType* tab = st->staffTypeForElement(this);
+                              w = tabHeadWidth(tab);
+                              }
+                        else if (staff()->isNumericStaff(chord()->tick())) {
+                              StaffType* tab = staff()->staffType(tick());
                               w = tabHeadWidth(tab);
                               }
                         e->rxpos() += w;

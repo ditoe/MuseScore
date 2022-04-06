@@ -1612,7 +1612,11 @@ Element* Measure::drop(EditData& data)
                                     if (ts  == s)
                                           ns = ts;
                                     }
-                              if (ns && ns->page() == s->page()) {
+                              if (ns == s) {
+                                    qreal y1 = s->staffYpage(staffIdx);
+                                    qreal y2 = s->page()->height() - s->page()->bm();
+                                    gap = y2 - y1 - score()->staff(staffIdx)->height();
+                              } else if (ns && ns->page() == s->page()) {
                                     qreal y1 = s->staffYpage(staffIdx);
                                     qreal y2 = ns->staffYpage(0);
                                     gap = y2 - y1 - score()->staff(staffIdx)->height();
@@ -3705,6 +3709,11 @@ void Measure::setEndBarLineType(BarLineType val, int track, bool visible, QColor
             bl = new BarLine(score());
             bl->setParent(seg);
             bl->setTrack(track);
+            Part* part = score()->staff(track / VOICES)->part();
+            // by default, barlines for multi-staff parts should span across staves
+            if (part && part->nstaves() > 1) {
+                bl->setSpanStaff(true);
+            }
             score()->addElement(bl);
             }
       bl->setGenerated(false);
@@ -4087,6 +4096,10 @@ void Measure::addSystemHeader(bool isFirstSystem)
 
             needKeysig = needKeysig && (keyIdx.key() != Key::C || keyIdx.custom() || keyIdx.isAtonal());
 
+            if (staff && staff->isNumericStaff( tick())) {
+                  needKeysig =true;
+                  }
+
             if (needKeysig) {
                   KeySig* keysig;
                   if (!kSegment) {
@@ -4171,6 +4184,9 @@ void Measure::addSystemHeader(bool isFirstSystem)
                         bl->setSpanStaff(true);
                         bl->layout();
                         s->add(bl);
+                        }
+                  else {
+                        bl->layout();
                         }
                   }
             s->createShapes();

@@ -15,6 +15,7 @@
 
 #include "key.h"
 #include "element.h"
+#include "groups.h"
 
 namespace Ms {
 
@@ -33,10 +34,30 @@ class KeySig final : public Element {
       bool _hideNaturals;     // used in layout to override score style (needed for the Continuous panel)
       KeySigEvent _sig;
       void addLayout(SymId sym, qreal x, int y);
+      QString _numericString;
+      QString _numericNoteString;
+      QRectF _numericNoteRecht;
+      QRectF _numericNoteKlammerRecht;
+      QRectF _numericShape;
+      int _numericAccidentalShift;
+      qreal _numericNoteShift;
+      qreal _numericHigth;
+      QPointF _numericPoint;
+      QPointF _numericNotePoint;
+      QPointF _numericNoteKlammerPoint;
+      QPointF _numericAccidentalPoint;
+      qreal _numericReigthAdjust;
+      qreal _numericLeftAdjust;
+      bool _numericEnable;
+      bool _numericDrawNote;
+      bool _keyListSave = false;
+      Fraction _keyListSaveFraction = Fraction();
+      KeySigEvent _keyListSaveSig;
 
    public:
       KeySig(Score* = 0);
       KeySig(const KeySig&);
+      void layout2();
 
       KeySig* clone() const override       { return new KeySig(*this); }
       void draw(QPainter*) const override;
@@ -84,6 +105,13 @@ class KeySig final : public Element {
       Element* nextSegmentElement() override;
       Element* prevSegmentElement() override;
       QString accessibleInfo() const override;
+
+      qreal numericGetWidth(StaffType* numeric, QString string) const;
+      qreal get_numericReigthAdjust()      { return _numericReigthAdjust; }
+      qreal get_numericLefthAdjust()      { return _numericLeftAdjust; }
+      void set_numericNote(QString note, int Accidental, qreal shift)      { _numericNoteString = note;
+                                                                             _numericAccidentalShift = Accidental;
+                                                                             _numericNoteShift = shift; }
 
       SymId convertFromOldId(int val) const;
       };

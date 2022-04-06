@@ -2331,6 +2331,45 @@ qreal Segment::minHorizontalDistance(Segment* ns, bool systemHeaderGap) const
             w = 0.0;
       if (ns)
             w += ns->extraLeadingSpace().val() * spatium();
+      if(st == SegmentType::KeySig)
+            w-= numericKeysigDistansAdjustReigth(this);
+      if(nst == SegmentType::KeySig)
+            w+= numericKeysigDistansAdjustLeft(ns);
+      return w;
+      }
+
+//---------------------------------------------------------
+//   numericKeysigDistansAdjustReigth
+//    fuer numeric staff ziet den uberstand von Keysig ab
+//---------------------------------------------------------
+
+qreal Segment::numericKeysigDistansAdjustReigth(const Segment* s) const{
+      qreal w = 0.0;
+      if(s &&s->isKeySigType()){
+            for (Element* e : s->elist()) {
+                  if(e&&e->isKeySig()){
+
+                        w = qMax(w, toKeySig(e)->get_numericReigthAdjust());
+                        }
+                  }
+            }
+      return w;
+      }
+//---------------------------------------------------------
+//   numericKeysigDistansAdjustLeft
+//    fuer numeric staff ziet den uberstand von Keysig ab
+//---------------------------------------------------------
+
+qreal Segment::numericKeysigDistansAdjustLeft(const Segment* s) const{
+      qreal w = 0.0;
+      if(s &&s->isKeySigType()){
+            for (Element* e : s->elist()) {
+                  if(e&&e->isKeySig()){
+
+                        w = qMax(w, toKeySig(e)->get_numericLefthAdjust());
+                        }
+                  }
+            }
       return w;
       }
 

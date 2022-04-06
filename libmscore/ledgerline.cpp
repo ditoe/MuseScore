@@ -62,6 +62,12 @@ qreal LedgerLine::measureXPos() const
 
 void LedgerLine::layout()
       {
+      if (staff() && staff()->isNumericStaff(chord()->tick())) {
+            setColor(staff()->staffType(tick())->color());
+            qreal w2 = _width * .5;
+            bbox().setRect(-w2, -w2, _len + _width, _width);
+            return;
+            }
       setLineWidth(score()->styleP(Sid::ledgerLineWidth) * chord()->mag());
       if (staff())
             setColor(staff()->staffType(tick())->color());
@@ -83,6 +89,11 @@ void LedgerLine::layout()
 
 void LedgerLine::draw(QPainter* painter) const
       {
+      if (staff() && staff()->isNumericStaff(chord()->tick())) {
+            painter->setPen(QPen(curColor(), _width));
+            painter->drawLine(QLineF(0.0, 0.0, _len, 0.0));
+            return;
+            }
       if (chord()->crossMeasure() == CrossMeasure::SECOND)
             return;
       painter->setPen(QPen(curColor(), _width, Qt::SolidLine, Qt::FlatCap));

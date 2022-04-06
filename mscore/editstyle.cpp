@@ -80,7 +80,7 @@ EditStyle::EditStyle(Score* s, QWidget* parent)
       fbStyle->addButton(radioFBModern, 0);
       fbStyle->addButton(radioFBHistoric, 1);
 
-      int dta = 1;
+      int dta = 0;
       voltaLineStyle->clear();
       ottavaLineStyle->clear();
       pedalLineStyle->clear();
@@ -404,6 +404,55 @@ EditStyle::EditStyle(Score* s, QWidget* parent)
 
       { Sid::bendLineWidth,     false, bendLineWidth,     resetBendLineWidth     },
       { Sid::bendArrowWidth,    false, bendArrowWidth,    resetBendArrowWidth    },
+
+      { Sid::numericHeightDisplacement,        false, numericHeightDisplacement,          resetNumericHeightDisplacement      },
+      { Sid::numericDistanceOctave,            false, numericDistanceOctave,              resetNumericDistanceOctave          },
+      { Sid::numericHeigthLine,                false, numericHeigthLine,                  resetNumericHeigthLine              },
+      { Sid::numericOffsetLine,                false, numericOffsetLine,                  resetnumericOffsetLine              },
+      { Sid::numericDistanceBetweenLines,      false, numericDistanceBetweenLines,        resetNumericDistanceBetweenLines    },
+      { Sid::numericWideLine,                  false, numericWideLine,                    resetNumericWideLine                },
+      { Sid::numericThickLine,                 false, numericThickLine,                   resetNumericThickLine               },
+      { Sid::numericSizeSignSharp,             false, numericSizeSignSharp,               resetNumericSizeSignSharp           },
+      { Sid::numericSizeSignFlat,              false, numericSizeSignFlat,                resetNumericSizeSignFlat            },
+      { Sid::numericDistanceSignSharp,         false, numericDistanceSignSharp,           resetNumericDistanceSignSharp       },
+      { Sid::numericDistanceSignFlat,          false, numericDistanceSignFlat,            resetNumericDistanceSignFlat        },
+      { Sid::numericHeigthSignSharp,           false, numericHeigthSignSharp,             resetNumericHeigthSignSharp         },
+      { Sid::numericHeigthSignFlat,            false, numericHeigthSignFlat,              resetNumericHeigthSignFlat          },
+      { Sid::numericFont,                      false, numericFont,                        resetNumericFont                    },
+      { Sid::numericSlurEckenform,             false, numericSlurEckenform,               resetNumericSlurEckenform           },
+      { Sid::numericSlurThick,                 false, numericSlurThick,                   resetNumericSlurThick               },
+      { Sid::numericSlurHeigth,                false, numericSlurHeigth,                  resetNumericSlurHeigth              },
+      { Sid::numericSlurUberhang,              false, numericSlurUberhang,                resetNumericSlurUberhang            },
+      { Sid::numericSlurShift,                 false, numericSlurShift,                   resetNumericSlurShift               },
+      { Sid::numericLedgerlineThick,           false, numericLedgerlineThick,             resetNumericLedgerlineThick         },
+      { Sid::numericLedgerlineLength,          false, numericLedgerlineLength,            resetNumericLedgerlineLength        },
+      { Sid::numericLedgerlineShift,           false, numericLedgerlineShift,             resetNumericLedgerlineShift         },
+      { Sid::numericStaffDistans,              false, numericStaffDistans,                resetNumericStaffDistans            },
+      { Sid::numericTimeSigSize,               false, numericTimeSigSize,                 resetNumericTimeSigSize             },
+      { Sid::numericTimeSigDistance,           false, numericTimeSigDistance,             resetNumericTimeSigDistance         },
+      { Sid::numericTimeSigLineThick,          false, numericTimeSigLineThick,            resetNumericTimeSigLineThick        },
+      { Sid::numericTimeSigLineSize,           false, numericTimeSigLineSize,             resetNumericTimeSigLineSize         },
+      { Sid::numericTimeSigFont,               false, numericTimeSigFont,                 resetNumericTimeSigFont             },
+      { Sid::numericKeySigFont,                false, numericKeySigFont,                  resetNumericKeySigFont              },
+      { Sid::numericKeySigSize,                false, numericKeySigSize,                  resetNumericKeySigSize              },
+      { Sid::numericKeySigHorizontalShift,     false, numericKeySigHorizontalShift,       resetNumericKeySigHorizontalShift   },
+      { Sid::numericKeySigHigth,               false, numericKeySigHigth,                 resetNumericKeySigHigth             },
+      { Sid::numericKeysigNoteDistancLeft,     false, numericKeysigNoteDistancLeft,       resetNumericKeysigNoteDistancLeft   },
+      { Sid::numericKeysigNoteDistancReigth,   false, numericKeysigNoteDistancReigth,     resetNumericKeysigNoteDistancReigth }, 
+      { Sid::numericBarlineLength,             false, numericBarlineLength,               resetNumericBarlineLength           },
+      { Sid::numericFontSize,                  false, numericFontSize,                    resetNumericFontSize                },
+      { Sid::numericRestDistanc,               false, numericRestDistanc,                 resetNumericRestDistanc             },
+      { Sid::numericNoteDistanc,               false, numericNoteDistanc,                 resetNumericNoteDistanc             },
+      { Sid::numericAccidentalFont,            false, numericAccidentalFont,              resetNumericAccidentalFont          },
+      { Sid::numericTupletSlurEcke,            false, numericTupletSlurEcke,              resetNumericTupletSlurEcke          },
+      { Sid::numericTupletSlurhigth,           false, numericTupletSlurhigth,             resetNumericTupletSlurhigth         },
+      { Sid::numericTupletSlurdistans,         false, numericTupletSlurdistans,           resetNumericTupletSlurdistans       },
+      { Sid::numericTupletSlurshift,           false, numericTupletSlurshift,             resetNumericTupletSlurshift         },
+      { Sid::numericTupletSluruberhang,        false, numericTupletSluruberhang,          resetNumericTupletSluruberhang      },
+      { Sid::numericTupletNummerHigth,         false, numericTupletNummerHigth,           resetNumericTupletNummerHigth       },
+      { Sid::numericTupletSlurThickness,       false, numericTupletSlurThickness,         resetNumericTupletSlurThickness     },
+      { Sid::numericTupletNummerFontSize,      false, numericTupletNummerFontSize,        resetNumericTupletNummerFontSize    },
+      { Sid::numericTupletNummerFont,          false, numericTupletNummerFont,            resetNumericTupletNummerFont        },
       };
 
       for (QComboBox* cb : std::vector<QComboBox*> {
@@ -446,13 +495,12 @@ EditStyle::EditStyle(Score* s, QWidget* parent)
       tupletBracketType->addItem(tr("None", "no tuplet bracket type"), int(TupletBracketType::SHOW_NO_BRACKET));
 
       pageList->setCurrentRow(0);
+      numericListPage->setCurrentRow(0);
       accidentalsGroup->setVisible(false); // disable, not yet implemented
 
       musicalSymbolFont->clear();
-      int idx = 0;
       for (auto i : ScoreFont::scoreFonts()) {
             musicalSymbolFont->addItem(i.name(), i.name());
-            ++idx;
             }
 
       static const SymId ids[] = {
@@ -773,7 +821,6 @@ void EditStyle::retranslate()
       int index = 0;
       for (const char* p : lineStyles) {
             QString trs = qApp->translate("EditStyleBase", p);
-            voltaLineStyle->setItemText(index, trs);
             voltaLineStyle->setItemText(index, trs);
             ottavaLineStyle->setItemText(index, trs);
             pedalLineStyle->setItemText(index, trs);

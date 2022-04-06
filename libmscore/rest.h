@@ -16,6 +16,7 @@
 #include "chordrest.h"
 #include "notedot.h"
 #include "sym.h"
+#include "numeric.h"
 
 namespace Ms {
 
@@ -40,6 +41,16 @@ class Rest : public ChordRest {
       qreal downPos() const override;
       void setOffset(const QPointF& o) override;
       Sid getPropertyStyle(Pid pid) const override;
+
+
+      QString _fretString;
+      qreal _numericWidht;
+      qreal _numericLineWidht;
+      qreal _numericLineThick;
+      qreal _numericLineSpace;
+      qreal _numericHigthLine;
+      qreal _numericHigth;
+	  numeric _numeric;
 
 
    public:
@@ -77,6 +88,7 @@ class Rest : public ChordRest {
       void layoutMMRest(qreal val);
       QRectF mmRestNumberRect() const;
       qreal mmWidth() const        { return _mmWidth; }
+      qreal numericGetWidthRest(StaffType* numeric, QString string)const;
       SymId getSymbol(TDuration::DurationType type, int line, int lines,  int* yoffset);
 
       void checkDots();

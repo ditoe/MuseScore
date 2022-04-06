@@ -91,7 +91,7 @@ static constexpr qreal DPI       = 72.0 * DPI_F;
 static constexpr qreal SPATIUM20 = 5.0 * (DPI / 72.0);
 static constexpr qreal DPMM      = DPI / INCH;
 
-static constexpr int MAX_STAVES  = 4;
+static constexpr int MAX_STAVES  = 10;
 
 static const int  SHADOW_NOTE_LIGHT       = 135;
 
@@ -184,9 +184,9 @@ enum class UpDownMode : char {
 //---------------------------------------------------------
 
 enum class StaffGroup : char {
-      STANDARD, PERCUSSION, TAB
+      STANDARD, PERCUSSION, TAB, NUMERIC
       };
-const int STAFF_GROUP_MAX = int(StaffGroup::TAB) + 1;      // out of enum to avoid compiler complains about not handled switch cases
+const int STAFF_GROUP_MAX = int(StaffGroup::NUMERIC) + 1;      // out of enum to avoid compiler complains about not handled switch cases
 
 //---------------------------------------------------------
 //   BarLineType
@@ -203,6 +203,7 @@ enum class BarLineType {
       BROKEN           = 0x10,
       DASHED           = BarLineType::BROKEN,
       END              = 0x20,
+      BEGIN            = 0x30,
       FINAL            = BarLineType::END,
       END_START_REPEAT = 0x40,
       LEFT_RIGHT_REPEAT= BarLineType::END_START_REPEAT,

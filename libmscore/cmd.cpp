@@ -1558,6 +1558,7 @@ void Score::upDown(bool up, UpDownMode mode)
                         }
                         break;
                   case StaffGroup::STANDARD:
+                  case StaffGroup::NUMERIC:
                         switch (mode) {
                               case UpDownMode::OCTAVE:
                                     if (up) {
@@ -1838,6 +1839,8 @@ void Score::changeAccidental(Note* note, AccidentalType accidental)
       AccidentalVal acc = (accidental == AccidentalType::NONE) ? acc2 : Accidental::subtype2value(accidental);
 
       int pitch = line2pitch(note->line(), clef, Key::C) + int(acc);
+      if (note->staff()->isNumericStaff(chord->tick()))
+                  pitch = note->get_numericGroundPitch() + int(acc);
       if (!note->concertPitch())
             pitch += note->transposition();
 
@@ -3150,7 +3153,7 @@ void Score::cmdSlashFill()
                   int line = 0;
                   bool error = false;
                   NoteVal nv;
-                  if (staff(staffIdx)->staffType(s->tick())->group() == StaffGroup::TAB)
+                  if ((staff(staffIdx)->staffType(s->tick())->group() == StaffGroup::TAB) || (staff(staffIdx)->staffType(s->tick())->group() == StaffGroup::NUMERIC))
                         line = staff(staffIdx)->lines(s->tick()) / 2;
                   else
                         line = staff(staffIdx)->middleLine(s->tick());     // staff(staffIdx)->lines() - 1;
@@ -3960,12 +3963,22 @@ void Score::cmdAddPitch(const EditData& ed, int note, bool addFlag, bool insert)
                               }
                         octave = curPitch / 12;
                         }
+                  if (staff(is.track() / VOICES)->isNumericStaff(is.tick())){
 
-                  int delta = octave * 12 + tab[note] - curPitch;
-                  if (delta > 6)
-                        --octave;
-                  else if (delta < -6)
-                        ++octave;
+                        int delta = octave * 12 + tab[note] - curPitch - Note().getNumericTrans(staff(is.track() / VOICES)->key(is.tick()));
+                        if (delta > 6)
+                              --octave;
+                        else if (delta < -6)
+                              ++octave;
+                        }
+                  else{
+
+                        int delta = octave * 12 + tab[note] - curPitch;
+                        if (delta > 6)
+                              --octave;
+                        else if (delta < -6)
+                              ++octave;
+                        }
                   }
             }
       ed.view->startNoteEntryMode();
@@ -4142,6 +4155,27 @@ void Score::cmd(const QAction* a, EditData& ed)
             { "insert-g",                   [](Score* cs, EditData& ed){ cs->cmdAddPitch(ed, 4, false, true);                         }},
             { "insert-a",                   [](Score* cs, EditData& ed){ cs->cmdAddPitch(ed, 5, false, true);                         }},
             { "insert-b",                   [](Score* cs, EditData& ed){ cs->cmdAddPitch(ed, 6, false, true);                         }},
+            { "numeric-1",                  [](Score* cs, EditData& ed){ cs->cmdAddPitch(ed, 0, false, false);                        }},
+            { "numeric-2",                  [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 1, false, false);                        }},
+            { "numeric-3",                  [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 2, false, false);                        }},
+            { "numeric-4",                  [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 3, false, false);                        }},
+            { "numeric-5",                  [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 4, false, false);                        }},
+            { "numeric-6",                  [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 5, false, false);                        }},
+            { "numeric-7",                  [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 6, false, false);                        }},
+            { "numchord-1",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 0, true, false);                         }},
+            { "numchord-2",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 1, true, false);                         }},
+            { "numchord-3",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 2, true, false);                         }},
+            { "numchord-4",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 3, true, false);                         }},
+            { "numchord-5",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 4, true, false);                         }},
+            { "numchord-6",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 5, true, false);                         }},
+            { "numchord-7",                 [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 6, true, false);                         }},
+            { "numinsert-1",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 0, false, true);                         }},
+            { "numinsert-2",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 1, false, true);                         }},
+            { "numinsert-3",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 2, false, true);                         }},
+            { "numinsert-4",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 3, false, true);                         }},
+            { "numinsert-5",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 4, false, true);                         }},
+            { "numinsert-6",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 5, false, true);                         }},
+            { "numinsert-7",                [](Score* cs, EditData& ed) { cs->cmdAddPitch(ed, 6, false, true);                         }},
             { "fret-0",                     [](Score* cs, EditData&){ cs->cmdAddFret(0);                                              }},
             { "fret-1",                     [](Score* cs, EditData&){ cs->cmdAddFret(1);                                              }},
             { "fret-2",                     [](Score* cs, EditData&){ cs->cmdAddFret(2);                                              }},

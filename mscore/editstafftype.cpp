@@ -27,7 +27,8 @@ extern Score::FileError readScore(MasterScore* score, QString name, bool ignoreV
 const char* g_groupNames[STAFF_GROUP_MAX] = {
       QT_TRANSLATE_NOOP("staff group header name", "STANDARD STAFF"),
       QT_TRANSLATE_NOOP("staff group header name", "PERCUSSION STAFF"),
-      QT_TRANSLATE_NOOP("staff group header name", "TABLATURE STAFF")
+      QT_TRANSLATE_NOOP("staff group header name", "TABLATURE STAFF"),
+      QT_TRANSLATE_NOOP("staff group header name", "NUMERIC STAFF"),
       };
 
 //---------------------------------------------------------
@@ -70,7 +71,7 @@ EditStaffType::EditStaffType(QWidget* parent, Staff* st)
       bool bTab         = (instr != nullptr && instr->stringData() != nullptr && instr->stringData()->frettedStrings() > 0);
       int idx           = 0;
       for (const StaffType& t : StaffType::presets()) {
-            if ( (t.group() == StaffGroup::STANDARD && bStandard)
+            if ( (((t.group() == StaffGroup::STANDARD) || (t.group() == StaffGroup::NUMERIC)) && bStandard)
                         || (t.group() == StaffGroup::PERCUSSION && bPerc)
                         || (t.group() == StaffGroup::TAB && bTab && t.lines() <= instr->stringData()->frettedStrings()))
                   templateCombo->addItem(t.name(), idx);
@@ -212,6 +213,7 @@ void EditStaffType::setValues()
                   break;
 
             case StaffGroup::TAB:
+            case StaffGroup::NUMERIC:
                   {
                   upsideDown->setChecked(staffType.upsideDown());
                   showTabFingering->setChecked(staffType.showTabFingering());
@@ -570,6 +572,9 @@ QString EditStaffType::createUniqueStaffTypeName(StaffGroup group)
                         break;
                   case StaffGroup::TAB:
                         sn = QString("Tab-%1 [*]").arg(idx);
+                        break;
+                  case StaffGroup::NUMERIC:
+                        sn = QString("Num-%1 [*]").arg(idx);
                         break;
                   }
             bool found = false;

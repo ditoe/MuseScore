@@ -57,6 +57,7 @@ Tuplet::Tuplet(Score* s)
       _ratio        = Fraction(1, 1);
       _number       = 0;
       _hasBracket   = false;
+      _hasSlur      = false;
       _isUp         = true;
       _id           = 0;
       initElementStyle(&tupletStyle);
@@ -67,6 +68,7 @@ Tuplet::Tuplet(const Tuplet& t)
       {
       _tick         = t._tick;
       _hasBracket   = t._hasBracket;
+      _hasSlur      = t._hasSlur;
       _ratio        = t._ratio;
       _baseLen      = t._baseLen;
       _direction    = t._direction;
@@ -215,21 +217,26 @@ void Tuplet::layout()
       // find out main direction
       //
       if (_direction == Direction::AUTO) {
-            int up = 1;
-            for (const DurationElement* e : _elements) {
-                  if (e->isChord()) {
-                        const Chord* c = toChord(e);
-                        if (c->stemDirection() != Direction::AUTO)
-                              up += c->stemDirection() == Direction::UP ? 1000 : -1000;
-                        else {
-                              up += c->up() ? 1 : -1;
+            if (staff()->isNumericStaff(tick())) {
+                  _isUp = true;
+                  }
+            else {
+                  int up = 1;
+                  for (const DurationElement* e : _elements) {
+                        if (e->isChord()) {
+                              const Chord* c = toChord(e);
+                              if (c->stemDirection() != Direction::AUTO)
+                                    up += c->stemDirection() == Direction::UP ? 1000 : -1000;
+                              else {
+                                    up += c->up() ? 1 : -1;
+                                    }
+                              }
+                        else if (e->isTuplet()) {
+                      // TODO
                               }
                         }
-                  else if (e->isTuplet()) {
-                        // TODO
-                        }
+                  _isUp = up > 0;
                   }
-            _isUp = up > 0;
             }
       else
             _isUp = _direction == Direction::UP;
@@ -261,25 +268,33 @@ void Tuplet::layout()
       //
       if (_bracketType == TupletBracketType::AUTO_BRACKET) {
             _hasBracket = false;
-            for (DurationElement* e : _elements) {
-                  if (e->isTuplet() || e->isRest()) {
-                        _hasBracket = true;
-                        break;
-                        }
-                  else if (e->isChordRest()) {
-                        ChordRest* cr = toChordRest(e);
-                        //
-                        // maybe we should check for more than one beam
-                        //
-                        if (cr->beam() == 0) {
+            _hasSlur = false;
+            if (staff()->isNumericStaff(tick())) {
+                  _hasSlur = true;
+                  }
+            else {
+                  for (DurationElement* e : _elements) {
+                        if (e->isTuplet() || e->isRest()) {
                               _hasBracket = true;
                               break;
+                              }
+                        else if (e->isChordRest()) {
+                              ChordRest* cr = toChordRest(e);
+                              //
+                              // maybe we should check for more than one beam
+                              //
+                              if (cr->beam() == 0) {
+                                    _hasBracket = true;
+                                    break;
+                                    }
                               }
                         }
                   }
             }
-      else
-            _hasBracket = _bracketType != TupletBracketType::SHOW_NO_BRACKET;
+      else {
+            _hasBracket = _bracketType == TupletBracketType::SHOW_BRACKET;
+            _hasSlur    = _bracketType == TupletBracketType::SHOW_SLUR;
+      }
 
 
       //
@@ -577,6 +592,13 @@ void Tuplet::layout()
       // center number
       qreal x3 = 0.0;
       qreal numberWidth = 0.0;
+      if (staff()->isNumericStaff(tick())) {
+            if (cr1->isChord()) {
+                  const Chord* chord1 = toChord(cr1);
+                  _numericHigth = chord1->upNote()->get_numericHigth();
+                  }
+      
+            }
       if (_number) {
             _number->layout();
             numberWidth = _number->bbox().width();
@@ -601,6 +623,9 @@ void Tuplet::layout()
                   x3 = p1.x() + deltax * .5;
                   }
 
+            if (staff()->isNumericStaff(tick())) {
+                y3 += _number->bbox().height()/2+ _numericHigth * score()->styleD(Sid::numericTupletNummerHigth);
+            }
             _number->setPos(QPointF(x3, y3) - ipos());
             }
 
@@ -656,6 +681,71 @@ void Tuplet::layout()
                   }
             }
 
+      if (_hasSlur) {
+            if (_isUp) {
+                  qreal h = p2.y() - p1.y();
+                  //if (h < 0) h *= -1;
+                  qreal widthx = p2.x() - p1.x();
+                  qreal higth = 20 * mag() +
+                      ((h / widthx) * widthx * 0.1);
+                  qreal shift = 0.0;
+                  qreal distanc = 0.0;
+                  qreal ecke = widthx * 0.1;
+                  qreal uberhang = 0;
+                  if (staff()->isNumericStaff(tick())) {
+                        higth = _numericHigth * score()->styleD(Sid::numericTupletSlurhigth) +
+                            ((h / widthx) * widthx * score()->styleD(Sid::numericSlurEckenform));
+                        shift = _numericHigth * score()->styleD(Sid::numericTupletSlurshift);
+                        distanc = _numericHigth * score()->styleD(Sid::numericTupletSlurdistans);
+                        ecke = widthx * score()->styleD(Sid::numericTupletSlurEcke);
+                        uberhang = _numericHigth * score()->styleD(Sid::numericTupletSluruberhang);
+                        }
+                    
+                  qreal x1 = p1.x() - uberhang + shift;
+                  qreal x2 = p1.x() +  ecke + shift;
+                  qreal x3 = p2.x() -  ecke + shift;
+                  qreal x4 = p2.x() + uberhang + shift;
+                  qreal y1 = p1.y() - distanc;
+                  qreal y2 = y1-higth;
+                  qreal y4 = p2.y() - distanc;
+                  qreal y3 = y4-higth;
+                  _SlurPath = QPainterPath();
+                  _SlurPath.moveTo(x1, y1);
+                  _SlurPath.cubicTo(x2, y2, x3, y3, x4, y4);
+                  }
+            else {
+                  qreal h = p2.y() - p1.y();
+                  //if (h < 0) h *= -1;
+                  qreal widthx = p2.x() - p1.x();
+                  qreal higth = 20 * mag() +
+                      ((h / widthx) * widthx * 0.1);
+                  qreal shift = 0.0;
+                  qreal distanc = 0.0;
+                  qreal ecke = widthx * 0.1;
+                  qreal uberhang = 0;
+                  if (staff()->isNumericStaff(tick())) {
+                        higth = _numericHigth * score()->styleD(Sid::numericTupletSlurhigth) +
+                            ((h / widthx) * widthx * score()->styleD(Sid::numericSlurEckenform));
+                        shift = _numericHigth * score()->styleD(Sid::numericTupletSlurshift);
+                        distanc = _numericHigth * score()->styleD(Sid::numericTupletSlurdistans);
+                        ecke = widthx * score()->styleD(Sid::numericTupletSlurEcke);
+                        uberhang = _numericHigth * score()->styleD(Sid::numericTupletSluruberhang);
+                        }
+                   
+                  qreal x1 = p1.x() - uberhang + shift;
+                  qreal x2 = p1.x() + ecke + shift;
+                  qreal x3 = p2.x() - ecke + shift;
+                  qreal x4 = p2.x() + uberhang + shift;
+                  qreal y1 = p1.y() + distanc;
+                  qreal y2 = y1 + higth;
+                  qreal y4 = p2.y() + distanc;
+                  qreal y3 = y4 + higth;
+                  _SlurPath = QPainterPath();
+                  _SlurPath.moveTo(x1, y1);
+                  _SlurPath.cubicTo(x2, y2, x3, y3, x4, y4);
+                  }
+            }
+
       // collect bounding box
       QRectF r;
       if (_number) {
@@ -705,7 +795,17 @@ void Tuplet::draw(QPainter* painter) const
                   painter->drawPolyline(bracketR, 3);
                   }
             }
+      if (_hasSlur) {
+
+            QPen pen(curColor());
+            pen.setCapStyle(Qt::RoundCap);
+            pen.setJoinStyle(Qt::RoundJoin);
+            pen.setWidthF(_bracketWidth.val());
+            painter->setPen(pen);
+            painter->drawPath(_SlurPath);
+            }
       }
+
 
 //---------------------------------------------------------
 //   Rect

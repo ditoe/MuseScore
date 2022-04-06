@@ -162,6 +162,7 @@ void ScoreView::lyricsTab(bool back, bool end, bool moveOnly)
       int track        = lyrics->track();
       Segment* segment = lyrics->segment();
       int verse        = lyrics->no();
+      int staffShift   = lyrics->getStaffShift();
       Placement placement = lyrics->placement();
       PropertyFlags pFlags = lyrics->propertyFlags(Pid::PLACEMENT);
 
@@ -219,6 +220,7 @@ void ScoreView::lyricsTab(bool back, bool end, bool moveOnly)
             _toLyrics->setPlacement(placement);
             _toLyrics->setPropertyFlags(Pid::PLACEMENT, pFlags);
             _toLyrics->setSyllabic(Lyrics::Syllabic::SINGLE);
+            _toLyrics->setStaffShift(staffShift);
             newLyrics = true;
             }
 

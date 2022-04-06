@@ -52,6 +52,8 @@ class Lyrics final : public TextBase {
       LyricsLine* _separator;
 
       bool isMelisma() const;
+      int _staffShift;
+
       void undoChangeProperty(Pid id, const QVariant&, PropertyFlags ps) override;
 
    protected:
@@ -75,6 +77,7 @@ class Lyrics final : public TextBase {
 
       void layout() override;
       void layout2(int);
+	  void layout3();
 
       void write(XmlWriter& xml) const override;
       void read(XmlReader&) override;
@@ -101,6 +104,8 @@ class Lyrics final : public TextBase {
       QVariant getProperty(Pid propertyId) const override;
       bool setProperty(Pid propertyId, const QVariant&) override;
       QVariant propertyDefault(Pid id) const override;
+	  int getStaffShift() { return _staffShift; }
+      void setStaffShift(int n) { _staffShift = n; }
       };
 
 //---------------------------------------------------------

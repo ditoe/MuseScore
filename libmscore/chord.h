@@ -84,6 +84,7 @@ class Chord final : public ChordRest {
 
       void layoutPitched();
       void layoutTablature();
+      void layoutNumeric();
       qreal noteHeadWidth() const;
 
    public:
@@ -132,6 +133,7 @@ class Chord final : public ChordRest {
       qreal maxHeadWidth() const;
 
       Note* findNote(int pitch, int skip = 0) const;
+      Note* findNoteBack(int pitch) ;
 
       Stem* stem() const                     { return _stem; }
       Arpeggio* arpeggio() const             { return _arpeggio;  }
