@@ -2332,41 +2332,41 @@ qreal Segment::minHorizontalDistance(Segment* ns, bool systemHeaderGap) const
       if (ns)
             w += ns->extraLeadingSpace().val() * spatium();
       if(st == SegmentType::KeySig)
-            w-= numericKeysigDistansAdjustReigth(this);
+            w-= cipherKeysigDistansAdjustReigth(this);
       if(nst == SegmentType::KeySig)
-            w+= numericKeysigDistansAdjustLeft(ns);
+            w+= cipherKeysigDistansAdjustLeft(ns);
       return w;
       }
 
 //---------------------------------------------------------
-//   numericKeysigDistansAdjustReigth
-//    fuer numeric staff ziet den uberstand von Keysig ab
+//   cipherKeysigDistansAdjustReigth
+//    fuer cipher staff ziet den uberstand von Keysig ab
 //---------------------------------------------------------
 
-qreal Segment::numericKeysigDistansAdjustReigth(const Segment* s) const{
+qreal Segment::cipherKeysigDistansAdjustReigth(const Segment* s) const{
       qreal w = 0.0;
       if(s &&s->isKeySigType()){
             for (Element* e : s->elist()) {
                   if(e&&e->isKeySig()){
 
-                        w = qMax(w, toKeySig(e)->get_numericReigthAdjust());
+                        w = qMax(w, toKeySig(e)->get_cipherReigthAdjust());
                         }
                   }
             }
       return w;
       }
 //---------------------------------------------------------
-//   numericKeysigDistansAdjustLeft
-//    fuer numeric staff ziet den uberstand von Keysig ab
+//   cipherKeysigDistansAdjustLeft
+//    fuer cipher staff ziet den uberstand von Keysig ab
 //---------------------------------------------------------
 
-qreal Segment::numericKeysigDistansAdjustLeft(const Segment* s) const{
+qreal Segment::cipherKeysigDistansAdjustLeft(const Segment* s) const{
       qreal w = 0.0;
       if(s &&s->isKeySigType()){
             for (Element* e : s->elist()) {
                   if(e&&e->isKeySig()){
 
-                        w = qMax(w, toKeySig(e)->get_numericLefthAdjust());
+                        w = qMax(w, toKeySig(e)->get_cipherLefthAdjust());
                         }
                   }
             }

@@ -4896,7 +4896,7 @@ void LayoutContext::collectPage()
                               if (!e)
                                     continue;
                               else if (e->isTimeSig()&&segment->isTimeSigType()){
-                                    if(toTimeSig(e)->get_numericVisible()){
+                                    if(toTimeSig(e)->get_cipherVisible()){
                                           qreal w=0.0;
                                           if(m->first() && m->first()->firstElement(0) && m->first()->isBeginBarLineType())
                                                 w = m->first()->firstElement(0)->width();
@@ -4908,7 +4908,7 @@ void LayoutContext::collectPage()
                                                   && m->prevMeasure()->last()->prev()->isEndBarLineType())
                                                 w =qMax(w, m->prevMeasure()->last()->prev()->firstElement(0)->width());
                                           TimeSig* sig1 = toTimeSig(e);
-                                          sig1->set_numericXpos(-segment->rxpos()- w);
+                                          sig1->set_cipherXpos(-segment->rxpos()- w);
                                           sig1->layout2();
                                           }
                                     }

@@ -187,7 +187,7 @@ FT_BEGIN_HEADER
    *   A list of constants used for the @interpreter-version property to
    *   select the hinting engine for Truetype fonts.
    *
-   *   The numeric value in the constant names represents the version
+   *   The cipher value in the constant names represents the version
    *   number as returned by the `GETINFO' bytecode instruction.
    *
    * @values:

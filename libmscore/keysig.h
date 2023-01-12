@@ -34,22 +34,22 @@ class KeySig final : public Element {
       bool _hideNaturals;     // used in layout to override score style (needed for the Continuous panel)
       KeySigEvent _sig;
       void addLayout(SymId sym, qreal x, int y);
-      QString _numericString;
-      QString _numericNoteString;
-      QRectF _numericNoteRecht;
-      QRectF _numericNoteKlammerRecht;
-      QRectF _numericShape;
-      int _numericAccidentalShift;
-      qreal _numericNoteShift;
-      qreal _numericHigth;
-      QPointF _numericPoint;
-      QPointF _numericNotePoint;
-      QPointF _numericNoteKlammerPoint;
-      QPointF _numericAccidentalPoint;
-      qreal _numericReigthAdjust;
-      qreal _numericLeftAdjust;
-      bool _numericEnable;
-      bool _numericDrawNote;
+      QString _cipherString;
+      QString _cipherNoteString;
+      QRectF _cipherNoteRecht;
+      QRectF _cipherNoteKlammerRecht;
+      QRectF _cipherShape;
+      int _cipherAccidentalShift;
+      qreal _cipherNoteShift;
+      qreal _cipherHigth;
+      QPointF _cipherPoint;
+      QPointF _cipherNotePoint;
+      QPointF _cipherNoteKlammerPoint;
+      QPointF _cipherAccidentalPoint;
+      qreal _cipherReigthAdjust;
+      qreal _cipherLeftAdjust;
+      bool _cipherEnable;
+      bool _cipherDrawNote;
       bool _keyListSave = false;
       Fraction _keyListSaveFraction = Fraction();
       KeySigEvent _keyListSaveSig;
@@ -106,12 +106,12 @@ class KeySig final : public Element {
       Element* prevSegmentElement() override;
       QString accessibleInfo() const override;
 
-      qreal numericGetWidth(StaffType* numeric, QString string) const;
-      qreal get_numericReigthAdjust()      { return _numericReigthAdjust; }
-      qreal get_numericLefthAdjust()      { return _numericLeftAdjust; }
-      void set_numericNote(QString note, int Accidental, qreal shift)      { _numericNoteString = note;
-                                                                             _numericAccidentalShift = Accidental;
-                                                                             _numericNoteShift = shift; }
+      qreal cipherGetWidth(StaffType* cipher, QString string) const;
+      qreal get_cipherReigthAdjust()      { return _cipherReigthAdjust; }
+      qreal get_cipherLefthAdjust()      { return _cipherLeftAdjust; }
+      void set_cipherNote(QString note, int Accidental, qreal shift)      { _cipherNoteString = note;
+                                                                             _cipherAccidentalShift = Accidental;
+                                                                             _cipherNoteShift = shift; }
 
       SymId convertFromOldId(int val) const;
       };

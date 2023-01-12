@@ -57,7 +57,7 @@ add_library (
       stemslash.h stringdata.h style.h sym.h symbol.h synthesizerstate.h system.h systemdivider.h systemtext.h tempo.h
       tempotext.h text.h mmrestrange.h measurenumberbase.h measurenumber.h textbase.h textedit.h textframe.h textline.h textlinebase.h tie.h tiemap.h timesig.h
       tremolo.h tremolobar.h trill.h tuplet.h tupletmap.h types.h undo.h utils.h vibrato.h volta.h xml.h
-      numeric.h
+      cipher.h
 
       segmentlist.cpp fingering.cpp accidental.cpp arpeggio.cpp
       fermata.cpp articulation.cpp barline.cpp beam.cpp bend.cpp box.cpp
@@ -70,7 +70,7 @@ add_library (
       instrtemplate.cpp instrument.cpp interval.cpp
       key.cpp keysig.cpp lasso.cpp
       layoutbreak.cpp layout.cpp line.cpp lyrics.cpp measurebase.cpp
-      measure.cpp navigate.cpp note.cpp noteevent.cpp numeric.cpp ottava.cpp
+      measure.cpp navigate.cpp note.cpp noteevent.cpp cipher.cpp ottava.cpp
       page.cpp part.cpp pedal.cpp letring.cpp vibrato.cpp palmmute.cpp pitch.cpp pitchspelling.cpp
       rendermidi.cpp repeat.cpp repeatlist.cpp rest.cpp
       score.cpp segment.cpp select.cpp shadownote.cpp slur.cpp tie.cpp slurtie.cpp

@@ -73,7 +73,7 @@ class Harmony final : public TextBase {
       int _id;                            // >0 = id of matched chord from chord list, if applicable
                                           // -1 = invalid chord
                                           // <-10000 = private id of generated chord or matched chord with no id
-      QString _function;                  // numeric representation of root for RNA or Nashville
+      QString _function;                  // cipher representation of root for RNA or Nashville
       QString _userName;                  // name as typed by user if applicable
       QString _textName;                  // name recognized from chord list, read from score file, or constructed from imported source
       ParsedChord* _parsedForm;           // parsed form of chord

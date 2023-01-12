@@ -217,7 +217,7 @@ void Tuplet::layout()
       // find out main direction
       //
       if (_direction == Direction::AUTO) {
-            if (staff()->isNumericStaff(tick())) {
+            if (staff()->isCipherStaff(tick())) {
                   _isUp = true;
                   }
             else {
@@ -269,7 +269,7 @@ void Tuplet::layout()
       if (_bracketType == TupletBracketType::AUTO_BRACKET) {
             _hasBracket = false;
             _hasSlur = false;
-            if (staff()->isNumericStaff(tick())) {
+            if (staff()->isCipherStaff(tick())) {
                   _hasSlur = true;
                   }
             else {
@@ -592,10 +592,10 @@ void Tuplet::layout()
       // center number
       qreal x3 = 0.0;
       qreal numberWidth = 0.0;
-      if (staff()->isNumericStaff(tick())) {
+      if (staff()->isCipherStaff(tick())) {
             if (cr1->isChord()) {
                   const Chord* chord1 = toChord(cr1);
-                  _numericHigth = chord1->upNote()->get_numericHigth();
+                  _cipherHigth = chord1->upNote()->get_cipherHigth();
                   }
       
             }
@@ -623,8 +623,8 @@ void Tuplet::layout()
                   x3 = p1.x() + deltax * .5;
                   }
 
-            if (staff()->isNumericStaff(tick())) {
-                y3 += _number->bbox().height()/2+ _numericHigth * score()->styleD(Sid::numericTupletNummerHigth);
+            if (staff()->isCipherStaff(tick())) {
+                y3 += _number->bbox().height()/2+ _cipherHigth * score()->styleD(Sid::cipherTupletNummerHigth);
             }
             _number->setPos(QPointF(x3, y3) - ipos());
             }
@@ -692,13 +692,13 @@ void Tuplet::layout()
                   qreal distanc = 0.0;
                   qreal ecke = widthx * 0.1;
                   qreal uberhang = 0;
-                  if (staff()->isNumericStaff(tick())) {
-                        higth = _numericHigth * score()->styleD(Sid::numericTupletSlurhigth) +
-                            ((h / widthx) * widthx * score()->styleD(Sid::numericSlurEckenform));
-                        shift = _numericHigth * score()->styleD(Sid::numericTupletSlurshift);
-                        distanc = _numericHigth * score()->styleD(Sid::numericTupletSlurdistans);
-                        ecke = widthx * score()->styleD(Sid::numericTupletSlurEcke);
-                        uberhang = _numericHigth * score()->styleD(Sid::numericTupletSluruberhang);
+                  if (staff()->isCipherStaff(tick())) {
+                        higth = _cipherHigth * score()->styleD(Sid::cipherTupletSlurhigth) +
+                            ((h / widthx) * widthx * score()->styleD(Sid::cipherSlurEckenform));
+                        shift = _cipherHigth * score()->styleD(Sid::cipherTupletSlurshift);
+                        distanc = _cipherHigth * score()->styleD(Sid::cipherTupletSlurdistans);
+                        ecke = widthx * score()->styleD(Sid::cipherTupletSlurEcke);
+                        uberhang = _cipherHigth * score()->styleD(Sid::cipherTupletSluruberhang);
                         }
                     
                   qreal x1 = p1.x() - uberhang + shift;
@@ -723,13 +723,13 @@ void Tuplet::layout()
                   qreal distanc = 0.0;
                   qreal ecke = widthx * 0.1;
                   qreal uberhang = 0;
-                  if (staff()->isNumericStaff(tick())) {
-                        higth = _numericHigth * score()->styleD(Sid::numericTupletSlurhigth) +
-                            ((h / widthx) * widthx * score()->styleD(Sid::numericSlurEckenform));
-                        shift = _numericHigth * score()->styleD(Sid::numericTupletSlurshift);
-                        distanc = _numericHigth * score()->styleD(Sid::numericTupletSlurdistans);
-                        ecke = widthx * score()->styleD(Sid::numericTupletSlurEcke);
-                        uberhang = _numericHigth * score()->styleD(Sid::numericTupletSluruberhang);
+                  if (staff()->isCipherStaff(tick())) {
+                        higth = _cipherHigth * score()->styleD(Sid::cipherTupletSlurhigth) +
+                            ((h / widthx) * widthx * score()->styleD(Sid::cipherSlurEckenform));
+                        shift = _cipherHigth * score()->styleD(Sid::cipherTupletSlurshift);
+                        distanc = _cipherHigth * score()->styleD(Sid::cipherTupletSlurdistans);
+                        ecke = widthx * score()->styleD(Sid::cipherTupletSlurEcke);
+                        uberhang = _cipherHigth * score()->styleD(Sid::cipherTupletSluruberhang);
                         }
                    
                   qreal x1 = p1.x() - uberhang + shift;

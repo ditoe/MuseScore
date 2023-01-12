@@ -25,7 +25,7 @@
 #include "shape.h"
 #include "key.h"
 #include "sym.h"
-#include "numeric.h"
+#include "cipher.h"
 
 namespace Ms {
 
@@ -294,15 +294,15 @@ class Note final : public Element {
 
       QString _fretString;
       qreal _fretStringYShift;
-      qreal _numericWidth;
-      qreal _numericWidth2;
-      qreal _numericHigth;
+      qreal _cipherWidth;
+      qreal _cipherWidth2;
+      qreal _cipherHigth;
       qreal _trackthick=1.0;
-      QPointF _numericaccidentalPos;
-      QPointF _numericTextPos;
-      QPointF _numericKlammerPos;
-      numeric _numeric;
-      int _numericLedgerline;
+      QPointF _cipherAccidentalPos;
+      QPointF _cipherTextPos;
+      QPointF _cipherKlammerPos;
+      cipher _cipher;
+      int _cipherLedgerline;
       bool _fretHidden = false;
       bool _drawFlat = false;
       bool _drawSharp = false;
@@ -384,13 +384,13 @@ class Note final : public Element {
       void setFixed(bool v)               { _fixed = v;        }
       int fixedLine() const               { return _fixedLine; }
       void setFixedLine(int v)            { _fixedLine = v;    }
-      void numeric_setKeysigNote(KeySig* sig);
+      void cipher_setKeysigNote(KeySig* sig);
       qreal fretStringYShift() const                { return _fretStringYShift;   }
-      qreal get_numericWidth()                      { return _numericWidth;   }
-      qreal get_numericWidth2()                      { return _numericWidth2;   }
-      qreal get_numericHigth()                      { return _numericHigth;   }
-      int get_numericLedgerline()                      { return _numericLedgerline;   }
-      int get_numericGroundPitch();
+      qreal get_cipherWidth()                      { return _cipherWidth;   }
+      qreal get_cipherWidth2()                      { return _cipherWidth2;   }
+      qreal get_cipherHigth()                      { return _cipherHigth;   }
+      int get_cipherLedgerline()                      { return _cipherLedgerline;   }
+      int get_cipherGroundPitch();
 
       int tpc() const;
       int tpc1() const            { return _tpc[0]; }     // non transposed tpc
@@ -517,10 +517,10 @@ class Note final : public Element {
       void localSpatiumChanged(qreal oldValue, qreal newValue) override;
       QVariant getProperty(Pid propertyId) const override;
       bool setProperty(Pid propertyId, const QVariant&) override;
-      QString getNumericString(int numkro);
+      QString get_cipherString(int numkro);
       int setAccidentalTypeBack(int defaultdirection) ;
-      int getNumericTrans(Key key) const;
-      int getNumericOktave() const;
+      int get_cipherTrans(Key key) const;
+      int get_cipherOktave() const;
       void undoChangeDotsVisible(bool v);
       QVariant propertyDefault(Pid) const override;
       QString propertyUserValue(Pid) const override;

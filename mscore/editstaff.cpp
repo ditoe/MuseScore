@@ -592,7 +592,7 @@ void EditStaff::editStringDataClicked()
 
 //---------------------------------------------------------
 //   midiCodeToStr
-//    Converts a MIDI numeric pitch code to human-readable note name
+//    Converts a MIDI cipher pitch code to human-readable note name
 //---------------------------------------------------------
 
 static const char* g_cNoteName[] = {

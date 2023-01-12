@@ -325,39 +325,39 @@ void TimeSig::layout()
             ns.push_back(SymId::timeSigCut3);
             ds.clear();
             }
-      else if (staff() && staff()->isNumericStaff( tick())) {
+      else if (staff() && staff()->isCipherStaff( tick())) {
             if(segment()->isTimeSigAnnounceType()){
-                  set_numericVisible(false);
+                  set_cipherVisible(false);
 
                   setbbox(QRectF());
                   return;
                   }
             setEnabled(false);
 
-            StaffType* numeric = staff()->staffType(tick());
+            StaffType* cipher = staff()->staffType(tick());
 			QFont font;
-			font.setFamily(score()->styleSt(Sid::numericTimeSigFont));
-			font.setPointSizeF((score()->styleD(Sid::numericFontSize) * score()->styleD(Sid::numericTimeSigSize) * spatium() * MScore::pixelRatio / SPATIUM20));
-			_numeric.set_FretFont(font);
-            _numeric_ds = _numeratorString.isEmpty()   ? QString::number(_sig.numerator())   : _numeratorString;//toTimeSigString(_numeratorString.isEmpty()   ? QString::number(_sig.numerator())   : _numeratorString);
-            _numeric_ns = _denominatorString.isEmpty() ? QString::number(_sig.denominator()) : _denominatorString;//toTimeSigString(_denominatorString.isEmpty() ? QString::number(_sig.denominator()) : _denominatorString);
+			font.setFamily(score()->styleSt(Sid::cipherTimeSigFont));
+			font.setPointSizeF((score()->styleD(Sid::cipherFontSize) * score()->styleD(Sid::cipherTimeSigSize) * spatium() * MScore::pixelRatio / SPATIUM20));
+			_cipher.set_FretFont(font);
+            _cipher_ds = _numeratorString.isEmpty()   ? QString::number(_sig.numerator())   : _numeratorString;//toTimeSigString(_numeratorString.isEmpty()   ? QString::number(_sig.numerator())   : _numeratorString);
+            _cipher_ns = _denominatorString.isEmpty() ? QString::number(_sig.denominator()) : _denominatorString;//toTimeSigString(_denominatorString.isEmpty() ? QString::number(_sig.denominator()) : _denominatorString);
 
             ns = toTimeSigString(_numeratorString.isEmpty()   ? QString::number(_sig.numerator())   : _numeratorString);
             ds = toTimeSigString(_denominatorString.isEmpty() ? QString::number(_sig.denominator()) : _denominatorString);
 
             qreal px =-0.0;
-			_numericHigthds = _numeric.textHeigth(_numeric.getFretFont(), _numeric_ds);
-			_numericHigthns = _numeric.textHeigth(_numeric.getFretFont(), _numeric_ns);
-            qreal wn = numericGetWidth(numeric, _numeric_ns);
-            qreal wd = numericGetWidth(numeric, _numeric_ds);
-            QRectF numRect = QRectF(px, 0.0, wn, _numericHigthns);
-            QRectF denRect = QRectF(px, 0.0, wd, _numericHigthds);
-            qreal displ = numRect.height()*score()->styleD(Sid::numericTimeSigLineThick)*1.5;
+			_cipherHigthds = _cipher.textHeigth(_cipher.getFretFont(), _cipher_ds);
+			_cipherHigthns = _cipher.textHeigth(_cipher.getFretFont(), _cipher_ns);
+            qreal wn = cipherGetWidth(cipher, _cipher_ns);
+            qreal wd = cipherGetWidth(cipher, _cipher_ds);
+            QRectF numRect = QRectF(px, 0.0, wn, _cipherHigthns);
+            QRectF denRect = QRectF(px, 0.0, wd, _cipherHigthds);
+            qreal displ = numRect.height()*score()->styleD(Sid::cipherTimeSigLineThick)*1.5;
 
             //align on the wider
             qreal pzY = yoff + displ + numRect.height();
             qreal pnY = yoff - displ;
-            qreal numericLineWidht = denRect.width();
+            qreal cipherLineWidht = denRect.width();
             qreal boxwidth = 0.0;
 
 
@@ -366,7 +366,7 @@ void TimeSig::layout()
                   pz = QPointF(px, pzY);
                   // denominator: horiz: centred around centre of numerator | vert: one space below centre line
                   pn = QPointF((numRect.width() - denRect.width())*.5+px, pnY);
-                  numericLineWidht = numRect.width();
+                  cipherLineWidht = numRect.width();
                   //px +=(numRect.width() - denRect.width())*.5;
                   boxwidth = numRect.width();
                   }
@@ -375,14 +375,14 @@ void TimeSig::layout()
                   pz = QPointF((denRect.width() - numRect.width())*.5+px, pzY);
                   // denominator: horiz: centred around centre of numerator | vert: one space below centre line
                   pn = QPointF(px, pnY);
-                  numericLineWidht = denRect.width();
+                  cipherLineWidht = denRect.width();
                   //px +=(numRect.width() - denRect.width())*.5;
                   boxwidth = denRect.width();
                   }
-            px -= numericLineWidht * (score()->styleD(Sid::numericTimeSigLineSize) - 1.0) * 0.5;
+            px -= cipherLineWidht * (score()->styleD(Sid::cipherTimeSigLineSize) - 1.0) * 0.5;
             QRectF timeSigRect = QRectF(px, pnY-numRect.height(), boxwidth, numRect.height()*2+displ*2);
-            numericLine = QLineF(px, 0, numericLineWidht * score()->styleD(Sid::numericTimeSigLineSize) + px, 0);
-            _numericlinethick=numRect.height()*score()->styleD(Sid::numericTimeSigLineThick);
+            cipherLine = QLineF(px, 0, cipherLineWidht * score()->styleD(Sid::cipherTimeSigLineSize) + px, 0);
+            cipherLineThick=numRect.height()*score()->styleD(Sid::cipherTimeSigLineThick);
             setbbox(timeSigRect);
             ns.clear();
             ns.push_back(SymId::timeSigCutCommon);
@@ -449,18 +449,18 @@ void TimeSig::layout()
 
 void TimeSig::layout2(){
 
-      if (staff() && staff()->isNumericStaff( tick())) {
+      if (staff() && staff()->isCipherStaff( tick())) {
             if(segment()->isTimeSigAnnounceType()){
                   return;
                   }
-            _numericBegin = measure()->first()->isBeginBarLineType();
-            if(_numericBegin) rxpos()= get_numericXpos()-bbox().width() - _numericHigthds*score()->styleD(Sid::numericTimeSigDistance);
+            _cipherBegin = measure()->first()->isBeginBarLineType();
+            if(_cipherBegin) rxpos()= get_cipherXpos()-bbox().width() - _cipherHigthds*score()->styleD(Sid::cipherTimeSigDistance);
             else {
 
-                  qreal x = bbox().width() + _numericHigthds*score()->styleD(Sid::numericTimeSigDistance);
-                  numericBarLine = QLineF(x, -_numericBarLinelenght / 2, x,_numericBarLinelenght / 2);
+                  qreal x = bbox().width() + _cipherHigthds*score()->styleD(Sid::cipherTimeSigDistance);
+                  cipherBarLine = QLineF(x, -_cipherBarLinelenght / 2, x,_cipherBarLinelenght / 2);
                   qreal lw = score()->styleP(Sid::barWidth) * mag();
-                  addbbox(QRect(x, -_numericBarLinelenght / 2,lw, _numericBarLinelenght));
+                  addbbox(QRect(x, -_cipherBarLinelenght / 2,lw, _cipherBarLinelenght));
                   }
             setEnabled(true);
             }
@@ -473,7 +473,7 @@ void TimeSig::layout2(){
 Shape TimeSig::shape() const
       {
       QRectF box(bbox());
-      if (staff() && staff()->isNumericStaff( tick())) {
+      if (staff() && staff()->isCipherStaff( tick())) {
             return Shape(box);
             }
       const Staff* st = staff();
@@ -497,22 +497,22 @@ void TimeSig::draw(QPainter* painter) const
       {
       if (staff() && !const_cast<const Staff*>(staff())->staffType(tick())->genTimesig())
             return;
-      if (staff() && staff()->isNumericStaff( tick())) {
-          if(get_numericVisible()){
+      if (staff() && staff()->isCipherStaff( tick())) {
+          if(get_cipherVisible()){
                 QColor c(curColor());
                 QFont font;
-                font.setFamily(score()->styleSt(Sid::numericTimeSigFont));
-                font.setPointSizeF(score()->styleD(Sid::numericFontSize) * spatium() * score()->styleD(Sid::numericTimeSigSize) * MScore::pixelRatio / SPATIUM20);
+                font.setFamily(score()->styleSt(Sid::cipherTimeSigFont));
+                font.setPointSizeF(score()->styleD(Sid::cipherFontSize) * spatium() * score()->styleD(Sid::cipherTimeSigSize) * MScore::pixelRatio / SPATIUM20);
                 painter->setFont(font);
                 painter->setPen(c);
-                painter->drawText(pz,_numeric_ns);
-                painter->drawText(pn,_numeric_ds);
-                painter->setPen(QPen(curColor(),_numericlinethick));
-                painter->drawLine(numericLine);
-                if(!_numericBegin){
+                painter->drawText(pz,_cipher_ns);
+                painter->drawText(pn,_cipher_ds);
+                painter->setPen(QPen(curColor(),cipherLineThick));
+                painter->drawLine(cipherLine);
+                if(!_cipherBegin){
                       qreal lw = score()->styleP(Sid::barWidth) * mag();
                       painter->setPen(QPen(curColor(), lw, Qt::SolidLine, Qt::FlatCap));
-                      painter->drawLine(numericBarLine);
+                      painter->drawLine(cipherBarLine);
                         }
                 }
           return;
@@ -726,16 +726,16 @@ bool TimeSig::operator==(const TimeSig& ts) const
 
 
 //---------------------------------------------------------
-//   numericWidth
+//   cipherWidth
 //---------------------------------------------------------
 
-qreal TimeSig::numericGetWidth(StaffType* numeric, QString string) const
+qreal TimeSig::cipherGetWidth(StaffType* cipher, QString string) const
       {
       qreal val;
-      if (numeric) {
+      if (cipher) {
             QFont font;
-            font.setFamily(score()->styleSt(Sid::numericTimeSigFont));
-            font.setPointSizeF(score()->styleD(Sid::numericFontSize) * score()->styleD(Sid::numericTimeSigSize));
+            font.setFamily(score()->styleSt(Sid::cipherTimeSigFont));
+            font.setPointSizeF(score()->styleD(Sid::cipherFontSize) * score()->styleD(Sid::cipherTimeSigSize));
             QFontMetricsF fm(font, MScore::paintDevice());
             val  = fm.width(string) * magS();
             }

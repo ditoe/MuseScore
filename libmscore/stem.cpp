@@ -104,7 +104,7 @@ void Stem::layout()
                         }
                   // in other TAB types, no correction
                   }
-            else if (staff() && staff()->isNumericStaff(chord()->tick())){
+            else if (staff() && staff()->isCipherStaff(chord()->tick())){
 
             }
             else {                              // non-TAB

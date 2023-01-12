@@ -937,6 +937,62 @@
   <SC>
     <key>fret-14</key>
     </SC>
+  <SC>
+    <key>cipherchord-1</key>
+    <seq>Ctrl+Shift+1</seq>
+    </SC>
+  <SC>
+    <key>cipherchord-2</key>
+    <seq>Ctrl+Shift+2</seq>
+    </SC>
+  <SC>
+    <key>cipherchord-3</key>
+    <seq>Ctrl+Shift+3</seq>
+    </SC>
+  <SC>
+    <key>cipherchord-4</key>
+    <seq>Ctrl+Shift+4</seq>
+    </SC>
+  <SC>
+    <key>cipherchord-5</key>
+    <seq>Ctrl+Shift+5</seq>
+    </SC>
+  <SC>
+    <key>cipherchord-6</key>
+    <seq>Ctrl+Shift+6</seq>
+    </SC>
+  <SC>
+    <key>cipherchord-7</key>
+    <seq>Ctrl+Shift+7</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-1</key>
+    <seq>Alt+Shift+1</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-2</key>
+    <seq>Alt+Shift+2</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-3</key>
+    <seq>Alt+Shift+3</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-4</key>
+    <seq>Alt+Shift+4</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-5</key>
+    <seq>Alt+Shift+5</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-6</key>
+    <seq>Alt+Shift+6</seq>
+    </SC>
+  <SC>
+    <key>cipherinsert-7</key>
+    <seq>Alt+Shift+7</seq>
+    </SC>
 <!-- HARMONY / FIGURED BASS specific shortcuts -->
   <SC>
     <key>advance-longa</key>

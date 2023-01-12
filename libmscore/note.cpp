@@ -61,7 +61,7 @@
 #include <QtMath>
 #include <QVector2D>
 #include "keysig.h"
-#include "numeric.h"
+#include "cipher.h"
 
 namespace Ms {
 
@@ -996,11 +996,11 @@ qreal Note::tabHeadWidth(const StaffType* tab) const
             QFontMetricsF fm(f, MScore::paintDevice());
             val  = fm.width(_fretString) * magS();
             }
-      else if (tab && _fretString != "" && (staff()->isNumericStaff(chord()->tick()))){
+      else if (tab && _fretString != "" && (staff()->isCipherStaff(chord()->tick()))){
 
           QFont font;
-          font.setFamily(score()->styleSt(Sid::numericFont));
-          font.setPointSizeF(score()->styleD(Sid::numericFontSize) *_trackthick);
+          font.setFamily(score()->styleSt(Sid::cipherFont));
+          font.setPointSizeF(score()->styleD(Sid::cipherFontSize) *_trackthick);
             QFontMetricsF fm(font, MScore::paintDevice());
             val  = fm.width(_fretString) * magS();
             }
@@ -1263,38 +1263,38 @@ void Note::draw(QPainter* painter) const
             painter->drawText(QPointF(bbox().x(), tab->fretFontYOffset()), _fretString);
             }
 
-      else if (staff() && staff()->isNumericStaff(chord()->tick())) {
+      else if (staff() && staff()->isCipherStaff(chord()->tick())) {
 
             QFont font;
-            font.setFamily(score()->styleSt(Sid::numericFont));
-            font.setPointSizeF((score()->styleD(Sid::numericFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
+            font.setFamily(score()->styleSt(Sid::cipherFont));
+            font.setPointSizeF((score()->styleD(Sid::cipherFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
             painter->setFont(font);
             painter->setPen(c);
-            painter->drawText(_numericTextPos, _fretString);
+            painter->drawText(_cipherTextPos, _fretString);
             if (_accidental || _drawFlat || _drawSharp){
                   if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
                         QFont fontAccidental;
-                        fontAccidental.setFamily(score()->styleSt(Sid::numericAccidentalFont));
-                        fontAccidental.setPointSizeF((score()->styleD(Sid::numericFontSize) * score()->styleD(Sid::numericSizeSignSharp) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
-                        _numeric.drawShap(painter,_numericaccidentalPos, fontAccidental);
-                        //score()->scoreFont()->draw(SymId::numericAccidentalSharp, painter,( score()->styleD(Sid::numericSizeSignSharp)/100*_numericHigth), _numericaccidentalPos);
+                        fontAccidental.setFamily(score()->styleSt(Sid::cipherAccidentalFont));
+                        fontAccidental.setPointSizeF((score()->styleD(Sid::cipherFontSize) * score()->styleD(Sid::cipherSizeSignSharp) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
+                        _cipher.drawShap(painter,_cipherAccidentalPos, fontAccidental);
+                        //score()->scoreFont()->draw(SymId::cipherAccidentalSharp, painter,( score()->styleD(Sid::cipherSizeSignSharp)/100*_cipherHigth), _cipherAccidentalPos);
                         }
                   if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
                         QFont fontAccidental;
-                        fontAccidental.setFamily(score()->styleSt(Sid::numericAccidentalFont));
-                        fontAccidental.setPointSizeF((score()->styleD(Sid::numericFontSize) * score()->styleD(Sid::numericSizeSignFlat) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
-                        _numeric.drawFlat(painter,_numericaccidentalPos, fontAccidental);
-                        //score()->scoreFont()->draw(SymId::numericAccidentalFlat, painter,( score()->styleD(Sid::numericSizeSignFlat)/100*_numericHigth),_numericaccidentalPos);
+                        fontAccidental.setFamily(score()->styleSt(Sid::cipherAccidentalFont));
+                        fontAccidental.setPointSizeF((score()->styleD(Sid::cipherFontSize) * score()->styleD(Sid::cipherSizeSignFlat) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
+                        _cipher.drawFlat(painter,_cipherAccidentalPos, fontAccidental);
+                        //score()->scoreFont()->draw(SymId::cipherAccidentalFlat, painter,( score()->styleD(Sid::cipherSizeSignFlat)/100*_cipherHigth),_cipherAccidentalPos);
                         }
                   }
             if(_trackthick!=1.0){
 
-                  painter->drawText(_numericKlammerPos, "(");
-                  painter->drawText((QPointF(_numericTextPos.x() + _numericWidth2,_numericTextPos.y())), ")");
+                  painter->drawText(_cipherKlammerPos, "(");
+                  painter->drawText((QPointF(_cipherTextPos.x() + _cipherWidth2,_cipherTextPos.y())), ")");
                   }
             }
 
-      // NOT tablature and Numeric
+      // NOT tablature and cipher
 
       else {
             // skip drawing, if second note of a cross-measure value
@@ -2058,10 +2058,10 @@ void Note::setDotY(Direction pos)
             }
       }
 //---------------------------------------------------------
-//   numeric_setKeysigNote
+//   cipher_setKeysigNote
 //---------------------------------------------------------
 
-void Note::numeric_setKeysigNote(KeySig* sig)
+void Note::cipher_setKeysigNote(KeySig* sig)
       {
       if(staff()->key(tick()) != staff()->key(tick() - Fraction::fromTicks(1)) && track() % 4 == 0){
             bool drawFlatTemp=_drawFlat;
@@ -2070,11 +2070,11 @@ void Note::numeric_setKeysigNote(KeySig* sig)
             _drawFlat = false;
             _drawSharp = false;
             int numtransposeInterval=part()->instrument(chord()->tick())->transpose().chromatic;
-            int clefshift=getNumericOktave();
-            int grundtonverschibung=getNumericTrans(staff()->key(tick() - Fraction::fromTicks(1)));
+            int clefshift=get_cipherOktave();
+            int grundtonverschibung=get_cipherTrans(staff()->key(tick() - Fraction::fromTicks(1)));
             int zifferkomatik=((_pitch+grundtonverschibung+numtransposeInterval)%12)+1;
-            QString fretString = getNumericString(zifferkomatik);
-            qreal fretStringYShift=((_pitch+grundtonverschibung+numtransposeInterval)/12-5-clefshift)*_numericHigth*score()->styleD(Sid::numericDistanceOctave);
+            QString fretString = get_cipherString(zifferkomatik);
+            qreal fretStringYShift=((_pitch+grundtonverschibung+numtransposeInterval)/12-5-clefshift)*_cipherHigth*score()->styleD(Sid::cipherDistanceOctave);
             int accid = 0;
             if(_drawFlat){
                   accid--;
@@ -2083,17 +2083,17 @@ void Note::numeric_setKeysigNote(KeySig* sig)
                   accid++;
                   }
 
-            sig->set_numericNote(fretString+")",accid,fretStringYShift);
+            sig->set_cipherNote(fretString+")",accid,fretStringYShift);
             _drawFlat = drawFlatTemp;
             _drawSharp = drawSharpTemp;
             }
 
       }
 //---------------------------------------------------------
-//   getNumeric
+//   get_cipher
 //---------------------------------------------------------
 
-QString Note::getNumericString(int numkro)
+QString Note::get_cipherString(int numkro)
       {
       switch (numkro) {
               case 0:
@@ -2101,25 +2101,25 @@ QString Note::getNumericString(int numkro)
               case 1:
                     return "1";
               case 2:
-                    return getNumericString(numkro + setAccidentalTypeBack(-1));
+                    return get_cipherString(numkro + setAccidentalTypeBack(-1));
               case 3:
                     return "2";
               case 4:
-                  return getNumericString(numkro + setAccidentalTypeBack(1));
+                  return get_cipherString(numkro + setAccidentalTypeBack(1));
               case 5:
                     return "3";
               case 6:
                     return "4";
               case 7:
-                  return getNumericString(numkro + setAccidentalTypeBack(-1));
+                  return get_cipherString(numkro + setAccidentalTypeBack(-1));
               case 8:
                     return "5";
               case 9:
-                  return getNumericString(numkro + setAccidentalTypeBack(-1));
+                  return get_cipherString(numkro + setAccidentalTypeBack(-1));
               case 10:
                     return "6";
               case 11:
-                  return getNumericString(numkro + setAccidentalTypeBack(1));
+                  return get_cipherString(numkro + setAccidentalTypeBack(1));
               case 12:
                     return "7";
               case 13:
@@ -2129,10 +2129,10 @@ QString Note::getNumericString(int numkro)
             }
       }
 //---------------------------------------------------------
-//   get_numericGroundPitch
+//   get_cipherGroundPitch
 //---------------------------------------------------------
 
-int Note::get_numericGroundPitch(){
+int Note::get_cipherGroundPitch(){
       if(_drawSharp)
             return _pitch - 1;
       if(_drawFlat)
@@ -2178,25 +2178,25 @@ int Note::setAccidentalTypeBack(int defaultdirection) {
       return shift;
       }
 //---------------------------------------------------------
-//   getNumericDuration
+//   get_cipherDuration
 //---------------------------------------------------------
 
-QString getNumericDuration[16]={
+QString get_cipherDuration[16]={
       "","",",,",",","","","","","","","","","","","",""
 
       };
 //---------------------------------------------------------
-//   getNumericDurationDot
+//   get_cipherDurationDot
 //---------------------------------------------------------
 
-QString getNumericDurationDot[3]={
+QString get_cipherDurationDot[3]={
       "",".",".."
 
       };
 //---------------------------------------------------------
-//   getNumericTrans
+//   get_cipherTrans
 //---------------------------------------------------------
-int Note::getNumericTrans(Key key) const{
+int Note::get_cipherTrans(Key key) const{
     switch(key) {
         case Key::C_B:  return 1;
         case Key::G_B:  return -6;
@@ -2219,9 +2219,9 @@ int Note::getNumericTrans(Key key) const{
           }
       }
 //---------------------------------------------------------
-//   getNumericOktave
+//   get_cipherOktave
 //---------------------------------------------------------voice.soprano
-int Note::getNumericOktave() const{
+int Note::get_cipherOktave() const{
       QString instname = part()->instrument(chord()->tick())->instrumentId();
       if(instname == "voice.bass")
             return -1;
@@ -2255,8 +2255,8 @@ void Note::layout()
             qreal w = tabHeadWidth(tab); // !! use _fretString
             bbox().setRect(0.0, tab->fretBoxY() * mags, w, tab->fretBoxH() * mags);
             }
-      else if (staff() && staff()->isNumericStaff(chord()->tick())) {
-            StaffType* numeric = staff()->staffType(tick());
+      else if (staff() && staff()->isCipherStaff(chord()->tick())) {
+            StaffType* cipher = staff()->staffType(tick());
 
             int accidentalshift=0;
             _drawFlat = false;
@@ -2270,34 +2270,34 @@ void Note::layout()
                         accidentalshift=1;
                         }
                   }
-            int clefshift=getNumericOktave();
-            int grundtonverschibung=getNumericTrans(staff()->key(tick()));
+            int clefshift=get_cipherOktave();
+            int grundtonverschibung=get_cipherTrans(staff()->key(tick()));
             int zifferkomatik=((_pitch+grundtonverschibung+numtransposeInterval)%12)+1;
-            _fretString = getNumericString(zifferkomatik+accidentalshift);
-            _numericWidth=tabHeadWidth(numeric);
+            _fretString = get_cipherString(zifferkomatik+accidentalshift);
+            _cipherWidth=tabHeadWidth(cipher);
             _fretString = _fretString+
-                        getNumericDuration[int(chord()->durationType().type())]+
-                        getNumericDurationDot[int(chord()->durationType().dots())];
+                        get_cipherDuration[int(chord()->durationType().type())]+
+                        get_cipherDurationDot[int(chord()->durationType().dots())];
             _trackthick=1.0;
             if(track()%4>0){
-                  _numericWidth *=0.7;
+                  _cipherWidth *=0.7;
                   _trackthick=0.7;
                   }
 			QFont font;
-			font.setFamily(score()->styleSt(Sid::numericFont));
-			font.setPointSizeF((score()->styleD(Sid::numericFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
-			_numeric.set_FretFont(font);
-            _numericWidth2=tabHeadWidth(numeric);
-            _numericLedgerline = ((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)/2;
-            _fretStringYShift=((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)*_numericHigth*score()->styleD(Sid::numericDistanceOctave);
+			font.setFamily(score()->styleSt(Sid::cipherFont));
+			font.setPointSizeF((score()->styleD(Sid::cipherFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
+			_cipher.set_FretFont(font);
+            _cipherWidth2=tabHeadWidth(cipher);
+            _cipherLedgerline = ((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)/2;
+            _fretStringYShift=((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)*_cipherHigth*score()->styleD(Sid::cipherDistanceOctave);
             rypos() = -_fretStringYShift;
-            qreal w = tabHeadWidth(numeric); // !! use _fretString
-            _numericHigth =  _numeric.textHeigth(_numeric.getFretFont(),"1234567890");
-            _numeric.set_relativeSize(_numericHigth);
-            QRectF stringbox = QRectF(0.0, _numericHigth*score()->styleD(Sid::numericHeightDisplacement),
-                             w, _numericHigth);
+            qreal w = tabHeadWidth(cipher); // !! use _fretString
+            _cipherHigth =  _cipher.textHeigth(_cipher.getFretFont(),"1234567890");
+            _cipher.set_relativeSize(_cipherHigth);
+            QRectF stringbox = QRectF(0.0, _cipherHigth*score()->styleD(Sid::cipherHeightDisplacement),
+                             w, _cipherHigth);
             setbbox(stringbox);
-            staff()->set_numericHeight(_numericHigth);
+            staff()->set_cipherHeight(_cipherHigth);
             }
       else {
             SymId nh = noteHead();
@@ -2326,12 +2326,12 @@ void Note::layout2()
       // for standard staves this is done in Score::layoutChords3()
       // so that the results are available there
 
-      if (staff()->isNumericStaff(chord()->tick())) {
+      if (staff()->isCipherStaff(chord()->tick())) {
             //adjustReadPos();
-            StaffType* numeric1 = staff()->staffType(tick());
+            StaffType* cipher1 = staff()->staffType(tick());
             bool paren = false;
             _fretHidden = false;
-            if (tieBack() && !numeric1->showBackTied() && !_fretString.startsWith("(")) {   // skip back-tied notes if not shown but between () if on another system
+            if (tieBack() && !cipher1->showBackTied() && !_fretString.startsWith("(")) {   // skip back-tied notes if not shown but between () if on another system
                   if (chord()->measure()->system() != tieBack()->startNote()->chord()->measure()->system() || el().size() > 0)
                         paren = true;
                   else
@@ -2339,53 +2339,53 @@ void Note::layout2()
                   }
             if (paren)
                   _fretString = QString("(%1)").arg(_fretString);
-            qreal w = tabHeadWidth(numeric1); // !! use _fretString
-            QRectF stringbox = QRectF(0.0,_numericHigth*-1 + _numericHigth*score()->styleD(Sid::numericHeightDisplacement),
-                             w, _numericHigth);
+            qreal w = tabHeadWidth(cipher1); // !! use _fretString
+            QRectF stringbox = QRectF(0.0,_cipherHigth*-1 + _cipherHigth*score()->styleD(Sid::cipherHeightDisplacement),
+                             w, _cipherHigth);
             setbbox(stringbox);
-            _numericTextPos = QPointF(0.0,_numericHigth*score()->styleD(Sid::numericHeightDisplacement));
-            qreal ShapSize=_numeric.getFretFont().pointSize() * score()->styleD(Sid::numericSizeSignSharp);
-            qreal FlatSize= _numeric.getFretFont().pointSize() * score()->styleD(Sid::numericSizeSignFlat);
+            _cipherTextPos = QPointF(0.0,_cipherHigth*score()->styleD(Sid::cipherHeightDisplacement));
+            qreal ShapSize=_cipher.getFretFont().pointSize() * score()->styleD(Sid::cipherSizeSignSharp);
+            qreal FlatSize= _cipher.getFretFont().pointSize() * score()->styleD(Sid::cipherSizeSignFlat);
             QFont fontAccidental;
-            fontAccidental.setFamily(score()->styleSt(Sid::numericAccidentalFont));
+            fontAccidental.setFamily(score()->styleSt(Sid::cipherAccidentalFont));
             if (_accidental || _drawFlat || _drawSharp){
                   if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
-                        _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignSharp),
-                                                        (_numericHigth*score()->styleD(Sid::numericHeigthSignSharp)));
+                        _cipherAccidentalPos = QPointF(_cipherHigth*-score()->styleD(Sid::cipherDistanceSignSharp),
+                                                        (_cipherHigth*score()->styleD(Sid::cipherHeigthSignSharp)));
                         fontAccidental.setPointSizeF(ShapSize);
-                        addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
+                        addbbox(_cipher.bbox(fontAccidental,_cipherAccidentalPos,_cipher.shapString()));
                         }
                   if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
-                        _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignFlat),
-                                                        (_numericHigth*score()->styleD(Sid::numericHeigthSignFlat)));
+                        _cipherAccidentalPos = QPointF(_cipherHigth*-score()->styleD(Sid::cipherDistanceSignFlat),
+                                                        (_cipherHigth*score()->styleD(Sid::cipherHeigthSignFlat)));
                         fontAccidental.setPointSizeF(FlatSize);
-                        addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
+                        addbbox(_cipher.bbox(fontAccidental,_cipherAccidentalPos,_cipher.shapString()));
                         }
                   }
             if(_trackthick!=1.0){
-                  qreal xK = _numericTextPos.x();
+                  qreal xK = _cipherTextPos.x();
                   if (_accidental || _drawFlat || _drawSharp){
                         if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
-                              _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignSharp)*0.7,
-                                                              (_numericHigth*score()->styleD(Sid::numericHeigthSignSharp)));
+                              _cipherAccidentalPos = QPointF(_cipherHigth*-score()->styleD(Sid::cipherDistanceSignSharp)*0.7,
+                                                              (_cipherHigth*score()->styleD(Sid::cipherHeigthSignSharp)));
                               fontAccidental.setPointSizeF(ShapSize);
-                              addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
-                              xK = _numericaccidentalPos.x();
+                              addbbox(_cipher.bbox(fontAccidental,_cipherAccidentalPos,_cipher.shapString()));
+                              xK = _cipherAccidentalPos.x();
                               }
                         if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
-                              _numericaccidentalPos = QPointF(_numericHigth*-score()->styleD(Sid::numericDistanceSignFlat)*0.7,
-                                                              (_numericHigth*score()->styleD(Sid::numericHeigthSignFlat)));
+                              _cipherAccidentalPos = QPointF(_cipherHigth*-score()->styleD(Sid::cipherDistanceSignFlat)*0.7,
+                                                              (_cipherHigth*score()->styleD(Sid::cipherHeigthSignFlat)));
                               fontAccidental.setPointSizeF(FlatSize);
-                              addbbox(_numeric.bbox(fontAccidental,_numericaccidentalPos,_numeric.shapString()));
-                              xK = _numericaccidentalPos.x();
+                              addbbox(_cipher.bbox(fontAccidental,_cipherAccidentalPos,_cipher.shapString()));
+                              xK = _cipherAccidentalPos.x();
                               }
                         }
-                  numeric n;
-                  qreal wr = n.textWidth(_numeric.getFretFont(),"(");
-                  _numericKlammerPos = QPointF(xK- wr,_numericTextPos.y());
+                  cipher n;
+                  qreal wr = n.textWidth(_cipher.getFretFont(),"(");
+                  _cipherKlammerPos = QPointF(xK- wr,_cipherTextPos.y());
 
-                  addbbox(QRectF(_numericKlammerPos.x(),_numericKlammerPos.y()-_numericHigth,wr, _numericHigth));
-                  addbbox(QRectF(_numericTextPos.x()+_numericWidth,_numericKlammerPos.y()-_numericHigth,wr, _numericHigth));
+                  addbbox(QRectF(_cipherKlammerPos.x(),_cipherKlammerPos.y()-_cipherHigth,wr, _cipherHigth));
+                  addbbox(QRectF(_cipherTextPos.x()+_cipherWidth,_cipherKlammerPos.y()-_cipherHigth,wr, _cipherHigth));
                   }
 
             }
@@ -2411,7 +2411,7 @@ void Note::layout2()
                         d = dd * 0.5;
                         }
                   }
-            else if (staff()->isNumericStaff(chord()->tick())) {
+            else if (staff()->isCipherStaff(chord()->tick())) {
                   StaffType* tab = staff()->staffType(tick());
                   if (tab->stemThrough()) {
                         // with TAB's, dot Y is not calculated during layoutChords3(),
@@ -2447,7 +2447,7 @@ void Note::layout2()
                               const StaffType* tab = st->staffTypeForElement(this);
                               w = tabHeadWidth(tab);
                               }
-                        else if (staff()->isNumericStaff(chord()->tick())) {
+                        else if (staff()->isCipherStaff(chord()->tick())) {
                               StaffType* tab = staff()->staffType(tick());
                               w = tabHeadWidth(tab);
                               }

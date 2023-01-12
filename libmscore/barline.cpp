@@ -465,7 +465,7 @@ void BarLine::getY() const
       qreal yy = measure->staffLines(staffIdx1)->y1() - yp;
       qreal lw = score()->styleS(Sid::staffLineWidth).val() * spatium1 * .5;
 
-      if(staff()->isNumericStaff(tick)){
+      if(staff()->isCipherStaff(tick)){
 
             bool spanStavesbefor     = false;
             int staffbefor=staffIdx1;
@@ -507,8 +507,8 @@ void BarLine::getY() const
                   }
             else {
 
-                  y1 = -staff()->get_numericHeight() * score()->styleD(Sid::numericBarlineLength);
-                  y2 = staff()->get_numericHeight() * score()->styleD(Sid::numericBarlineLength);
+                  y1 = -staff()->get_cipherHeight() * score()->styleD(Sid::cipherBarlineLength);
+                  y2 = staff()->get_cipherHeight() * score()->styleD(Sid::cipherBarlineLength);
                   }
             return;
             }

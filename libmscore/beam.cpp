@@ -1112,7 +1112,7 @@ static int adjust(qreal _spatium4, int slant, const std::vector<ChordRest*>& cl)
                   }
             }
       // on tab staff, reduce a bit the stems (value 4 is experimental)
-      // TODO : proper fix should adapt all the numeric vaues used in Beam::computeStemLen() below
+      // TODO : proper fix should adapt all the cipher vaues used in Beam::computeStemLen() below
       // to variable line distance
       if (c1->staff() && c1->staff()->isTabStaff(Fraction(0,1))) {
             ml = (ml != 0) ? ml - 4 : 0;

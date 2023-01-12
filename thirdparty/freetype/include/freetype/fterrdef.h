@@ -37,7 +37,7 @@
   /*   used by FreeType.                                                   */
   /*                                                                       */
   /*   Within your application you should *only* use error names and       */
-  /*   *never* its numeric values!  The latter might (and actually do)     */
+  /*   *never* its cipher values!  The latter might (and actually do)     */
   /*   change in forthcoming FreeType versions.                            */
   /*                                                                       */
   /*   Macro `FT_NOERRORDEF_' defines `FT_Err_Ok', which is always zero.   */

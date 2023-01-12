@@ -4096,7 +4096,7 @@ void Measure::addSystemHeader(bool isFirstSystem)
 
             needKeysig = needKeysig && (keyIdx.key() != Key::C || keyIdx.custom() || keyIdx.isAtonal());
 
-            if (staff && staff->isNumericStaff( tick())) {
+            if (staff && staff->isCipherStaff( tick())) {
                   needKeysig =true;
                   }
 

@@ -693,8 +693,8 @@ qreal Chord::maxHeadWidth() const
 
 void Chord::addLedgerLines()
       {
-      if (staff() && (staff()->isNumericStaff(tick()))){
-            int anzahl = notes()[0]->get_numericLedgerline();
+      if (staff() && (staff()->isCipherStaff(tick()))){
+            int anzahl = notes()[0]->get_cipherLedgerline();
             if (anzahl<0)
                   anzahl *= -1;
             for (int n=0;n<anzahl; n++) {
@@ -702,14 +702,14 @@ void Chord::addLedgerLines()
                   h->setParent(this);
                   h->setTrack(track());
                   h->setVisible(visible());
-                  h->setLineWidth(notes()[0]->get_numericHigth()*score()->styleD(Sid::numericLedgerlineThick));
-                  h->setLen(notes()[0]->get_numericWidth()*score()->styleD(Sid::numericLedgerlineLength));
-                  qreal x = (notes()[0]->get_numericWidth()*0.5)-(notes()[0]->get_numericWidth()*score()->styleD(Sid::numericLedgerlineLength)*0.5)+
-                              score()->styleD(Sid::numericLedgerlineShift);
-                  if(notes()[0]->get_numericLedgerline()<0)
-                        h->setPos(x, notes()[0]->get_numericHigth()*score()->styleD(Sid::numericDistanceOctave)*2.0*(n+1));
+                  h->setLineWidth(notes()[0]->get_cipherHigth()*score()->styleD(Sid::cipherLedgerlineThick));
+                  h->setLen(notes()[0]->get_cipherWidth()*score()->styleD(Sid::cipherLedgerlineLength));
+                  qreal x = (notes()[0]->get_cipherWidth()*0.5)-(notes()[0]->get_cipherWidth()*score()->styleD(Sid::cipherLedgerlineLength)*0.5)+
+                              score()->styleD(Sid::cipherLedgerlineShift);
+                  if(notes()[0]->get_cipherLedgerline()<0)
+                        h->setPos(x, notes()[0]->get_cipherHigth()*score()->styleD(Sid::cipherDistanceOctave)*2.0*(n+1));
                   else
-                        h->setPos(x, -notes()[0]->get_numericHigth()*score()->styleD(Sid::numericDistanceOctave)*2.0*(n+1));
+                        h->setPos(x, -notes()[0]->get_cipherHigth()*score()->styleD(Sid::cipherDistanceOctave)*2.0*(n+1));
                   h->setNext(_ledgerLines);
                   _ledgerLines = h;
                   }
@@ -1624,7 +1624,7 @@ void Chord::layoutStem()
                   }
             // if stems are through staff, use standard formatting
             }
-      if (staff() && (staff()->isNumericStaff(tick()))){
+      if (staff() && (staff()->isCipherStaff(tick()))){
 
             if (_hook) {
                   QPointF p(0,0);
@@ -1635,7 +1635,7 @@ void Chord::layoutStem()
                   }
             return;
             }
-      // not stem on Numeric
+      // not stem on cipher
       //
       // NON-TAB (or TAB with stems through staff)
       //
@@ -1824,7 +1824,7 @@ void Chord::cmdUpdateNotes(AccidentalState* as)
                   qDebug("no drumset");
             updatePercussionNotes(this, drumset);
             }
-      else if (staffGroup == StaffGroup::NUMERIC) {
+      else if (staffGroup == StaffGroup::CIPHER) {
             // ToDo
             const Instrument* instrument = part()->instrument();
             const Drumset* drumset = instrument->drumset();
@@ -1869,8 +1869,8 @@ void Chord::layout()
             return;
       if (onTabStaff())
             layoutTablature();
-      else if (staff() && (staff()->isNumericStaff(tick())))
-            layoutNumeric();
+      else if (staff() && (staff()->isCipherStaff(tick())))
+            layoutCipher();
       else
             layoutPitched();
       }
@@ -2536,17 +2536,17 @@ void Chord::layoutTablature()
       }
 
 //---------------------------------------------------------
-//   layoutNumeric
+//   layoutCipher
 //---------------------------------------------------------
 
-void Chord::layoutNumeric()
+void Chord::layoutCipher()
       {
       qreal _spatium          = spatium();
       qreal minNoteDistance   = score()->styleP(Sid::minNoteDistance);
       qreal minTieLength      = score()->styleP(Sid::MinTieLength);
 
       for (Chord* c : _graceNotes)
-            c->layoutNumeric();
+            c->layoutCipher();
 
       while (_ledgerLines) {
             LedgerLine* l = _ledgerLines->next();
@@ -2633,7 +2633,7 @@ void Chord::layoutNumeric()
 
       addLedgerLines();
 
-      lll = rrr = headWidth*score()->styleD(Sid::numericNoteDistanc);
+      lll = rrr = headWidth*score()->styleD(Sid::cipherNoteDistanc);
       // align dots to the widest fret mark (not needed in all TAB styles, but harmless anyway)
       if (segment())
             segment()->setDotPosX(staffIdx(), headWidth);
@@ -2730,7 +2730,7 @@ void Chord::layoutNumeric()
 
             Note* note = _notes.at(0);
             if (numOfNotes>0){
-                  _hook->setNumericHookDimension(note->get_numericWidth(),note->get_numericHigth());
+                  _hook->setCipherHookDimension(note->get_cipherWidth(),note->get_cipherHigth());
                   }
             QPointF p(0,0);
             p.ry() = note->pos().y();

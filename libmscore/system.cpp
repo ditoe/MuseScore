@@ -668,10 +668,10 @@ void System::layout2()
             staffDistance       = score()->styleP(Sid::minStaffSpread);
             akkoladeDistance    = score()->styleP(Sid::minStaffSpread);
             }
-      qreal numerictimesigStart=0.0;
-      int numericAnzalStaff=0;
-      Staff* numericFirstStaff  = 0;
-      TimeSig* numericTimesig = 0;
+      qreal cipherTimesigStart=0.0;
+      int cipherAnzalStaff=0;
+      Staff* cipherFirstStaff  = 0;
+      TimeSig* cipherTimesig = 0;
 	  Fraction tickk = tick();
 	  if (nextSegmentElement())
 		  tickk = nextSegmentElement()->tick();
@@ -692,42 +692,42 @@ void System::layout2()
             auto ni       = i + 1;
 
 			ss->set_distanceFirstStaff(y);
-            if(staff && staff->isNumericStaff(tickk)){
-                  numericAnzalStaff++;
-                  staffDistance       = score()->styleP(Sid::numericStaffDistans);
-                  if (numericAnzalStaff==1){
-                        numericFirstStaff = staff;
-                        numericTimesig = numericFirstStaff->nextTimeSig(tickk);
-                        numerictimesigStart = y;
+            if(staff && staff->isCipherStaff(tickk)){
+                  cipherAnzalStaff++;
+                  staffDistance       = score()->styleP(Sid::cipherStaffDistans);
+                  if (cipherAnzalStaff==1){
+                        cipherFirstStaff = staff;
+                        cipherTimesig = cipherFirstStaff->nextTimeSig(tickk);
+                        cipherTimesigStart = y;
                         }
                   else {
 
-                        if(numericAnzalStaff>1){
+                        if(cipherAnzalStaff>1){
                               TimeSig* sig = staff->nextTimeSig(tickk);
                               while (sig) {
-                                    sig->set_numericVisible(false);
+                                    sig->set_cipherVisible(false);
                                     sig = staff->nextTimeSig(sig->tick() + Fraction::fromTicks(1));
                                     }
                               }
                         }
-                  if(numericTimesig){
-                        numericTimesig->set_numericVisible(true);
-                        numericTimesig->rypos() =(y - numerictimesigStart)/2;
-                        numericTimesig->set_numericBarLinelength(y - numerictimesigStart);
-                        TimeSig* sig = numericFirstStaff->nextTimeSig(tickk + Fraction::fromTicks(1));
+                  if(cipherTimesig){
+                        cipherTimesig->set_cipherVisible(true);
+                        cipherTimesig->rypos() =(y - cipherTimesigStart)/2;
+                        cipherTimesig->set_cipherBarLinelength(y - cipherTimesigStart);
+                        TimeSig* sig = cipherFirstStaff->nextTimeSig(tickk + Fraction::fromTicks(1));
                         while (sig) {
-                              sig->set_numericVisible(true);
-                              sig->rypos() =(y - numerictimesigStart)/2;
-                              sig->set_numericBarLinelength(y - numerictimesigStart);
-                              sig = numericFirstStaff->nextTimeSig(sig->tick() + Fraction::fromTicks(1));
+                              sig->set_cipherVisible(true);
+                              sig->rypos() =(y - cipherTimesigStart)/2;
+                              sig->set_cipherBarLinelength(y - cipherTimesigStart);
+                              sig = cipherFirstStaff->nextTimeSig(sig->tick() + Fraction::fromTicks(1));
                               }
                         }
 
                   }
             else {
-                  numericAnzalStaff=0;
-                  numericFirstStaff=0;
-                  numericTimesig = 0;
+                  cipherAnzalStaff=0;
+                  cipherFirstStaff=0;
+                  cipherTimesig = 0;
                   staffDistance       = score()->styleP(Sid::staffDistance);
                   }
             qreal dist = staff->height();

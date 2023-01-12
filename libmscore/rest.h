@@ -16,7 +16,7 @@
 #include "chordrest.h"
 #include "notedot.h"
 #include "sym.h"
-#include "numeric.h"
+#include "cipher.h"
 
 namespace Ms {
 
@@ -44,13 +44,13 @@ class Rest : public ChordRest {
 
 
       QString _fretString;
-      qreal _numericWidht;
-      qreal _numericLineWidht;
-      qreal _numericLineThick;
-      qreal _numericLineSpace;
-      qreal _numericHigthLine;
-      qreal _numericHigth;
-	  numeric _numeric;
+      qreal _cipherWidht;
+      qreal _cipherLineWidht;
+      qreal _cipherLineThick;
+      qreal _cipherLineSpace;
+      qreal _cipherHigthLine;
+      qreal _cipherHigth;
+	  cipher _cipher;
 
 
    public:
@@ -88,7 +88,7 @@ class Rest : public ChordRest {
       void layoutMMRest(qreal val);
       QRectF mmRestNumberRect() const;
       qreal mmWidth() const        { return _mmWidth; }
-      qreal numericGetWidthRest(StaffType* numeric, QString string)const;
+      qreal cipherGetWidthRest(StaffType* cipher, QString string)const;
       SymId getSymbol(TDuration::DurationType type, int line, int lines,  int* yoffset);
 
       void checkDots();

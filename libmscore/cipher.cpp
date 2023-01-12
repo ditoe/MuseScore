@@ -1,4 +1,4 @@
-#include "numeric.h"
+#include "cipher.h"
 #include "mscore.h"
 
 
@@ -7,14 +7,14 @@ namespace Ms {
 //   textWidth
 //---------------------------------------------------------
 
-qreal numeric::textWidth(const QFont font, const QString string) const
+qreal cipher::textWidth(const QFont font, const QString string) const
       {
       qreal val;
       QFontMetricsF fm(font);
       val  = fm.width(string);
       return val;
       }
-qreal numeric::textHeigth(const QFont font, const QString string) const
+qreal cipher::textHeigth(const QFont font, const QString string) const
       {
       qreal val;
       QFontMetricsF fm(font);
@@ -22,19 +22,19 @@ qreal numeric::textHeigth(const QFont font, const QString string) const
       val  = pos.height();
       return val;
       }
-QRectF numeric::bbox(QFont font, QPointF pos, QString string)
+QRectF cipher::bbox(QFont font, QPointF pos, QString string)
       {
       QFontMetricsF fm(font);
       return fm.tightBoundingRect(string).translated(pos);
       }
-void numeric::drawShap(QPainter *painter, QPointF pos, QFont font) const
+void cipher::drawShap(QPainter *painter, QPointF pos, QFont font) const
       {
       QFont fontold = painter->font();
       painter->setFont(font);
       painter->drawText(pos, "♯");
       painter->setFont(fontold);
       }
-void numeric::drawFlat(QPainter *painter, QPointF pos, QFont font) const
+void cipher::drawFlat(QPainter *painter, QPointF pos, QFont font) const
       {
       QFont fontold = painter->font();
       painter->setFont(font);

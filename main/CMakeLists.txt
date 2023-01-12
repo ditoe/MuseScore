@@ -518,6 +518,7 @@ if (APPLE)
       ../fonts/leland/LelandText.otf
       ../fonts/petaluma/PetalumaText.otf
       ../fonts/petaluma/PetalumaScript.otf
+      ../fonts/cipher/Cipher.ttf
      DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}fonts
      )
      install(DIRECTORY

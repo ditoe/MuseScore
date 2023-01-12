@@ -506,7 +506,7 @@
      *   The first stack-clearing operator, which must be one of hstem,
      *   hstemhm, vstem, vstemhm, cntrmask, hintmask, hmoveto, vmoveto,
      *   rmoveto, or endchar, takes an additional argument - the width (as
-     *   described earlier), which may be expressed as zero or one numeric
+     *   described earlier), which may be expressed as zero or one cipher
      *   argument.
      *
      * What we implement here uses the first validly specified width, but

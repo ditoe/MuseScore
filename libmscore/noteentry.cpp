@@ -97,7 +97,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
                   nval.pitch = stringData->getPitch(line, nval.fret, st, tick);
                   break;
                   }
-            case StaffGroup::NUMERIC:
+            case StaffGroup::CIPHER:
                   {
                   if (line < 0)
                         line *= -1;
@@ -135,7 +135,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
                         }
 
                   Key key = st->key(pos.segment->tick());
-                  ton -= Note().getNumericTrans(key) ;
+                  ton -= Note().get_cipherTrans(key) ;
                   nval.pitch = octave*12+ton;
                   break;
                   }
@@ -394,7 +394,7 @@ void Score::putNote(const Position& p, bool replace)
                   break;
                   }
             case StaffGroup::TAB:
-            case StaffGroup::NUMERIC:
+            case StaffGroup::CIPHER:
                   stringData = st->part()->instrument(s->tick())->stringData();
                   _is.setDrumNote(-1);
                   break;

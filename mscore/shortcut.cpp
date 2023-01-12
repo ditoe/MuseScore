@@ -341,119 +341,119 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval1",
          QT_TRANSLATE_NOOP("action","Unison Above"),
          QT_TRANSLATE_NOOP("action","Enter unison above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval2",
          QT_TRANSLATE_NOOP("action","Second Above"),
          QT_TRANSLATE_NOOP("action","Enter second above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval3",
          QT_TRANSLATE_NOOP("action","Third Above"),
          QT_TRANSLATE_NOOP("action","Enter third above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval4",
          QT_TRANSLATE_NOOP("action","Fourth Above"),
          QT_TRANSLATE_NOOP("action","Enter fourth above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval5",
          QT_TRANSLATE_NOOP("action","Fifth Above"),
          QT_TRANSLATE_NOOP("action","Enter fifth above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval6",
          QT_TRANSLATE_NOOP("action","Sixth Above"),
          QT_TRANSLATE_NOOP("action","Enter sixth above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval7",
          QT_TRANSLATE_NOOP("action","Seventh Above"),
          QT_TRANSLATE_NOOP("action","Enter seventh above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval8",
          QT_TRANSLATE_NOOP("action","Octave Above"),
          QT_TRANSLATE_NOOP("action","Enter octave above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval9",
          QT_TRANSLATE_NOOP("action","Ninth Above"),
          QT_TRANSLATE_NOOP("action","Enter ninth above")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-2",
          QT_TRANSLATE_NOOP("action","Second Below"),
          QT_TRANSLATE_NOOP("action","Enter second below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-3",
          QT_TRANSLATE_NOOP("action","Third Below"),
          QT_TRANSLATE_NOOP("action","Enter third below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-4",
          QT_TRANSLATE_NOOP("action","Fourth Below"),
          QT_TRANSLATE_NOOP("action","Enter fourth below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-5",
          QT_TRANSLATE_NOOP("action","Fifth Below"),
          QT_TRANSLATE_NOOP("action","Enter fifth below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-6",
          QT_TRANSLATE_NOOP("action","Sixth Below"),
          QT_TRANSLATE_NOOP("action","Enter sixth below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-7",
          QT_TRANSLATE_NOOP("action","Seventh Below"),
          QT_TRANSLATE_NOOP("action","Enter seventh below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-8",
          QT_TRANSLATE_NOOP("action","Octave Below"),
          QT_TRANSLATE_NOOP("action","Enter octave below")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "interval-9",
          QT_TRANSLATE_NOOP("action","Ninth Below"),
          QT_TRANSLATE_NOOP("action","Enter ninth below")
@@ -558,7 +558,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "chord-tie",
          QT_TRANSLATE_NOOP("action","Add Tied Note to Chord"),
          QT_TRANSLATE_NOOP("action","Add tied note to chord")
@@ -614,155 +614,155 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
         //STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM,
-         "numeric-1",
-         QT_TRANSLATE_NOOP("action","NUM 1"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 1")
+         "cipher-1",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  1"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 1")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numeric-2",
-         QT_TRANSLATE_NOOP("action","NUM 2"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 2")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipher-2",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  2"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 2")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numeric-3",
-         QT_TRANSLATE_NOOP("action","NUM 3"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 3")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipher-3",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  3"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 3")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numeric-4",
-         QT_TRANSLATE_NOOP("action","NUM 4"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 4")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipher-4",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  4"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 4")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numeric-5",
-         QT_TRANSLATE_NOOP("action","NUM 5"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 5")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipher-5",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  5"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 5")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numeric-6",
-         QT_TRANSLATE_NOOP("action","NUM 6"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 6")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipher-6",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  6"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 6")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numeric-7",
-         QT_TRANSLATE_NOOP("action","NUM 7"),
-         QT_TRANSLATE_NOOP("action","Enter numeric 7")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipher-7",
+         QT_TRANSLATE_NOOP("action","Enter CIPHER  7"),
+         QT_TRANSLATE_NOOP("action","Enter cipher 7")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-1",
-         QT_TRANSLATE_NOOP("action","Add NUM 1"),
-         QT_TRANSLATE_NOOP("action","Add numeric 1")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-1",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 1"),
+         QT_TRANSLATE_NOOP("action","Add cipher 1")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-2",
-         QT_TRANSLATE_NOOP("action","Add NUM 2"),
-         QT_TRANSLATE_NOOP("action","Add numeric 2")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-2",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 2"),
+         QT_TRANSLATE_NOOP("action","Add cipher 2")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-3",
-         QT_TRANSLATE_NOOP("action","Add NUM 3"),
-         QT_TRANSLATE_NOOP("action","Add numeric 3")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-3",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 3"),
+         QT_TRANSLATE_NOOP("action","Add cipher 3")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-4",
-         QT_TRANSLATE_NOOP("action","Add NUM 4"),
-         QT_TRANSLATE_NOOP("action","Add numeric 4")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-4",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 4"),
+         QT_TRANSLATE_NOOP("action","Add cipher 4")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-5",
-         QT_TRANSLATE_NOOP("action","Add NUM 5"),
-         QT_TRANSLATE_NOOP("action","Add numeric 5")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-5",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 5"),
+         QT_TRANSLATE_NOOP("action","Add cipher 5")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-6",
-         QT_TRANSLATE_NOOP("action","NUM 6"),
-         QT_TRANSLATE_NOOP("action","Add numeric 6")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-6",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 6"),
+         QT_TRANSLATE_NOOP("action","Add cipher 6")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numchord-7",
-         QT_TRANSLATE_NOOP("action","Add NUM 7"),
-         QT_TRANSLATE_NOOP("action","Add numeric 7")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherchord-7",
+         QT_TRANSLATE_NOOP("action","Add CIPHER 7"),
+         QT_TRANSLATE_NOOP("action","Add cipher 7")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-1",
-         QT_TRANSLATE_NOOP("action","Insert NUM 1"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 1")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-1",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 1"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 1")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-2",
-         QT_TRANSLATE_NOOP("action","Insert NUM 2"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 2")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-2",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 2"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 2")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-3",
-         QT_TRANSLATE_NOOP("action","Insert NUM 3"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 3")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-3",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 3"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 3")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-4",
-         QT_TRANSLATE_NOOP("action","Insert NUM 4"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 4")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-4",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 4"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 4")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-5",
-         QT_TRANSLATE_NOOP("action","Insert NUM 5"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 5")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-5",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 5"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 5")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-6",
-         QT_TRANSLATE_NOOP("action","Insert NUM 6"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 6")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-6",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 6"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 6")
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NOTE_ENTRY_STAFF_NUMERIC,
-         "numinsert-7",
-         QT_TRANSLATE_NOOP("action","Insert NUM 7"),
-         QT_TRANSLATE_NOOP("action","Insert numeric 7")
+         STATE_NOTE_ENTRY_STAFF_CIPHER,
+         "cipherinsert-7",
+         QT_TRANSLATE_NOOP("action","Insert CIPHER 7"),
+         QT_TRANSLATE_NOOP("action","Insert cipher 7")
            },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "rest",
          QT_TRANSLATE_NOOP("action","Rest"),
          QT_TRANSLATE_NOOP("action","Enter rest"),
@@ -1837,7 +1837,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "pad-rest",
          QT_TRANSLATE_NOOP("action","Rest"),
          QT_TRANSLATE_NOOP("action","Note input: Rest"),
@@ -1848,7 +1848,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "sharp2",
          QT_TRANSLATE_NOOP("action","Double ♯"),
          QT_TRANSLATE_NOOP("action","Note input: Double ♯"),
@@ -1859,7 +1859,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "sharp",
          QT_TRANSLATE_NOOP("action","♯"),
          QT_TRANSLATE_NOOP("action","Note input: ♯"),
@@ -1870,7 +1870,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "nat",
          QT_TRANSLATE_NOOP("action","♮"),
          QT_TRANSLATE_NOOP("action","Note input: ♮"),
@@ -1881,7 +1881,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "flat",
          QT_TRANSLATE_NOOP("action","♭"),
          QT_TRANSLATE_NOOP("action","Note input: ♭"),
@@ -1892,7 +1892,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "flat2",
          QT_TRANSLATE_NOOP("action","Double ♭"),
          QT_TRANSLATE_NOOP("action","Note input: Double ♭"),
@@ -2988,7 +2988,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC /*| STATE_NOTE_ENTRY_TAB*/,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER /*| STATE_NOTE_ENTRY_TAB*/,
          "double-duration",
          QT_TRANSLATE_NOOP("action","Double Duration"),
          QT_TRANSLATE_NOOP("action","Double duration"),
@@ -2998,7 +2998,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC /*| STATE_NOTE_ENTRY_TAB*/,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER /*| STATE_NOTE_ENTRY_TAB*/,
          "half-duration",
          QT_TRANSLATE_NOOP("action","Half Duration"),
          QT_TRANSLATE_NOOP("action","Half duration"),
@@ -3008,7 +3008,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC /*| STATE_NOTE_ENTRY_TAB*/,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER /*| STATE_NOTE_ENTRY_TAB*/,
          "inc-duration-dotted",
          QT_TRANSLATE_NOOP("action","Increase Duration Dotted"),
          QT_TRANSLATE_NOOP("action","Increase duration dotted"),
@@ -3018,7 +3018,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::SCORE_TAB,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC /*| STATE_NOTE_ENTRY_TAB*/,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER /*| STATE_NOTE_ENTRY_TAB*/,
          "dec-duration-dotted",
          QT_TRANSLATE_NOOP("action","Decrease Duration Dotted"),
          QT_TRANSLATE_NOOP("action","Decrease duration dotted"),
@@ -3069,7 +3069,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::MAIN_WINDOW,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "enh-both",
          QT_TRANSLATE_NOOP("action","Change Enharmonic Spelling (Both Modes)"),
          QT_TRANSLATE_NOOP("action","Change enharmonic spelling (both modes)"),
@@ -3077,7 +3077,7 @@ Shortcut Shortcut::_sc[] = {
          },
       {
          MsWidget::MAIN_WINDOW,
-         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_NUMERIC,
+         STATE_NORMAL | STATE_NOTE_ENTRY_STAFF_PITCHED | STATE_NOTE_ENTRY_STAFF_DRUM | STATE_NOTE_ENTRY_STAFF_CIPHER,
          "enh-current",
          QT_TRANSLATE_NOOP("action","Change Enharmonic Spelling (Current Mode)"),
          QT_TRANSLATE_NOOP("action","Change enharmonic spelling (current mode)"),

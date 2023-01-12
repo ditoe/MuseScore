@@ -160,7 +160,7 @@ void Cursor::rewind(RewindMode mode)
 
 void Cursor::rewindToTick(int tick)
       {
-      // integer ticks may contain numeric errors so it is
+      // integer ticks may contain cipher errors so it is
       // better to search not precisely if possible
       Ms::Fraction fTick = Ms::Fraction::fromTicks(tick + 1);
       Ms::Segment* seg = _score->tick2leftSegment(fTick);

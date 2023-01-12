@@ -215,7 +215,7 @@
       </item>
       <item>
        <property name="text">
-        <string>numeric System</string>
+        <string>cipher System</string>
        </property>
       </item>
      </widget>
@@ -12357,10 +12357,10 @@ By default, they will be placed such as that their right end are at the same lev
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="PageNumericSystem">
+      <widget class="QWidget" name="PagecipherSystem">
        <layout class="QGridLayout" name="gridLayout_51">
         <item row="0" column="1">
-         <widget class="QStackedWidget" name="numericPageStack">
+         <widget class="QStackedWidget" name="cipherPageStack">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -12381,7 +12381,7 @@ By default, they will be placed such as that their right end are at the same lev
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_48">
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericStaffDistans">
+                  <widget class="QDoubleSpinBox" name="cipherStaffDistans">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12410,7 +12410,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericStaffDistans">
+                  <widget class="QToolButton" name="resetCipherStaffDistans">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12427,7 +12427,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericBarlineLength">
+                  <widget class="QDoubleSpinBox" name="cipherBarlineLength">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12440,7 +12440,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericBarlineLength">
+                  <widget class="QToolButton" name="resetCipherBarlineLength">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12483,7 +12483,7 @@ By default, they will be placed such as that their right end are at the same lev
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="pageNumericNote">
+          <widget class="QWidget" name="pagecipherNote">
            <layout class="QGridLayout" name="gridLayout_57">
             <item row="0" column="0">
              <widget class="QGroupBox" name="groupBox_45">
@@ -12500,7 +12500,7 @@ By default, they will be placed such as that their right end are at the same lev
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_441">
                  <item row="12" column="2">
-                  <widget class="QToolButton" name="resetNumericLedgerlineThick">
+                  <widget class="QToolButton" name="resetCipherLedgerlineThick">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12517,7 +12517,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericDistanceOctave">
+                  <widget class="QToolButton" name="resetCipherDistanceOctave">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12560,7 +12560,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QDoubleSpinBox" name="numericWideLine">
+                  <widget class="QDoubleSpinBox" name="cipherWideLine">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12580,7 +12580,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QToolButton" name="resetNumericHeigthLine">
+                  <widget class="QToolButton" name="resetCipherHeigthLine">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12597,7 +12597,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="11" column="2">
-                  <widget class="QToolButton" name="resetNumericLedgerlineShift">
+                  <widget class="QToolButton" name="resetCipherLedgerlineShift">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12614,7 +12614,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="5" column="2">
-                  <widget class="QToolButton" name="resetNumericWideLine">
+                  <widget class="QToolButton" name="resetCipherWideLine">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12631,7 +12631,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="11" column="1">
-                  <widget class="QDoubleSpinBox" name="numericLedgerlineShift">
+                  <widget class="QDoubleSpinBox" name="cipherLedgerlineShift">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12651,7 +12651,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QDoubleSpinBox" name="numericDistanceBetweenLines">
+                  <widget class="QDoubleSpinBox" name="cipherDistanceBetweenLines">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -12683,7 +12683,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="12" column="1">
-                  <widget class="QDoubleSpinBox" name="numericLedgerlineThick">
+                  <widget class="QDoubleSpinBox" name="cipherLedgerlineThick">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12693,7 +12693,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="numericHeigthLine">
+                  <widget class="QDoubleSpinBox" name="cipherHeigthLine">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -12712,7 +12712,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="2">
-                  <widget class="QToolButton" name="resetNumericThickLine">
+                  <widget class="QToolButton" name="resetCipherThickLine">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12745,7 +12745,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericDistanceOctave">
+                  <widget class="QDoubleSpinBox" name="cipherDistanceOctave">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12758,7 +12758,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QDoubleSpinBox" name="numericThickLine">
+                  <widget class="QDoubleSpinBox" name="cipherThickLine">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12768,7 +12768,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="6" column="2">
-                  <widget class="QToolButton" name="resetNumericDistanceBetweenLines">
+                  <widget class="QToolButton" name="resetCipherDistanceBetweenLines">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12785,7 +12785,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericHeightDisplacement">
+                  <widget class="QDoubleSpinBox" name="cipherHeightDisplacement">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -12801,7 +12801,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="10" column="1">
-                  <widget class="QDoubleSpinBox" name="numericLedgerlineLength">
+                  <widget class="QDoubleSpinBox" name="cipherLedgerlineLength">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12811,7 +12811,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericHeightDisplacement">
+                  <widget class="QToolButton" name="resetCipherHeightDisplacement">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12828,7 +12828,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="10" column="2">
-                  <widget class="QToolButton" name="resetNumericLedgerlineLength">
+                  <widget class="QToolButton" name="resetCipherLedgerlineLength">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12869,7 +12869,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="numericOffsetLine">
+                  <widget class="QDoubleSpinBox" name="cipherOffsetLine">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12882,7 +12882,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="2">
-                  <widget class="QToolButton" name="resetnumericOffsetLine">
+                  <widget class="QToolButton" name="resetCipherOffsetLine">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12899,7 +12899,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="7" column="1">
-                  <widget class="QDoubleSpinBox" name="numericRestDistanc">
+                  <widget class="QDoubleSpinBox" name="cipherRestDistanc">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12909,7 +12909,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="7" column="2">
-                  <widget class="QToolButton" name="resetNumericRestDistanc">
+                  <widget class="QToolButton" name="resetCipherRestDistanc">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -12936,7 +12936,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="8" column="1">
-                  <widget class="QDoubleSpinBox" name="numericNoteDistanc">
+                  <widget class="QDoubleSpinBox" name="cipherNoteDistanc">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -12946,7 +12946,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="8" column="2">
-                  <widget class="QToolButton" name="resetNumericNoteDistanc">
+                  <widget class="QToolButton" name="resetCipherNoteDistanc">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13009,7 +13009,7 @@ By default, they will be placed such as that their right end are at the same lev
                      <number>0</number>
                     </property>
                     <item row="1" column="2">
-                     <widget class="QToolButton" name="resetNumericFontSize">
+                     <widget class="QToolButton" name="resetCipherFontSize">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -13042,7 +13042,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="2" column="1">
-                     <widget class="QFontComboBox" name="numericFont">
+                     <widget class="QFontComboBox" name="cipherFont">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -13055,7 +13055,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="2" column="2">
-                     <widget class="QToolButton" name="resetNumericFont">
+                     <widget class="QToolButton" name="resetCipherFont">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -13086,7 +13086,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="1" column="1">
-                     <widget class="QDoubleSpinBox" name="numericFontSize">
+                     <widget class="QDoubleSpinBox" name="cipherFontSize">
                       <property name="suffix">
                        <string extracomment="spatium unit">sp</string>
                       </property>
@@ -13105,7 +13105,7 @@ By default, they will be placed such as that their right end are at the same lev
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="pageNumericSign">
+          <widget class="QWidget" name="pagecipherSign">
            <layout class="QGridLayout" name="gridLayout_56">
             <item row="0" column="0">
              <widget class="QGroupBox" name="groupBox_41">
@@ -13129,7 +13129,7 @@ By default, they will be placed such as that their right end are at the same lev
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_451">
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericSizeSignSharp">
+                  <widget class="QToolButton" name="resetCipherSizeSignSharp">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13146,7 +13146,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericHeigthSignSharp">
+                  <widget class="QDoubleSpinBox" name="cipherHeigthSignSharp">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13165,7 +13165,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="5" column="2">
-                  <widget class="QToolButton" name="resetNumericDistanceSignFlat">
+                  <widget class="QToolButton" name="resetCipherDistanceSignFlat">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13198,7 +13198,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSizeSignFlat">
+                  <widget class="QDoubleSpinBox" name="cipherSizeSignFlat">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13214,7 +13214,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="2">
-                  <widget class="QToolButton" name="resetNumericSizeSignFlat">
+                  <widget class="QToolButton" name="resetCipherSizeSignFlat">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13231,7 +13231,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QDoubleSpinBox" name="numericDistanceSignFlat">
+                  <widget class="QDoubleSpinBox" name="cipherDistanceSignFlat">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13250,7 +13250,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QToolButton" name="resetNumericDistanceSignSharp">
+                  <widget class="QToolButton" name="resetCipherDistanceSignSharp">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13299,7 +13299,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericHeigthSignSharp">
+                  <widget class="QToolButton" name="resetCipherHeigthSignSharp">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13332,7 +13332,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="numericDistanceSignSharp">
+                  <widget class="QDoubleSpinBox" name="cipherDistanceSignSharp">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13351,7 +13351,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSizeSignSharp">
+                  <widget class="QDoubleSpinBox" name="cipherSizeSignSharp">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13399,7 +13399,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QDoubleSpinBox" name="numericHeigthSignFlat">
+                  <widget class="QDoubleSpinBox" name="cipherHeigthSignFlat">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13418,7 +13418,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="2">
-                  <widget class="QToolButton" name="resetNumericHeigthSignFlat">
+                  <widget class="QToolButton" name="resetCipherHeigthSignFlat">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13448,7 +13448,7 @@ By default, they will be placed such as that their right end are at the same lev
                      <number>0</number>
                     </property>
                     <item row="0" column="2">
-                     <widget class="QToolButton" name="resetNumericAccidentalFont">
+                     <widget class="QToolButton" name="resetCipherAccidentalFont">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -13465,7 +13465,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="0" column="1">
-                     <widget class="QFontComboBox" name="numericAccidentalFont">
+                     <widget class="QFontComboBox" name="cipherAccidentalFont">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -13521,7 +13521,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSlurHeigth">
+                  <widget class="QDoubleSpinBox" name="cipherSlurHeigth">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13540,7 +13540,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSlurUberhang">
+                  <widget class="QDoubleSpinBox" name="cipherSlurUberhang">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -13553,7 +13553,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="2">
-                  <widget class="QToolButton" name="resetNumericSlurUberhang">
+                  <widget class="QToolButton" name="resetCipherSlurUberhang">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13589,7 +13589,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QToolButton" name="resetNumericSlurHeigth">
+                  <widget class="QToolButton" name="resetCipherSlurHeigth">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13606,7 +13606,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericSlurEckenform">
+                  <widget class="QToolButton" name="resetCipherSlurEckenform">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13639,7 +13639,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericSlurThick">
+                  <widget class="QToolButton" name="resetCipherSlurThick">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13656,7 +13656,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSlurEckenform">
+                  <widget class="QDoubleSpinBox" name="cipherSlurEckenform">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13688,7 +13688,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSlurThick">
+                  <widget class="QDoubleSpinBox" name="cipherSlurThick">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -13714,7 +13714,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="numericSlurShift">
+                  <widget class="QDoubleSpinBox" name="cipherSlurShift">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -13727,7 +13727,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="2">
-                  <widget class="QToolButton" name="resetNumericSlurShift">
+                  <widget class="QToolButton" name="resetCipherSlurShift">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13781,7 +13781,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTimeSigDistance">
+                  <widget class="QDoubleSpinBox" name="cipherTimeSigDistance">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -13794,7 +13794,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTimeSigLineSize">
+                  <widget class="QDoubleSpinBox" name="cipherTimeSigLineSize">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -13814,7 +13814,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTimeSigSize">
+                  <widget class="QDoubleSpinBox" name="cipherTimeSigSize">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -13827,7 +13827,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QToolButton" name="resetNumericTimeSigLineSize">
+                  <widget class="QToolButton" name="resetCipherTimeSigLineSize">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13844,7 +13844,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericTimeSigSize">
+                  <widget class="QToolButton" name="resetCipherTimeSigSize">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13861,7 +13861,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericTimeSigDistance">
+                  <widget class="QToolButton" name="resetCipherTimeSigDistance">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13892,7 +13892,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTimeSigLineThick">
+                  <widget class="QDoubleSpinBox" name="cipherTimeSigLineThick">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -13902,7 +13902,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="2">
-                  <widget class="QToolButton" name="resetNumericTimeSigLineThick">
+                  <widget class="QToolButton" name="resetCipherTimeSigLineThick">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -13932,7 +13932,7 @@ By default, they will be placed such as that their right end are at the same lev
                      <number>0</number>
                     </property>
                     <item row="0" column="1">
-                     <widget class="QToolButton" name="resetNumericTimeSigFont">
+                     <widget class="QToolButton" name="resetCipherTimeSigFont">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -13949,7 +13949,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="0" column="0">
-                     <widget class="QFontComboBox" name="numericTimeSigFont">
+                     <widget class="QFontComboBox" name="cipherTimeSigFont">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -14008,7 +14008,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericKeySigHigth">
+                  <widget class="QDoubleSpinBox" name="cipherKeySigHigth">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14021,7 +14021,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericKeySigHigth">
+                  <widget class="QToolButton" name="resetCipherKeySigHigth">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14045,7 +14045,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericKeySigSize">
+                  <widget class="QDoubleSpinBox" name="cipherKeySigSize">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14058,7 +14058,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="2">
-                  <widget class="QToolButton" name="resetNumericKeysigNoteDistancReigth">
+                  <widget class="QToolButton" name="resetCipherKeysigNoteDistancReigth">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14075,7 +14075,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="numericKeySigHorizontalShift">
+                  <widget class="QDoubleSpinBox" name="cipherKeySigHorizontalShift">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14088,7 +14088,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QDoubleSpinBox" name="numericKeysigNoteDistancReigth">
+                  <widget class="QDoubleSpinBox" name="cipherKeysigNoteDistancReigth">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14101,7 +14101,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericKeySigSize">
+                  <widget class="QToolButton" name="resetCipherKeySigSize">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14118,7 +14118,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="numericKeysigNoteDistancLeft">
+                  <widget class="QDoubleSpinBox" name="cipherKeysigNoteDistancLeft">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14131,7 +14131,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="2">
-                  <widget class="QToolButton" name="resetNumericKeysigNoteDistancLeft">
+                  <widget class="QToolButton" name="resetCipherKeysigNoteDistancLeft">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14155,7 +14155,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QToolButton" name="resetNumericKeySigHorizontalShift">
+                  <widget class="QToolButton" name="resetCipherKeySigHorizontalShift">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14199,7 +14199,7 @@ By default, they will be placed such as that their right end are at the same lev
                      <number>0</number>
                     </property>
                     <item row="0" column="1">
-                     <widget class="QToolButton" name="resetNumericKeySigFont">
+                     <widget class="QToolButton" name="resetCipherKeySigFont">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -14216,7 +14216,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="0" column="0">
-                     <widget class="QFontComboBox" name="numericKeySigFont">
+                     <widget class="QFontComboBox" name="cipherKeySigFont">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -14271,7 +14271,7 @@ By default, they will be placed such as that their right end are at the same lev
                      <number>0</number>
                     </property>
                     <item row="1" column="2">
-                     <widget class="QToolButton" name="resetNumericTupletNummerFontSize">
+                     <widget class="QToolButton" name="resetCipherTupletNummerFontSize">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -14304,7 +14304,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="2" column="1">
-                     <widget class="QFontComboBox" name="numericTupletNummerFont">
+                     <widget class="QFontComboBox" name="cipherTupletNummerFont">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -14317,7 +14317,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="2" column="2">
-                     <widget class="QToolButton" name="resetNumericTupletNummerFont">
+                     <widget class="QToolButton" name="resetCipherTupletNummerFont">
                       <property name="toolTip">
                        <string>Reset to default</string>
                       </property>
@@ -14348,7 +14348,7 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="1" column="1">
-                     <widget class="QDoubleSpinBox" name="numericTupletNummerFontSize">
+                     <widget class="QDoubleSpinBox" name="cipherTupletNummerFontSize">
                       <property name="suffix">
                        <string extracomment="spatium unit">sp</string>
                       </property>
@@ -14365,7 +14365,7 @@ By default, they will be placed such as that their right end are at the same lev
                <item row="1" column="0">
                 <layout class="QGridLayout" name="gridLayout_50">
                  <item row="3" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletSlurshift">
+                  <widget class="QToolButton" name="resetCipherTupletSlurshift">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14382,7 +14382,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletSlurhigth">
+                  <widget class="QToolButton" name="resetCipherTupletSlurhigth">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14413,7 +14413,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletSluruberhang">
+                  <widget class="QDoubleSpinBox" name="cipherTupletSluruberhang">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14423,7 +14423,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletNummerHigth">
+                  <widget class="QDoubleSpinBox" name="cipherTupletNummerHigth">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14433,7 +14433,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletSlurhigth">
+                  <widget class="QDoubleSpinBox" name="cipherTupletSlurhigth">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14446,7 +14446,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletSlurThickness">
+                  <widget class="QDoubleSpinBox" name="cipherTupletSlurThickness">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14456,7 +14456,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="5" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletSlurThickness">
+                  <widget class="QToolButton" name="resetCipherTupletSlurThickness">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14487,7 +14487,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletSlurdistans">
+                  <widget class="QDoubleSpinBox" name="cipherTupletSlurdistans">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14500,7 +14500,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletSlurEcke">
+                  <widget class="QDoubleSpinBox" name="cipherTupletSlurEcke">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14513,7 +14513,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QDoubleSpinBox" name="numericTupletSlurshift">
+                  <widget class="QDoubleSpinBox" name="cipherTupletSlurshift">
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14523,7 +14523,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletSlurEcke">
+                  <widget class="QToolButton" name="resetCipherTupletSlurEcke">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14547,7 +14547,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="6" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletNummerHigth">
+                  <widget class="QToolButton" name="resetCipherTupletNummerHigth">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14564,7 +14564,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletSlurdistans">
+                  <widget class="QToolButton" name="resetCipherTupletSlurdistans">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14588,7 +14588,7 @@ By default, they will be placed such as that their right end are at the same lev
                   </widget>
                  </item>
                  <item row="4" column="2">
-                  <widget class="QToolButton" name="resetNumericTupletSluruberhang">
+                  <widget class="QToolButton" name="resetCipherTupletSluruberhang">
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14634,7 +14634,7 @@ By default, they will be placed such as that their right end are at the same lev
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QListWidget" name="numericListPage">
+         <widget class="QListWidget" name="cipherListPage">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -15283,9 +15283,9 @@ By default, they will be placed such as that their right end are at the same lev
    </hints>
   </connection>
   <connection>
-   <sender>numericListPage</sender>
+   <sender>cipherListPage</sender>
    <signal>currentRowChanged(int)</signal>
-   <receiver>numericPageStack</receiver>
+   <receiver>cipherPageStack</receiver>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">

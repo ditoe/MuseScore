@@ -228,8 +228,8 @@ class Segment final : public Element {
       qreal minLeft() const;
       qreal minHorizontalDistance(Segment*, bool isSystemGap) const;
       qreal minHorizontalCollidingDistance(Segment* ns) const;
-      qreal numericKeysigDistansAdjustReigth(const Segment* s) const;
-      qreal numericKeysigDistansAdjustLeft(const Segment* s) const;
+      qreal cipherKeysigDistansAdjustReigth(const Segment* s) const;
+      qreal cipherKeysigDistansAdjustLeft(const Segment* s) const;
 
       // some helper function
       ChordRest* cr(int track) const        { return toChordRest(_elist[track]); }

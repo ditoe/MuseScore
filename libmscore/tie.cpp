@@ -64,9 +64,9 @@ void TieSegment::draw(QPainter* painter) const
                   pen.setWidthF(score()->styleP(Sid::SlurDottedWidth) * mag);
                   break;
             }
-      if(tie()->startNote()->staff() && tie()->startNote()->staff()->isNumericStaff(tie()->startNote()->tick())){
+      if(tie()->startNote()->staff() && tie()->startNote()->staff()->isCipherStaff(tie()->startNote()->tick())){
 
-            pen.setWidthF(score()->styleD(Sid::numericSlurThick));
+            pen.setWidthF(score()->styleD(Sid::cipherSlurThick));
             }
       painter->setPen(pen);
       painter->drawPath(path);
@@ -235,9 +235,9 @@ void TieSegment::computeBezier(QPointF p6o)
 
       qreal w = 0.0;
       qreal c    = p2.x();
-      if(tie()->startNote()->staff() && tie()->startNote()->staff()->isNumericStaff(tie()->startNote()->tick())){
-            shoulderH = tie()->get_numericHigth()*score()->styleD(Sid::numericSlurHeigth);
-            shoulderW = (c-tie()->get_numericHigth()*score()->styleD(Sid::numericSlurEckenform))/c;
+      if(tie()->startNote()->staff() && tie()->startNote()->staff()->isCipherStaff(tie()->startNote()->tick())){
+            shoulderH = tie()->get_cipherHigth()*score()->styleD(Sid::cipherSlurHeigth);
+            shoulderW = (c-tie()->get_cipherHigth()*score()->styleD(Sid::cipherSlurEckenform))/c;
             }
       else {
             w = score()->styleP(Sid::SlurMidWidth) - score()->styleP(Sid::SlurEndWidth);
@@ -412,7 +412,7 @@ void TieSegment::layoutSegment(const QPointF& p1, const QPointF& p2)
 void TieSegment::setAutoAdjust(const QPointF& offset)
       {
 
-	  if (staff()->isNumericStaff(tie()->startNote()->tick())) {
+	  if (staff()->isCipherStaff(tie()->startNote()->tick())) {
 		    return;
 	        }
       QPointF diff = offset - autoAdjustOffset;
@@ -477,10 +477,10 @@ void Tie::slurPos(SlurPos* sp)
       qreal xo;
       qreal yo;
       bool shortStart = false;
-      if(note1->staff() && note1->staff()->isNumericStaff(note1->tick())){
-            _numericHigth=note1->get_numericHigth();
-            sp->p1.rx() +=-note1->get_numericHigth()*score()->styleD(Sid::numericSlurUberhang);
-            sp->p1.ry() = note1->y() + note1->get_numericHigth()*0.5+note1->get_numericHigth()*score()->styleD(Sid::numericSlurShift);
+      if(note1->staff() && note1->staff()->isCipherStaff(note1->tick())){
+            _cipherHigth=note1->get_cipherHigth();
+            sp->p1.rx() +=-note1->get_cipherHigth()*score()->styleD(Sid::cipherSlurUberhang);
+            sp->p1.ry() = note1->y() + note1->get_cipherHigth()*0.5+note1->get_cipherHigth()*score()->styleD(Sid::cipherSlurShift);
 
             }
       else {
@@ -517,9 +517,9 @@ void Tie::slurPos(SlurPos* sp)
       // force tie to be horizontal except for cross-staff or if there is a difference of line (tpc, clef, tpc)
       bool horizontal = startNote()->line() == endNote()->line() && sc->vStaffIdx() == ec->vStaffIdx();
 
-      if(note1->staff() && note1->staff()->isNumericStaff(note1->tick())){
-            sp->p2.rx() +=note2->get_numericWidth()+note1->get_numericHigth()*score()->styleD(Sid::numericSlurUberhang);
-            sp->p2.ry() = note2->y() + note2->get_numericHigth()*0.5+note2->get_numericHigth()*score()->styleD(Sid::numericSlurShift);
+      if(note1->staff() && note1->staff()->isCipherStaff(note1->tick())){
+            sp->p2.rx() +=note2->get_cipherWidth()+note1->get_cipherHigth()*score()->styleD(Sid::cipherSlurUberhang);
+            sp->p2.ry() = note2->y() + note2->get_cipherHigth()*0.5+note2->get_cipherHigth()*score()->styleD(Sid::cipherSlurShift);
             return;
             }
       hw = endNote()->tabHeadWidth(stt);
@@ -597,7 +597,7 @@ void Tie::calculateDirection()
       if (_slurDirection == Direction::AUTO) {
             std::vector<Note*> notes = c1->notes();
             size_t n = notes.size();
-            if (startNote()->staff() && startNote()->staff()->isNumericStaff( startNote()->tick())) {
+            if (startNote()->staff() && startNote()->staff()->isCipherStaff( startNote()->tick())) {
                   // bei nummeric standard unten
                   _up = false;
                   }
@@ -691,7 +691,7 @@ TieSegment* Tie::layoutFor(System* system)
                   }
             Chord* c1 = startNote()->chord();
             if (_slurDirection == Direction::AUTO) {
-                  if (startNote()->staff() && startNote()->staff()->isNumericStaff( startNote()->tick())) {
+                  if (startNote()->staff() && startNote()->staff()->isCipherStaff( startNote()->tick())) {
                         // bei nummeric standard unten
                         _up = false;
                         }

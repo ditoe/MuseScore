@@ -1,11 +1,11 @@
-#ifndef NUMERIC_H
-#define NUMERIC_H
+#ifndef CIPHER_H
+#define CIPHER_H
 
 
 namespace Ms {
 
 
-class numeric
+class cipher
       {
 
       qreal _relativeSize;
@@ -28,4 +28,4 @@ public:
       void drawFlat(QPainter* painter, QPointF pos, QFont font) const;
       };
 }
-#endif // NUMERIC_H
+#endif // CIPHER_H

@@ -67,15 +67,15 @@ void Hook::setHookType(int i)
 
 void Hook::layout()
       {
-      if (staff() && staff()->isNumericStaff( tick())) {
+      if (staff() && staff()->isCipherStaff( tick())) {
 
-            _numericLineThick=_numericHigth*score()->styleD(Sid::numericThickLine);
-            _numericLineSpace=_numericHigth*(score()->styleD(Sid::numericDistanceBetweenLines)*-1);
-            _numericHigthLine=_numericHigth*score()->styleD(Sid::numericHeightDisplacement)-_numericHigth-_numericHigth*score()->styleD(Sid::numericHeigthLine);
-            qreal linienlaenge=_numericLineWidht*score()->styleD(Sid::numericWideLine);
-            QRectF hookbox = QRectF(score()->styleD(Sid::numericOffsetLine)+((_numericLineWidht-linienlaenge)/2),
-                                    _numericHigthLine+((qAbs(_hookType)-1)*_numericLineSpace)-_numericLineThick, linienlaenge,
-                                    ( _numericHigthLine+((qAbs(_hookType)-1)*_numericLineSpace)-_numericLineThick)*-1-_numericHigthLine*-1);
+            _cipherLineThick=_cipherHigth*score()->styleD(Sid::cipherThickLine);
+            _cipherLineSpace=_cipherHigth*(score()->styleD(Sid::cipherDistanceBetweenLines)*-1);
+            _cipherHigthLine=_cipherHigth*score()->styleD(Sid::cipherHeightDisplacement)-_cipherHigth-_cipherHigth*score()->styleD(Sid::cipherHeigthLine);
+            qreal linienlaenge=_cipherLineWidht*score()->styleD(Sid::cipherWideLine);
+            QRectF hookbox = QRectF(score()->styleD(Sid::cipherOffsetLine)+((_cipherLineWidht-linienlaenge)/2),
+                                    _cipherHigthLine+((qAbs(_hookType)-1)*_cipherLineSpace)-_cipherLineThick, linienlaenge,
+                                    ( _cipherHigthLine+((qAbs(_hookType)-1)*_cipherLineSpace)-_cipherLineThick)*-1-_cipherHigthLine*-1);
             setbbox(hookbox);
 
             }
@@ -91,14 +91,14 @@ void Hook::layout()
 void Hook::draw(QPainter* painter) const
       {
 
-      if (staff() && staff()->isNumericStaff( tick())) {
-            painter->setPen(QPen(curColor(), _numericLineThick));
+      if (staff() && staff()->isCipherStaff( tick())) {
+            painter->setPen(QPen(curColor(), _cipherLineThick));
             for (int i = 0; i < qAbs(_hookType); ++i){
 
-                  painter->drawLine(QLineF(score()->styleD(Sid::numericOffsetLine)+(_numericLineWidht/2-(_numericLineWidht*score()->styleD(Sid::numericWideLine))/2),
-                                           _numericHigthLine+(i*_numericLineSpace),
-                                           score()->styleD(Sid::numericOffsetLine)+(_numericLineWidht/2+(_numericLineWidht*score()->styleD(Sid::numericWideLine))/2),
-                                           _numericHigthLine+(i*_numericLineSpace)));
+                  painter->drawLine(QLineF(score()->styleD(Sid::cipherOffsetLine)+(_cipherLineWidht/2-(_cipherLineWidht*score()->styleD(Sid::cipherWideLine))/2),
+                                           _cipherHigthLine+(i*_cipherLineSpace),
+                                           score()->styleD(Sid::cipherOffsetLine)+(_cipherLineWidht/2+(_cipherLineWidht*score()->styleD(Sid::cipherWideLine))/2),
+                                           _cipherHigthLine+(i*_cipherLineSpace)));
                   }
             }
       else{

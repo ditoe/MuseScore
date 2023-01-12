@@ -29,7 +29,7 @@
 #include "stafftype.h"
 #include "icon.h"
 #include "image.h"
-#include "numeric.h"
+#include "cipher.h"
 
 namespace Ms {
 
@@ -84,18 +84,18 @@ Rest::Rest(const Rest& r, bool link)
       }
 
 //---------------------------------------------------------
-//   getNumericDuration
+//   get_cipherDuration
 //---------------------------------------------------------
 
-QString getNumericDurationRest[16]={
+QString get_cipherDurationRest[16]={
       "","",",,",",","","","","","","","","","","",",,",""
 
 };
 //---------------------------------------------------------
-//   getNumericDurationDot
+//   get_cipherDurationDot
 //---------------------------------------------------------
 
-QString getNumericDurationDotRest[3]={
+QString get_cipherDurationDotRest[3]={
       "",".",".."
 
 };
@@ -105,23 +105,23 @@ QString getNumericDurationDotRest[3]={
 
 void Rest::draw(QPainter* painter) const
       {
-      if (staff() && staff()->isNumericStaff(tick())) {
+      if (staff() && staff()->isCipherStaff(tick())) {
 
             QColor c(curColor());
             painter->setPen(c);
 
             QFont font;
-            font.setFamily(score()->styleSt(Sid::numericFont));
-            font.setPointSizeF((score()->styleD(Sid::numericFontSize)* spatium()* MScore::pixelRatio / SPATIUM20));
+            font.setFamily(score()->styleSt(Sid::cipherFont));
+            font.setPointSizeF((score()->styleD(Sid::cipherFontSize)* spatium()* MScore::pixelRatio / SPATIUM20));
             painter->setFont(font);
             painter->setPen(c);
-            painter->drawText(QPointF(0, _numericHigth*score()->styleD(Sid::numericHeightDisplacement)), _fretString);
+            painter->drawText(QPointF(0, _cipherHigth*score()->styleD(Sid::cipherHeightDisplacement)), _fretString);
 
-            painter->setPen(QPen(curColor(), _numericLineThick));
+            painter->setPen(QPen(curColor(), _cipherLineThick));
             for (int i = 0; i < qAbs(durationType().hooks()); ++i){
 
-                  painter->drawLine(QLineF(_numericLineWidht/2-(_numericLineWidht*score()->styleD(Sid::numericWideLine))/2, _numericHigthLine+(i*_numericLineSpace),
-                                           _numericLineWidht/2+(_numericLineWidht*score()->styleD(Sid::numericWideLine))/2, _numericHigthLine+(i*_numericLineSpace)));
+                  painter->drawLine(QLineF(_cipherLineWidht/2-(_cipherLineWidht*score()->styleD(Sid::cipherWideLine))/2, _cipherHigthLine+(i*_cipherLineSpace),
+                                           _cipherLineWidht/2+(_cipherLineWidht*score()->styleD(Sid::cipherWideLine))/2, _cipherHigthLine+(i*_cipherLineSpace)));
                   }
             return;
             }
@@ -460,28 +460,28 @@ void Rest::layout()
                   _tabDur = 0;
                   }
             }
-      if (staff() && staff()->isNumericStaff(tick())) {
+      if (staff() && staff()->isCipherStaff(tick())) {
 
             setPos(0.0, 0.0);             // no rest is drawn: reset any position might be set for it
 			QFont font;
-			font.setFamily(score()->styleSt(Sid::numericFont));
-			font.setPointSizeF(score()->styleD(Sid::numericFontSize) * spatium() * MScore::pixelRatio / SPATIUM20);
-			_numeric.set_FretFont(font);
+			font.setFamily(score()->styleSt(Sid::cipherFont));
+			font.setPointSizeF(score()->styleD(Sid::cipherFontSize) * spatium() * MScore::pixelRatio / SPATIUM20);
+			_cipher.set_FretFont(font);
             _fretString = "0";
-            _numericHigth = _numeric.textHeigth(_numeric.getFretFont(),_fretString);
-            _numericLineWidht= _numeric.textWidth(_numeric.getFretFont(), _fretString);
+            _cipherHigth = _cipher.textHeigth(_cipher.getFretFont(),_fretString);
+            _cipherLineWidht= _cipher.textWidth(_cipher.getFretFont(), _fretString);
             _fretString = "0"+
-                        getNumericDurationRest[int(durationType().type())]+
-                        getNumericDurationDotRest[int(durationType().dots())];
-            _numericWidht = _numeric.textWidth(_numeric.getFretFont(), _fretString);
+                        get_cipherDurationRest[int(durationType().type())]+
+                        get_cipherDurationDotRest[int(durationType().dots())];
+            _cipherWidht = _cipher.textWidth(_cipher.getFretFont(), _fretString);
 
-            staff()->set_numericHeight(_numericHigth);
-            _numericLineThick=_numericHigth*score()->styleD(Sid::numericThickLine);
-            _numericLineSpace=_numericHigth*(score()->styleD(Sid::numericDistanceBetweenLines)*-1);
-            _numericHigthLine=_numericHigth*score()->styleD(Sid::numericHeightDisplacement)-_numericHigth-_numericHigth*score()->styleD(Sid::numericHeigthLine);
-            qreal distance =_numericWidht * score()->styleD(Sid::numericRestDistanc);
-			QRectF hookbox = QRectF(0.0-distance/2, (_numericHigthLine)+((qAbs(durationType().hooks())-1)*_numericLineSpace)-_numericLineThick,
-                             _numericWidht+distance,(_numericHigth*score()->styleD(Sid::numericHeightDisplacement)+((_numericHigthLine)+((qAbs(durationType().hooks())-1)*_numericLineSpace)-_numericLineThick)*-1));
+            staff()->set_cipherHeight(_cipherHigth);
+            _cipherLineThick=_cipherHigth*score()->styleD(Sid::cipherThickLine);
+            _cipherLineSpace=_cipherHigth*(score()->styleD(Sid::cipherDistanceBetweenLines)*-1);
+            _cipherHigthLine=_cipherHigth*score()->styleD(Sid::cipherHeightDisplacement)-_cipherHigth-_cipherHigth*score()->styleD(Sid::cipherHeigthLine);
+            qreal distance =_cipherWidht * score()->styleD(Sid::cipherRestDistanc);
+			QRectF hookbox = QRectF(0.0-distance/2, (_cipherHigthLine)+((qAbs(durationType().hooks())-1)*_cipherLineSpace)-_cipherLineThick,
+                             _cipherWidht+distance,(_cipherHigth*score()->styleD(Sid::cipherHeightDisplacement)+((_cipherHigthLine)+((qAbs(durationType().hooks())-1)*_cipherLineSpace)-_cipherLineThick)*-1));
             setbbox(hookbox);
             return;
 
@@ -1260,15 +1260,15 @@ void Rest::editDrag(EditData& editData)
       }
 
 //---------------------------------------------------------
-//   numericWidth
+//   cipherWidth
 //---------------------------------------------------------
 
-qreal Rest::numericGetWidthRest(StaffType* numeric, QString string) const
+qreal Rest::cipherGetWidthRest(StaffType* cipher, QString string) const
       {
       qreal val;
-      if (numeric) {
-            QFont f    = numeric->fretFont();
-            f.setPointSizeF(score()->styleD(Sid::numericFontSize));
+      if (cipher) {
+            QFont f    = cipher->fretFont();
+            f.setPointSizeF(score()->styleD(Sid::cipherFontSize));
             QFontMetricsF fm(f, MScore::paintDevice());
             val  = fm.width(string) * magS();
             }

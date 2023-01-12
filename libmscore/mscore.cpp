@@ -377,7 +377,7 @@ void MScore::init()
             ":/fonts/mscore/MScoreText.ttf",
             ":/fonts/petaluma/PetalumaText.otf",
             ":/fonts/petaluma/PetalumaScript.otf",
-            ":/fonts/numeric/Numeric.ttf",
+            ":/fonts/cipher/Cipher.ttf",
             };
 
       for (unsigned i = 0; i < sizeof(fonts)/sizeof(*fonts); ++i) {

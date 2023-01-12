@@ -76,7 +76,7 @@ FT_BEGIN_HEADER
                     :  ( (  (x) + 0x2000 ) >> 14 ) )
 
 
-  /* signed numeric types */
+  /* signed cipher types */
   typedef enum  CF2_NumberType_
   {
     CF2_NumberFixed,    /* 16.16 */

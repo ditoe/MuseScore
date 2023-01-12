@@ -38,7 +38,7 @@ void NoteDot::draw(QPainter* p) const
       {
       Note* n = note();
       Fraction tick = n ? n->chord()->tick() : rest()->tick();
-	  if (staff()->isNumericStaff(tick))
+	  if (staff()->isCipherStaff(tick))
 		  return;
       // always draw dot for non-tab
       // for tab, draw if on a note and stems through staff or on a rest and rests shown

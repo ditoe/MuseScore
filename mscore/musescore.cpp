@@ -4507,10 +4507,10 @@ void MuseScore::changeState(ScoreState val)
             act->setShortcuts(srt->keys());
         }
     }
-      bool intoNUMERIC = (_sstate != STATE_NOTE_ENTRY_STAFF_NUMERIC) && (val == STATE_NOTE_ENTRY_STAFF_NUMERIC);
-      bool fromNUMERIC = (_sstate == STATE_NOTE_ENTRY_STAFF_NUMERIC) && (val != STATE_NOTE_ENTRY_STAFF_NUMERIC);
+      bool intoCIPHER = (_sstate != STATE_NOTE_ENTRY_STAFF_CIPHER) && (val == STATE_NOTE_ENTRY_STAFF_CIPHER);
+      bool fromCIPHER = (_sstate == STATE_NOTE_ENTRY_STAFF_CIPHER) && (val != STATE_NOTE_ENTRY_STAFF_CIPHER);
 
-	  if (intoNUMERIC) {
+	  if (intoCIPHER) {
 		  for (unsigned i = 0; i < sizeof(stdNames) / sizeof(char*); ++i) {
 			  QAction* act = getAction(stdNames[i]);
 			  const Shortcut* srt = Shortcut::getShortcut(tabNames[i]);
@@ -4518,7 +4518,7 @@ void MuseScore::changeState(ScoreState val)
 		  }
 	  }
 	  // if de-ativating TAB note entry, restore shortcuts for "pad-note-..." actions
-	  else if (fromNUMERIC) {
+	  else if (fromCIPHER) {
 		  for (unsigned i = 0; i < sizeof(stdNames) / sizeof(char*); ++i) {
 			  QAction* act = getAction(stdNames[i]);
 			  const Shortcut* srt = Shortcut::getShortcut(stdNames[i]);
@@ -4675,9 +4675,9 @@ void MuseScore::changeState(ScoreState val)
         }
         showModeText(tr("TAB input mode"));
         break;
-            case STATE_NOTE_ENTRY_STAFF_NUMERIC:
-                  showModeText(tr("NUMERIC input mode"));
-                  break;
+    case STATE_NOTE_ENTRY_STAFF_CIPHER:
+        showModeText(tr("CIPHER input mode"));
+        break;
     case STATE_EDIT:
         showModeText(tr("Edit mode"));
         break;
@@ -5684,7 +5684,7 @@ const char* stateName(ScoreState s)
     case STATE_NOTE_ENTRY_STAFF_PITCHED: return "STATE_NOTE_ENTRY_STAFF_PITCHED";
     case STATE_NOTE_ENTRY_STAFF_DRUM:    return "STATE_NOTE_ENTRY_STAFF_DRUM";
     case STATE_NOTE_ENTRY_STAFF_TAB:     return "STATE_NOTE_ENTRY_STAFF_TAB";
-			case STATE_NOTE_ENTRY_STAFF_NUMERIC:     return "STATE_NOTE_ENTRY_STAFF_NUMERIC";
+	case STATE_NOTE_ENTRY_STAFF_CIPHER:     return "STATE_NOTE_ENTRY_STAFF_CIPHER";
     case STATE_NOTE_ENTRY:         return "STATE_NOTE_ENTRY";
     case STATE_NOTE_ENTRY_METHOD_STEPTIME:          return "STATE_NOTE_ENTRY_METHOD_STEPTIME";
     case STATE_NOTE_ENTRY_METHOD_REPITCH:           return "STATE_NOTE_ENTRY_METHOD_REPITCH";

@@ -17,7 +17,7 @@
 #include "sig.h"
 #include "mscore.h"
 #include "groups.h"
-#include "numeric.h"
+#include "cipher.h"
 
 namespace Ms {
 
@@ -44,18 +44,18 @@ enum class TimeSigType : char {
 class TimeSig final : public Element {
       QString _numeratorString;     // calculated from actualSig() if !customText
       QString _denominatorString;
-      QString _numeric_ns;
-      QString _numeric_ds;
+      QString _cipher_ns;
+      QString _cipher_ds;
 
-      qreal _numericlinethick;
-      qreal _numericXpos;
-	  qreal _numericHigthds;
-	  qreal _numericHigthns;
-      qreal _numericBarLinelenght;
-      bool _numericVisible;
-      bool _numericBegin;
+      qreal cipherLineThick;
+      qreal _cipherXpos;
+	  qreal _cipherHigthds;
+	  qreal _cipherHigthns;
+      qreal _cipherBarLinelenght;
+      bool _cipherVisible;
+      bool _cipherBegin;
 
-	  numeric _numeric;
+	  cipher _cipher;
 
       std::vector<SymId> ns;
       std::vector<SymId> ds;
@@ -64,8 +64,8 @@ class TimeSig final : public Element {
       QPointF pn;
       QPointF pointLargeLeftParen;
       QPointF pointLargeRightParen;
-      QLineF numericLine;
-      QLineF numericBarLine;
+      QLineF cipherLine;
+      QLineF cipherBarLine;
       Fraction _sig;
       Fraction _stretch;      // localSig / globalSig
       Groups _groups;
@@ -126,12 +126,12 @@ class TimeSig final : public Element {
 
       void setScale(const QSizeF& s)      { _scale = s; }
 
-      qreal numericGetWidth(StaffType* numeric, QString string)const;
-      void set_numericVisible(bool s)      { _numericVisible = s; }
-      bool get_numericVisible() const  { return _numericVisible; }
-      void set_numericXpos(qreal s)      { _numericXpos = s; }
-      qreal get_numericXpos() const  { return _numericXpos; }
-      void set_numericBarLinelength(qreal length)      { _numericBarLinelenght = length; }
+      qreal cipherGetWidth(StaffType* cipher, QString string)const;
+      void set_cipherVisible(bool s)      { _cipherVisible = s; }
+      bool get_cipherVisible() const  { return _cipherVisible; }
+      void set_cipherXpos(qreal s)      { _cipherXpos = s; }
+      qreal get_cipherXpos() const  { return _cipherXpos; }
+      void set_cipherBarLinelength(qreal length)      { _cipherBarLinelenght = length; }
 
 
       void setFrom(const TimeSig*);
