@@ -491,7 +491,7 @@ void BarLine::getY() const
                         break;
                         }
                   }
-            if (_spanStaff){
+            if (_spanStaff && staffIdx2){
                   y1 = 0.0;
                   if (spanStavesbefor){
                         y1 = -(yp - measure->staffLines(staffbefor)->y1())*0.5;
