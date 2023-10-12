@@ -3205,7 +3205,7 @@ void ScoreView::startNoteEntry()
 
       // if not tab, pitched/unpitched depends on instrument (override StaffGroup to allow pitched/unpitched changes)
       StaffGroup staffGroup = staff->staffType(is.tick())->group();
-      if (staffGroup != StaffGroup::TAB)
+      if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
             staffGroup = staff->part()->instrument(is.tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
 
       switch (staffGroup) {
@@ -3945,7 +3945,7 @@ ScoreState ScoreView::mscoreState() const
 
             // pitched/unpitched depending on instrument (override StaffGroup)
             StaffGroup staffGroup = staff->staffType(is.tick())->group();
-            if (staffGroup != StaffGroup::TAB)
+            if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
                   staffGroup = staff->part()->instrument(is.tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
             switch( staffGroup ) {
                   case StaffGroup::STANDARD:

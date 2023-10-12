@@ -125,7 +125,7 @@ void Clef::layout()
             StaffGroup staffGroup = st->group();
 
             // if not tab, use instrument->useDrumset to set staffGroup (to allow pitched to unpitched in same staff)
-            if ( staffGroup != StaffGroup::TAB)
+            if ( staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
                   staffGroup = staff()->part()->instrument(this->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
 
             // check clef is compatible with staff type group:
