@@ -48,7 +48,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
 
       // pitched/unpitched note entry depends on instrument (override StaffGroup)
       StaffGroup staffGroup = st->staffType(tick)->group();
-      if (staffGroup != StaffGroup::TAB) 
+      if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
             staffGroup = instr->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
 
       switch (staffGroup) {
@@ -99,6 +99,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
                   }
             case StaffGroup::CIPHER:
                   {
+                  AccidentalVal acci = Accidental::subtype2value(at);
                   if (line < 0)
                         line *= -1;
                   int octave = line/7;
@@ -136,7 +137,8 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
 
                   Key key = st->key(pos.segment->tick());
                   ton -= Note().get_cipherTrans(key) ;
-                  nval.pitch = octave*12+ton;
+                  nval.pitch = octave*12+ton + int(acci);
+                  if (int(acci) == 1) {
                   break;
                   }
             case StaffGroup::STANDARD: {
@@ -384,7 +386,7 @@ void Score::putNote(const Position& p, bool replace)
 
       // pitched/unpitched note entry depends on instrument (override StaffGroup)
       StaffGroup staffGroup = st->staffType(s->tick())->group();
-      if (staffGroup != StaffGroup::TAB)
+      if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
             staffGroup = st->part()->instrument(s->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
 
       switch (staffGroup) {
@@ -457,6 +459,7 @@ void Score::putNote(const Position& p, bool replace)
       if (_is.accidentalType() != AccidentalType::NONE) {
             NoteVal nval2 = noteValForPosition(p, AccidentalType::NONE, error);
             forceAccidental = (nval.pitch == nval2.pitch);
+            if (staffGroup == StaffGroup::CIPHER) forceAccidental = true;
             }
       if (addToChord && cr->isChord()) {
             // if adding, add!

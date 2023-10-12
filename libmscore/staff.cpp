@@ -303,7 +303,7 @@ ClefTypeList Staff::clefType(const Fraction& tick) const
       if (ct._concertClef == ClefType::INVALID) {
             // Clef compatibility based on instrument (override StaffGroup) 
             StaffGroup staffGroup = staffType(tick)->group();
-            if (staffGroup != StaffGroup::TAB)
+            if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
                   staffGroup = part()->instrument(tick)->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
 
             switch (staffGroup) {

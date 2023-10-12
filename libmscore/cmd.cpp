@@ -1492,7 +1492,7 @@ void Score::upDown(bool up, UpDownMode mode)
 
             StaffGroup staffGroup = staff->staffType(oNote->chord()->tick())->group();
             // if not tab, check for instrument instead of staffType (for pitched to unpitched instrument changes) 
-            if ( staffGroup != StaffGroup::TAB)
+            if ( staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER)
                   staffGroup = staff->part()->instrument(oNote->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
 
             switch (staffGroup) {
