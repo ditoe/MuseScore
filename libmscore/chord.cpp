@@ -1781,7 +1781,7 @@ void Chord::cmdUpdateNotes(AccidentalState* as)
             instrument->stringData()->fretChords(this);
             return;
             }
-      else  {
+      else  if (st->staffTypeForElement(this)->group() != StaffGroup::CIPHER) {
             // if not tablature, use instrument->useDrumset to set staffGroup (to allow pitched to unpitched in same staff)
             staffGroup = st->part()->instrument(this->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
             }
