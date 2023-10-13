@@ -422,6 +422,16 @@ void EditStaffType::setFromDlg()
             if (noteValuesStems->isChecked())
                   staffType.setStemless(false);
             }
+      
+      if (staffType.group() == StaffGroup::CIPHER) {
+            staffType.setGenKeysig(false);
+            staffType.setStemless(true);                   // assume no note values
+            staffType.setGenDurations(false);              //    "     "
+            if (noteValuesSymb->isChecked())
+                staffType.setGenDurations(true);
+            if (noteValuesStems->isChecked())
+                staffType.setStemless(false);
+            }
       }
 
 //---------------------------------------------------------

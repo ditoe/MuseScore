@@ -42,6 +42,7 @@ namespace Ms {
 int StaffListItem::customStandardIdx;
 int StaffListItem::customPercussionIdx;
 int StaffListItem::customTablatureIdx;
+int StaffListItem::customChipherIdx;
 
 //---------------------------------------------------------
 //   ScoreOrderListModel
@@ -192,6 +193,8 @@ void StaffListItem::initStaffTypeCombo(bool forceRecreate)
       _staffTypeCombo->addItem(tr("Custom Percussion"), CUSTOM_STAFF_TYPE_IDX);
       customTablatureIdx = _staffTypeCombo->count();
       _staffTypeCombo->addItem(tr("Custom Tablature"), CUSTOM_STAFF_TYPE_IDX);
+      customChipherIdx = _staffTypeCombo->count();
+      _staffTypeCombo->addItem(tr("Custom Cipher"), CUSTOM_STAFF_TYPE_IDX);
 
       treeWidget()->setItemWidget(this, 4, _staffTypeCombo);
       connect(_staffTypeCombo, SIGNAL(currentIndexChanged(int)), SLOT(staffTypeChanged(int)) );
@@ -262,6 +265,9 @@ void StaffListItem::setStaffType(const StaffType* st)
                         break;
                   case StaffGroup::TAB:
                         idx = customTablatureIdx;
+                        break;
+                  case StaffGroup::CIPHER:
+                        idx = customChipherIdx;
                         break;
                   }
             _staffTypeCombo->setCurrentIndex(idx);
