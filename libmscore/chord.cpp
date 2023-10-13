@@ -1828,8 +1828,8 @@ void Chord::cmdUpdateNotes(AccidentalState* as)
             // ToDo
             const Instrument* instrument = part()->instrument();
             const Drumset* drumset = instrument->drumset();
-            if (!drumset)
-                  qWarning("no drumset");
+            //if (!drumset)
+            //      qWarning("no drumset");
             updatePercussionNotes(this, drumset);
             }
 
