@@ -1272,14 +1272,14 @@ void Note::draw(QPainter* painter) const
             painter->setPen(c);
             painter->drawText(_cipherTextPos, _fretString);
             if (_accidental || _drawFlat || _drawSharp){
-                  if ((_accidental && (_accidental->accidentalType() == AccidentalType::SHARP)) || _drawSharp){
+                  if (_drawSharp){
                         QFont fontAccidental;
                         fontAccidental.setFamily(score()->styleSt(Sid::cipherAccidentalFont));
                         fontAccidental.setPointSizeF((score()->styleD(Sid::cipherFontSize) * score()->styleD(Sid::cipherSizeSignSharp) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
                         _cipher.drawShap(painter,_cipherAccidentalPos, fontAccidental);
                         //score()->scoreFont()->draw(SymId::cipherAccidentalSharp, painter,( score()->styleD(Sid::cipherSizeSignSharp)/100*_cipherHigth), _cipherAccidentalPos);
                         }
-                  if ((_accidental && (_accidental->accidentalType() == AccidentalType::FLAT)) || _drawFlat){
+                  if (_drawFlat){
                         QFont fontAccidental;
                         fontAccidental.setFamily(score()->styleSt(Sid::cipherAccidentalFont));
                         fontAccidental.setPointSizeF((score()->styleD(Sid::cipherFontSize) * score()->styleD(Sid::cipherSizeSignFlat) * spatium() * MScore::pixelRatio / SPATIUM20)*_trackthick);
@@ -2144,37 +2144,9 @@ int Note::get_cipherGroundPitch(){
 //---------------------------------------------------------
 
 int Note::setAccidentalTypeBack(int defaultdirection) {
-      Note* n = 0;
       int shift = defaultdirection;
-      if(staff() && chord()){
-            n = chord()->findNoteBack(_pitch);
-            }
-      while(n != 0 && n->accidentalType() != AccidentalType::SHARP &&
-            n->accidentalType() != AccidentalType::FLAT){
-            n = n->chord()->findNoteBack(_pitch);
-            }
-      if (n && n->accidentalType() != AccidentalType::NONE){
-            if (n->accidentalType() == AccidentalType::SHARP){
-                  shift = -1;
-                  }
-            if (n->accidentalType() == AccidentalType::FLAT){
-                  shift = 1;
-                  }
-            }
-      if (shift == -1)
-            _drawSharp = true;
-      else
-            _drawFlat = true;
-	  if (_accidental&& _accidental->accidentalType() == AccidentalType::SHARP && _drawFlat) {
-		  _drawFlat = false;
-		  _accidental->setAccidentalType(AccidentalType::NONE);
-		  shift = 1;
-	  }
-	  if (_accidental&& _accidental->accidentalType() == AccidentalType::FLAT && _drawSharp) {
-		  _drawSharp = false;
-		  _accidental->setAccidentalType(AccidentalType::NONE);
-		  shift = -1;
-	  }
+      if (shift == 1) { _drawSharp = true; _drawFlat = false; }
+      if (shift == -1) { _drawFlat = true; _drawSharp = false; }
       return shift;
       }
 //---------------------------------------------------------
@@ -2262,18 +2234,20 @@ void Note::layout()
             _drawFlat = false;
             _drawSharp = false;
             int numtransposeInterval=part()->instrument(chord()->tick())->transpose().chromatic;
-            if (_accidental){
-                  if (_accidental->accidentalType() == AccidentalType::SHARP){
-                        accidentalshift=-1;
-                        }
-                  if (_accidental->accidentalType() == AccidentalType::FLAT){
-                        accidentalshift=1;
-                        }
-                  }
+            int step = tpc2stepByKey(tpc(), staff()->key(tick()),accidentalshift);
+            //qWarning().nospace() << "step" << step << "acci" << accidentalshift;
+            if (accidentalshift > 1 || accidentalshift < -1)accidentalshift = 0;
+            if (accidentalshift == 1){
+                _drawSharp = true;
+                }
+            else if (accidentalshift == -1) {
+                _drawFlat = true;
+            }
+
             int clefshift=get_cipherOktave();
             int grundtonverschibung=get_cipherTrans(staff()->key(tick()));
-            int zifferkomatik=((_pitch+grundtonverschibung+numtransposeInterval)%12)+1;
-            _fretString = get_cipherString(zifferkomatik+accidentalshift);
+            int zifferkomatik=((_pitch-accidentalshift+grundtonverschibung+numtransposeInterval)%12)+1;
+            _fretString = get_cipherString(zifferkomatik);
             _cipherWidth=tabHeadWidth(cipher);
             _fretString = _fretString+
                         get_cipherDuration[int(chord()->durationType().type())]+
@@ -2288,8 +2262,8 @@ void Note::layout()
 			font.setPointSizeF((score()->styleD(Sid::cipherFontSize)* spatium()* MScore::pixelRatio / SPATIUM20)* _trackthick);
 			_cipher.set_FretFont(font);
             _cipherWidth2=tabHeadWidth(cipher);
-            _cipherLedgerline = ((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)/2;
-            _fretStringYShift=((_pitch+grundtonverschibung+accidentalshift+numtransposeInterval)/12-5-clefshift)*_cipherHigth*score()->styleD(Sid::cipherDistanceOctave);
+            _cipherLedgerline = ((_pitch+grundtonverschibung-accidentalshift+numtransposeInterval)/12-5-clefshift)/2;
+            _fretStringYShift=((_pitch+grundtonverschibung-accidentalshift+numtransposeInterval)/12-5-clefshift)*_cipherHigth*score()->styleD(Sid::cipherDistanceOctave);
             rypos() = -_fretStringYShift;
             qreal w = tabHeadWidth(cipher); // !! use _fretString
             _cipherHigth =  _cipher.textHeigth(_cipher.getFretFont(),"1234567890");

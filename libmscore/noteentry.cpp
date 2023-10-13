@@ -26,6 +26,7 @@
 #include "range.h"
 #include "excerpt.h"
 #include "accidental.h"
+#include "keysig.h"
 
 namespace Ms {
 
@@ -105,9 +106,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
                   int octave = line/7;
                   int ton=line%7;
                   switch (ton) {
-                        case 0:
-
-                              break;
+                        case 0: break;
                         case 1:
                               ton = 2;
                               break;
@@ -138,7 +137,30 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
                   Key key = st->key(pos.segment->tick());
                   ton -= Note().get_cipherTrans(key) ;
                   nval.pitch = octave*12+ton + int(acci);
-                  if (int(acci) == 1) {
+                  nval.pitch += instr->transpose().chromatic;
+                 
+                  int keyshift = 0;
+                  switch (key) {
+                      case Key::D:   keyshift = 1; break;
+                      case Key::D_B: keyshift = 1; break;
+                      case Key::E:   keyshift = 2; break;
+                      case Key::E_B: keyshift = 2; break;
+                      case Key::F:   keyshift = 3; break;
+                      case Key::F_S: keyshift = 3; break;
+                      case Key::G:   keyshift = 4; break;
+                      case Key::G_B: keyshift = 4; break;
+                      case Key::A:   keyshift = 5; break;
+                      case Key::A_B: keyshift = 5; break;
+                      case Key::B:   keyshift = 6; break;
+                      case Key::B_B: keyshift = 6; break;
+                  }
+                  int step = (line % 7 + keyshift) % 7;
+                  step = step2tpcByKey(step, key);
+                  step += int(acci) * 7;
+                  nval.tpc2 = step;
+                  nval.tpc1 = nval.tpc2;
+                  //qWarning().nospace() << step << " step " << int(acci) << " acci " << line << " line ";
+
                   break;
                   }
             case StaffGroup::STANDARD: {
@@ -459,7 +481,7 @@ void Score::putNote(const Position& p, bool replace)
       if (_is.accidentalType() != AccidentalType::NONE) {
             NoteVal nval2 = noteValForPosition(p, AccidentalType::NONE, error);
             forceAccidental = (nval.pitch == nval2.pitch);
-            if (staffGroup == StaffGroup::CIPHER) forceAccidental = true;
+            //if (staffGroup == StaffGroup::CIPHER) forceAccidental = true;
             }
       if (addToChord && cr->isChord()) {
             // if adding, add!
