@@ -48,9 +48,9 @@ const char* keyNames[] = {
 //   getCipherString
 //---------------------------------------------------------
 QString CipherString[15][2]={
-      {"H-Dur  a=♭7","gis-Moll  a=♭7"},
-      {"Fis-Dur  a=♭3","es-Moll  a=♭3"},
-      {"Cis-Dur  a=♯5","B-Moll  a=♯5"},
+      {"Ces-Dur  a=♭7","as-Moll  a=♭7"},
+      {"Ges-Dur  a=♭3","es-Moll  a=♭3"},
+      {"Des-Dur  a=♯5","b-Moll  a=♯5"},
       {"As-Dur  a=♯1","f-Moll  a=♯1"},
       {"Es-Dur  a=♯4","c-Moll  a=♯4"},
       {"B-Dur  a=7","g-Moll  a=7"},
@@ -61,8 +61,8 @@ QString CipherString[15][2]={
       {"A-Dur  a=1","fis-Moll  a=1"},
       {"E-Dur  a=4","cis-Moll  a=4"},
       {"H-Dur  a=♭7","gis-Moll  a=♭7"},
-      {"Fis-Dur  a=♭3","es-Moll  a=♭3"},
-      {"Cis-Dur  a=♯5","B-Moll  a=♯5"}
+      {"Fis-Dur  a=♭3","dis-Moll  a=♭3"},
+      {"Cis-Dur  a=♯5","ais-Moll  a=♯5"}
 
 };
 
