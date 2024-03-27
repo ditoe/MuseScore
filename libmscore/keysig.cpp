@@ -471,6 +471,7 @@ void KeySig::draw(QPainter* p) const
                           QFont font;
                           font.setFamily(score()->styleSt(Sid::cipherKeySigFont));
                           font.setPointSizeF(score()->styleD(Sid::cipherFontSize) * spatium() * score()->styleD(Sid::cipherKeySigSize) * MScore::pixelRatio / SPATIUM20);
+                          font.setItalic(true);
                           QColor c(curColor());
                           p->setFont(font);
                           p->setPen(c);
