@@ -295,6 +295,10 @@ void TimeSig::layout()
       // determine middle staff position:
 
       qreal yoff = _spatium * (numOfLines-1) *.5 * lineDist;
+      if (staff() && staff()->isCipherStaff(tick())) {
+            if (_timeSigType == TimeSigType::FOUR_FOUR || _timeSigType == TimeSigType::ALLA_BREVE) _timeSigType = TimeSigType::NORMAL;
+            sigType = timeSigType();
+            }
 
       // C and Ccut are placed at the middle of the staff: use yoff directly
       if (sigType ==  TimeSigType::FOUR_FOUR) {
@@ -325,13 +329,14 @@ void TimeSig::layout()
             ns.push_back(SymId::timeSigCut3);
             ds.clear();
             }
-      else if (staff() && staff()->isCipherStaff( tick())) {
-            if(segment()->isTimeSigAnnounceType()){
+      else if (staff() && staff()->isCipherStaff(tick())) {
+            if (segment()->isTimeSigAnnounceType()) {
                   set_cipherVisible(false);
 
                   setbbox(QRectF());
                   return;
-                  }
+            }
+            if (_timeSigType == TimeSigType::FOUR_FOUR || _timeSigType == TimeSigType::ALLA_BREVE) _timeSigType = TimeSigType::NORMAL;
             setEnabled(false);
 
             StaffType* cipher = staff()->staffType(tick());
