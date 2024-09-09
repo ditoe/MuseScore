@@ -5,8 +5,6 @@ echo "Setup MacOS build environment"
 trap 'echo Setup failed; exit 1' ERR
 SKIP_ERR_FLAG=true
 
-export MACOSX_DEPLOYMENT_TARGET=10.10
-
 WITH_QT_DOWNLOAD=false
 WITH_JACK_INSTALL=false
 WITH_BOTTLES=false
@@ -100,14 +98,16 @@ installBottleManually libsndfile
 installBottleManually portaudio
 
 
-export QT_SHORT_VERSION=5.15.2
-export QT_PATH=$HOME/Qt
-export QT_MACOS=$QT_PATH/$QT_SHORT_VERSION/clang_64
+# export PATH=$PATH:$QT_MACOS/bin
+echo "PATH: $PATH"
 
 # echo "PATH=$PATH" >> $GITHUB_ENV  # we are not on github
 if [ "$WITH_QT_DOWNLOAD" = true ] ; then
-    export PATH=$PATH:$QT_MACOS/bin
     echo "Download Qt"
+
+    export QT_SHORT_VERSION=5.15.2
+    export QT_PATH=$HOME/Qt
+    export QT_MACOS=$QT_PATH/$QT_SHORT_VERSION/clang_64
     wget -nv -O qt5.zip https://s3.amazonaws.com/utils.musescore.org/Qt5152_mac.zip
     mkdir -p $QT_MACOS
     unzip -qq qt5.zip -d $QT_MACOS
