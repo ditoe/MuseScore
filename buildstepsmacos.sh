@@ -2,6 +2,16 @@
 
 BUILD_NUMBER=1
 
+echo "We need Qt 5.12.12 from here: https://download.qt.io/archive/qt/5.12/5.12.12/"
+echo "We need XCode 10.3 from here: https://developer.apple.com/download/all/?q=Xcode%2010.3"
+
+if [[ $PATH == *"$HOME/Qt/5.12.12/5.12.12/clang_64/bin"* ]]; then
+  echo "Qt is in $HOME/Qt/5.15.2/5.12.12/clang_64/bin"
+else
+  echo "Qt is expected here $HOME/Qt/5.15.2/clang_64/bin"
+  exit 1
+fi
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -n|--number) BUILD_NUMBER="$2"; shift ;;
