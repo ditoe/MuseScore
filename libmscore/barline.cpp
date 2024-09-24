@@ -1444,6 +1444,8 @@ void BarLine::layout()
                         break;
                   }
             }
+      if (this->parent() && staff()->isCipherStaff(segment()->measure()->tick()) && barLineType() == BarLineType::END)
+      QRectF r(w, y1, w * 2, y2 - y1);
       setbbox(r);
 
       for (Element* e : _el) {
