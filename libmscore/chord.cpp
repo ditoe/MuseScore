@@ -69,7 +69,7 @@ struct LedgerLineData {
 Note* Chord::upNote() const
       {
       Q_ASSERT(!_notes.empty());
-
+      if (_notes.empty())return NULL;
       Note* result = _notes.back();
       const Staff* stf = staff();
       if (!stf)
@@ -106,6 +106,7 @@ Note* Chord::upNote() const
 Note* Chord::downNote() const
       {
       Q_ASSERT(!_notes.empty());
+      if (_notes.empty())return NULL;
 
       Note* result = _notes.front();
       const Staff* stf = staff();

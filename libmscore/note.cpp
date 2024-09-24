@@ -2669,6 +2669,7 @@ void Note::setSmall(bool val)
 
 int Note::line() const
       {
+    if (!this)return 0;
       return fixed() ? _fixedLine : _line;
       }
 
