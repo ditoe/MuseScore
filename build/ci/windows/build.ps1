@@ -56,6 +56,7 @@ if ($TARGET_PROCESSOR_BITS -ne 64 -and $TARGET_PROCESSOR_BITS -ne 32) {
 $BUILD_MODE = Get-Content "$ARTIFACTS_DIR\env\build_mode.env"
 $MUSESCORE_BUILD_CONFIG = "dev"
 switch ($BUILD_MODE) {
+    "local_build" { $MUSESCORE_BUILD_CONFIG = "dev" }
     "devel_build" { $MUSESCORE_BUILD_CONFIG = "dev" }
     "nightly_build" { $MUSESCORE_BUILD_CONFIG = "dev" }
     "testing_build" { $MUSESCORE_BUILD_CONFIG = "testing" }
@@ -85,28 +86,40 @@ Write-Output "CRASH_LOG_SERVER_URL: $CRASH_LOG_SERVER_URL"
 Write-Output "BUILD_WIN_PORTABLE: $BUILD_WIN_PORTABLE"
 Write-Output "BUILD_UI_MU4: $BUILD_UI_MU4"
 
-Copy-Item -Recurse -Force "C:\musescore_dependencies" $PWD
-Write-Output "Finished copy dependencies"
+$env:BUILD_WIN_PORTABLE = "$BUILD_WIN_PORTABLE"
 
-$GENERATOR_NAME = "Visual Studio 16 2019"
-$MSCORE_STABLE_BUILD = "TRUE"
+if (-not (Test-Path $PWD/"musescore_dependencies")) {
+    Copy-Item -Recurse -Force "C:\musescore_dependencies" $PWD
+    Write-Output "Finished copy dependencies"
+}
 
 # TODO We need define paths during image creation
 $JACK_DIR = "C:\Program Files (x86)\Jack"
-$QT_DIR = "C:\Qt\5.15.2"
+
+$env:PATH = "$JACK_DIR;$env:PATH"
 
 if ($TARGET_PROCESSOR_BITS -eq 32) {
-    $env:PATH = "$QT_DIR\msvc2015\bin;$JACK_DIR;$env:PATH"
+    $env:PATH = "C:\Qt\5.9.9\msvc2015\bin;$env:PATH"
 } else {
-    $env:PATH = "$QT_DIR\msvc2019_64\bin;$JACK_DIR;$env:PATH"
+    if ("$env:PATH" -notlike "*Qt\5.15*") {
+        Write-Output "Qt is not in PATH."
+        Write-Output "Try to use Qt 5 from defaultd path: projectDir\dependencies\windows_x64\Qt\5.15.2\msvc2019_64\bin"
+        $git_root = git rev-parse --show-toplevel
+        $qt_root = "$git_root\dependencies\windows_x64\Qt\5.15.2\msvc2019_64\bin"
+        Write-Output "Qt path is: $qt_root"
+        $env:PATH = "$qt_root;$env:PATH"
+    }
 }
 
-powershell "& ""./build/ci/tools/make_revision_env.ps1"
+
+powershell "& ""./build/ci/tools/make_revision_env.ps1"""
 $MUSESCORE_REVISION = Get-Content "$ARTIFACTS_DIR\env\build_revision.env"
 Write-Output "MUSESCORE_REVISION: $MUSESCORE_REVISION"
 
-powershell "& ""./msvc_build.ps1""" relwithdebinfo $TARGET_PROCESSOR_BITS $BUILD_NUMBER
-powershell "& ""./msvc_build.ps1""" installrelwithdebinfo $TARGET_PROCESSOR_BITS $BUILD_NUMBER
+$env:MUSESCORE_BUILD_CONFIG = $MUSESCORE_BUILD_CONFIG
+
+powershell "& ""./msvc_build.ps1""" "relwithdebinfo" $TARGET_PROCESSOR_BITS $BUILD_NUMBER
+powershell "& ""./msvc_build.ps1""" "installrelwithdebinfo" $TARGET_PROCESSOR_BITS $BUILD_NUMBER
 
 powershell "& ""./build/ci/tools/make_release_channel_env.ps1""" $MUSESCORE_BUILD_CONFIG
 powershell "& ""./build/ci/tools/make_version_env.ps1""" $BUILD_NUMBER
