@@ -5,6 +5,7 @@ set(_components
     Network
     Test
     Qml
+    QmlModels
     Quick
     QuickControls2
     QuickTemplates2

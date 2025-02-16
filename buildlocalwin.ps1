@@ -1,18 +1,10 @@
 # MuseScore build script for Windows
 
 $BUILD_NUMBER = 1
+$BUILD_WIN_PORTABLE = "OFF"
 
-Write-Output "We need Qt 5.15.2 from here: https://download.qt.io/archive/qt/5.15/5.15.2/"
-
-$env:Path = 'C:\Qt\5.15.2\msvc2019_64\bin;' + $env:Path
-
-if ($env:PATH -like "*C:\Qt\5.15.2\msvc2019_64\bin*") {
-    Write-Output "Qt is in C:\Qt\5.15.2\msvc2019_64\bin"
-} else {
-    Write-Output "Qt is expected here C:\Qt\5.15.2\msvc2019_64\bin"
-    exit 1
-}
-
+Write-Output "We need Qt 5.15 from here: https://download.qt.io/archive/qt/5.15/"
+Write-Output "Default Qt-Path is: projectDir\dependencies\windows_x64\Qt\5.15.2\msvc2019_64\bin, if not specified in PATH"
 
 $index = 0
 while ($index -lt $args.Length) {
@@ -23,6 +15,10 @@ while ($index -lt $args.Length) {
         }
         "--number" {
             $BUILD_NUMBER = $args[$index + 1]
+            $index += 2
+        }
+        "--portable" {
+            $BUILD_WIN_PORTABLE = $args[$index + 1]
             $index += 2
         }
         default {
@@ -38,16 +34,13 @@ if (-not $BUILD_NUMBER) {
 }
 
 # "Configure workflow"
-bash ./build/ci/tools/make_build_mode_env.sh -m devel_build
+powershell "& ""./build/ci/tools/make_build_mode_env.ps1""" -m "local_build"
 # BUILD_MODE = "devel_build"
 $BUILD_MODE = Get-Content ./build.artifacts/env/build_mode.env
-Write-Output "BUILD_MODE: devel_build"
+Write-Output "BUILD_MODE: $BUILD_MODE"
 
 # Build
-$T_ID = "''" # Telemetry_id
-powershell -noexit "& ""./build/ci/windows/build.ps1""" -n "$BUILD_NUMBER" --telemetry $T_ID
+powershell "& ""./build/ci/windows/build.ps1""" -n "$BUILD_NUMBER" --portable "$BUILD_WIN_PORTABLE"
 
 # Package
-$S_S = "''"
-$S_P = "''"
-powershell -noexit "& ""./build/ci/macos/package.ps1""" --signpass "$S_P" --signsecret "$S_S"
+powershell "& ""./build/ci/windows/package.ps1""" --portable "$BUILD_WIN_PORTABLE"

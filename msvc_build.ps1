@@ -50,6 +50,20 @@ function Find-Generator-Version {
     $version = & $vswhere -version "[$majorVersion,)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion -format value
     if ($version -match "^$majorVersion") {
         $env:GENERATOR_NAME = "Visual Studio $majorVersion $year"
+        $env:GENERATOR_ID = & $vswhere -version "[$majorVersion,)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion -format value
+    }
+}
+function Find-MsBuild-Version {
+    param (
+        [string]$vswhere,
+        [int]$majorVersion,
+        [int]$year
+    )
+
+    $version = & $vswhere -version "[$majorVersion,)" -products Microsoft.VisualStudio.Product.BuildTools -latest -property installationVersion -format value
+    if ($version -match "^$majorVersion") {
+        $env:GENERATOR_NAME = "Visual Studio $majorVersion $year"
+        $env:GENERATOR_ID = & $vswhere -version "[$majorVersion,)" -products Microsoft.VisualStudio.Product.BuildTools -latest -property installationVersion -format value
     }
 }
 
@@ -62,12 +76,8 @@ function Find-Generator {
     Find-Generator-Version $VSWHERE 16 2019
     if (-not $env:GENERATOR_NAME) {
         Write-Output "Visual Studio 2019 not found. Try to find MSBuild 2019."        
-        $MSVC_LIST = Get-ChildItem -Path "C:/Program Files (x86)/Microsoft Visual Studio/20*/*/VC/Tools/MSVC/14.2*/bin/Hostx64/x64/cl.exe" -Recurse
-        $MSVC_EXE = $MSVC_LIST[-1].FullName
-        if (Test-Path $MSVC_EXE -PathType Leaf) {
-            $env:GENERATOR_NAME = "Visual Studio 16 2019"
-        }
-        else {
+        Find-MsBuild-Version $VSWHERE 16 2019
+        if (-not $env:GENERATOR_NAME) {
             Write-Output "MSBuild 2019 not found."
             return
         }
@@ -76,12 +86,20 @@ function Find-Generator {
 
 
 function Build {
+    if ("$env:PATH" -notlike "*Qt\5.15*") {
+        Write-Output "Qt is not in PATH."
+        Write-Output "Try to use Qt 5 from defaultd path: projectDir\dependencies\windows_x64\Qt\5.15.2\msvc2019_64\bin"
+        $git_root = git rev-parse --show-toplevel
+        $qt_root = "$git_root\dependencies\windows_x64\Qt\5.15.2\msvc2019_64\bin"
+        Write-Output "Qt path is: $qt_root"
+        $env:PATH = "$qt_root;$env:PATH"
+    }
     Write-Output "Generator is: $env:GENERATOR_NAME"
     Write-Output "Platform is: $PLATFORM_NAME"
-    $BUILD_FOLDER = "$BUILD_FOLDER_$ARCH"
+    $BUILD_FOLDER = "$($BUILD_FOLDER)_$($ARCH)"
     Write-Output "Build folder is: $BUILD_FOLDER"
     if ($env:BUILD_WIN_PORTABLE -ne "ON") {
-        $INSTALL_FOLDER = "$INSTALL_FOLDER_$ARCH"
+        $INSTALL_FOLDER = "$($INSTALL_FOLDER)_$($ARCH)"
     }
     Write-Output "Install folder is: $INSTALL_FOLDER"
     if (-not (Test-Path $BUILD_FOLDER)) {
@@ -107,7 +125,7 @@ function Build {
         $env:MUSESCORE_BUILD_CONFIG = "dev"
     }
 
-    $INSTALL_FOLDER = $INSTALL_FOLDER -replace '\\', '/'
+    $INSTALL_FOLDER = "$PSScriptRoot\$INSTALL_FOLDER" -replace '\\', '/'
     Set-Location $BUILD_FOLDER
     if (Test-Path "CMakeCache.txt") {
         Write-Output "Using existing CMake configuration to save time."
@@ -115,7 +133,8 @@ function Build {
         Write-Output "You only need to do this if you want to use different build options to before."
     } else {
         Write-Output "Building CMake configuration..."
-        cmake -G "$env:GENERATOR_NAME" -A "$PLATFORM_NAME" -DCMAKE_INSTALL_PREFIX=../$INSTALL_FOLDER -DCMAKE_BUILD_TYPE=$CONFIGURATION_STR -DMUSESCORE_BUILD_CONFIG=$env:MUSESCORE_BUILD_CONFIG -DMUSESCORE_REVISION=$env:MUSESCORE_REVISION -DBUILD_FOR_WINSTORE=$env:BUILD_FOR_WINSTORE -DBUILD_64=$env:BUILD_64 -DCMAKE_BUILD_NUMBER=$env:BUILD_NUMBER -DBUILD_AUTOUPDATE=$env:BUILD_AUTOUPDATE $CRASH_REPORT_URL_OPT $TELEMETRY_TRACK_ID_OPT $WIN_PORTABLE_OPT ..
+        
+        cmake -G $env:GENERATOR_NAME -A "$PLATFORM_NAME" -T "v142" -DCMAKE_INSTALL_PREFIX="$($INSTALL_FOLDER)" -DCMAKE_BUILD_TYPE=$CONFIGURATION_STR -DCMAKE_CXX_FLAGS_INIT='/W3 /WX /EHsc' -DMUSESCORE_BUILD_CONFIG="$($env:MUSESCORE_BUILD_CONFIG)" -DMUSESCORE_REVISION="$($env:MUSESCORE_REVISION)" -DBUILD_FOR_WINSTORE="$($env:BUILD_FOR_WINSTORE)" -DBUILD_64="$($env:BUILD_64)" -DCMAKE_BUILD_NUMBER="$($env:BUILD_NUMBER)" -DBUILD_AUTOUPDATE="$($env:BUILD_AUTOUPDATE)" $CRASH_REPORT_URL_OPT $TELEMETRY_TRACK_ID_OPT $WIN_PORTABLE_OPT ..
         if ($LASTEXITCODE -ne 0) {
             Remove-Item -Force "CMakeCache.txt"
             exit $LASTEXITCODE
@@ -123,6 +142,7 @@ function Build {
     }
     Write-Output "Building MuseScore..."
     cmake --build . --config $CONFIGURATION_STR --target mscore
+    cd ..
     exit 0
 }
 
@@ -153,10 +173,12 @@ if ($arch -eq "32") {
     $PLATFORM_NAME = "Win32"
     $ARCH = "x86"
     $env:BUILD_64 = "OFF"
+    $env:FIND_LIBRARY_USE_LIB64_PATHS = "OFF"
 } elseif ($arch -eq "64") {
     $PLATFORM_NAME = "x64"
     $ARCH = "x64"
     $env:BUILD_64 = "ON"
+    $env:FIND_LIBRARY_USE_LIB64_PATHS = "ON"
 } else {
     Write-Output "Invalid second argument"
     exit 1
@@ -191,22 +213,22 @@ switch ($buildType.ToLower()) {
         Build
     }
     "install" {
-        $BUILD_FOLDER = "$BUILD_FOLDER_$ARCH"
+        $BUILD_FOLDER = "$($BUILD_FOLDER)_$($ARCH)"
         $CONFIGURATION_STR = "release"
         Install
     }
     "installdebug" {
-        $BUILD_FOLDER = "$BUILD_FOLDER_$ARCH"
+        $BUILD_FOLDER = "$($BUILD_FOLDER)_$($ARCH)"
         $CONFIGURATION_STR = "debug"
         Install
     }
     "installrelwithdebinfo" {
-        $BUILD_FOLDER = "$BUILD_FOLDER_$ARCH"
+        $BUILD_FOLDER = "$($BUILD_FOLDER)_$($ARCH)"
         $CONFIGURATION_STR = "relwithdebinfo"
         Install
     }
     "package" {
-        cd "$BUILD_FOLDER_$ARCH"
+        Set-Location "$($BUILD_FOLDER)_$($ARCH)"
         cmake --build . --config RelWithDebInfo --target package
         exit 0
     }
