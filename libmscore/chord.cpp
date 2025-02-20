@@ -1833,6 +1833,14 @@ void Chord::cmdUpdateNotes(AccidentalState* as)
             //      qWarning("no drumset");
             updatePercussionNotes(this, drumset);
             }
+      else if (staffGroup == StaffGroup::CIPHER) {
+            // ToDo
+            const Instrument* instrument = part()->instrument();
+            const Drumset* drumset = instrument->drumset();
+            //if (!drumset)
+            //      qWarning("no drumset");
+            updatePercussionNotes(this, drumset);
+            }
 
       sortNotes();
       }
