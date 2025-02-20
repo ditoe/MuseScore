@@ -215,13 +215,13 @@
       </item>
       <item>
        <property name="text">
-        <string>cipher System</string>
+        <string>Cipher System</string>
        </property>
       </item>
      </widget>
      <widget class="QStackedWidget" name="pageStack">
       <property name="currentIndex">
-       <number>0</number>
+       <number>35</number>
       </property>
       <widget class="QWidget" name="PageScore">
        <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -259,8 +259,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>597</width>
-                <height>552</height>
+                <width>499</width>
+                <height>612</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -937,8 +937,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>503</width>
-                <height>534</height>
+                <width>513</width>
+                <height>571</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_4">
@@ -2339,8 +2339,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>703</width>
-             <height>320</height>
+             <width>707</width>
+             <height>340</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -4027,8 +4027,8 @@ By default, they will be placed such as that their right end are at the same lev
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>332</width>
-                <height>678</height>
+                <width>339</width>
+                <height>699</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_56">
@@ -4892,6 +4892,12 @@ By default, they will be placed such as that their right end are at the same lev
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                 </spacer>
                </item>
               </layout>
@@ -5731,8 +5737,8 @@ By default, they will be placed such as that their right end are at the same lev
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>434</width>
-                <height>420</height>
+                <width>453</width>
+                <height>453</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_54">
@@ -9489,8 +9495,8 @@ By default, they will be placed such as that their right end are at the same lev
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>458</width>
-             <height>364</height>
+             <width>480</width>
+             <height>388</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_57">
@@ -10889,8 +10895,8 @@ By default, they will be placed such as that their right end are at the same lev
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>467</width>
-                <height>443</height>
+                <width>481</width>
+                <height>498</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_55">
@@ -12368,7 +12374,7 @@ By default, they will be placed such as that their right end are at the same lev
            </sizepolicy>
           </property>
           <property name="currentIndex">
-           <number>6</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="page_3">
            <layout class="QGridLayout" name="gridLayout_58">
@@ -12402,7 +12408,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>Notenzeilen abstand</string>
+                    <string>Abstand zwischen Stimmen</string>
                    </property>
                    <property name="buddy">
                     <cstring>systemHeaderTimeSigDistance</cstring>
@@ -12459,7 +12465,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_223">
                    <property name="text">
-                    <string>Tacktstrichlänge</string>
+                    <string>Taktstrichlänge</string>
                    </property>
                   </widget>
                  </item>
@@ -12536,7 +12542,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="11" column="0">
                   <widget class="QLabel" name="label_160">
                    <property name="text">
-                    <string>Hilfslinie verschibung</string>
+                    <string>Horizotale Verschiebung Hilfslinie</string>
                    </property>
                    <property name="buddy">
                     <cstring>keyBarlineDistance</cstring>
@@ -12552,7 +12558,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>abstand Octave</string>
+                    <string>Oktavabstand</string>
                    </property>
                    <property name="buddy">
                     <cstring>minMeasureWidth_2</cstring>
@@ -12572,7 +12578,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="12" column="0">
                   <widget class="QLabel" name="label_159">
                    <property name="text">
-                    <string>Hilfslinie dicke</string>
+                    <string>Strichstärke Hilfslinie</string>
                    </property>
                    <property name="buddy">
                     <cstring>systemHeaderDistance</cstring>
@@ -12646,7 +12652,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="6" column="0">
                   <widget class="QLabel" name="label_215">
                    <property name="text">
-                    <string>abstand zwischen Schtriche</string>
+                    <string>Abstand zwischen Strichen</string>
                    </property>
                   </widget>
                  </item>
@@ -12675,7 +12681,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>höhe Strich</string>
+                    <string>Vertikale Verschiebung Strich über Ziffer</string>
                    </property>
                    <property name="buddy">
                     <cstring>measureSpacing</cstring>
@@ -12737,7 +12743,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>höhe verschibung</string>
+                    <string>Vertikale Verschiebung</string>
                    </property>
                    <property name="buddy">
                     <cstring>barGraceDistance</cstring>
@@ -12847,21 +12853,21 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="4" column="0">
                   <widget class="QLabel" name="label_217">
                    <property name="text">
-                    <string>dicke Strich</string>
+                    <string>Strichstärke</string>
                    </property>
                   </widget>
                  </item>
                  <item row="5" column="0">
                   <widget class="QLabel" name="label_216">
                    <property name="text">
-                    <string>breite Strich</string>
+                    <string>Strichbreite</string>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_123">
                    <property name="text">
-                    <string>versatz Strich</string>
+                    <string>Horizontale Verschiebung Strich über Ziffer</string>
                    </property>
                    <property name="buddy">
                     <cstring>keyTimesigDistance</cstring>
@@ -12928,7 +12934,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="10" column="0">
                   <widget class="QLabel" name="label_171">
                    <property name="text">
-                    <string>Hilfslinie Länge</string>
+                    <string>Hilfslinienbreite</string>
                    </property>
                    <property name="buddy">
                     <cstring>clefTimesigDistance</cstring>
@@ -12965,7 +12971,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="7" column="0">
                   <widget class="QLabel" name="label_170">
                    <property name="text">
-                    <string>abstand Pausen</string>
+                    <string>Abstand Pause zu Pause/Ziffer</string>
                    </property>
                    <property name="buddy">
                     <cstring>clefTimesigDistance</cstring>
@@ -12975,7 +12981,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="8" column="0">
                   <widget class="QLabel" name="label_182">
                    <property name="text">
-                    <string>abstand Noten</string>
+                    <string>Abstand Ziffer zu Pause/Ziffer</string>
                    </property>
                    <property name="buddy">
                     <cstring>clefTimesigDistance</cstring>
@@ -12984,20 +12990,7 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                 </layout>
                </item>
-               <item row="1" column="0">
-                <spacer name="verticalSpacer_371">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="2" column="0">
+               <item row="3" column="0">
                 <widget class="QGroupBox" name="groupBox_46">
                  <property name="title">
                   <string>Schriftart</string>
@@ -13008,52 +13001,6 @@ By default, they will be placed such as that their right end are at the same lev
                     <property name="leftMargin">
                      <number>0</number>
                     </property>
-                    <item row="1" column="2">
-                     <widget class="QToolButton" name="resetCipherFontSize">
-                      <property name="toolTip">
-                       <string>Reset to default</string>
-                      </property>
-                      <property name="accessibleName">
-                       <string>Reset 'Key to barline distance' value</string>
-                      </property>
-                      <property name="text">
-                       <string notr="true"/>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="musescore.qrc">
-                        <normaloff>:/data/icons/edit-reset.svg</normaloff>:/data/icons/edit-reset.svg</iconset>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QFrame" name="frame">
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>50</height>
-                       </size>
-                      </property>
-                      <property name="frameShape">
-                       <enum>QFrame::StyledPanel</enum>
-                      </property>
-                      <property name="frameShadow">
-                       <enum>QFrame::Raised</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <widget class="QFontComboBox" name="cipherFont">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="editable">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="2" column="2">
                      <widget class="QToolButton" name="resetCipherFont">
                       <property name="toolTip">
@@ -13071,10 +13018,16 @@ By default, they will be placed such as that their right end are at the same lev
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_145">
-                      <property name="text">
-                       <string>Schriftgröße</string>
+                    <item row="2" column="1">
+                     <widget class="QFontComboBox" name="cipherFont">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="editable">
+                       <bool>false</bool>
                       </property>
                      </widget>
                     </item>
@@ -13085,7 +13038,31 @@ By default, they will be placed such as that their right end are at the same lev
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="1">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_145">
+                      <property name="text">
+                       <string>Schriftgröße</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <widget class="QToolButton" name="resetCipherFontSize">
+                      <property name="toolTip">
+                       <string>Reset to default</string>
+                      </property>
+                      <property name="accessibleName">
+                       <string>Reset 'Key to barline distance' value</string>
+                      </property>
+                      <property name="text">
+                       <string notr="true"/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="musescore.qrc">
+                        <normaloff>:/data/icons/edit-reset.svg</normaloff>:/data/icons/edit-reset.svg</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
                      <widget class="QDoubleSpinBox" name="cipherFontSize">
                       <property name="suffix">
                        <string extracomment="spatium unit">sp</string>
@@ -13099,6 +13076,19 @@ By default, they will be placed such as that their right end are at the same lev
                   </item>
                  </layout>
                 </widget>
+               </item>
+               <item row="1" column="0">
+                <spacer name="verticalSpacer_371">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
@@ -13190,7 +13180,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>größe Vorzeichen (Flat)</string>
+                    <string>Größe Vorzeichen (Flat)</string>
                    </property>
                    <property name="buddy">
                     <cstring>noteBarDistance</cstring>
@@ -13275,7 +13265,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>abstand Vorzeichen (Flat)</string>
+                    <string>Horizontale Verschiebung (Flat)</string>
                    </property>
                    <property name="buddy">
                     <cstring>clefLeftMargin</cstring>
@@ -13291,7 +13281,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>höhe Virzeichen (Sharp)</string>
+                    <string>Vertikale Verschiebung (Sharp)</string>
                    </property>
                    <property name="buddy">
                     <cstring>minNoteDistance</cstring>
@@ -13324,7 +13314,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>größe Vorzeichen (Sharp)</string>
+                    <string>Größe Vorzeichen (Sharp)</string>
                    </property>
                    <property name="buddy">
                     <cstring>barAccidentalDistance</cstring>
@@ -13375,7 +13365,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>abstand Vorzeichen (Sharp)</string>
+                    <string>Horizontale Verschiebung (Sharp)</string>
                    </property>
                    <property name="buddy">
                     <cstring>barNoteDistance</cstring>
@@ -13391,7 +13381,7 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>höhe Virzeichen (Flat)</string>
+                    <string>Vertikale Verschiebung (Flat)</string>
                    </property>
                    <property name="buddy">
                     <cstring>keysigLeftMargin</cstring>
@@ -13502,6 +13492,19 @@ By default, they will be placed such as that their right end are at the same lev
                <string>Bindebögen Haltebögen</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_60">
+               <item row="4" column="0">
+                <spacer name="verticalSpacer_351">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
                <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_46">
                  <item row="0" column="0">
@@ -13513,29 +13516,10 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>Bogen Eckenform</string>
+                    <string>Bogenform Ecke</string>
                    </property>
                    <property name="buddy">
                     <cstring>timesigBarlineDistance</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QDoubleSpinBox" name="cipherSlurHeigth">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="suffix">
-                    <string>sp</string>
-                   </property>
-                   <property name="minimum">
-                    <double>-10.000000000000000</double>
-                   </property>
-                   <property name="singleStep">
-                    <double>0.100000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -13569,42 +13553,6 @@ By default, they will be placed such as that their right end are at the same lev
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_173">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Bogen höhe</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::PlainText</enum>
-                   </property>
-                   <property name="buddy">
-                    <cstring>clefKeyRightMargin</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="2">
-                  <widget class="QToolButton" name="resetCipherSlurHeigth">
-                   <property name="toolTip">
-                    <string>Reset to default</string>
-                   </property>
-                   <property name="accessibleName">
-                    <string>Reset 'Clef/Key right margin' valua</string>
-                   </property>
-                   <property name="text">
-                    <string notr="true"/>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="musescore.qrc">
-                     <normaloff>:/data/icons/edit-reset.svg</normaloff>:/data/icons/edit-reset.svg</iconset>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="2">
                   <widget class="QToolButton" name="resetCipherSlurEckenform">
                    <property name="toolTip">
@@ -13612,39 +13560,6 @@ By default, they will be placed such as that their right end are at the same lev
                    </property>
                    <property name="accessibleName">
                     <string>Reset 'Time signature to barline distance' value</string>
-                   </property>
-                   <property name="text">
-                    <string notr="true"/>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="musescore.qrc">
-                     <normaloff>:/data/icons/edit-reset.svg</normaloff>:/data/icons/edit-reset.svg</iconset>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_174">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Bogen dicke</string>
-                   </property>
-                   <property name="buddy">
-                    <cstring>timesigLeftMargin</cstring>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="2">
-                  <widget class="QToolButton" name="resetCipherSlurThick">
-                   <property name="toolTip">
-                    <string>Reset to default</string>
-                   </property>
-                   <property name="accessibleName">
-                    <string>Reset 'Time signature left margin' value</string>
                    </property>
                    <property name="text">
                     <string notr="true"/>
@@ -13680,33 +13595,17 @@ By default, they will be placed such as that their right end are at the same lev
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>Bogen überhang</string>
+                    <string>Überhang Bogen</string>
                    </property>
                    <property name="buddy">
                     <cstring>clefBarlineDistance</cstring>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QDoubleSpinBox" name="cipherSlurThick">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="suffix">
-                    <string>sp</string>
-                   </property>
-                   <property name="singleStep">
-                    <double>0.010000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_119">
                    <property name="text">
-                    <string>Bogen verschiebung</string>
+                    <string>Vertikale Verschiebung Bogen</string>
                    </property>
                    <property name="buddy">
                     <cstring>clefKeyDistance</cstring>
@@ -13743,20 +13642,111 @@ By default, they will be placed such as that their right end are at the same lev
                    </property>
                   </widget>
                  </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_174">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Strichstärke Bogen</string>
+                   </property>
+                   <property name="buddy">
+                    <cstring>timesigLeftMargin</cstring>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QDoubleSpinBox" name="cipherSlurThick">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="suffix">
+                    <string>sp</string>
+                   </property>
+                   <property name="singleStep">
+                    <double>0.010000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QToolButton" name="resetCipherSlurThick">
+                   <property name="toolTip">
+                    <string>Reset to default</string>
+                   </property>
+                   <property name="accessibleName">
+                    <string>Reset 'Time signature left margin' value</string>
+                   </property>
+                   <property name="text">
+                    <string notr="true"/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="musescore.qrc">
+                     <normaloff>:/data/icons/edit-reset.svg</normaloff>:/data/icons/edit-reset.svg</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QToolButton" name="resetCipherSlurHeigth">
+                   <property name="toolTip">
+                    <string>Reset to default</string>
+                   </property>
+                   <property name="accessibleName">
+                    <string>Reset 'Clef/Key right margin' valua</string>
+                   </property>
+                   <property name="text">
+                    <string notr="true"/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="musescore.qrc">
+                     <normaloff>:/data/icons/edit-reset.svg</normaloff>:/data/icons/edit-reset.svg</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QDoubleSpinBox" name="cipherSlurHeigth">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="suffix">
+                    <string>sp</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-10.000000000000000</double>
+                   </property>
+                   <property name="singleStep">
+                    <double>0.100000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_173">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Bogenform Mitte</string>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::PlainText</enum>
+                   </property>
+                   <property name="buddy">
+                    <cstring>clefKeyRightMargin</cstring>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
-               </item>
-               <item row="1" column="0">
-                <spacer name="verticalSpacer_351">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
                </item>
               </layout>
              </widget>
@@ -14270,7 +14260,37 @@ By default, they will be placed such as that their right end are at the same lev
                     <property name="leftMargin">
                      <number>0</number>
                     </property>
-                    <item row="1" column="2">
+                    <item row="1" column="1">
+                     <widget class="QFontComboBox" name="cipherTupletNummerFont">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="editable">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QDoubleSpinBox" name="cipherTupletNummerFontSize">
+                      <property name="suffix">
+                       <string extracomment="spatium unit">sp</string>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.010000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_147">
+                      <property name="text">
+                       <string>Schriftgröße</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
                      <widget class="QToolButton" name="resetCipherTupletNummerFontSize">
                       <property name="toolTip">
                        <string>Reset to default</string>
@@ -14287,36 +14307,7 @@ By default, they will be placed such as that their right end are at the same lev
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="1">
-                     <widget class="QFrame" name="frame_4">
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>50</height>
-                       </size>
-                      </property>
-                      <property name="frameShape">
-                       <enum>QFrame::StyledPanel</enum>
-                      </property>
-                      <property name="frameShadow">
-                       <enum>QFrame::Raised</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <widget class="QFontComboBox" name="cipherTupletNummerFont">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="editable">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="2">
+                    <item row="1" column="2">
                      <widget class="QToolButton" name="resetCipherTupletNummerFont">
                       <property name="toolTip">
                        <string>Reset to default</string>
@@ -14334,26 +14325,9 @@ By default, they will be placed such as that their right end are at the same lev
                      </widget>
                     </item>
                     <item row="1" column="0">
-                     <widget class="QLabel" name="label_147">
-                      <property name="text">
-                       <string>Schriftgröße</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
                      <widget class="QLabel" name="label_153">
                       <property name="text">
                        <string>Schriftart</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QDoubleSpinBox" name="cipherTupletNummerFontSize">
-                      <property name="suffix">
-                       <string extracomment="spatium unit">sp</string>
-                      </property>
-                      <property name="singleStep">
-                       <double>0.010000000000000</double>
                       </property>
                      </widget>
                     </item>
@@ -14678,7 +14652,7 @@ By default, they will be placed such as that their right end are at the same lev
           </item>
           <item>
            <property name="text">
-            <string>Tacktangabe</string>
+            <string>Taktangabe</string>
            </property>
           </item>
           <item>
