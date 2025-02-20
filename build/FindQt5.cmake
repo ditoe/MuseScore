@@ -6,6 +6,7 @@ set(_components
     Test
     Qml
     QmlModels
+    QmlWorkerScript
     Quick
     QuickControls2
     QuickTemplates2
