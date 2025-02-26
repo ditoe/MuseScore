@@ -105,9 +105,9 @@ echo "PATH: $PATH"
 if [ "$WITH_QT_DOWNLOAD" = true ] ; then
     echo "Download Qt"
 
-    export QT_SHORT_VERSION=5.15.2
+    export QT_SHORT_VERSION=5.12.12
     export QT_PATH=$HOME/Qt
-    export QT_MACOS=$QT_PATH/$QT_SHORT_VERSION/clang_64
+    export QT_MACOS=$QT_PATH/$QT_SHORT_VERSION/$QT_SHORT_VERSION/clang_64
     wget -nv -O qt5.zip https://s3.amazonaws.com/utils.musescore.org/Qt5152_mac.zip
     mkdir -p $QT_MACOS
     unzip -qq qt5.zip -d $QT_MACOS
