@@ -357,7 +357,7 @@ static constexpr PropertyMetaData propertyList[] = {
       { Pid::PREFER_SHARP_FLAT,       true,  "preferSharpFlat",       P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "prefer sharps or flats") },
 
       { Pid::SET_KEY_TYPE,           false,  "set_key_type",          P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "set Key Type")     },
-	  { Pid::LYRICS_STAFF_SHIFT,     false,  "lyricsStaffShift",      P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "Notenzeilen verschibung") },
+	  { Pid::LYRICS_STAFF_SHIFT,     false,  "lyricsStaffShift",      P_TYPE::INT,                 DUMMY_QT_TRANSLATE_NOOP("propertyName", "Verschiebung Liedtext") },
 
       { Pid::END, false, "++end++", P_TYPE::INT, DUMMY_QT_TRANSLATE_NOOP("propertyName", "<invalid property>") }
       };

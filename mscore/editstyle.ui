@@ -215,7 +215,7 @@
       </item>
       <item>
        <property name="text">
-        <string>Cipher System</string>
+        <string>Ziffern-System</string>
        </property>
       </item>
      </widget>
@@ -259,8 +259,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>499</width>
-                <height>612</height>
+                <width>502</width>
+                <height>557</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -937,8 +937,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>513</width>
-                <height>571</height>
+                <width>517</width>
+                <height>539</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_4">
@@ -2339,8 +2339,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>707</width>
-             <height>340</height>
+             <width>703</width>
+             <height>324</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -4027,8 +4027,8 @@ By default, they will be placed such as that their right end are at the same lev
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>339</width>
-                <height>699</height>
+                <width>342</width>
+                <height>678</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_56">
@@ -5737,8 +5737,8 @@ By default, they will be placed such as that their right end are at the same lev
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>453</width>
-                <height>453</height>
+                <width>445</width>
+                <height>421</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_54">
@@ -9495,8 +9495,8 @@ By default, they will be placed such as that their right end are at the same lev
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>480</width>
-             <height>388</height>
+             <width>477</width>
+             <height>364</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_57">
@@ -10895,8 +10895,8 @@ By default, they will be placed such as that their right end are at the same lev
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>481</width>
-                <height>498</height>
+                <width>475</width>
+                <height>449</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="gridLayout_55">
@@ -12374,7 +12374,7 @@ By default, they will be placed such as that their right end are at the same lev
            </sizepolicy>
           </property>
           <property name="currentIndex">
-           <number>5</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="page_3">
            <layout class="QGridLayout" name="gridLayout_58">
@@ -13489,7 +13489,7 @@ By default, they will be placed such as that their right end are at the same lev
             <item row="0" column="0">
              <widget class="QGroupBox" name="groupBox_42">
               <property name="title">
-               <string>Bindebögen Haltebögen</string>
+               <string>Bindebögen / Haltebögen</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_60">
                <item row="4" column="0">
@@ -13758,7 +13758,7 @@ By default, they will be placed such as that their right end are at the same lev
             <item row="0" column="0">
              <widget class="QGroupBox" name="groupBox_43">
               <property name="title">
-               <string>Tacktangabe</string>
+               <string>Taktangabe</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_59">
                <item row="0" column="0">
@@ -13766,7 +13766,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_181">
                    <property name="text">
-                    <string>Taktangabe abstand</string>
+                    <string>Abstand zum System</string>
                    </property>
                   </widget>
                  </item>
@@ -13799,7 +13799,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_218">
                    <property name="text">
-                    <string>Taktangabe größe</string>
+                    <string>Größe Taktangabe</string>
                    </property>
                   </widget>
                  </item>
@@ -13870,14 +13870,14 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_219">
                    <property name="text">
-                    <string>Taktangabe linie größe</string>
+                    <string>Taktangabe Linienbreite</string>
                    </property>
                   </widget>
                  </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_220">
                    <property name="text">
-                    <string>Taktangabe linie dicke</string>
+                    <string>Taktangabe Linienstärke</string>
                    </property>
                   </widget>
                  </item>
@@ -13993,7 +13993,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_221">
                    <property name="text">
-                    <string>größe</string>
+                    <string>Größe Tonartangabe</string>
                    </property>
                   </widget>
                  </item>
@@ -14030,7 +14030,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_222">
                    <property name="text">
-                    <string>Horizontal verschibung</string>
+                    <string>Horizontale Verschiebung</string>
                    </property>
                   </widget>
                  </item>
@@ -14049,6 +14049,12 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                  <item row="4" column="2">
                   <widget class="QToolButton" name="resetCipherKeysigNoteDistancReigth">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14079,6 +14085,12 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                  <item row="4" column="1">
                   <widget class="QDoubleSpinBox" name="cipherKeysigNoteDistancReigth">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14109,6 +14121,15 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                  <item row="3" column="1">
                   <widget class="QDoubleSpinBox" name="cipherKeysigNoteDistancLeft">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="suffix">
                     <string extracomment="spatium unit">sp</string>
                    </property>
@@ -14122,6 +14143,12 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                  <item row="3" column="2">
                   <widget class="QToolButton" name="resetCipherKeysigNoteDistancLeft">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="toolTip">
                     <string>Reset to default</string>
                    </property>
@@ -14140,7 +14167,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_1715">
                    <property name="text">
-                    <string>höhe</string>
+                    <string>Vertikale Verschiebung</string>
                    </property>
                   </widget>
                  </item>
@@ -14163,6 +14190,12 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_229">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Ziffer Abstand Links</string>
                    </property>
@@ -14170,6 +14203,12 @@ By default, they will be placed such as that their right end are at the same lev
                  </item>
                  <item row="4" column="0">
                   <widget class="QLabel" name="label_228">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Ziffer Abstand Rechts</string>
                    </property>
@@ -14246,7 +14285,7 @@ By default, they will be placed such as that their right end are at the same lev
             <item>
              <widget class="QGroupBox" name="groupBox_48">
               <property name="title">
-               <string>Triolen</string>
+               <string>Tuplets</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_65">
                <item row="3" column="0">
@@ -14375,14 +14414,14 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="4" column="0">
                   <widget class="QLabel" name="label_230">
                    <property name="text">
-                    <string>Bogen überhang</string>
+                    <string>Überhang Bogen</string>
                    </property>
                   </widget>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_226">
                    <property name="text">
-                    <string>Bogen abstand</string>
+                    <string>Vertikale Verschiebung Bogen</string>
                    </property>
                   </widget>
                  </item>
@@ -14449,14 +14488,14 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_225">
                    <property name="text">
-                    <string>Bogen Eckenform</string>
+                    <string>Bogenform Ecke</string>
                    </property>
                   </widget>
                  </item>
                  <item row="5" column="0">
                   <widget class="QLabel" name="label_232">
                    <property name="text">
-                    <string>Bogen dicke</string>
+                    <string>Strichstärke Bogen</string>
                    </property>
                   </widget>
                  </item>
@@ -14516,7 +14555,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_224">
                    <property name="text">
-                    <string>Bogen höhe</string>
+                    <string>Bogenform Mitte</string>
                    </property>
                   </widget>
                  </item>
@@ -14557,7 +14596,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_227">
                    <property name="text">
-                    <string>Bogen Verschiebung</string>
+                    <string>Horizontale Verschiebung Bogen</string>
                    </property>
                   </widget>
                  </item>
@@ -14581,7 +14620,7 @@ By default, they will be placed such as that their right end are at the same lev
                  <item row="6" column="0">
                   <widget class="QLabel" name="label_231">
                    <property name="text">
-                    <string>nummer höhe</string>
+                    <string>Vertikale Verschiebung Nummer</string>
                    </property>
                   </widget>
                  </item>
@@ -14662,7 +14701,7 @@ By default, they will be placed such as that their right end are at the same lev
           </item>
           <item>
            <property name="text">
-            <string>Triolen</string>
+            <string>Tuplets</string>
            </property>
           </item>
          </widget>
