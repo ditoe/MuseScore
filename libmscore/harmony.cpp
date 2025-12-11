@@ -1658,6 +1658,17 @@ void Harmony::render(const QList<RenderAction>& renderList, qreal& x, qreal& y, 
                   else
                         qDebug("RenderAction::RenderActionType::POP: stack empty");
                   }
+            else if (a.type == RenderAction::RenderActionType::PUSH_ABS) {
+                _stack_abs.setX(x);
+                _stack_abs.setY(y);
+            }
+            else if (a.type == RenderAction::RenderActionType::POP_ABS) {
+                x = _stack_abs.x();
+                y = _stack_abs.y();
+            }
+            else if (a.type == RenderAction::RenderActionType::POP_MX) {
+                x = x-(x - _stack_abs.x())/2;
+            }
             else if (a.type == RenderAction::RenderActionType::NOTE) {
                   QString c;
                   AccidentalVal acc;

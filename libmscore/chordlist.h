@@ -89,7 +89,7 @@ class HChord {
 struct RenderAction {
       enum class RenderActionType : char {
             SET, MOVE, PUSH, POP,
-            NOTE, ACCIDENTAL
+			NOTE, ACCIDENTAL, PUSH_ABS, POP_ABS, POP_MX
             };
 
       RenderActionType type;

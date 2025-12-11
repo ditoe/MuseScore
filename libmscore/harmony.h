@@ -105,6 +105,8 @@ class Harmony final : public TextBase {
 
       Harmony* findInSeg(Segment* seg) const;
 
+      QPointF _stack_abs;
+
    public:
       Harmony(Score* = 0);
       Harmony(const Harmony&);

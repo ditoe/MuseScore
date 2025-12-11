@@ -479,8 +479,11 @@
                   commands:
                         xxx         draw symbol name xxx
                         m:x:y       add x:y to current position (1/5 spatium units)
-                        :push
-                        :pop
+                        :push		speichert pasotion local
+                        :pop		ladet position local und löscht :push
+						:push_abs	speichert pasotion global
+                        :pop_abs	ladet position global und behält :push_abs
+						:pop_mx		ladet die mitlere position von :push_abs und aktuell
                         :n          root or base note
                         :a          accidental
                   if omitted, chord will be rendered directly from the first name listed above

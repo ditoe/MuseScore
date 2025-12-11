@@ -323,6 +323,12 @@ static void readRenderList(QString val, QList<RenderAction>& renderList)
                   renderList.append(RenderAction(RenderAction::RenderActionType::NOTE));
             else if (s == ":a")
                   renderList.append(RenderAction(RenderAction::RenderActionType::ACCIDENTAL));
+            else if (s == ":push_abs")
+                renderList.append(RenderAction(RenderAction::RenderActionType::PUSH_ABS));
+            else if (s == ":pop_abs")
+                renderList.append(RenderAction(RenderAction::RenderActionType::POP_ABS));
+            else if (s == ":pop_mx")
+                renderList.append(RenderAction(RenderAction::RenderActionType::POP_MX));
             else {
                   RenderAction a(RenderAction::RenderActionType::SET);
                   a.text = s;
@@ -364,6 +370,15 @@ static void writeRenderList(XmlWriter& xml, const QList<RenderAction>* al, const
                   case RenderAction::RenderActionType::ACCIDENTAL:
                         s += ":a";
                         break;
+                  case RenderAction::RenderActionType::PUSH_ABS:
+                      s += ":push_abs";
+                      break;
+                  case RenderAction::RenderActionType::POP_ABS:
+                      s += ":pop_abs";
+                      break;
+                  case RenderAction::RenderActionType::POP_MX:
+                      s += ":pop_mx";
+                      break;
                   }
             }
       xml.tag(name, s);
