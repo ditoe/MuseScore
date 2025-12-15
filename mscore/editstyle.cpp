@@ -419,6 +419,8 @@ EditStyle::EditStyle(Score* s, QWidget* parent)
       { Sid::cipherHeigthSignSharp,           false, cipherHeigthSignSharp,             resetCipherHeigthSignSharp         },
       { Sid::cipherHeigthSignFlat,            false, cipherHeigthSignFlat,              resetCipherHeigthSignFlat          },
       { Sid::cipherFont,                      false, cipherFont,                        resetCipherFont                    },
+      { Sid::cipherbracket,                   false, cipherbracket,                     resetCipherbracket                 },
+      { Sid::cipherAlternativSize,            false, cipherAlternativSize,              resetCipherAlternativSize          },
       { Sid::cipherSlurEckenform,             false, cipherSlurEckenform,               resetCipherSlurEckenform           },
       { Sid::cipherSlurThick,                 false, cipherSlurThick,                   resetCipherSlurThick               },
       { Sid::cipherSlurHeigth,                false, cipherSlurHeigth,                  resetCipherSlurHeigth              },

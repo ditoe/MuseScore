@@ -1458,6 +1458,8 @@ static const StyleType styleTypes[] {
       { Sid::cipherHeigthSignSharp,        "cipherHeigthSignSharp",        0.28 },
       { Sid::cipherHeigthSignFlat,         "cipherHeigthSignFlat",         0.46 },
       { Sid::cipherFont,                   "cipherFont",                   "Cipher" },
+      { Sid::cipherbracket,                "cipherbracket",                false },
+      { Sid::cipherAlternativSize,         "cipherAlternativSize",         0.7 },
       { Sid::cipherSlurEckenform,          "cipherSlurEckenform",          0.0 },
       { Sid::cipherSlurThick,              "cipherSlurThick",              1.3 },
       { Sid::cipherSlurHeigth,             "cipherSlurHeigth",             0.2 },

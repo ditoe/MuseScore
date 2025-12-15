@@ -1287,7 +1287,7 @@ void Note::draw(QPainter* painter) const
                         //score()->scoreFont()->draw(SymId::cipherAccidentalFlat, painter,( score()->styleD(Sid::cipherSizeSignFlat)/100*_cipherHigth),_cipherAccidentalPos);
                         }
                   }
-            if(_trackthick!=1.0){
+            if(_trackthick!=1.0&& score()->styleB(Sid::cipherbracket)){
 
                   painter->drawText(_cipherKlammerPos, "(");
                   painter->drawText((QPointF(_cipherTextPos.x() + _cipherWidth2,_cipherTextPos.y())), ")");
@@ -2254,8 +2254,8 @@ void Note::layout()
                         get_cipherDurationDot[int(chord()->durationType().dots())];
             _trackthick=1.0;
             if(track()%4>0){
-                  _cipherWidth *=0.7;
-                  _trackthick=0.7;
+                  _cipherWidth *= score()->styleD(Sid::cipherAlternativSize);
+                  _trackthick= score()->styleD(Sid::cipherAlternativSize);
                   }
 			QFont font;
 			font.setFamily(score()->styleSt(Sid::cipherFont));

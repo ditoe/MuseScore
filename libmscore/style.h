@@ -1442,6 +1442,8 @@ enum class Sid {
         cipherHeigthSignSharp,
         cipherHeigthSignFlat,
         cipherFont,
+        cipherbracket,
+        cipherAlternativSize,
         cipherSlurEckenform,
         cipherSlurThick,
         cipherSlurHeigth,
