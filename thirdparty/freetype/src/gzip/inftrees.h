@@ -14,6 +14,14 @@
 #ifndef _INFTREES_H
 #define _INFTREES_H
 
+#ifndef Byte
+typedef unsigned char Byte;
+#endif
+
+#ifndef Bytef
+typedef Byte FAR Bytef;
+#endif
+
 typedef struct inflate_huft_s FAR inflate_huft;
 
 struct inflate_huft_s {

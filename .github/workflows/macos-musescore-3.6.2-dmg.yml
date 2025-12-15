@@ -1,0 +1,111 @@
+name: macOS DMG (MuseScore 3.6.2)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ vergleich ]
+
+jobs:
+  macos:
+    runs-on: macos-15-intel
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install build tools
+      run: |
+        brew update
+        brew install cmake create-dmg zlib libsndfile freetype
+        brew install jack portaudio lame
+        pipx install aqtinstall
+        pipx ensurepath
+
+    - name: Install Qt 5.15.2
+      run: |
+        aqt install-qt mac desktop 5.15.2 clang_64 -O $HOME/Qt
+
+    - name: Add Qt tools to PATH
+      run: echo "$HOME/Qt/5.15.2/clang_64/bin" >> $GITHUB_PATH
+
+    - name: Configure MuseScore
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. \
+          -G "Unix Makefiles" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH="$HOME/Qt/5.15.2/clang_64/lib/cmake" \
+          -DCMAKE_INSTALL_PREFIX=$HOME/MuseScoreInstall \
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
+          -DFT_DISABLE_ZLIB=ON \
+          -DFT_DISABLE_BZIP2=ON \
+          -DFT_DISABLE_PNG=ON \
+          -DUSE_WEBENGINE=OFF \
+          -DENABLE_WEBENGINE=OFF \
+          -DMUSESCORE_ENABLE_WEBENGINE=OFF \
+          -DFT_CONFIG_OPTION_USE_LZW=ON
+
+    - name: Build MuseScore
+      run: |
+        cd build
+        make -j$(sysctl -n hw.ncpu)
+
+    - name: Install (bundle .app)
+      run: |
+        cd build
+        make install
+
+    - name: Locate app bundle
+      run: |
+        find $HOME/MuseScoreInstall -name "*.app"
+
+    - name: Deploy Qt frameworks (macdeployqt)
+      run: |
+        APP=$(find $HOME/MuseScoreInstall -name "*.app" | head -n 1)
+        echo "Deploying Qt to $APP"
+
+        macdeployqt "$APP" \
+          -verbose=2 \
+          -no-strip \
+          -executable="$APP/Contents/MacOS/mscore"
+
+    - name: Bundle Homebrew dylibs
+      run: |
+        chmod +x .github/workflows/bundle_dylibs.sh
+        APP=$(find $HOME/MuseScoreInstall -name "*.app" | head -n 1)
+        .github/workflows/bundle_dylibs.sh "$APP"
+
+    - name: Verify Qt frameworks
+      run: |
+        APP=$(find $HOME/MuseScoreInstall -name "*.app" | head -n 1)
+        ls "$APP/Contents/Frameworks"
+        otool -L "$APP/Contents/MacOS/mscore"
+
+    - name: Bundle MuseScore translations
+      run: |
+        APP=$(find $HOME/MuseScoreInstall -name "*.app" | head -n 1)
+        mkdir -p "$APP/Contents/Resources/locale"
+        cp -R "share/locale/"* \
+              "$APP/Contents/Resources/locale/"
+              
+    - name: Create DMG
+      run: |
+        mkdir dmg
+        APP=$(find "$HOME/MuseScoreInstall" -maxdepth 3 -name "*.app" | head -n 1)
+        echo "Found app: $APP"
+        create-dmg \
+          --volname "MuseScore 3.6.2" \
+          --window-size 800 400 \
+          --icon-size 128 \
+          --app-drop-link 600 185 \
+          dmg/MuseScore-3.6.2-test.dmg \
+          "$APP"
+
+    - name: Upload DMG artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MuseScore-3.6.2-macOS-test
+        path: dmg/MuseScore-3.6.2-test.dmg

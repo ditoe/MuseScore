@@ -11,6 +11,14 @@
 #ifndef _INFUTIL_H
 #define _INFUTIL_H
 
+#ifndef Byte
+typedef unsigned char Byte;
+#endif
+
+#ifndef Bytef
+typedef Byte FAR Bytef;
+#endif
+
 typedef enum {
       TYPE,     /* get type bits (3, including end bit) */
       LENS,     /* get lengths for stored */

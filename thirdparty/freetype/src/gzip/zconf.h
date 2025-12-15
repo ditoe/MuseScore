@@ -225,6 +225,7 @@ typedef unsigned long  uLong; /* 32 bits or more */
    /* Borland C/C++ and some old MSC versions ignore FAR inside typedef */
 #  define Bytef Byte FAR
 #else
+   typedef unsigned char Byte;
    typedef Byte  FAR Bytef;
 #endif
 typedef char  FAR charf;

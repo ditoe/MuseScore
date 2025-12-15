@@ -13,6 +13,14 @@
 #define exop word.what.Exop
 #define bits word.what.Bits
 
+#ifndef Byte
+typedef unsigned char Byte;
+#endif
+
+#ifndef Bytef
+typedef Byte FAR Bytef;
+#endif
+
 typedef enum {        /* waiting for "i:"=input, "o:"=output, "x:"=nothing */
       START,    /* x: set up for LEN */
       LEN,      /* i: get length/literal/eob next */

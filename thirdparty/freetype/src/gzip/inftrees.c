@@ -11,6 +11,14 @@
 #endif
 
 
+#ifndef Byte
+typedef unsigned char Byte;
+#endif
+
+#ifndef Bytef
+typedef Byte FAR Bytef;
+#endif
+
 #if 0
 local const char inflate_copyright[] =
    " inflate 1.1.4 Copyright 1995-2002 Mark Adler ";

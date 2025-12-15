@@ -20,7 +20,7 @@
 project(mscore)
 
 # Minimum tested, report if it works with older
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
 
 include(build/functions.cmake) # library of CMake functions ("fn__" namespace)
 
@@ -34,13 +34,13 @@ cmake_policy(SET CMP0003 NEW)
 if (APPLE)
     # Issue no warning non-existent target argument to get_target_property()
     # and set the result variable to a -NOTFOUND value rather than issuing a FATAL_ERROR 40
-    if(POLICY CMP0045)
-        cmake_policy(SET CMP0045 OLD)
-    endif(POLICY CMP0045)
+if(POLICY CMP0045)
+    cmake_policy(SET CMP0045 NEW)
+endif()
 
     # Silently ignore non-existent dependencies (mops1, mops2)
     if(POLICY CMP0046)
-        cmake_policy(SET CMP0046 OLD)
+        cmake_policy(SET CMP0046 NEW)
     endif(POLICY CMP0046)
 endif (APPLE)
 
@@ -60,7 +60,7 @@ if (MSVC)
 endif (MSVC)
 
 # We need this early, before FindQt5
-option(BUILD_WEBENGINE "Built in webengine support" ON)
+option(BUILD_WEBENGINE "Built in webengine support" OFF)
 
 if (BUILD_WEBENGINE)
    if (MINGW)
@@ -407,6 +407,11 @@ endif(USE_ZITA_REVERB)
 
 if (USE_SYSTEM_FREETYPE)
       if (APPLE)
+            set(FreeType_INCLUDE_DIR /path/to/your/freetype/include) 
+            set(FreeType_LIBRARY /path/to/your/freetype/libfreetype.a) 
+            include_directories(${FreeType_INCLUDE_DIR}) 
+            target_link_libraries(mscoreapp ${FreeType_LIBRARY})
+            target_link_libraries(mscoreapp PRIVATE ZLIB::ZLIB)
             PKGCONFIG1 (freetype2 2.5.2 FREETYPE_INCLUDE_DIRS FREETYPE_LIBDIR FREETYPE_LIBRARIES FREETYPE_CPP)
             if (FREETYPE_INCLUDE_DIRS)
                   STRING(REGEX REPLACE  "\"" "" FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})
