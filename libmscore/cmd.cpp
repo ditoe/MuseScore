@@ -1839,8 +1839,34 @@ void Score::changeAccidental(Note* note, AccidentalType accidental)
       AccidentalVal acc = (accidental == AccidentalType::NONE) ? acc2 : Accidental::subtype2value(accidental);
 
       int pitch = line2pitch(note->line(), clef, Key::C) + int(acc);
-      if (note->staff()->isCipherStaff(chord->tick()))
-                  pitch = note->get_cipherGroundPitch() + int(acc);
+      if (note->staff()->isCipherStaff(chord->tick())) {
+          int accidentalshift = 0;
+          int tpc = 0;
+          step = tpc2stepByKey(note->tpc(), note->staff()->key(note->tick()), accidentalshift);
+          tpc = step2tpcByKey(step, note->staff()->key(note->tick()));
+          int accshift = 0;
+          if (accidentalshift == 0) {
+              tpc += int(acc) * 7;
+              accshift = int(acc);
+          }
+          else
+          {
+              if (accidentalshift == -1 && int(acc) == 1) {
+                  tpc += 7;
+                  accshift = 1;
+              }
+              if (accidentalshift == 1 && int(acc) == -1) {
+                  tpc -= 7;
+                  accshift = -1;
+              }
+          }
+          pitch = note->get_cipherGroundPitch() + accshift;
+          changeAccidental2(note, pitch, tpc);
+          setPlayNote(true);
+          setSelectionChanged(true);
+          return;
+      }
+
       if (!note->concertPitch())
             pitch += note->transposition();
 
