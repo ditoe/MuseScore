@@ -108,7 +108,7 @@ StaffType::StaffType(StaffGroup sg, const String& xml, const String& name, int l
     setShowBarlines(showBarLines);
     setStemless(stemless);
     setGenTimesig(genTimesig);
-    setGenKeysig(sg != StaffGroup::TAB);
+    setGenKeysig(sg != StaffGroup::TAB && sg != StaffGroup::CIPHER);
     setDurationFontName(durFontName);
     setDurationFontSize(durFontSize);
     setDurationFontUserY(durFontUserY);
@@ -661,7 +661,7 @@ String StaffType::tabBassStringPrefix(int strg, bool* hasFret) const
 
 void StaffType::drawInputStringMarks(Painter* p, int string, const Color& selectionColor, const RectF& rect) const
 {
-    if (m_group != StaffGroup::TAB) {
+    if (m_group != StaffGroup::TAB && m_group != StaffGroup::CIPHER) {
         return;
     }
 
@@ -708,7 +708,7 @@ void StaffType::drawInputStringMarks(Painter* p, int string, const Color& select
 
 int StaffType::numOfTabLedgerLines(int string) const
 {
-    if (m_group != StaffGroup::TAB || !m_useNumbers) {
+    if ((m_group != StaffGroup::TAB && m_group != StaffGroup::CIPHER) || !m_useNumbers) {
         return 0;
     }
 
