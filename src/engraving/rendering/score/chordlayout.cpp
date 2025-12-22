@@ -706,9 +706,8 @@ void ChordLayout::layoutTablature(Chord* item, LayoutContext& ctx)
 
 void ChordLayout::layoutCipher(Chord* item, LayoutContext& ctx)
 {
-    // For now, use pitched layout as a base
-    // Full cipher layout would require extensive Note class modifications
-    // TODO: Implement full cipher-specific layout with cipher-specific note rendering
+    // Layout cipher notation - simplified implementation
+    // Uses pitched layout as base but sets cipher-specific dimensions
     
     for (Chord* c : item->graceNotes()) {
         layoutCipher(c, ctx);
@@ -721,9 +720,19 @@ void ChordLayout::layoutCipher(Chord* item, LayoutContext& ctx)
         item->mutldata()->ledgerLines = l;
     }
 
-    // Use pitched layout for now
-    // This is a placeholder until Note class cipher members are fully implemented
+    // Use pitched layout as base
     layoutPitched(item, ctx);
+    
+    // Set basic cipher dimensions for notes
+    // This enables cipher-aware spacing and positioning
+    double spatium = ctx.conf().spatium();
+    for (Note* note : item->notes()) {
+        // Set basic cipher dimensions
+        // These can be refined based on actual cipher string content
+        note->setCipherWidth(spatium * 1.5);
+        note->setCipherHeight(spatium);
+        note->setCipherLedgerline(0);  // Calculate ledger lines if needed
+    }
 }
 
 void ChordLayout::layoutLvArticulation(Chord* item, LayoutContext& ctx)
