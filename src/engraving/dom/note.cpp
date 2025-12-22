@@ -3975,4 +3975,47 @@ int Note::stringOrLine() const
     // The number string() returns doesn't count spaces.  This should be used where it is expected even numbers are spaces and odd are lines
     return staff()->staffType(tick())->isTabStaff() ? string() * 2 : line();
 }
+
+//---------------------------------------------------------
+//   cipherString
+//   Generate cipher notation string representation
+//---------------------------------------------------------
+
+String Note::cipherString() const
+{
+    // Basic cipher notation: convert pitch to numeric cipher
+    // This is a simplified implementation
+    // Full implementation would include key signature handling, octave markers, etc.
+    
+    if (!staff() || !staff()->isCipherStaff(tick())) {
+        return String();
+    }
+    
+    // Get pitch class (0-11, where 0=C)
+    int pitchClass = m_pitch % 12;
+    
+    // Convert to cipher notation (1-7 for diatonic scale)
+    // This is a simplified chromatic mapping
+    static const char* cipherNotes[] = { "1", "#1", "2", "#2", "3", "4", "#4", "5", "#5", "6", "#6", "7" };
+    
+    String cipher = String::fromUtf8(cipherNotes[pitchClass]);
+    
+    // Add octave indicators if needed
+    int octave = m_pitch / 12;
+    int middleOctave = 5;  // MIDI octave for middle C
+    
+    if (octave > middleOctave) {
+        // Upper octaves - add dots above
+        for (int i = 0; i < octave - middleOctave; ++i) {
+            cipher += u"'";
+        }
+    } else if (octave < middleOctave) {
+        // Lower octaves - add commas below
+        for (int i = 0; i < middleOctave - octave; ++i) {
+            cipher += u",";
+        }
+    }
+    
+    return cipher;
+}
 }
