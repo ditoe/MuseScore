@@ -3100,10 +3100,11 @@ MarkerType TConv::fromXml(const AsciiStringView& tag, MarkerType def)
     return def;
 }
 
-static const std::array<Item<StaffGroup>, 3> STAFFGROUP_TYPES = { {
+static const std::array<Item<StaffGroup>, 4> STAFFGROUP_TYPES = { {
     { StaffGroup::STANDARD,     "pitched",    muse::TranslatableString("engraving/staffgroup", "Standard") },
     { StaffGroup::PERCUSSION,   "percussion", muse::TranslatableString("engraving/staffgroup", "Percussion") },
     { StaffGroup::TAB,          "tablature",  muse::TranslatableString("engraving/staffgroup", "Tablature") },
+    { StaffGroup::CIPHER,       "cipher",     muse::TranslatableString("engraving/staffgroup", "Cipher") },
 } };
 
 String TConv::translatedUserName(StaffGroup v)

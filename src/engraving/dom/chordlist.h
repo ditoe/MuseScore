@@ -123,7 +123,7 @@ private:
 struct RenderAction
 {
     enum class RenderActionType : char {
-        SET, MOVE, MOVEXHEIGHT, PUSH, POP, NOTE, ACCIDENTAL, STOPHALIGN, SCALE, PAREN
+        SET, MOVE, MOVEXHEIGHT, PUSH, POP, NOTE, ACCIDENTAL, STOPHALIGN, SCALE, PAREN, PUSH_ABS, POP_ABS, POP_MX
     };
 
     virtual RenderActionType actionType() const = 0;
@@ -251,6 +251,24 @@ struct RenderActionPopY : RenderActionPop
 {
     RenderActionPopY()
         : RenderActionPop(false, true) {}
+};
+
+struct RenderActionPushAbs : RenderAction
+{
+    RenderActionPushAbs() {}
+    RenderActionType actionType() const override { return RenderActionType::PUSH_ABS; }
+};
+
+struct RenderActionPopAbs : RenderAction
+{
+    RenderActionPopAbs() {}
+    RenderActionType actionType() const override { return RenderActionType::POP_ABS; }
+};
+
+struct RenderActionPopMx : RenderAction
+{
+    RenderActionPopMx() {}
+    RenderActionType actionType() const override { return RenderActionType::POP_MX; }
 };
 
 struct RenderActionNote : RenderAction
