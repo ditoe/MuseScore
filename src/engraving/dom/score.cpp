@@ -1198,10 +1198,10 @@ bool Score::getPosition(Position* pos, const PointF& p, voice_idx_t voice) const
     staff_idx_t preferredStaffIdx = muse::nidx;
     const double spacingFactor = 0.5;
     const double preferredSpacingFactor = 0.75;
-    if (noteEntryMode() && inputState().staffGroup() != StaffGroup::TAB) {
-        // for non-tab staves, prefer the current system & staff
+    if (noteEntryMode() && inputState().staffGroup() != StaffGroup::TAB && inputState().staffGroup() != StaffGroup::CIPHER) {
+        // for non-tab/cipher staves, prefer the current system & staff
         // this makes it easier to add notes far above or below the staff
-        // not helpful for tab since notes are not entered above or below
+        // not helpful for tab/cipher since notes are not entered above or below
         Segment* seg = inputState().segment();
         if (seg) {
             preferredSystem = seg->system();

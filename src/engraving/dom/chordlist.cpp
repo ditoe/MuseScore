@@ -390,6 +390,12 @@ static void readRenderList(String val, std::list<RenderActionPtr>& renderList, i
             renderList.emplace_back(new RenderActionNote());
         } else if (s == u":a") {
             renderList.emplace_back(new RenderActionAccidental());
+        } else if (s == u":push_abs") {
+            renderList.emplace_back(new RenderActionPushAbs());
+        } else if (s == u":pop_abs") {
+            renderList.emplace_back(new RenderActionPopAbs());
+        } else if (s == u":pop_mx") {
+            renderList.emplace_back(new RenderActionPopMx());
         } else if (s == u":pl") {
             renderList.emplace_back(new RenderActionParenLeft());
         } else if (s == u":pr") {
@@ -452,6 +458,15 @@ static void writeRenderList(XmlWriter& xml, const std::list<RenderActionPtr>& al
             break;
         case RenderAction::RenderActionType::ACCIDENTAL:
             s += u":a";
+            break;
+        case RenderAction::RenderActionType::PUSH_ABS:
+            s += u":push_abs";
+            break;
+        case RenderAction::RenderActionType::POP_ABS:
+            s += u":pop_abs";
+            break;
+        case RenderAction::RenderActionType::POP_MX:
+            s += u":pop_mx";
             break;
         case RenderAction::RenderActionType::PAREN: {
             const RenderActionParenPtr paren = std::static_pointer_cast<RenderActionParen>(a);

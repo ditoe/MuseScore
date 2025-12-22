@@ -99,6 +99,8 @@ void ChordLayout::layout(Chord* item, LayoutContext& ctx)
 
     if (item->onTabStaff()) {
         layoutTablature(item, ctx);
+    } else if (item->onCipherStaff()) {
+        layoutCipher(item, ctx);
     } else {
         layoutPitched(item, ctx);
     }
@@ -695,6 +697,42 @@ void ChordLayout::layoutTablature(Chord* item, LayoutContext& ctx)
     layoutLvArticulation(item, ctx);
 
     fillShape(item, item->mutldata(), ctx.conf());
+}
+
+//---------------------------------------------------------
+//   layoutCipher
+//   Layout cipher notation
+//---------------------------------------------------------
+
+void ChordLayout::layoutCipher(Chord* item, LayoutContext& ctx)
+{
+    // Layout cipher notation - simplified implementation
+    // Uses pitched layout as base but sets cipher-specific dimensions
+    
+    for (Chord* c : item->graceNotes()) {
+        layoutCipher(c, ctx);
+    }
+
+    // Clear existing ledger lines
+    while (item->mutldata()->ledgerLines) {
+        LedgerLine* l = item->ledgerLines()->next();
+        delete item->mutldata()->ledgerLines;
+        item->mutldata()->ledgerLines = l;
+    }
+
+    // Use pitched layout as base
+    layoutPitched(item, ctx);
+    
+    // Set basic cipher dimensions for notes
+    // This enables cipher-aware spacing and positioning
+    double spatium = ctx.conf().spatium();
+    for (Note* note : item->notes()) {
+        // Set basic cipher dimensions
+        // These can be refined based on actual cipher string content
+        note->setCipherWidth(spatium * 1.5);
+        note->setCipherHeight(spatium);
+        note->setCipherLedgerline(0);  // Calculate ledger lines if needed
+    }
 }
 
 void ChordLayout::layoutLvArticulation(Chord* item, LayoutContext& ctx)

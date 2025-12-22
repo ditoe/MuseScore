@@ -931,6 +931,12 @@ enum class Sid {
     tabFretNumberFrameFgColor,
     tabFretNumberFrameBgColor,
 
+    cipherLedgerlineThick,
+    cipherLedgerlineLength,
+    cipherLedgerlineShift,
+    cipherDistanceOctave,
+    cipherNoteDistanc,
+
     lhGuitarFingeringFontFace,
     lhGuitarFingeringFontSize,
     lhGuitarFingeringLineSpacing,

@@ -176,6 +176,15 @@ public:
     double headHeight() const;
     double tabHeadWidth(const StaffType* tab = 0) const;
     double tabHeadHeight(const StaffType* tab = 0) const;
+    
+    // Cipher notation accessors
+    double cipherWidth() const { return m_cipherWidth; }
+    double cipherHeight() const { return m_cipherHeight; }
+    int cipherLedgerline() const { return m_cipherLedgerline; }
+    void setCipherWidth(double w) { m_cipherWidth = w; }
+    void setCipherHeight(double h) { m_cipherHeight = h; }
+    void setCipherLedgerline(int l) { m_cipherLedgerline = l; }
+    
     PointF stemDownNW() const;
     PointF stemUpSE() const;
     double bboxXShift() const;
@@ -249,6 +258,10 @@ public:
     String fretString() const { return m_fretString; }
     void setFretString(const String& s) { m_fretString = s; }
     bool negativeFretUsed() const;
+    
+    // Cipher notation string generation
+    String cipherString() const;
+    
     int string() const { return m_string; }
     void setString(int val) { m_string = val; }
     int stringOrLine() const;
@@ -537,5 +550,10 @@ private:
 
     std::vector<LineAttachPoint> m_lineAttachPoints;
     TieJumpPointList m_jumpPoints { this };
+
+    // Cipher notation members
+    double m_cipherWidth = 0.0;
+    double m_cipherHeight = 0.0;
+    int m_cipherLedgerline = 0;
 };
 } // namespace mu::engraving

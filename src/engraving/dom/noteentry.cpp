@@ -72,11 +72,15 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool& error)
 
     // pitched/unpitched note entry depends on instrument (override StaffGroup)
     StaffGroup staffGroup = st->staffType(tick)->group();
-    if (staffGroup != StaffGroup::TAB) {
+    if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER) {
         staffGroup = instr->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
     }
 
     switch (staffGroup) {
+    case StaffGroup::CIPHER:
+        // Cipher notation - treat as TAB for now
+        // TODO: Implement full cipher note entry
+        // Fall through to TAB handling
     case StaffGroup::PERCUSSION: {
         if (m_is.rest()) {
             break;
@@ -389,7 +393,7 @@ Ret Score::putNote(const Position& p, bool replace)
 
     // pitched/unpitched note entry depends on instrument (override StaffGroup)
     StaffGroup staffGroup = st->staffType(s->tick())->group();
-    if (staffGroup != StaffGroup::TAB) {
+    if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER) {
         staffGroup = st->part()->instrument(s->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
     }
 
@@ -404,6 +408,10 @@ Ret Score::putNote(const Position& p, bool replace)
         }
         break;
     }
+    case StaffGroup::CIPHER:
+        // Cipher notation - treat as standard for now
+        // TODO: Implement full cipher note creation
+        break;
     case StaffGroup::TAB:
         stringData = st->part()->stringData(s->tick(), st->idx());
         m_is.setDrumNote(-1);
