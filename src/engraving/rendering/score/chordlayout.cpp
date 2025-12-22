@@ -99,6 +99,8 @@ void ChordLayout::layout(Chord* item, LayoutContext& ctx)
 
     if (item->onTabStaff()) {
         layoutTablature(item, ctx);
+    } else if (item->onCipherStaff()) {
+        layoutCipher(item, ctx);
     } else {
         layoutPitched(item, ctx);
     }
@@ -695,6 +697,33 @@ void ChordLayout::layoutTablature(Chord* item, LayoutContext& ctx)
     layoutLvArticulation(item, ctx);
 
     fillShape(item, item->mutldata(), ctx.conf());
+}
+
+//---------------------------------------------------------
+//   layoutCipher
+//   Layout cipher notation
+//---------------------------------------------------------
+
+void ChordLayout::layoutCipher(Chord* item, LayoutContext& ctx)
+{
+    // For now, use pitched layout as a base
+    // Full cipher layout would require extensive Note class modifications
+    // TODO: Implement full cipher-specific layout with cipher-specific note rendering
+    
+    for (Chord* c : item->graceNotes()) {
+        layoutCipher(c, ctx);
+    }
+
+    // Clear existing ledger lines
+    while (item->mutldata()->ledgerLines) {
+        LedgerLine* l = item->ledgerLines()->next();
+        delete item->mutldata()->ledgerLines;
+        item->mutldata()->ledgerLines = l;
+    }
+
+    // Use pitched layout for now
+    // This is a placeholder until Note class cipher members are fully implemented
+    layoutPitched(item, ctx);
 }
 
 void ChordLayout::layoutLvArticulation(Chord* item, LayoutContext& ctx)

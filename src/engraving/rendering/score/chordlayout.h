@@ -133,6 +133,7 @@ private:
 
     static void layoutPitched(Chord* item, LayoutContext& ctx);
     static void layoutTablature(Chord* item, LayoutContext& ctx);
+    static void layoutCipher(Chord* item, LayoutContext& ctx);
 
     static void layoutLvArticulation(Chord* item, LayoutContext& ctx);
 
