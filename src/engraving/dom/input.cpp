@@ -98,8 +98,8 @@ StaffGroup InputState::staffGroup() const
     StaffGroup staffGroup = staff->staffType(tick)->group();
     const Instrument* instrument = staff->part()->instrument(tick);
 
-    // if not tab, pitched/unpitched input depends on instrument, not staff (override StaffGroup)
-    if (staffGroup != StaffGroup::TAB) {
+    // if not tab or cipher, pitched/unpitched input depends on instrument, not staff (override StaffGroup)
+    if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER) {
         staffGroup = instrument->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
     }
 

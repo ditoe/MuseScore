@@ -1911,8 +1911,8 @@ void Score::upDown(bool up, UpDownMode mode)
         int fret     = oNote->fret();
 
         StaffGroup staffGroup = staff->staffType(oNote->chord()->tick())->group();
-        // if not tab, check for instrument instead of staffType (for pitched to unpitched instrument changes)
-        if (staffGroup != StaffGroup::TAB) {
+        // if not tab or cipher, check for instrument instead of staffType (for pitched to unpitched instrument changes)
+        if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER) {
             staffGroup = staff->part()->instrument(oNote->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
         }
 
@@ -1927,6 +1927,10 @@ void Score::upDown(bool up, UpDownMode mode)
             }
         }
         break;
+        case StaffGroup::CIPHER:
+            // Cipher notation - treat as standard for now
+            // TODO: Implement cipher-specific up/down logic
+            // Fall through to STANDARD handling
         case StaffGroup::TAB:
         {
             const StringData* stringData = part->stringData(tick, staff->idx());
@@ -4012,7 +4016,8 @@ void Score::cmdSlashFill()
             int line = 0;
             bool error = false;
             NoteVal nv;
-            if (staff(staffIdx)->staffType(s->tick())->group() == StaffGroup::TAB) {
+            if (staff(staffIdx)->staffType(s->tick())->group() == StaffGroup::TAB
+                || staff(staffIdx)->staffType(s->tick())->group() == StaffGroup::CIPHER) {
                 line = staff(staffIdx)->lines(s->tick()) / 2;
             } else {
                 line = staff(staffIdx)->middleLine(s->tick());             // staff(staffIdx)->lines() - 1;
