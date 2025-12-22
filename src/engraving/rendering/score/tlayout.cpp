@@ -506,8 +506,8 @@ void TLayout::layoutAccidental(const Accidental* item, Accidental::LayoutData* l
     ldata->syms.clear();
 
     // TODO: remove Accidental in layout
-    // don't show accidentals for tab or slash notation
-    if (item->onTabStaff() || (item->note() && item->note()->fixed())) {
+    // don't show accidentals for tab, cipher, or slash notation
+    if (item->onTabStaff() || item->onCipherStaff() || (item->note() && item->note()->fixed())) {
         ldata->setIsSkipDraw(true);
         return;
     }
@@ -1942,8 +1942,8 @@ void TLayout::layoutClef(const Clef* item, Clef::LayoutData* ldata, const Layout
         StaffGroup staffGroup = st->group();
         const bool hideClef = st->isTabStaff() ? conf.styleB(Sid::hideTabClefAfterFirst) : !conf.styleB(Sid::genClef);
 
-        // if not tab, use instrument->useDrumset to set staffGroup (to allow pitched to unpitched in same staff)
-        if (staffGroup != StaffGroup::TAB) {
+        // if not tab or cipher, use instrument->useDrumset to set staffGroup (to allow pitched to unpitched in same staff)
+        if (staffGroup != StaffGroup::TAB && staffGroup != StaffGroup::CIPHER) {
             staffGroup = item->staff()->part()->instrument(item->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
         }
 
