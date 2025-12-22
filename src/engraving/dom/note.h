@@ -258,6 +258,10 @@ public:
     String fretString() const { return m_fretString; }
     void setFretString(const String& s) { m_fretString = s; }
     bool negativeFretUsed() const;
+    
+    // Cipher notation string generation
+    String cipherString() const;
+    
     int string() const { return m_string; }
     void setString(int val) { m_string = val; }
     int stringOrLine() const;
