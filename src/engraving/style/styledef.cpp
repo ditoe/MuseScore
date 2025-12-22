@@ -912,6 +912,12 @@ const std::array<StyleDef::StyleValue, size_t(Sid::STYLES)> StyleDef::styleValue
     styleDef(tabFretNumberFrameFgColor,                  PropertyValue::fromValue(Color::BLACK)),
     styleDef(tabFretNumberFrameBgColor,                  PropertyValue::fromValue(Color::transparent)),
 
+    styleDef(cipherLedgerlineThick,                      0.1),
+    styleDef(cipherLedgerlineLength,                     1.5),
+    styleDef(cipherLedgerlineShift,                      0.0),
+    styleDef(cipherDistanceOctave,                       1.0),
+    styleDef(cipherNoteDistanc,                          0.25),
+
     styleDef(lhGuitarFingeringFontFace,                  "Edwin"),
     styleDef(lhGuitarFingeringFontSize,                  8.0),
     styleDef(lhGuitarFingeringLineSpacing,               1.0),
