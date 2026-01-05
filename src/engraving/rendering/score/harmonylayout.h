@@ -47,6 +47,7 @@ private:
 
         // Reset every render() call
         std::stack<PointF> stack;
+        PointF stackAbs = PointF(0.0, 0.0);  // For PUSH_ABS/POP_ABS actions
         int tpc = Tpc::TPC_INVALID;
         NoteSpellingType noteSpelling = NoteSpellingType::STANDARD;
         NoteCaseType noteCase = NoteCaseType::AUTO;
@@ -82,6 +83,9 @@ private:
     static void renderActionMoveXHeight(Harmony* item, const RenderActionMoveXHeightPtr& a, HarmonyRenderCtx& harmonyCtx);
     static void renderActionPush(HarmonyRenderCtx& harmonyCtx);
     static void renderActionPop(const RenderActionPopPtr& a, HarmonyRenderCtx& harmonyCtx);
+    static void renderActionPushAbs(HarmonyRenderCtx& harmonyCtx);
+    static void renderActionPopAbs(HarmonyRenderCtx& harmonyCtx);
+    static void renderActionPopMx(HarmonyRenderCtx& harmonyCtx);
     static void renderActionNote(Harmony* item, Harmony::LayoutData* ldata, HarmonyRenderCtx& harmonyCtx);
     static void renderActionAcc(Harmony* item, Harmony::LayoutData* ldata, HarmonyRenderCtx& harmonyCtx, const LayoutContext& ctx);
     static void renderActionAlign(HarmonyRenderCtx& harmonyCtx);

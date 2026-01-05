@@ -659,6 +659,15 @@ void HarmonyLayout::renderAction(Harmony* item, Harmony::LayoutData* ldata, cons
     case RenderAction::RenderActionType::POP:
         renderActionPop(std::static_pointer_cast<RenderActionPop>(a), harmonyCtx);
         break;
+    case RenderAction::RenderActionType::PUSH_ABS:
+        renderActionPushAbs(harmonyCtx);
+        break;
+    case RenderAction::RenderActionType::POP_ABS:
+        renderActionPopAbs(harmonyCtx);
+        break;
+    case RenderAction::RenderActionType::POP_MX:
+        renderActionPopMx(harmonyCtx);
+        break;
     case RenderAction::RenderActionType::NOTE:
         renderActionNote(item, ldata, harmonyCtx);
         break;
@@ -694,6 +703,22 @@ void HarmonyLayout::renderActionPop(const RenderActionPopPtr& a, HarmonyRenderCt
     PointF pt = harmonyCtx.stack.top();
     harmonyCtx.stack.pop();
     harmonyCtx.pos = PointF(a->popX() ? pt.x() : harmonyCtx.x(), a->popY() ? pt.y() : harmonyCtx.y());
+}
+
+void HarmonyLayout::renderActionPushAbs(HarmonyRenderCtx& harmonyCtx)
+{
+    harmonyCtx.stackAbs = harmonyCtx.pos;
+}
+
+void HarmonyLayout::renderActionPopAbs(HarmonyRenderCtx& harmonyCtx)
+{
+    harmonyCtx.pos = harmonyCtx.stackAbs;
+}
+
+void HarmonyLayout::renderActionPopMx(HarmonyRenderCtx& harmonyCtx)
+{
+    double newX = harmonyCtx.x() - (harmonyCtx.x() - harmonyCtx.stackAbs.x()) / 2.0;
+    harmonyCtx.setx(newX);
 }
 
 void HarmonyLayout::renderActionNote(Harmony* item, Harmony::LayoutData* ldata, HarmonyRenderCtx& harmonyCtx)
