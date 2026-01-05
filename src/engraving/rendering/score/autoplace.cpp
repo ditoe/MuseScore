@@ -48,7 +48,11 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
     const double minSkylineHorizontalClearance = item->isArticulationOrFermata() ? 0.0 : item->style().styleMM(
         Sid::skylineMinHorizontalClearance) * item->mag();
 
-    if (item->autoplace() && item->explicitParent()) {
+    // skip autoplace for KeySig on cipher staff
+    bool skipAutoplaceForCipher = (item->type() == ElementType::KEYSIG
+                                   && item->staff()
+                                   && item->staff()->isCipherStaff(item->tick()));
+    if (!skipAutoplaceForCipher && item->autoplace() && item->explicitParent()) {
         const Segment* s = toSegment(item->findAncestor(ElementType::SEGMENT));
         IF_ASSERT_FAILED(s) {
             return;

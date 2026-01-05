@@ -271,6 +271,7 @@ public:
     static void layoutJump(const Jump* item, Jump::LayoutData* ldata);
 
     static void layoutKeySig(const KeySig* item, KeySig::LayoutData* ldata, const LayoutConfiguration& conf);
+    static void layoutKeySig2(KeySig* item, KeySig::LayoutData* ldata);
 
     static void layoutLaissezVib(LaissezVib* item);
     static void layoutLayoutBreak(const LayoutBreak* item, LayoutBreak::LayoutData* ldata);
@@ -292,6 +293,7 @@ public:
     static void layoutMMRestRange(MMRestRange* item, MMRestRange::LayoutData* ldata, const LayoutContext& ctx);
 
     static void layoutNote(const Note* item, Note::LayoutData* ldata);
+    static void layoutNoteCipherAccidental(Note* item, Note::LayoutData* ldata);
     static void fillNoteShape(const Note* item, Note::LayoutData* ldata);
     static void layoutNoteDot(const NoteDot* item, NoteDot::LayoutData* ldata);
     static void layoutNoteAnchoredLine(SLine* item, SLine::LayoutData* ldata, LayoutContext& ctx);
@@ -358,7 +360,8 @@ public:
     static void layoutTextLineBase(TextLineBase* item, LayoutContext& ctx);
     static void layoutTextLineBaseSegment(TextLineBaseSegment* item, LayoutContext& ctx); // base class
     static void layoutTie(Tie* item, LayoutContext& ctx);
-    static void layoutTimeSig(const TimeSig* item, TimeSig::LayoutData* ldata, const LayoutContext& ctx);
+    static void layoutTimeSig(TimeSig* item, TimeSig::LayoutData* ldata, const LayoutContext& ctx);
+    static void layoutTimeSig2(TimeSig* item, TimeSig::LayoutData* ldata, const LayoutContext& ctx);
     static void layoutTimeTickAnchor(TimeTickAnchor* item, LayoutContext&);
     static void layoutTremoloSingle(TremoloSingleChord* item, LayoutContext& ctx);
     static void layoutTremoloTwo(TremoloTwoChord* item, LayoutContext& ctx);

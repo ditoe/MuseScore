@@ -178,12 +178,44 @@ public:
     double tabHeadHeight(const StaffType* tab = 0) const;
     
     // Cipher notation accessors
-    double cipherWidth() const { return m_cipherWidth; }
-    double cipherHeight() const { return m_cipherHeight; }
-    int cipherLedgerline() const { return m_cipherLedgerline; }
-    void setCipherWidth(double w) { m_cipherWidth = w; }
-    void setCipherHeight(double h) { m_cipherHeight = h; }
-    void setCipherLedgerline(int l) { m_cipherLedgerline = l; }
+    void cipher_setKeysigNote(KeySig* sig);
+    qreal fretStringYShift() const { return m_fretStringYShift; }
+    qreal get_cipherWidth() const { return m_cipherWidth; }
+    qreal get_cipherWidth2() const { return m_cipherWidth2; }
+    qreal get_cipherHeigth() const { return m_cipherHeigth; }
+    int get_cipherLedgerline() { return m_cipherLedgerline; }
+    int get_cipherGroundPitch();
+    bool get_fretHidden() { return m_fretHidden; }
+    void set_drawFlat(bool v) { m_drawFlat = v; }
+    void set_drawSharp(bool v) { m_drawSharp = v; }
+    void set_fretString(String s) { m_fretString = s; }
+    void set_cipherWidth(qreal r) { m_cipherWidth = r; }
+    void set_trackthick(qreal r) { m_trackthick = r; }
+    void set_cipherWidth2(qreal r) { m_cipherWidth2 = r; }
+    void set_cipherLedgerline(int i) { m_cipherLedgerline = i; }
+    void set_fretStringYShift(qreal r) { m_fretStringYShift = r; }
+    void set_cipherHeigth(qreal r) { m_cipherHeigth = r; }
+    void set_fretHidden(bool b) { m_fretHidden = b; }
+    void set_cipherTextPos(PointF p) { m_cipherTextPos = p; }
+    void set_cipherAccidentalPos(PointF p) { m_cipherAccidentalPos = p; }
+    void set_cipherKlammerPos(PointF p) { m_cipherKlammerPos = p; }
+    muse::draw::Font get_cipherFont() const;
+    muse::draw::Font get_cipherAccidentalFont() const;
+    // Cipher notation string generation
+    int setAccidentalTypeBack(int defaultdirection);
+    String get_cipherString(int numkro) ;
+    String get_cipherDuration(int n) const;
+    String get_cipherDurationDot(int n) const;
+    static int get_cipherTrans(Key key);
+    int get_cipherOktave() const;
+    bool get_drawFlat() const { return m_drawFlat; }
+    bool get_drawSharp() const { return m_drawSharp; }
+    qreal get_trackthick() const { return m_trackthick; }
+    PointF get_cipherAccidentalPos() const { return m_cipherAccidentalPos; }
+    PointF get_cipherTextPos() const { return m_cipherTextPos; }
+    PointF get_cipherKlammerPos() const { return m_cipherKlammerPos; }
+    void drawSharp(muse::draw::Painter* painter, const muse::PointF& pos, const muse::draw::Font& font) const;
+    void drawFlat(muse::draw::Painter* painter, const muse::PointF& pos, const muse::draw::Font& font) const;
     
     PointF stemDownNW() const;
     PointF stemUpSE() const;
@@ -259,8 +291,6 @@ public:
     void setFretString(const String& s) { m_fretString = s; }
     bool negativeFretUsed() const;
     
-    // Cipher notation string generation
-    String cipherString() const;
     
     int string() const { return m_string; }
     void setString(int val) { m_string = val; }
@@ -552,8 +582,17 @@ private:
     TieJumpPointList m_jumpPoints { this };
 
     // Cipher notation members
-    double m_cipherWidth = 0.0;
-    double m_cipherHeight = 0.0;
-    int m_cipherLedgerline = 0;
+    qreal m_fretStringYShift;
+    qreal m_cipherWidth;
+    qreal m_cipherWidth2;
+    qreal m_cipherHeigth;
+    qreal m_trackthick = 1.0;
+    PointF m_cipherAccidentalPos;
+    PointF m_cipherTextPos;
+    PointF m_cipherKlammerPos;
+    int m_cipherLedgerline;
+    bool m_fretHidden = false;
+    bool m_drawFlat = false;
+    bool m_drawSharp = false;
 };
 } // namespace mu::engraving

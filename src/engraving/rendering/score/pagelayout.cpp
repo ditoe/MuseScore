@@ -1,4 +1,4 @@
-/*
+﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
  * MuseScore-Studio-CLA-applies
  *
@@ -354,6 +354,36 @@ void PageLayout::collectPage(LayoutContext& ctx)
                 }
             }
             MeasureLayout::layout2(m, ctx);
+
+            for (int track = 0; track < ctx.dom().ntracks(); ++track) {
+                for (Segment* segment = m->first(); segment; segment = segment->next()) {
+                    EngravingItem* e = segment->element(track);
+
+                    if (!e)
+                        continue;
+                    else if (e->isTimeSig() && segment->isTimeSigType()) {
+                        if (toTimeSig(e)->mutldata()->cipherVisible) {
+                            qreal w = 0.0;
+                            if (m->first() && m->first()->firstElement(0) && m->first()->isBeginBarLineType())
+                                w = m->first()->firstElement(0)->width();
+                            if (m->prevMeasure() && m->prevMeasure()->last() && m->prevMeasure()->last()->firstElement(0)
+                                && m->prevMeasure()->last()->isEndBarLineType())
+                                w = qMax(w, m->prevMeasure()->last()->firstElement(0)->width());
+                            if (m->prevMeasure() && m->prevMeasure()->last() && m->prevMeasure()->last()->prev()
+                                && m->prevMeasure()->last()->prev()->firstElement(0)
+                                && m->prevMeasure()->last()->prev()->isEndBarLineType())
+                                w = qMax(w, m->prevMeasure()->last()->prev()->firstElement(0)->width());
+                            TimeSig* sig1 = toTimeSig(e);
+                            sig1->mutldata()->cipherXpos=(-segment->pos().x() - w);
+                            TLayout::layoutTimeSig2(sig1, sig1->mutldata(), ctx);
+                        }
+                    }
+                    else if (e->isKeySig()) {
+                        KeySig* sig1 = toKeySig(e);
+                        TLayout::layoutKeySig2(sig1, sig1->mutldata());
+                    }
+                }
+            }
         }
         SystemLayout::layoutSystemLockIndicators(s, ctx);
 
@@ -733,6 +763,11 @@ void PageLayout::distributeStaves(LayoutContext& ctx, Page* page, double footerP
                 if (vbox) {
                     vgd->addSpaceAroundVBox(false);
                     vbox = false;
+                }
+
+                // Wenn diese Staff eine Cipher‑Staff ist, verhindere spätere Vertikalverteilung
+                if (staff && staff->isCipherStaff(system->firstMeasure() ? system->firstMeasure()->tick() : Fraction(0,1))) {
+                    vgd->setNonStretchable();
                 }
 
                 prevYBottom  = system->y() + sysStaff->bbox().bottom();

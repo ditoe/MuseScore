@@ -259,6 +259,7 @@ static constexpr PropertyMetaData propertyList[] = {
     { Pid::SLUR_UOFF4,              false, "o4",                    P_TYPE::POINT,              PropertyGroup::POSITION,        QT_TRANSLATE_NOOP("engraving/propertyName", "end offset") },
     { Pid::STAFF_MOVE,              true,  "staffMove",             P_TYPE::INT,                PropertyGroup::APPEARANCE,      QT_TRANSLATE_NOOP("engraving/propertyName", "staff move") },
     { Pid::VERSE,                   true,  "no",                    P_TYPE::INT,                PropertyGroup::APPEARANCE,      QT_TRANSLATE_NOOP("engraving/propertyName", "verse") },
+    { Pid::LYRICS_STAFF_SHIFT,      true,  "lyricsStaffShift",      P_TYPE::INT,                PropertyGroup::APPEARANCE,      QT_TRANSLATE_NOOP("engraving/propertyName", "Move lyrics to a different voice") },
 
     { Pid::SYLLABIC,                true,  "syllabic",              P_TYPE::INT,                PropertyGroup::APPEARANCE,      QT_TRANSLATE_NOOP("engraving/propertyName", "syllabic") },
     { Pid::LYRIC_TICKS,             true,  "ticks_f",               P_TYPE::FRACTION,           PropertyGroup::APPEARANCE,      QT_TRANSLATE_NOOP("engraving/propertyName", "ticks") },

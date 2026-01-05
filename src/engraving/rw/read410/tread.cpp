@@ -3572,6 +3572,7 @@ void TRead::read(PartialLyricsLine* p, XmlReader& xml, ReadContext& ctx)
         if (tag == "isEndMelisma") {
             p->setIsEndMelisma(xml.readBool());
         } else if (TRead::readProperty(p, tag, xml, ctx, Pid::VERSE)) {
+        } else if (TRead::readProperty(p, tag, xml, ctx, Pid::LYRICS_STAFF_SHIFT)) {
         } else if (!readItemProperties(p, xml, ctx)) {
             xml.unknown();
         }

@@ -140,6 +140,8 @@ void NotationNoteInput::startNoteInput(NoteInputMethod method, bool focusNotatio
     switch (staff->staffType(is.tick())->group()) {
     case mu::engraving::StaffGroup::STANDARD:
         break;
+    case mu::engraving::StaffGroup::CIPHER:
+        //break;
     case mu::engraving::StaffGroup::TAB: {
         int strg = 0;                           // assume topmost string as current string
         // if entering note entry with a note selected and the note has a string

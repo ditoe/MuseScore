@@ -22,6 +22,7 @@ declare_module(engraving)
 set(MODULE_QRC
     engraving.qrc
     ${CMAKE_CURRENT_LIST_DIR}/data/fonts/fonts_Smufl.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/data/fonts/fonts_Cipher.qrc
 )
 
 set(MODULE_BIG_QRC
@@ -38,6 +39,7 @@ set(MODULE_BIG_QRC
     ${CMAKE_CURRENT_LIST_DIR}/data/fonts/fonts_FinaleMaestro.qrc
     ${CMAKE_CURRENT_LIST_DIR}/data/fonts/fonts_FinaleBroadway.qrc
     ${CMAKE_CURRENT_LIST_DIR}/data/fonts/fonts_Tabulature.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/data/fonts/fonts_Cipher.qrc
     )
 
 include(${CMAKE_CURRENT_LIST_DIR}/dom/dom.cmake)

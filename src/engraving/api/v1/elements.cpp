@@ -586,6 +586,11 @@ bool Staff::isPitchedStaff(FractionWrapper* tick)
     return staff()->isPitchedStaff(tick->fraction());
 }
 
+//bool Staff::isCipherStaff(FractionWrapper* tick)
+//{
+//    return staff()->isCipherStaff(tick->fraction());
+//}
+
 bool Staff::isTabStaff(FractionWrapper* tick)
 {
     return staff()->isTabStaff(tick->fraction());

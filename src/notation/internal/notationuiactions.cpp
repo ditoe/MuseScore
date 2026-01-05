@@ -63,6 +63,22 @@ static const TranslatableString noteA = TranslatableString("action", "A");
 //: Note
 static const TranslatableString noteB = TranslatableString("action", "B");
 
+//: Cipher
+static const TranslatableString cipherEnter1 = TranslatableString("action", "1");
+//: Cipher
+static const TranslatableString cipherEnter2 = TranslatableString("action", "2");
+//: Cipher
+static const TranslatableString cipherEnter3 = TranslatableString("action", "3");
+//: Cipher
+static const TranslatableString cipherEnter4 = TranslatableString("action", "4");
+//: Cipher
+static const TranslatableString cipherEnter5 = TranslatableString("action", "5");
+//: Cipher
+static const TranslatableString cipherEnter6 = TranslatableString("action", "6");
+//: Cipher
+static const TranslatableString cipherEnter7 = TranslatableString("action", "7");
+
+static const TranslatableString Enter_cipher_X = TranslatableString("action", "Enter cipher %1");
 static const TranslatableString Enter_note_X = TranslatableString("action", "Enter note %1");
 static const TranslatableString Add_X_to_chord = TranslatableString("action", "Add %1 to chord");
 static const TranslatableString Add_note_X_to_chord = TranslatableString("action", "Add note %1 to chord");
@@ -74,6 +90,9 @@ static const TranslatableString enter_TAB_fret_X = TranslatableString("action", 
 //: Addition to the name of an action to indicate that this action only applies to tablature notation.
 //: '%1' is the name of the action.
 static const TranslatableString X_TAB = TranslatableString("action", "%1 (TAB)");
+//: Addition to the name of an action to indicate that this action only applies to cipher notation.
+//: '%1' is the name of the action.
+static const TranslatableString X_CIPHER = TranslatableString("action", "%1 (Cipher)");
 
 //! NOTE Each notation actions should has context is UiCtxProjectOpened.
 //! If you want what action to dispatch by shortcut only when notation is focused (ex notation-move-right by press Right key),
@@ -255,13 +274,13 @@ const UiActionList NotationUiActions::m_actions = {
              ),
     UiAction("pitch-up",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Up"),
              TranslatableString("action", "Move pitch/selection up")
              ),
     UiAction("pitch-down",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Down"),
              TranslatableString("action", "Move pitch/selection down")
              ),
@@ -1141,9 +1160,51 @@ const UiActionList NotationUiActions::m_actions = {
              mu::context::CTX_NOTATION_OPENED,
              Insert_X.arg(noteB)
              ),
+    UiAction("cipher-1",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter1,
+            Enter_cipher_X.arg(cipherEnter1)
+            ),
+    UiAction("cipher-2",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter2,
+            Enter_cipher_X.arg(cipherEnter2)
+            ),
+    UiAction("cipher-3",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter3,
+            Enter_cipher_X.arg(cipherEnter3)
+            ),
+    UiAction("cipher-4",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter4,
+            Enter_cipher_X.arg(cipherEnter4)
+            ),
+    UiAction("cipher-5",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter5,
+            Enter_cipher_X.arg(cipherEnter5)
+            ),
+    UiAction("cipher-6",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter6,
+            Enter_cipher_X.arg(cipherEnter6)
+            ),
+    UiAction("cipher-7",
+            mu::context::UiCtxProjectOpened,
+            mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+            cipherEnter7,
+            Enter_cipher_X.arg(cipherEnter7)
+            ),
     UiAction("rest",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Rest"),
              TranslatableString("action", "Enter rest"),
              IconCode::Code::REST
@@ -2173,170 +2234,247 @@ const UiActionList NotationUiActions::m_actions = {
              ),
     UiAction("note-longa",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Longa"),
              TranslatableString("action", "Set duration: longa"),
              IconCode::Code::LONGO
              ),
     UiAction("note-breve",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Double whole note"),
              TranslatableString("action", "Set duration: double whole note"),
              IconCode::Code::NOTE_WHOLE_DOUBLE
              ),
     UiAction("pad-note-1",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Whole note"),
              TranslatableString("action", "Set duration: whole note"),
              IconCode::Code::NOTE_WHOLE
              ),
     UiAction("pad-note-2",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Half note"),
              TranslatableString("action", "Set duration: half note"),
              IconCode::Code::NOTE_HALF
              ),
     UiAction("pad-note-4",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Quarter note"),
              TranslatableString("action", "Set duration: quarter note"),
              IconCode::Code::NOTE_QUARTER
              ),
     UiAction("pad-note-8",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "Eighth note"),
              TranslatableString("action", "Set duration: eighth note"),
              IconCode::Code::NOTE_8TH
              ),
     UiAction("pad-note-16",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "16th note"),
              TranslatableString("action", "Set duration: 16th note"),
              IconCode::Code::NOTE_16TH
              ),
     UiAction("pad-note-32",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "32nd note"),
              TranslatableString("action", "Set duration: 32nd note"),
              IconCode::Code::NOTE_32ND
              ),
     UiAction("pad-note-64",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "64th note"),
              TranslatableString("action", "Set duration: 64th note"),
              IconCode::Code::NOTE_64TH
              ),
     UiAction("pad-note-128",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "128th note"),
              TranslatableString("action", "Set duration: 128th note"),
              IconCode::Code::NOTE_128TH
              ),
     UiAction("pad-note-256",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "256th note"),
              TranslatableString("action", "Set duration: 256th note"),
              IconCode::Code::NOTE_256TH
              ),
     UiAction("pad-note-512",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "512th note"),
              TranslatableString("action", "Set duration: 512th note"),
              IconCode::Code::NOTE_512TH
              ),
     UiAction("pad-note-1024",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB,
+             mu::context::CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB_CIPHER,
              TranslatableString("action", "1024th note"),
              TranslatableString("action", "Set duration: 1024th note"),
              IconCode::Code::NOTE_1024TH
              ),
     UiAction("pad-note-1-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "Whole note")),
              X_TAB.arg(TranslatableString("action", "Set duration: whole note")),
              IconCode::Code::NOTE_WHOLE
              ),
     UiAction("pad-note-2-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "Half note")),
              X_TAB.arg(TranslatableString("action", "Set duration: half note")),
              IconCode::Code::NOTE_HALF
              ),
     UiAction("pad-note-4-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "Quarter note")),
              X_TAB.arg(TranslatableString("action", "Set duration: quarter note")),
              IconCode::Code::NOTE_QUARTER
              ),
     UiAction("pad-note-8-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "Eighth note")),
              X_TAB.arg(TranslatableString("action", "Set duration: eighth note")),
              IconCode::Code::NOTE_8TH
              ),
     UiAction("pad-note-16-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "16th note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 16th note")),
              IconCode::Code::NOTE_16TH
              ),
     UiAction("pad-note-32-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "32nd note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 32nd note")),
              IconCode::Code::NOTE_32ND
              ),
     UiAction("pad-note-64-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "64th note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 64th note")),
              IconCode::Code::NOTE_64TH
              ),
     UiAction("pad-note-128-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "128th note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 128th note")),
              IconCode::Code::NOTE_128TH
              ),
     UiAction("pad-note-256-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "256th note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 256th note")),
              IconCode::Code::NOTE_256TH
              ),
     UiAction("pad-note-512-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "512th note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 512th note")),
              IconCode::Code::NOTE_512TH
              ),
     UiAction("pad-note-1024-TAB",
              mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_OPENED,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_TAB,
              X_TAB.arg(TranslatableString("action", "1024th note")),
              X_TAB.arg(TranslatableString("action", "Set duration: 1024th note")),
+             IconCode::Code::NOTE_1024TH
+             ),
+    UiAction("pad-note-1-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "Whole note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: whole note")),
+             IconCode::Code::NOTE_WHOLE
+             ),
+    UiAction("pad-note-2-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "Half note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: half note")),
+             IconCode::Code::NOTE_HALF
+             ),
+    UiAction("pad-note-4-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "Quarter note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: quarter note")),
+             IconCode::Code::NOTE_QUARTER
+             ),
+    UiAction("pad-note-8-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "Eighth note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: eighth note")),
+             IconCode::Code::NOTE_8TH
+             ),
+    UiAction("pad-note-16-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "16th note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 16th note")),
+             IconCode::Code::NOTE_16TH
+             ),
+    UiAction("pad-note-32-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "32nd note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 32nd note")),
+             IconCode::Code::NOTE_32ND
+             ),
+    UiAction("pad-note-64-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "64th note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 64th note")),
+             IconCode::Code::NOTE_64TH
+             ),
+    UiAction("pad-note-128-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "128th note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 128th note")),
+             IconCode::Code::NOTE_128TH
+             ),
+    UiAction("pad-note-256-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "256th note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 256th note")),
+             IconCode::Code::NOTE_256TH
+             ),
+    UiAction("pad-note-512-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "512th note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 512th note")),
+             IconCode::Code::NOTE_512TH
+             ),
+    UiAction("pad-note-1024-CIPHER",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_NOTE_INPUT_STAFF_CIPHER,
+             X_CIPHER.arg(TranslatableString("action", "1024th note")),
+             X_CIPHER.arg(TranslatableString("action", "Set duration: 1024th note")),
              IconCode::Code::NOTE_1024TH
              ),
     UiAction("pad-dot",

@@ -131,6 +131,9 @@ public:
     const ScaleF& scale() const { return m_scale; }
     void setScale(const ScaleF& s) { m_scale = s; } // TODO: think about what to do with this
 
+    muse::draw::Font cipherTimeSigFont() const;
+    void set_timeSigType(TimeSigType type) { m_timeSigType = type; }
+
     struct LayoutData : public EngravingItem::LayoutData {
         SymIdList ns;
         SymIdList ds;
@@ -138,6 +141,21 @@ public:
         PointF pn;
         PointF pointLargeLeftParen;
         PointF pointLargeRightParen;
+
+        String cipher_ns;
+        String cipher_ds;
+
+        qreal cipherLineThick;
+        qreal cipherXpos;
+        qreal cipherHeigthds;
+        qreal cipherHeigthns;
+        qreal cipherBarLinelenght;
+        bool cipherVisible;
+        bool cipherBegin;
+
+
+        LineF cipherLine;
+        LineF cipherBarLine;
     };
     DECLARE_LAYOUTDATA_METHODS(TimeSig)
 

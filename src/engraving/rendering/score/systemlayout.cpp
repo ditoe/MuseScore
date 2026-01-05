@@ -440,10 +440,44 @@ System* SystemLayout::collectSystem(LayoutContext& ctx)
         // Restore them to the correct state.
         SystemLayout::restoreOldSystemLayout(oldSystem, ctx);
     }
-
+    LyricsLayout3(system, ctx);
     return system;
 }
 
+//---------------------------------------------------------
+//   layoutTies
+//---------------------------------------------------------
+
+void SystemLayout::LyricsLayout3(System* system, LayoutContext& lc)
+{
+    for (int staffIdx = system->firstVisibleStaff(); staffIdx < system->score()->nstaves(); staffIdx = system->nextVisibleStaff(staffIdx)) {
+        for (MeasureBase* mb : system->measures()) {
+            if (!mb->isMeasure())
+                continue;
+            Measure* m = toMeasure(mb);
+            for (Segment& s : m->segments()) {
+                if (s.isChordRestType()) {
+                    for (int voice = 0; voice < VOICES; ++voice) {
+                        ChordRest* cr = s.cr(staffIdx * VOICES + voice);
+                        if (cr) {
+                            for (Lyrics* l : cr->lyrics()) {
+                                l->layout3();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (SpannerSegment* spannerSegment : system->spannerSegments()) {
+        if (spannerSegment->isLyricsLineSegment()) {
+            LyricsLineSegment* lyricsLineSegment = toLyricsLineSegment(spannerSegment);
+            lyricsLineSegment->layout3();
+
+        }
+    }
+
+}
 bool SystemLayout::shouldBeJustified(System* system, double curSysWidth, double targetSystemWidth, LayoutContext& ctx)
 {
     bool shouldJustify = true;
@@ -2445,6 +2479,17 @@ void SystemLayout::layout2(System* system, LayoutContext& ctx)
         akkoladeDistance    = ctx.conf().styleMM(Sid::minStaffSpread);
     }
 
+    qreal cipherTimesigStart = 0.0;
+    int cipherAnzalStaff = 0;
+    const Staff* cipherFirstStaff = 0;
+    TimeSig* cipherTimesig = 0;
+    Fraction tickk = system->tick();
+    if (system->nextSegmentElement())
+        tickk = system->nextSegmentElement()->tick();
+    int si = system->firstVisibleSysStaff();
+    SysStaff* sfirstVisibleSysStaff = si < 0 ? nullptr : system->staff(si);
+    sfirstVisibleSysStaff->set_distanceFirstStaff(0);
+
     if (visibleStaves.empty()) {
         return;
     }
@@ -2454,6 +2499,46 @@ void SystemLayout::layout2(System* system, LayoutContext& ctx)
         staff_idx_t si1 = i->first;
         const Staff* staff  = ctx.dom().staff(si1);
         auto ni = std::next(i);
+
+        ss->set_distanceFirstStaff(y);
+        if (staff && staff->isCipherStaff(tickk)) {
+            cipherAnzalStaff++;
+            staffDistance = ctx.conf().styleMM(Sid::cipherStaffDistans);
+            if (cipherAnzalStaff == 1) {
+                cipherFirstStaff = staff;
+                cipherTimesig = cipherFirstStaff->nextTimeSig(tickk);
+                cipherTimesigStart = y;
+            }
+            else {
+
+                if (cipherAnzalStaff > 1) {
+                    TimeSig* sig = staff->nextTimeSig(tickk);
+                    while (sig) {
+                        sig->mutldata()->cipherVisible=false;
+                        sig = staff->nextTimeSig(sig->tick() + Fraction::fromTicks(1));
+                    }
+                }
+            }
+            if (cipherTimesig) {
+                cipherTimesig->mutldata()->cipherVisible = true;
+                cipherTimesig->mutldata()->setPosY((y - cipherTimesigStart) / 2);
+                cipherTimesig->mutldata()->cipherBarLinelenght =y - cipherTimesigStart;
+                TimeSig* sig = cipherFirstStaff->nextTimeSig(tickk + Fraction::fromTicks(1));
+                while (sig) {
+                    sig->mutldata()->cipherVisible = true;
+                    sig->mutldata()->setPosY((y - cipherTimesigStart) / 2);
+                    sig->mutldata()->cipherBarLinelenght =y - cipherTimesigStart;
+                    sig = cipherFirstStaff->nextTimeSig(sig->tick() + Fraction::fromTicks(1));
+                }
+            }
+
+        }
+        else {
+            cipherAnzalStaff = 0;
+            cipherFirstStaff = 0;
+            cipherTimesig = 0;
+            staffDistance = system->styleP(Sid::staffDistance);
+        }
 
         double dist = staff->staffHeight();
         double yOffset;

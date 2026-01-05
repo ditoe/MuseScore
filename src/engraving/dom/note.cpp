@@ -1168,6 +1168,200 @@ double Note::tabHeadHeight(const StaffType* tab) const
 }
 
 //---------------------------------------------------------
+//   cipher_setKeysigNote
+//---------------------------------------------------------
+
+void Note::cipher_setKeysigNote(KeySig* sig)
+{
+    if (staff()->key(tick()) != staff()->key(tick() - Fraction::fromTicks(1)) && track() % 4 == 0) {
+        bool drawFlatTemp = m_drawFlat;
+        bool drawSharpTemp = m_drawSharp;
+
+        m_drawFlat = false;
+        m_drawSharp = false;
+        int numtransposeInterval = part()->instrument(chord()->tick())->transpose().chromatic;
+        int clefshift = get_cipherOktave();
+        int grundtonverschibung = get_cipherTrans(staff()->key(tick() - Fraction::fromTicks(1)));
+        int zifferkomatik = ((m_pitch + grundtonverschibung + numtransposeInterval) % 12) + 1;
+        QString fretString = get_cipherString(zifferkomatik);
+        qreal fretStringYShift = ((m_pitch + grundtonverschibung + numtransposeInterval) / 12 - 5 - clefshift) * m_cipherHeigth * style().styleD(Sid::cipherDistanceOctave);
+        int accid = 0;
+        if (m_drawFlat) {
+            accid--;
+        }
+        if (m_drawSharp) {
+            accid++;
+        }
+
+        //sig->set_cipherNote(fretString + ")", accid, fretStringYShift);
+        m_drawFlat = drawFlatTemp;
+        m_drawSharp = drawSharpTemp;
+    }
+
+}
+//---------------------------------------------------------
+//   getAccidentalTypeBack
+//---------------------------------------------------------
+
+int Note::setAccidentalTypeBack(int defaultdirection) {
+    int shift = defaultdirection;
+    if (shift == 1) { m_drawSharp = true; m_drawFlat = false; }
+    if (shift == -1) { m_drawFlat = true; m_drawSharp = false; }
+    return shift;
+}
+//---------------------------------------------------------
+//   get_cipher
+//---------------------------------------------------------
+
+String Note::get_cipherString(int numkro)
+{
+    switch (numkro) {
+    case 0:
+        return (String)"7";
+    case 1:
+        return (String)"1";
+    case 2:
+        return get_cipherString(numkro + setAccidentalTypeBack(-1));
+    case 3:
+        return (String)"2";
+    case 4:
+        return get_cipherString(numkro + setAccidentalTypeBack(1));
+    case 5:
+        return (String)"3";
+    case 6:
+        return (String)"4";
+    case 7:
+        return get_cipherString(numkro + setAccidentalTypeBack(-1));
+    case 8:
+        return (String)"5";
+    case 9:
+        return get_cipherString(numkro + setAccidentalTypeBack(-1));
+    case 10:
+        return (String)"6";
+    case 11:
+        return get_cipherString(numkro + setAccidentalTypeBack(1));
+    case 12:
+        return (String)"7";
+    case 13:
+        return (String)"1";
+    default:
+        return (String)"0";
+    }
+}
+//---------------------------------------------------------
+//   get_cipherGroundPitch
+//---------------------------------------------------------
+
+int Note::get_cipherGroundPitch() {
+    if (m_drawSharp)
+        return m_pitch - 1;
+    if (m_drawFlat)
+        return m_pitch + 1;
+    return m_pitch;
+}
+//---------------------------------------------------------
+//   get_cipherDuration
+//---------------------------------------------------------
+String Note::get_cipherDuration(int n) const {
+    String get_cipherDuration[16] = {
+          (String)"",(String)"",(String)",,",(String)",",(String)"",(String)"",(String)"",
+          (String)"",(String)"",(String)"",(String)"",(String)"",(String)"",(String)"",
+          (String)"",(String)""
+
+    };
+    return get_cipherDuration[n];
+}
+//---------------------------------------------------------
+//   get_cipherDurationDot
+//---------------------------------------------------------
+String Note::get_cipherDurationDot(int n) const {
+    String get_cipherDurationDot[3] = {
+          (String)"",(String)".",(String)".."
+
+    };
+    return get_cipherDurationDot[n];
+}
+//---------------------------------------------------------
+//   get_cipherTrans
+//---------------------------------------------------------
+int Note::get_cipherTrans(Key key) {
+    switch (key) {
+    case Key::C_B:  return 1;
+    case Key::G_B:  return -6;
+    case Key::D_B:  return -1;
+    case Key::A_B:  return 4;
+    case Key::E_B:  return -3;
+    case Key::B_B:  return 2;
+    case Key::F:  return -5;
+    case Key::C:  return 0;
+    case Key::G:  return 5;
+    case Key::D:  return -2;
+    case Key::A:  return 3;
+    case Key::E:  return -4;
+    case Key::B:  return 1;
+    case Key::F_S:  return -6;
+    case Key::C_S:  return 1;
+    default:
+        return 0;
+        break;
+    }
+}
+//---------------------------------------------------------
+//   get_cipherOktave
+//---------------------------------------------------------voice.soprano
+int Note::get_cipherOktave() const {
+    QString instname = part()->instrument(chord()->tick())->instrumentId();
+    if (instname == "bass")
+        return -1;
+    if (instname == "tenor")
+        return -1;
+    return 0;
+}
+//---------------------------------------------------------
+//   cipherTimeSigFont
+//---------------------------------------------------------
+muse::draw::Font Note::get_cipherFont() const
+{
+    const MStyle& st = style();
+    Font f(st.styleSt(Sid::cipherFont), Font::Type::Text);
+    f.setPointSizeF((st.styleD(Sid::cipherFontSize) * (spatium() / SPATIUM20)) * m_trackthick);
+    return f;
+}
+//---------------------------------------------------------
+//   cipherAccidentalFont
+//---------------------------------------------------------
+muse::draw::Font Note::get_cipherAccidentalFont() const
+{
+    const MStyle& st = style();
+    Font f(st.styleSt(Sid::cipherAccidentalFont), Font::Type::Text);
+    //f.setPointSizeF((st.styleD(Sid::cipherFontSize) * spatium() * MScore::pixelRatio / SPATIUM20) * m_trackthick);
+    return f;
+}
+//---------------------------------------------------------
+//   drawSharp
+//---------------------------------------------------------
+
+void Note::drawSharp(muse::draw::Painter* painter, const muse::PointF& pos, const muse::draw::Font& font) const
+{
+    muse::draw::Font fontOld = painter->font();
+    painter->setFont(font);
+    painter->drawText(pos, u"♯");
+    painter->setFont(fontOld);
+}
+
+//---------------------------------------------------------
+//   drawFlat
+//---------------------------------------------------------
+
+void Note::drawFlat(muse::draw::Painter* painter, const muse::PointF& pos, const muse::draw::Font& font) const
+{
+    muse::draw::Font fontOld = painter->font();
+    painter->setFont(font);
+    painter->drawText(pos, u"♭");
+    painter->setFont(fontOld);
+}
+
+//---------------------------------------------------------
 //   stemDownNW
 //---------------------------------------------------------
 
@@ -3976,46 +4170,4 @@ int Note::stringOrLine() const
     return staff()->staffType(tick())->isTabStaff() ? string() * 2 : line();
 }
 
-//---------------------------------------------------------
-//   cipherString
-//   Generate cipher notation string representation
-//---------------------------------------------------------
-
-String Note::cipherString() const
-{
-    // Basic cipher notation: convert pitch to numeric cipher
-    // This is a simplified implementation
-    // Full implementation would include key signature handling, octave markers, etc.
-    
-    if (!staff() || !staff()->isCipherStaff(tick())) {
-        return String();
-    }
-    
-    // Get pitch class (0-11, where 0=C)
-    int pitchClass = m_pitch % 12;
-    
-    // Convert to cipher notation (1-7 for diatonic scale)
-    // This is a simplified chromatic mapping
-    static const char* cipherNotes[] = { "1", "#1", "2", "#2", "3", "4", "#4", "5", "#5", "6", "#6", "7" };
-    
-    String cipher = String::fromUtf8(cipherNotes[pitchClass]);
-    
-    // Add octave indicators if needed
-    int octave = m_pitch / 12;
-    int middleOctave = 5;  // MIDI octave for middle C
-    
-    if (octave > middleOctave) {
-        // Upper octaves - add dots above
-        for (int i = 0; i < octave - middleOctave; ++i) {
-            cipher += u"'";
-        }
-    } else if (octave < middleOctave) {
-        // Lower octaves - add commas below
-        for (int i = 0; i < middleOctave - octave; ++i) {
-            cipher += u",";
-        }
-    }
-    
-    return cipher;
-}
 }

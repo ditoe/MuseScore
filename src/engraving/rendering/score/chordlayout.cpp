@@ -705,34 +705,243 @@ void ChordLayout::layoutTablature(Chord* item, LayoutContext& ctx)
 //---------------------------------------------------------
 
 void ChordLayout::layoutCipher(Chord* item, LayoutContext& ctx)
-{
-    // Layout cipher notation - simplified implementation
-    // Uses pitched layout as base but sets cipher-specific dimensions
-    
+{//
     for (Chord* c : item->graceNotes()) {
-        layoutCipher(c, ctx);
+        layoutPitched(c, ctx);
     }
 
-    // Clear existing ledger lines
-    while (item->mutldata()->ledgerLines) {
-        LedgerLine* l = item->ledgerLines()->next();
-        delete item->mutldata()->ledgerLines;
-        item->mutldata()->ledgerLines = l;
-    }
+    double mag_ = item->staff() ? item->staff()->staffMag(item) : 1.0;      // palette elements do not have a staff
+    double dotNoteDistance = ctx.conf().styleMM(Sid::dotNoteDistance) * mag_;
 
-    // Use pitched layout as base
-    layoutPitched(item, ctx);
-    
-    // Set basic cipher dimensions for notes
-    // This enables cipher-aware spacing and positioning
-    double spatium = ctx.conf().spatium();
+    double chordX = (item->noteType() == NoteType::NORMAL) ? item->ldata()->pos().x() : 0.0;
+
+    double lll = 0.0;           // space to leave at left of chord
+    double rrr = 0.0;           // space to leave at right of chord
+    double lhead = 0.0;           // amount of notehead to left of chord origin
+    Note* upnote = item->upNote();
+    Note* downnote = item->downNote();
+    Note* leftNote = nullptr;
+
+    delete item->tabDur();     // no TAB? no duration symbol! (may happen when converting a TAB into PITCHED)
+    item->setTabDur(nullptr);
+
+    //-----------------------------------------
+    //  process notes
+    //-----------------------------------------
+
+    // Keeps track if there are any accidentals in this chord.
+    // Used to remove excess space in front of arpeggios.
+    // See GitHub issue #8970 for more details.
+    // https://github.com/musescore/MuseScore/issues/8970
+    std::vector<Accidental*> chordAccidentals;
+
     for (Note* note : item->notes()) {
-        // Set basic cipher dimensions
-        // These can be refined based on actual cipher string content
-        note->setCipherWidth(spatium * 1.5);
-        note->setCipherHeight(spatium);
-        note->setCipherLedgerline(0);  // Calculate ledger lines if needed
+        TLayout::layoutNote(note, note->mutldata());
+        double x1 = note->pos().x() + chordX;
+        double x2 = x1 + note->headWidth();
+        lll = std::max(lll, -x1);
+        rrr = std::max(rrr, x2);
+        // track amount of space due to notehead only
+        lhead = std::max(lhead, -x1);
+        if (!leftNote || note->x() < leftNote->x()) {
+            leftNote = note;
+        }
+
+        Accidental* accidental = note->accidental();
+        if (accidental && accidental->visible()) {
+            chordAccidentals.push_back(accidental);
+        }
+        if (accidental && accidental->addToSkyline() && !note->fixed()) {
+            // convert x position of accidental to segment coordinate system
+            double x = accidental->pos().x() + note->pos().x() + chordX;
+            // distance from accidental to note already taken into account
+            // but here perhaps we create more padding in *front* of accidental?
+            x -= ctx.conf().styleMM(Sid::accidentalDistance) * mag_;
+            lll = std::max(lll, -x);
+        }
+
+        // clear layout for note-based fingerings
+        for (EngravingItem* e : note->el()) {
+            if (e->isFingering()) {
+                Fingering* f = toFingering(e);
+                if (f->layoutType() == ElementType::NOTE) {
+                    f->setPos(PointF());
+                    f->setbbox(RectF());
+                }
+            }
+        }
     }
+
+    // A chord can have its own arpeggio and also be part of another arpeggio's span.  We need to lay out both of these arpeggios properly
+    Arpeggio* oldSpanArp = item->spanArpeggio();
+    Arpeggio* newSpanArp = nullptr;
+
+    // If item has an arpeggio: mark chords which are part of the arpeggio
+    if (item->arpeggio()) {
+        item->arpeggio()->findAndAttachToChords();
+        item->arpeggio()->mutldata()->maxChordPad = 0.0;
+        item->arpeggio()->mutldata()->minChordX = DBL_MAX;
+        TLayout::layoutArpeggio(item->arpeggio(), item->arpeggio()->mutldata(), ctx.conf());
+    }
+
+    if (item->spanArpeggio() != oldSpanArp) {
+        newSpanArp = item->spanArpeggio();
+    }
+    // If item is within arpeggio span, keep track of largest space needed between glissando and chord across staves
+    double lllMax = lll;
+    for (Arpeggio* spanArp : { oldSpanArp, newSpanArp }) {
+        if (!spanArp || !spanArp->chord()) {
+            continue;
+        }
+        Arpeggio::LayoutData* arpldata = spanArp->mutldata();
+        const Segment* seg = spanArp->chord()->segment();
+        const EngravingItem* endItem = seg->elementAt(spanArp->endTrack());
+        const Chord* endChord = item;
+        if (endItem && endItem->isChord()) {
+            endChord = toChord(endItem);
+        }
+
+        // If a note is covered in the voice span but located outside the visual span of the arpeggio calculate accidental offset later
+        bool aboveStart
+            = std::make_pair(item->vStaffIdx(), item->downLine()) < std::make_pair(spanArp->vStaffIdx(), spanArp->chord()->upLine());
+        bool belowEnd = std::make_pair(item->vStaffIdx(), item->upLine()) > std::make_pair(endChord->vStaffIdx(), endChord->downLine());
+
+        if (!(aboveStart || belowEnd)) {
+            const PaddingTable& paddingTable = item->score()->paddingTable();
+            double arpeggioNoteDistance = paddingTable.at(ElementType::ARPEGGIO).at(ElementType::NOTE) * mag_;
+            double arpeggioLedgerDistance = paddingTable.at(ElementType::ARPEGGIO).at(ElementType::LEDGER_LINE) * mag_;
+            int firstLedgerBelow = item->staff()->lines(item->downNote()->tick()) * 2 - 1;
+            int firstLedgerAbove = -1;
+
+            double gapSize = arpeggioNoteDistance;
+
+            if (leftNote && muse::RealIsNull(leftNote->x())) {
+                if (downnote->line() > firstLedgerBelow || upnote->line() < firstLedgerAbove) {
+                    gapSize = arpeggioLedgerDistance + ctx.conf().styleS(Sid::ledgerLineLength).val() * item->spatium();
+                }
+            }
+            else if (leftNote && (leftNote->line() > firstLedgerBelow || leftNote->line() < firstLedgerAbove)) {
+                gapSize = arpeggioLedgerDistance + ctx.conf().styleS(Sid::ledgerLineLength).val() * item->spatium();
+            }
+
+            double arpChordX = std::min(chordX, 0.0);
+
+            if (!chordAccidentals.empty()) {
+                double arpeggioAccidentalDistance = paddingTable.at(ElementType::ARPEGGIO).at(ElementType::ACCIDENTAL) * mag_;
+                double accidentalDistance = ctx.conf().styleMM(Sid::accidentalDistance) * mag_;
+                gapSize = arpeggioAccidentalDistance - accidentalDistance;
+                gapSize -= ArpeggioLayout::insetDistance(spanArp, ctx, mag_, item, chordAccidentals);
+            }
+
+            double extraX = spanArp->width() + gapSize;
+
+            // Track leftmost chord position, as we we always want the arpeggio to be to the left of this
+            arpldata->minChordX = std::min(arpldata->minChordX, arpChordX);
+
+            // Save this to arpeggio if largest
+            arpldata->maxChordPad = std::max(arpldata->maxChordPad, lll + extraX);
+
+            // If first chord in arpeggio set y
+            if (item->arpeggio() && item->arpeggio() == spanArp) {
+                double y1 = upnote->pos().y() - upnote->headHeight() * .5;
+                item->arpeggio()->mutldata()->setPosY(y1);
+            }
+
+            Note* endDownNote = endChord->downNote();
+
+            // If last chord in arpeggio, set x
+            if (endDownNote->track() == item->track()) {
+                // Amount to move arpeggio from it's parent chord to factor in chords further to the left
+                double firstChordX = spanArp->chord()->ldata()->pos().x();
+                double xDiff = firstChordX - arpldata->minChordX;
+
+                double offset = -(xDiff + arpldata->maxChordPad);
+                spanArp->mutldata()->setPosX(offset);
+                if (spanArp->visible()) {
+                    lllMax = std::max(lllMax, offset);
+                }
+            }
+        }
+
+    }
+
+    lll = lllMax;
+
+    if (item->dots()) {
+        double x = item->dotPosX() + dotNoteDistance
+            + double(item->dots() - 1) * ctx.conf().styleMM(Sid::dotDotDistance) * mag_;
+        x += item->symWidth(SymId::augmentationDot);
+        rrr = std::max(rrr, x);
+    }
+
+    for (Note* note : item->notes()) {
+        //layoutNote2(note, ctx);
+        TLayout::layoutNoteCipherAccidental(note, note->mutldata());
+    }
+    if (item->hook()) {
+
+        item->hook()->setHookType(item->up() ? item->durationType().hooks() : -item->durationType().hooks());
+        Note* note = item->notes().at(0);
+        if (item->notes().size() > 0) {
+            item->hook()->setCipherDimension(note->get_cipherWidth(), note->get_cipherHeigth());
+        }
+        PointF p(0, 0);
+        p.ry() = note->pos().y();
+        p.rx() = note->pos().x();
+
+        item->hook()->setPos(p);
+        TLayout::layoutHook(item->hook(), item->hook()->mutldata());
+
+    }
+
+    item->setSpaceLw(lll);
+    item->setSpaceRw(rrr);
+
+
+    for (EngravingItem* e : item->el()) {
+        if (e->type() == ElementType::SLUR) {       // we cannot at this time as chordpositions are not fixed
+            continue;
+        }
+        TLayout::layoutItem(e, ctx);
+        if (e->type() == ElementType::CHORDLINE) {
+            RectF tbbox = e->ldata()->bbox().translated(e->pos());
+            double lx = tbbox.left() + chordX;
+            double rx = tbbox.right() + chordX;
+            if (-lx > item->spaceLw()) {
+                item->setSpaceLw(item->spaceLw() - lx);
+            }
+            if (rx > item->spaceRw()) {
+                item->setSpaceRw(rx);
+            }
+        }
+    }
+
+    // align note-based fingerings
+    std::vector<Fingering*> alignNote;
+    double xNote = DBL_MAX;
+    for (Note* note : item->notes()) {
+        bool leftFound = false;
+        for (EngravingItem* e : note->el()) {
+            if (e->isFingering() && e->autoplace()) {
+                Fingering* f = toFingering(e);
+                if (f->layoutType() == ElementType::NOTE && f->textStyleType() == TextStyleType::LH_GUITAR_FINGERING) {
+                    alignNote.push_back(f);
+                    if (!leftFound) {
+                        leftFound = true;
+                        double xf = f->ldata()->pos().x();
+                        xNote = std::min(xNote, xf);
+                    }
+                }
+            }
+        }
+    }
+    for (Fingering* f : alignNote) {
+        f->mutldata()->setPosX(xNote);
+    }
+
+    layoutLvArticulation(item, ctx);
+
+    fillShape(item, item->mutldata(), ctx.conf());
 }
 
 void ChordLayout::layoutLvArticulation(Chord* item, LayoutContext& ctx)
@@ -1263,7 +1472,10 @@ void ChordLayout::layoutStem(Chord* item, const LayoutContext& ctx)
     TRACEFUNC;
 
     LAYOUT_CALL() << "chord: " << item->eid();
+    if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
+        return;
 
+    }
     // Stem needs to know hook's bbox and SMuFL anchors.
     // This is done before calcDefaultStemLength because the presence or absence of a hook affects stem length
     if (item->hook()) {
@@ -1313,6 +1525,34 @@ bool ChordLayout::computeUpBeamCase(const Chord* item, Beam* beam)
 
 void ChordLayout::updateLedgerLines(Chord* item, LayoutContext& ctx)
 {
+    if (item->staff() && (item->staff()->isCipherStaff(item->tick()))) {
+        int anzahl = item->notes()[0]->get_cipherLedgerline();
+        if (anzahl < 0)
+            anzahl *= -1;
+        if (anzahl > 10) return;
+        item->resizeLedgerLinesTo(anzahl);
+        for (int n = 0; n < anzahl; n++) {
+            LedgerLine* h = item->ledgerLines()[n];
+            h->setParent(item);
+            h->setTrack(item->track());
+            h->setVisible(item->visible());
+            h->set_width(item->notes()[0]->get_cipherHeigth() * item->style().styleD(Sid::cipherLedgerlineThick));
+            h->setLen(item->notes()[0]->get_cipherWidth() * item->style().styleD(Sid::cipherLedgerlineLength));
+            qreal x = item->notes()[0]->get_cipherTextPos().x()+(item->notes()[0]->get_cipherWidth() * 0.5) - (item->notes()[0]->get_cipherWidth() * item->style().styleD(Sid::cipherLedgerlineLength) * 0.5) +
+                item->style().styleD(Sid::cipherLedgerlineShift);
+            if (item->notes()[0]->get_cipherLedgerline() < 0)
+                h->setPos(x, item->notes()[0]->get_cipherHeigth() * item->style().styleD(Sid::cipherDistanceOctave) * 2.0 * (n + 1));
+            else
+                h->setPos(x, -item->notes()[0]->get_cipherHeigth() * item->style().styleD(Sid::cipherDistanceOctave) * 2.0 * (n + 1));
+        }
+
+
+        for (LedgerLine* ll : item->ledgerLines()) {
+            TLayout::layoutLedgerLine(ll, ctx);
+        }
+
+        return;
+    }
     // initialize for palette
     track_idx_t track = 0;                     // the track lines belong to
     // the line pos corresponding to the bottom line of the staff
@@ -2296,6 +2536,12 @@ void ChordLayout::layoutChords1(LayoutContext& ctx, Segment* segment, staff_idx_
     }
 
     ChordPosInfo posInfo = calculateChordPosInfo(segment, staffIdx, partStartTrack, partEndTrack, ctx);
+    if (staff && staff->isCipherStaff(tick)) {
+
+        layoutSegmentElements(segment, partStartTrack, partEndTrack, staffIdx, ctx);
+        layoutLedgerLines(posInfo.chords, ctx);
+        return;
+    }
 
     if (posInfo.upVoices + posInfo.downVoices && (staffType->stemThrough() || staffType->isCommonTabStaff())) {
         // TODO: use track as secondary sort criteria?
@@ -2344,7 +2590,6 @@ double ChordLayout::layoutChords2(std::vector<Note*>& notes, bool up, LayoutCont
 {
     int startIdx, endIdx, incIdx;
     double maxWidth = 0.0;
-
     // loop in correct direction so that first encountered notehead wins conflict
     if (up) {
         // loop bottom up

@@ -35,7 +35,7 @@ enum class TupletNumberType : unsigned char {
     SHOW_NUMBER, SHOW_RELATION, NO_TEXT
 };
 enum class TupletBracketType : unsigned char {
-    AUTO_BRACKET, SHOW_BRACKET, SHOW_NO_BRACKET
+    AUTO_BRACKET, SHOW_BRACKET, SHOW_SLUR, SHOW_NO_BRACKET
 };
 
 //------------------------------------------------------------------------
@@ -203,5 +203,10 @@ private:
     mutable int m_id;                   // used during read/write
 
     Text* m_number = nullptr;
+
+    qreal m_cipherHigth;
+    QPainterPath m_SlurPath;
+    QPainterPath m_SlurShapePath;
+    bool m_hasSlur;
 };
 }

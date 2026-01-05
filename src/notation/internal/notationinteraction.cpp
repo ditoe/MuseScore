@@ -6463,6 +6463,7 @@ void NotationInteraction::navigateToLyrics(bool back, bool moveOnly, bool end)
     track_idx_t track = lyrics->track();
     mu::engraving::Segment* segment = lyrics->segment();
     int verse = lyrics->no();
+    int moveLyrics = lyrics->move_lyrics();
     mu::engraving::PlacementV placement = lyrics->placement();
     mu::engraving::PropertyFlags pFlags = lyrics->propertyFlags(mu::engraving::Pid::PLACEMENT);
     mu::engraving::FontStyle fStyle = lyrics->fontStyle();
@@ -6539,6 +6540,7 @@ void NotationInteraction::navigateToLyrics(bool back, bool moveOnly, bool end)
         cr = toChordRest(nextSegment->element(track));
         nextLyrics->setParent(cr);
         nextLyrics->setNo(verse);
+        nextLyrics->setMove_lyrics(moveLyrics);
         nextLyrics->setTextStyleType(styleType);
         nextLyrics->setPlacement(placement);
         nextLyrics->setPropertyFlags(mu::engraving::Pid::PLACEMENT, pFlags);
@@ -6622,6 +6624,7 @@ void NotationInteraction::navigateToNextSyllable()
     track_idx_t toLyricTrack = track;
     Segment* segment = lyrics->segment();
     int verse = lyrics->no();
+    int moveLyric = lyrics->move_lyrics();
     PlacementV placement = lyrics->placement();
     PropertyFlags pFlags = lyrics->propertyFlags(Pid::PLACEMENT);
     FontStyle fStyle = lyrics->fontStyle();
@@ -6703,6 +6706,7 @@ void NotationInteraction::navigateToNextSyllable()
             PartialLyricsLine* dash = Factory::createPartialLyricsLine(score()->dummy());
             dash->setIsEndMelisma(false);
             dash->setNo(verse);
+            dash->setMove_lyrics(moveLyric);
             dash->setPlacement(placement);
             dash->setTick(initialCR->tick());
             dash->setTicks(Fraction(0, 1));
@@ -6717,6 +6721,7 @@ void NotationInteraction::navigateToNextSyllable()
             toLyrics->setTrack(track);
             toLyrics->setParent(initialCR);
             toLyrics->setNo(verse);
+            toLyrics->setMove_lyrics(moveLyric);
             toLyrics->setTextStyleType(styleType);
             toLyrics->setPlacement(placement);
             toLyrics->setPropertyFlags(Pid::PLACEMENT, pFlags);
@@ -6808,6 +6813,7 @@ void NotationInteraction::navigateToNextSyllable()
         toLyrics->setParent(toLyricsChord);
 
         toLyrics->setNo(verse);
+        toLyrics->setMove_lyrics(moveLyric);
         toLyrics->setTextStyleType(styleType);
 
         toLyrics->setPlacement(placement);
@@ -6845,6 +6851,7 @@ void NotationInteraction::navigateToNextSyllable()
         PartialLyricsLine* dash = Factory::createPartialLyricsLine(score()->dummy());
         dash->setIsEndMelisma(false);
         dash->setNo(verse);
+        dash->setMove_lyrics(moveLyric);
         dash->setPlacement(lyrics->placement());
         dash->setTick(initialCR->tick());
         dash->setTicks(hasPrecedingRepeat ? Fraction(0, 1) : initialCR->ticks());
@@ -6883,6 +6890,7 @@ void NotationInteraction::navigateToLyricsVerse(MoveDirection direction)
     engraving::track_idx_t track = lyrics->track();
     ChordRest* cr = lyrics->chordRest();
     int verse = lyrics->no();
+    int moveLyrics = lyrics->move_lyrics();
     mu::engraving::PlacementV placement = lyrics->placement();
     mu::engraving::PropertyFlags pFlags = lyrics->propertyFlags(mu::engraving::Pid::PLACEMENT);
     mu::engraving::FontStyle fStyle = lyrics->fontStyle();
@@ -6908,7 +6916,8 @@ void NotationInteraction::navigateToLyricsVerse(MoveDirection direction)
         lyrics = Factory::createLyrics(cr);
         lyrics->setTrack(track);
         lyrics->setParent(cr);
-        lyrics->setNo(verse);
+        lyrics->setNo(moveLyrics);
+        lyrics->setMove_lyrics(verse);
         lyrics->setTextStyleType(styleType);
         lyrics->setPlacement(placement);
         lyrics->setPropertyFlags(mu::engraving::Pid::PLACEMENT, pFlags);
@@ -7492,6 +7501,7 @@ void NotationInteraction::addMelisma()
     track_idx_t track = lyrics->track();
     Segment* segment = lyrics->segment();
     int verse = lyrics->no();
+    int moveLyrics = lyrics->move_lyrics();
     PlacementV placement = lyrics->placement();
     PropertyFlags pFlags = lyrics->propertyFlags(Pid::PLACEMENT);
     FontStyle fStyle = lyrics->fontStyle();
@@ -7584,6 +7594,7 @@ void NotationInteraction::addMelisma()
             PartialLyricsLine* melisma = Factory::createPartialLyricsLine(score()->dummy());
             melisma->setIsEndMelisma(true);
             melisma->setNo(verse);
+            melisma->setMove_lyrics(moveLyrics);
             melisma->setPlacement(lyrics->placement());
             melisma->setTick(initialCR->tick());
             melisma->setTicks(initialCR->ticks());
@@ -7631,6 +7642,7 @@ void NotationInteraction::addMelisma()
         toLyrics->setParent(nextCR);
 
         toLyrics->setNo(verse);
+        toLyrics->setMove_lyrics(moveLyrics);
         const TextStyleType styleType(toLyrics->isEven() ? TextStyleType::LYRICS_EVEN : TextStyleType::LYRICS_ODD);
         toLyrics->setTextStyleType(styleType);
 
@@ -7667,6 +7679,7 @@ void NotationInteraction::addMelisma()
         PartialLyricsLine* melisma = Factory::createPartialLyricsLine(score()->dummy());
         melisma->setIsEndMelisma(true);
         melisma->setNo(verse);
+        melisma->setMove_lyrics(moveLyrics);
         melisma->setPlacement(lyrics->placement());
         melisma->setTick(initialCR->tick());
         melisma->setTicks(initialCR->ticks());
@@ -7709,6 +7722,7 @@ void NotationInteraction::addLyricsVerse()
 
     score()->startCmd(TranslatableString("undoableAction", "Add lyrics verse"));
     int newVerse = oldLyrics->no() + 1;
+    int newMove = oldLyrics->move_lyrics();
 
     mu::engraving::Lyrics* lyrics = Factory::createLyrics(oldLyrics->chordRest());
     lyrics->setTrack(oldLyrics->track());
@@ -7717,6 +7731,7 @@ void NotationInteraction::addLyricsVerse()
     lyrics->setPropertyFlags(mu::engraving::Pid::PLACEMENT, oldLyrics->propertyFlags(mu::engraving::Pid::PLACEMENT));
 
     lyrics->setNo(newVerse);
+    lyrics->setMove_lyrics(newMove);
     const mu::engraving::TextStyleType styleType(lyrics->isEven() ? TextStyleType::LYRICS_EVEN : TextStyleType::LYRICS_ODD);
     lyrics->setTextStyleType(styleType);
 

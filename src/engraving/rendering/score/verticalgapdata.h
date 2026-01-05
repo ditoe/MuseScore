@@ -64,6 +64,7 @@ public:
     double addFillSpacing(double step, double maxFill);
 
     void setNormalisedSpacing(double newNormalisedSpacing);
+    void setNonStretchable();   // neu: markiert diese Lücke als fest (nicht verteilbar)
 
 private:
     void  updateFactor(double factor);

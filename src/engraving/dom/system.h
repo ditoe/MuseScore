@@ -74,6 +74,9 @@ public:
     const Skyline& skyline() const { return m_skyline; }
     Skyline& skyline() { return m_skyline; }
 
+    void set_distanceFirstStaff(qreal h) { m_distanceFirstStaff = h; }
+    qreal get_distanceFirstStaff() { return m_distanceFirstStaff; }
+
 private:
     RectF m_bbox;               // Bbox of StaffLines.
     Skyline m_skyline;
@@ -83,6 +86,7 @@ private:
     double m_continuousDist = -1.0; // distance for continuous mode
     bool m_show = true;             // derived from Staff or false if empty
                                     // staff is hidden
+    qreal m_distanceFirstStaff;
 };
 
 //---------------------------------------------------------
@@ -217,13 +221,13 @@ public:
     void addLockIndicator(SystemLockIndicator* sli);
     void deleteLockIndicators();
 
+    staff_idx_t firstVisibleSysStaff() const;
+    staff_idx_t lastVisibleSysStaff() const;
+
 private:
     friend class Factory;
 
     System(Page* parent);
-
-    staff_idx_t firstVisibleSysStaff() const;
-    staff_idx_t lastVisibleSysStaff() const;
 
     staff_idx_t firstVisibleStaffFrom(staff_idx_t startStaffIdx) const;
 

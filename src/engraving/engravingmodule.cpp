@@ -96,6 +96,7 @@ static void engraving_init_qrc()
     Q_INIT_RESOURCE(fonts_FinaleMaestro);
     Q_INIT_RESOURCE(fonts_FinaleBroadway);
     Q_INIT_RESOURCE(fonts_Tabulature);
+    Q_INIT_RESOURCE(fonts_Cipher);
 #endif
 }
 
@@ -213,6 +214,10 @@ void EngravingModule::onInit(const IApplication::RunMode& mode)
         fdb->addFont(FontDataKey(u"FreeSans"), ":/fonts/FreeSans.ttf");
         fdb->addFont(FontDataKey(u"MScoreTabulature"), ":/fonts/mscoreTab.ttf");
 
+        //Cipher
+        addMusicFont("Cipher", FontDataKey(u"Cipher"), ":/fonts/cipher/Cipher.ttf");
+        fdb->addFont(FontDataKey(u"Cipher"), ":/fonts/cipher/Cipher.ttf");
+
         // Figured Bass
         fdb->addFont(FontDataKey(u"MscoreBC"), ":/fonts/mscore-BC.ttf");
 
@@ -246,6 +251,14 @@ void EngravingModule::onInit(const IApplication::RunMode& mode)
         //! But if they are not loaded, then they are not added to the font database and,
         //! accordingly, they are drawn incorrectly
         m_engravingfonts->loadAllFonts();
+
+        // nach `m_engravingfonts->loadAllFonts();`
+        auto f = m_engravingfonts->fontByName("Cipher");
+        if (f) {
+            LOGI() << "Cipher:EngravingFont loaded: " << f->name();
+        } else {
+            LOGE() << "Cipher: EngravingFont NOT found";
+        }
     }
 
     m_configuration->init();

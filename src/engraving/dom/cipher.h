@@ -29,7 +29,7 @@
 #include "draw/painter.h"
 
 namespace mu::engraving {
-class Cipher
+class cipher
 {
 private:
     double m_relativeSize = 1.0;

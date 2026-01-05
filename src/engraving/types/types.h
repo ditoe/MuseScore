@@ -411,6 +411,7 @@ enum class BarLineType {
     BROKEN           = 0x10,
     DASHED           = BarLineType::BROKEN,
     END              = 0x20,
+    BEGIN            = 0x30,
     FINAL            = BarLineType::END,
     END_START_REPEAT = 0x40,
     LEFT_RIGHT_REPEAT= BarLineType::END_START_REPEAT,
@@ -1163,7 +1164,7 @@ enum class MarkerType : unsigned char {
 };
 
 enum class StaffGroup : unsigned char {
-    STANDARD, PERCUSSION, TAB, CIPHER
+    STANDARD, PERCUSSION, TAB, CIPHER,
 };
 constexpr int STAFF_GROUP_MAX = int(StaffGroup::CIPHER) + 1; // out of enum to avoid compiler complains about not handled switch cases
 

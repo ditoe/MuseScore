@@ -1314,6 +1314,7 @@ enum class StaffGroup {
     STANDARD   = int(mu::engraving::StaffGroup::STANDARD),
     PERCUSSION = int(mu::engraving::StaffGroup::PERCUSSION),
     TAB        = int(mu::engraving::StaffGroup::TAB),
+    CIPHER     = int(mu::engraving::StaffGroup::CIPHER),
 };
 Q_ENUM_NS(StaffGroup);
 

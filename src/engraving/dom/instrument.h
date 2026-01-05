@@ -414,6 +414,8 @@ public:
     GlissandoStyle glissandoStyle() const;
     void setGlissandoStyle(GlissandoStyle style);
 
+    String instrumentId() const { return id(); }
+
 private:
 
     StaffNameList m_longNames;

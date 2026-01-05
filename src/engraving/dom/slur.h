@@ -131,6 +131,9 @@ public:
 
     void undoChangeStartEndElements(ChordRest* scr, ChordRest* ecr);
 
+    qreal get_cipherHeigth() { return m_cipherHeigth; }
+    void set_cipherHeigth(qreal h) { m_cipherHeigth = h; }
+
 private:
     M_PROPERTY2(ConnectedElement, connectedElement, setConnectedElement, ConnectedElement::NONE)
     M_PROPERTY2(PartialSpannerDirection, partialSpannerDirection, setPartialSpannerDirection, PartialSpannerDirection::NONE)
@@ -141,5 +144,7 @@ private:
     friend class Factory;
 
     StemFloated m_stemFloated; // end point position is attached to stem but floated towards the note
+
+    qreal m_cipherHeigth;
 };
 } // namespace mu::engraving

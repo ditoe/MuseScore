@@ -1,4 +1,4 @@
-/*
+﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
  * MuseScore-Studio-CLA-applies
  *
@@ -322,5 +322,75 @@ String KeySig::accessibleInfo() const
 muse::TranslatableString KeySig::subtypeUserName() const
 {
     return TConv::userName(key(), isAtonal(), isCustom());
+}
+
+//---------------------------------------------------------
+//   getCipherString
+//---------------------------------------------------------
+String KeySig::getCipherString(int key, int d) const {
+    QString CipherString[15][2] = {
+          {"Ces-Dur  a=♭7","as-Moll  a=♭7"},
+          {"Ges-Dur  a=♭3","es-Moll  a=♭3"},
+          {"Des-Dur  a=♯5","b-Moll  a=♯5"},
+          {"As-Dur  a=♯1","f-Moll  a=♯1"},
+          {"Es-Dur  a=♯4","c-Moll  a=♯4"},
+          {"B-Dur  a=7","g-Moll  a=7"},
+          {"F-Dur  a=3","d-moll  a=3"},
+          {"C-Dur  a=6","a-Moll  a=6"},
+          {"G-Dur  a=2","e-Moll  a=2"},
+          {"D-Dur  a=5","h-Moll  a=5"},
+          {"A-Dur  a=1","fis-Moll  a=1"},
+          {"E-Dur  a=4","cis-Moll  a=4"},
+          {"H-Dur  a=♭7","gis-Moll  a=♭7"},
+          {"Fis-Dur  a=♭3","dis-Moll  a=♭3"},
+          {"Cis-Dur  a=♯5","ais-Moll  a=♯5"}
+
+    };
+    return CipherString[key][d];
+}
+//---------------------------------------------------------
+//   cipherWidth
+//---------------------------------------------------------
+
+qreal KeySig::cipherGetWidth(StaffType* cipher, String string) const
+{
+    qreal val;
+    if (cipher) {
+        muse::draw::FontMetrics fm(cipherKeySigFont());
+        val = fm.width(string);
+    }
+    else
+        val = 5.0;
+    return val;
+}
+muse::draw::Font KeySig::cipherKeySigFont() const
+{
+    const MStyle& st = style();
+    muse::draw::Font f(st.styleSt(Sid::cipherKeySigFont), muse::draw::Font::Type::Text);
+    f.setPointSizeF(st.styleD(Sid::cipherFontSize) * st.styleD(Sid::cipherKeySigSize) * (spatium() / SPATIUM20));
+    return f;
+}
+//---------------------------------------------------------
+//   drawSharp
+//---------------------------------------------------------
+
+void KeySig::drawSharp(muse::draw::Painter* painter, const muse::PointF& pos, const muse::draw::Font& font) const
+{
+    muse::draw::Font fontOld = painter->font();
+    painter->setFont(font);
+    painter->drawText(pos, u"♯");
+    painter->setFont(fontOld);
+}
+
+//---------------------------------------------------------
+//   drawFlat
+//---------------------------------------------------------
+
+void KeySig::drawFlat(muse::draw::Painter* painter, const muse::PointF& pos, const muse::draw::Font& font) const
+{
+    muse::draw::Font fontOld = painter->font();
+    painter->setFont(font);
+    painter->drawText(pos, u"♭");
+    painter->setFont(fontOld);
 }
 }

@@ -273,6 +273,58 @@ void BarLine::calcY()
     double y1 = offset + from * lineDistance * .5 - lineWidth;
     double y2 = offset + (staffType1->lines() * 2 - 2 + to) * lineDistance * .5 + lineWidth;
 
+    if (staff()->isCipherStaff(tick)) {
+
+        int nstaves = score()->nstaves();
+        SysStaff* sysStaff1 = system->staff(staffIdx1);
+        qreal yp = sysStaff1->y();
+        bool spanStavesbefor = false;
+        int staffbefor = staffIdx1;
+        for (int i2 = staffIdx1 - 1; i2 >= 0; --i2) {
+            Staff* s = score()->staff(i2);
+            if (s && !s->staffType(tick)->invisible() && s->part()->show() && measure->visible(i2)) {
+                BarLine* nbl = toBarLine(segment()->element(i2 * VOICES));
+                if (nbl && nbl->spanStaff()) {
+                    spanStavesbefor = true;
+                    staffbefor = i2;
+                }
+                break;
+            }
+        }
+        for (int i2 = staffIdx1 + 1; i2 < nstaves; ++i2) {
+            Staff* s = score()->staff(i2);
+            if (s && !s->staffType(tick)->invisible() && s->part()->show() && measure->visible(i2)) {
+                BarLine* nbl = toBarLine(segment()->element(i2 * VOICES));
+                if (nbl && nbl->spanStaff()) {
+                    //spanStaves = true;
+                    staffIdx2 = i2;
+                }
+                break;
+            }
+        }
+        if (spanStaff && staffIdx2) {
+            y1 = 0.0;
+            if (spanStavesbefor) {
+                y1 = -(yp - measure->staffLines(staffbefor)->y1()) * 0.5;
+            }
+
+            y2 = (measure->staffLines(staffIdx2)->y1() - yp) * 0.5;
+        }
+        else if (spanStavesbefor) {
+
+            y1 = -(yp - measure->staffLines(staffbefor)->y1()) * 0.5;
+
+            y2 = 0.0;
+        }
+        else {
+
+            y1 = -staff()->get_cipherHeight() * style().styleD(Sid::cipherBarlineLength);
+            y2 = staff()->get_cipherHeight() * style().styleD(Sid::cipherBarlineLength);
+        }
+        data->y1 = y1;
+        data->y2 = y2;
+        return;
+    }
     if (spanStaff) {
         // we need spatium and line distance of bottom staff
         // as it may be scalled diferently

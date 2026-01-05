@@ -37,6 +37,7 @@ LyricsSettingsModel::LyricsSettingsModel(QObject* parent, IElementRepositoryServ
 void LyricsSettingsModel::createProperties()
 {
     m_verse = buildPropertyItem(mu::engraving::Pid::VERSE);
+    m_move_lyrics = buildPropertyItem(mu::engraving::Pid::LYRICS_STAFF_SHIFT);
     m_avoidBarlines = buildPropertyItem(mu::engraving::Pid::AVOID_BARLINES);
 }
 
@@ -48,18 +49,25 @@ void LyricsSettingsModel::requestElements()
 void LyricsSettingsModel::loadProperties()
 {
     loadPropertyItem(m_verse);
+    loadPropertyItem(m_move_lyrics);
     loadPropertyItem(m_avoidBarlines);
 }
 
 void LyricsSettingsModel::resetProperties()
 {
     m_verse->resetToDefault();
+    m_move_lyrics->resetToDefault();
     m_avoidBarlines->resetToDefault();
 }
 
 PropertyItem* LyricsSettingsModel::verse() const
 {
     return m_verse;
+}
+
+PropertyItem* LyricsSettingsModel::move() const
+{
+    return m_move_lyrics;
 }
 
 PropertyItem* LyricsSettingsModel::avoidBarlines() const

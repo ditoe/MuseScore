@@ -71,7 +71,7 @@ private:
     static void collectLyricsVerses(staff_idx_t staffIdx, System* system, LyricsVersesMap& lyricsVersesAbove,
                                     LyricsVersesMap& lyricsVersesBelow);
 
-    static void setDefaultPositions(staff_idx_t staffIdx, const LyricsVersesMap& lyricsVersesAbove,
+    static void setDefaultPositions(staff_idx_t staffIdx, System* system, const LyricsVersesMap& lyricsVersesAbove,
                                     const LyricsVersesMap& lyricsVersesBelow, LayoutContext& ctx);
 
     static void checkCollisionsWithStaffElements(System* system, staff_idx_t staffIdx,  LayoutContext& ctx,

@@ -197,6 +197,7 @@ private:
     static bool elementHasAnotherStackedOutside(const EngravingItem* element, const Shape& elementShape, const SkylineLine& skylineLine);
     static void centerElementBetweenStaves(EngravingItem* element, const System* system);
     static void centerMMRestBetweenStaves(MMRest* mmRest, const System* system);
+    static void LyricsLayout3(System* system, LayoutContext& lc);
 
     static bool shouldBeJustified(System* system, double curSysWidth, double targetSystemWidth, LayoutContext& ctx);
 

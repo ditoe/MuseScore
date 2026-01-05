@@ -61,7 +61,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool& error)
 {
     error           = false;
     Segment* s      = pos.segment;
-    int line        = pos.line;
+    int line        = pos.step;
     Fraction tick   = s->tick();
     staff_idx_t staffIdx = pos.staffIdx;
     Staff* st       = staff(staffIdx);
@@ -77,10 +77,70 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool& error)
     }
 
     switch (staffGroup) {
-    case StaffGroup::CIPHER:
-        // Cipher notation - treat as TAB for now
-        // TODO: Implement full cipher note entry
-        // Fall through to TAB handling
+    case StaffGroup::CIPHER: {
+        AccidentalVal acci = Accidental::subtype2value(at);
+        if (line < 0)
+            line *= -1;
+        int octave = line / 7;
+        int ton = line % 7;
+        switch (ton) {
+        case 0: break;
+        case 1:
+            ton = 2;
+            break;
+        case 2:
+            ton = 4;
+
+            break;
+        case 3:
+            ton = 5;
+
+            break;
+        case 4:
+            ton = 7;
+
+            break;
+        case 5:
+            ton = 9;
+
+            break;
+        case 6:
+            ton = 11;
+
+            break;
+        default:
+            break;
+        }
+
+        Key key = st->key(pos.segment->tick());
+        ton -= Note::get_cipherTrans(key);
+        nval.pitch = octave * 12 + ton + int(acci);
+        nval.pitch += instr->transpose().chromatic;
+
+        int keyshift = 0;
+        switch (key) {
+        case Key::D:   keyshift = 1; break;
+        case Key::D_B: keyshift = 1; break;
+        case Key::E:   keyshift = 2; break;
+        case Key::E_B: keyshift = 2; break;
+        case Key::F:   keyshift = 3; break;
+        case Key::F_S: keyshift = 3; break;
+        case Key::G:   keyshift = 4; break;
+        case Key::G_B: keyshift = 4; break;
+        case Key::A:   keyshift = 5; break;
+        case Key::A_B: keyshift = 5; break;
+        case Key::B:   keyshift = 6; break;
+        case Key::B_B: keyshift = 6; break;
+        }
+        int step = (line % 7 + keyshift) % 7;
+        step = step2tpcByKey(step, key);
+        step += int(acci) * 7;
+        nval.tpc2 = step;
+        nval.tpc1 = nval.tpc2;
+        //qWarning().nospace() << step << " step " << int(acci) << " acci " << line << " line ";
+
+        break;
+    }
     case StaffGroup::PERCUSSION: {
         if (m_is.rest()) {
             break;
@@ -409,8 +469,8 @@ Ret Score::putNote(const Position& p, bool replace)
         break;
     }
     case StaffGroup::CIPHER:
-        // Cipher notation - treat as standard for now
-        // TODO: Implement full cipher note creation
+        stringData = st->part()->stringData(s->tick(), st->idx());
+        m_is.setDrumNote(-1);
         break;
     case StaffGroup::TAB:
         stringData = st->part()->stringData(s->tick(), st->idx());

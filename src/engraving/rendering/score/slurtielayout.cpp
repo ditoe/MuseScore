@@ -404,6 +404,20 @@ void SlurTieLayout::slurPos(Slur* item, SlurTiePos* sp, LayoutContext& ctx)
         note2 = item->up() ? ec->upNote() : ec->downNote();
     }
 
+    if (note1->staff() && note1->staff()->isCipherStaff(note1->tick())) {
+
+        sp->p1 = scr->pos() + scr->segment()->pos() + scr->measure()->pos();
+        sp->p2 = ecr->pos() + ecr->segment()->pos() + ecr->measure()->pos();
+        item->set_cipherHeigth(note1->get_cipherHeigth());
+        sp->p1.rx() += note1->get_cipherTextPos().x() - note1->get_cipherHeigth() * ctx.conf().styleD(Sid::cipherSlurUberhang);
+        sp->p1.ry() = note1->y() + note1->get_cipherHeigth() * 0.5 + note1->get_cipherHeigth() * ctx.conf().styleD(Sid::cipherSlurShift);
+        ///------p2
+
+        sp->p2.rx() += note2->get_cipherTextPos().x()+note2->get_cipherWidth() + note1->get_cipherHeigth() * item->style().styleD(Sid::cipherSlurUberhang);
+        sp->p2.ry() = note2->y() + note2->get_cipherHeigth() * 0.5 + note2->get_cipherHeigth() * ctx.conf().styleD(Sid::cipherSlurShift);
+        return;
+
+    }
     sp->system1 = scr->measure()->system();
     sp->system2 = ecr->measure()->system();
 
@@ -1574,9 +1588,24 @@ TieSegment* SlurTieLayout::layoutTieFor(Tie* item, System* system)
 
     adjustYforLedgerLines(segment, sPos);
 
+    if (item->staff()->isCipherStaff(item->tick())) {
+        item->set_cipherHeigth(item->startNote()->get_cipherHeigth());
+        Note* note1 = item->startNote();
+        Note* note2 = item->endNote();
+        sPos.p1 = note1->chord()->pos() + note1->chord()->segment()->pos() + note1->chord()->measure()->pos();
+        sPos.p2 = note2->chord()->pos() + note2->chord()->segment()->pos() + note2->chord()->measure()->pos();
+        sPos.p1.rx() += note1->get_cipherTextPos().x() - item->get_cipherHeigth() * item->style().styleD(Sid::cipherSlurUberhang);
+        sPos.p1.ry() = note1->y() + item->get_cipherHeigth() * 0.5 + item->get_cipherHeigth() * item->style().styleD(Sid::cipherSlurShift);
+        sPos.p2.rx() += note2->get_cipherTextPos().x() + note2->get_cipherWidth() + item->get_cipherHeigth() * item->style().styleD(Sid::cipherSlurUberhang);
+        sPos.p2.ry() = note2->y() + item->get_cipherHeigth() * 0.5 + item->get_cipherHeigth() * item->style().styleD(Sid::cipherSlurShift);
+        segment->ups(Grip::START).p = sPos.p1;
+        segment->ups(Grip::END).p = sPos.p2;
+        computeBezier(segment);
+        addLineAttachPoints(segment); // add attach points to start and end note
+        return segment;
+    }
     segment->ups(Grip::START).p = sPos.p1;
     segment->ups(Grip::END).p = sPos.p2;
-
     if (segment->autoplace() && !segment->isEdited()) {
         adjustY(segment);
     } else {
@@ -2541,6 +2570,10 @@ void SlurTieLayout::resolveVerticalTieCollisions(const std::vector<TieSegment*>&
 
 void SlurTieLayout::computeUp(Slur* slur, LayoutContext& ctx)
 {
+    if (slur->staff() && slur->staff()->isCipherStaff(slur->tick())) {
+        slur->setUp(false);
+        return;
+    }
     switch (slur->slurDirection()) {
     case DirectionV::UP:
         slur->setUp(true);
@@ -2647,6 +2680,10 @@ void SlurTieLayout::computeBezier(TieSegment* tieSeg, PointF shoulderOffset)
 
     double shoulderW = 0.6; // TODO: style
 
+    if (tieSeg->staffType() && tieSeg->staffType()->isCipherStaff()) {
+        shoulderH = -(tieSeg->tie()->get_cipherHeigth() * tieSeg->style().styleD(Sid::cipherSlurHeigth));
+        shoulderW = (tieEndNormalized.x() - tieSeg->tie()->get_cipherHeigth() * tieSeg->style().styleD(Sid::cipherSlurEckenform)) / tieEndNormalized.x();
+    }
     const double tieWidth = tieEndNormalized.x();
     const double bezier1X = (tieWidth - tieWidth * shoulderW) * .5 + shoulderOffset.x();
     const double bezier2X = bezier1X + tieWidth * shoulderW + shoulderOffset.x();
@@ -2673,7 +2710,7 @@ void SlurTieLayout::computeBezier(TieSegment* tieSeg, PointF shoulderOffset)
     PainterPath path = PainterPath();
     path.moveTo(PointF());
     path.cubicTo(bezier1 + bezier1Offset - tieThickness, bezier2 + bezier2Offset - tieThickness, tieEndNormalized);
-    if (tieSeg->tie()->styleType() == SlurStyleType::Solid) {
+    if (tieSeg->tie()->styleType() == SlurStyleType::Solid&&!tieSeg->staff()->isCipherStaff(tieSeg->tick())) {
         path.cubicTo(bezier2 + bezier2Offset + tieThickness, bezier1 + bezier1Offset + tieThickness, PointF());
     }
 
@@ -2762,6 +2799,10 @@ void SlurTieLayout::computeBezier(SlurSegment* slurSeg, PointF shoulderOffset)
     double shoulderH = computeShoulderHeight(slurSeg, d, shoulderOffset);
 
     double c    = p2.x();
+    if (slurSeg->staffType() && slurSeg->staffType()->isCipherStaff()) {
+        shoulderH = -(slurSeg->slur()->get_cipherHeigth() * slurSeg->style().styleD(Sid::cipherSlurHeigth));
+        shoulderW = (c - slurSeg->slur()->get_cipherHeigth() * slurSeg->style().styleD(Sid::cipherSlurEckenform)) / c;
+    }
     double c1   = (c - c * shoulderW) * .5 + shoulderOffset.x();
     double c2   = c1 + c * shoulderW + shoulderOffset.x();
     PointF p3(c1, -shoulderH);
@@ -2824,7 +2865,7 @@ void SlurTieLayout::computeBezier(SlurSegment* slurSeg, PointF shoulderOffset)
     PainterPath path = PainterPath();
     path.moveTo(PointF());
     path.cubicTo(p3 - thick, p4 - thick, p2);
-    if (slurSeg->slur()->styleType() == SlurStyleType::Solid) {
+    if (slurSeg->slur()->styleType() == SlurStyleType::Solid && !slurSeg->staff()->isCipherStaff(slurSeg->tick())) {
         path.cubicTo(p4 + thick, p3 + thick, PointF());
     }
 
@@ -2985,6 +3026,11 @@ void SlurTieLayout::calculateDirection(Tie* item)
     const Note* secondaryNote = tieHasBothNotes ? item->endNote() : nullptr;
     const Chord* secondaryChord = secondaryNote ? secondaryNote->chord() : nullptr;
     const Measure* secondaryMeasure = secondaryChord ? secondaryChord->measure() : nullptr;
+    if (primaryNote->staff()->isCipherStaff(primaryNote->tick())) {
+
+        item->setUp(false);
+        return;
+    }
 
     if (item->slurDirection() == DirectionV::AUTO) {
         std::vector<Note*> notes = primaryChord->notes();
@@ -3094,6 +3140,10 @@ void SlurTieLayout::calculateDirection(Tie* item)
 
 void SlurTieLayout::calculateIsInside(Tie* item)
 {
+    if (item->staff()->isCipherStaff(item->tick())) {
+        return;
+        item->setIsInside(false);
+    }
     if (item->tiePlacement() != TiePlacement::AUTO) {
         item->setIsInside(item->tiePlacement() == TiePlacement::INSIDE);
         return;

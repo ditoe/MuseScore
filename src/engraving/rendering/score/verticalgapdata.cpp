@@ -209,6 +209,16 @@ void VerticalGapData::setNormalisedSpacing(double newNormalisedSpacing)
     m_normalisedSpacing = newNormalisedSpacing;
 }
 
+void VerticalGapData::setNonStretchable()
+{
+    // Make gap fixed so VerticalGapData::isFixedHeight() returns true
+    m_fixedHeight = true;
+    // keep factor consistent
+    m_factor = 1.0;
+    // ensure maxActualSpacing equals current normalised spacing so isFixedHeight() is true
+    m_maxActualSpacing = m_normalisedSpacing;
+}
+
 //---------------------------------------------------------
 //   deleteAll
 //---------------------------------------------------------

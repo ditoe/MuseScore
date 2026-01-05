@@ -61,6 +61,8 @@ public:
     double measureXPos() const;
 
     void spatiumChanged(double /*oldValue*/, double /*newValue*/) override;
+    void set_width(qreal r) { m_width = r; }
+    qreal get_width()const { return m_width; }
 
     struct LayoutData : public EngravingItem::LayoutData {
         double lineWidth = 0.0;
@@ -71,6 +73,7 @@ private:
 
     double m_len = 0.0;
     bool m_vertical = false;
+    qreal m_width = 0.0;
 };
 } // namespace mu::engraving
 #endif

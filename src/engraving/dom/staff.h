@@ -154,6 +154,9 @@ public:
     double staffHeight() const;
     double staffHeight(const Fraction& tick) const;
 
+    void set_cipherHeight(qreal h) { m_cipherHeigth = h; }
+    qreal get_cipherHeight() { return m_cipherHeigth; }
+
     int channel(const Fraction&, voice_idx_t voice) const;
 
     void clearChannelList(voice_idx_t voice) { m_channelList[voice].clear(); }
@@ -186,6 +189,7 @@ public:
     bool isPitchedStaff(const Fraction&) const;
     bool isTabStaff(const Fraction&) const;
     bool isDrumStaff(const Fraction&) const;
+
     bool isCipherStaff(const Fraction&) const;
 
     int lines(const Fraction&) const;
@@ -320,5 +324,7 @@ private:
     bool m_reflectTranspositionInLinkedTab = true;
 
     AutoOnOff m_showMeasureNumbers = AutoOnOff::AUTO;
+
+    qreal m_cipherHeigth;
 };
 }

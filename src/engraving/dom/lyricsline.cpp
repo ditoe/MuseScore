@@ -142,6 +142,26 @@ void LyricsLine::doComputeEndElement()
     }
 }
 
+void LyricsLine::layout3()
+{
+
+    if (placeBelow()) {
+        int schift = staffIdx() + lyrics()->move_lyrics();
+        if (score()->nstaves() <= schift)
+            schift = score()->nstaves() - 1;
+        qreal y1 = lyrics()->segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
+        qreal y2 = lyrics()->segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+        mutldata()->moveY(y2 - y1);
+    }
+    else {
+        int schift = staffIdx() - lyrics()->move_lyrics();
+        if (0 > schift)
+            schift = 0;
+        qreal y1 = lyrics()->segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
+        qreal y2 = lyrics()->segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+        mutldata()->moveY(y1 - y2);
+    }
+}
 //=========================================================
 //   LyricsLineSegment
 //=========================================================
@@ -196,6 +216,8 @@ PropertyValue PartialLyricsLine::getProperty(Pid propertyId) const
     switch (propertyId) {
     case Pid::VERSE:
         return _no;
+    case Pid::LYRICS_STAFF_SHIFT:
+        return _move_lyrics;
     default:
         return LyricsLine::getProperty(propertyId);
     }
@@ -206,6 +228,9 @@ bool PartialLyricsLine::setProperty(Pid propertyId, const PropertyValue& val)
     switch (propertyId) {
     case Pid::VERSE:
         setNo(val.toInt());
+        break;
+    case Pid::LYRICS_STAFF_SHIFT:
+        setMove_lyrics(val.toInt());
         break;
     default:
         return LyricsLine::setProperty(propertyId, val);
@@ -220,6 +245,8 @@ PropertyValue PartialLyricsLine::propertyDefault(Pid propertyId) const
 {
     switch (propertyId) {
     case Pid::VERSE:
+        return 0;
+    case Pid::LYRICS_STAFF_SHIFT:
         return 0;
     default:
         return LyricsLine::propertyDefault(propertyId);
@@ -291,6 +318,8 @@ EngravingItem* PartialLyricsLineSegment::propertyDelegate(Pid pid)
 {
     switch (pid) {
     case Pid::VERSE:
+        return lyricsLine();
+    case Pid::LYRICS_STAFF_SHIFT:
         return lyricsLine();
     default:
         return LyricsLineSegment::propertyDelegate(pid);

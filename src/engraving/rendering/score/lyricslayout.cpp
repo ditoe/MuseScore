@@ -1,4 +1,4 @@
-/*
+﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
  * MuseScore-Studio-CLA-applies
  *
@@ -561,7 +561,7 @@ void LyricsLayout::computeVerticalPositions(staff_idx_t staffIdx, System* system
 
     collectLyricsVerses(staffIdx, system, lyricsVersesAbove, lyricsVersesBelow);
 
-    setDefaultPositions(staffIdx, lyricsVersesAbove, lyricsVersesBelow, ctx);
+    setDefaultPositions(staffIdx, system, lyricsVersesAbove, lyricsVersesBelow, ctx);
 
     checkCollisionsWithStaffElements(system, staffIdx, ctx, lyricsVersesAbove, lyricsVersesBelow);
 
@@ -571,8 +571,10 @@ void LyricsLayout::computeVerticalPositions(staff_idx_t staffIdx, System* system
 void LyricsLayout::collectLyricsVerses(staff_idx_t staffIdx, System* system, LyricsVersesMap& lyricsVersesAbove,
                                        LyricsVersesMap& lyricsVersesBelow)
 {
-    track_idx_t startTrack = staffIdx * VOICES;
-    track_idx_t endTrack = startTrack + VOICES;
+    //track_idx_t startTrack = staffIdx * VOICES;
+    //track_idx_t endTrack = startTrack + VOICES;
+    track_idx_t startTrack = 0;
+    track_idx_t endTrack = system->score()->nstaves() * VOICES;
 
     for (MeasureBase* mb : system->measures()) {
         if (!mb->isMeasure()) {
@@ -588,12 +590,19 @@ void LyricsLayout::collectLyricsVerses(staff_idx_t staffIdx, System* system, Lyr
                     continue;
                 }
                 for (Lyrics* lyrics : toChordRest(element)->lyrics()) {
+                    int lstaffidx = lyrics->staffIdx();
                     int verse = lyrics->no();
                     if (lyrics->placeAbove()) {
-                        lyricsVersesAbove[verse].addLyrics(lyrics);
-                    } else {
-                        lyricsVersesBelow[verse].addLyrics(lyrics);
+                        if (lstaffidx - lyrics->move_lyrics() == staffIdx) {
+                            lyricsVersesAbove[verse].addLyrics(lyrics);
+                        }
                     }
+                    else {
+                        if (lstaffidx + lyrics->move_lyrics() == staffIdx) {
+                            lyricsVersesBelow[verse].addLyrics(lyrics);
+                        }
+                    }
+                    
                 }
             }
         }
@@ -605,17 +614,24 @@ void LyricsLayout::collectLyricsVerses(staff_idx_t staffIdx, System* system, Lyr
                 continue;
             }
             LyricsLineSegment* lyricsLineSegment = toLyricsLineSegment(spannerSegment);
+            int lstaffidx = lyricsLineSegment->staffIdx();
             int verse = lyricsLineSegment->no();
             if (lyricsLineSegment->lyricsPlaceAbove()) {
-                lyricsVersesAbove[verse].addLine(lyricsLineSegment);
-            } else {
-                lyricsVersesBelow[verse].addLine(lyricsLineSegment);
+                if (lstaffidx - lyricsLineSegment->lyrics()->move_lyrics() == staffIdx) {
+                    lyricsVersesAbove[verse].addLine(lyricsLineSegment);
+                }
             }
+            else {
+                if (lstaffidx + lyricsLineSegment->lyrics()->move_lyrics() == staffIdx) {
+                    lyricsVersesBelow[verse].addLine(lyricsLineSegment);
+                }
+            }
+            
         }
     }
 }
 
-void LyricsLayout::setDefaultPositions(staff_idx_t staffIdx, const LyricsVersesMap& lyricsVersesAbove,
+void LyricsLayout::setDefaultPositions(staff_idx_t staffIdx, System* system, const LyricsVersesMap& lyricsVersesAbove,
                                        const LyricsVersesMap& lyricsVersesBelow,
                                        LayoutContext& ctx)
 {
@@ -641,10 +657,12 @@ void LyricsLayout::setDefaultPositions(staff_idx_t staffIdx, const LyricsVersesM
         const LyricsVerse& lyricsVerse = pair.second;
         for (Lyrics* lyrics : lyricsVerse.lyrics()) {
             double y = staffHeight + verse * lyrics->lineSpacing() * lyricsLineHeightFactor;
+            //y += system->staffYpage(staffIdx);// -lyrics->staff()->pos().y();
             lyrics->setYRelativeToStaff(y);
         }
         for (LyricsLineSegment* lyricsLineSegment : lyricsVerse.lines()) {
             double y = staffHeight + verse * lyricsLineSegment->lineSpacing() * lyricsLineHeightFactor;
+            //y += ctx.dom().staff(staffIdx)->pos().y() - ctx.dom().staff(lyricsLineSegment->staffIdx())->pos().y();
             lyricsLineSegment->move(PointF(0.0, y + lyricsLineSegment->baseLineShift()));
         }
     }

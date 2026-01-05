@@ -142,6 +142,7 @@ enum class StaffTypes : signed char {
     TAB_ITALIAN, TAB_FRENCH,
     TAB_7COMMON, TAB_8COMMON, TAB_9COMMON, TAB_10COMMON,
     TAB_7SIMPLE, TAB_8SIMPLE, TAB_9SIMPLE, TAB_10SIMPLE,
+    CIPHER,
     STAFF_TYPES,
     // some useful shorthands:
     PERC_DEFAULT = StaffTypes::PERC_5LINE,
@@ -315,6 +316,7 @@ public:
     void  setFretPreset(const String& str);
 
     bool isTabStaff() const { return m_group == StaffGroup::TAB; }
+    bool isCipherStaff() const { return m_group == StaffGroup::CIPHER; }
     bool isDrumStaff() const { return m_group == StaffGroup::PERCUSSION; }
 
     bool isSimpleTabStaff() const;

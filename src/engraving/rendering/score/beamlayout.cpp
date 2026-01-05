@@ -565,7 +565,8 @@ void BeamLayout::beamGraceNotes(LayoutContext& ctx, Chord* mainNote, bool after)
 
     for (ChordRest* cr : graceNotes) {
         bm = Groups::endBeam(cr);
-        if ((cr->durationType().type() <= DurationType::V_QUARTER) || (bm == BeamMode::NONE)) {
+        if ((cr->durationType().type() <= DurationType::V_QUARTER) || (bm == BeamMode::NONE)
+            || (mainNote->staff() && mainNote->staff()->isCipherStaff(mainNote->tick()))) {
             if (beam) {
                 beam->setIsGrace(true);
                 layout1(beam, ctx);
@@ -691,6 +692,7 @@ void BeamLayout::createBeams(LayoutContext& ctx, Measure* measure)
                         Beam* prevBeam = prevCR->beam();
                         const Measure* pm = prevCR->measure();
                         if (!beamNoContinue(prevCR->beamMode())
+                            && !(cr->staff() && cr->staff()->isCipherStaff(cr->tick()))
                             && !pm->lineBreak() && !pm->pageBreak() && !pm->sectionBreak()
                             && ctx.state().prevMeasure()
                             && !(prevCR->isChord() && prevCR->durationType().type() <= DurationType::V_QUARTER)) {
@@ -724,8 +726,9 @@ void BeamLayout::createBeams(LayoutContext& ctx, Measure* measure)
                 beamGraceNotes(ctx, chord, false);         // grace before
                 beamGraceNotes(ctx, chord, true);          // grace after
             }
-
             if (cr->isRest() && cr->beamMode() == BeamMode::AUTO) {
+                bm = BeamMode::NONE;                   // do not beam rests set to BeamMode::AUTO or with only other rests
+            } else if (cr->staff()->isCipherStaff(cr->tick())) {
                 bm = BeamMode::NONE;                   // do not beam rests set to BeamMode::AUTO or with only other rests
             } else {
                 bm = Groups::endBeam(cr, prev);          // get defaults from time signature properties
@@ -764,7 +767,7 @@ void BeamLayout::createBeams(LayoutContext& ctx, Measure* measure)
 
             // Rests of any duration can be beamed over, if required
             bool canBeBeamed = durationType.type() > DurationType::V_QUARTER || cr->isRest();
-            if (!canBeBeamed || (bm == BeamMode::NONE)) {
+            if (!canBeBeamed || (bm == BeamMode::NONE)|| (cr->staff() && cr->staff()->isCipherStaff(cr->tick()))) {
                 bool removeBeam = true;
                 if (beam) {
                     layout1(beam, ctx);

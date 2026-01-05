@@ -2241,6 +2241,7 @@ void TWrite::write(const Lyrics* item, XmlWriter& xml, WriteContext& ctx)
     }
     xml.startElement(item);
     writeProperty(item, xml, Pid::VERSE);
+    writeProperty(item, xml, Pid::LYRICS_STAFF_SHIFT);
     if (item->syllabic() != LyricsSyllabic::SINGLE) {
         xml.tag("syllabic", TConv::toXml(item->syllabic()));
     }
@@ -2522,6 +2523,7 @@ void TWrite::write(const PartialLyricsLine* item, XmlWriter& xml, WriteContext& 
     }
     xml.startElement(item);
     writeProperty(item, xml, Pid::VERSE);
+    writeProperty(item, xml, Pid::LYRICS_STAFF_SHIFT);
     xml.tag("isEndMelisma", item->isEndMelisma());
     writeItemProperties(item, xml, ctx);
     xml.endElement();

@@ -64,6 +64,8 @@ public:
     TranslatableString subtypeUserName() const override;
     void setNo(int n) { m_no = n; }
     int no() const { return m_no; }
+    void setMove_lyrics(int n) { m_move_lyrics = n; }
+    int move_lyrics() const { return m_move_lyrics; }
     bool isEven() const { return m_no % 2; }
     void setSyllabic(LyricsSyllabic s) { m_syllabic = s; }
     LyricsSyllabic syllabic() const { return m_syllabic; }
@@ -103,9 +105,11 @@ public:
 
     bool avoidBarlines() const { return m_avoidBarlines; }
     void setAvoidBarlines(bool v) { m_avoidBarlines = v; }
+    void layout3();
 
 protected:
     int m_no = 0;  // row index
+    int m_move_lyrics = 0;  //Move lyrics to a different voice
 
 private:
 
@@ -148,6 +152,7 @@ public:
     virtual bool isEndMelisma() const { return lyrics() && lyrics()->ticks().isNotZero(); }
     bool isDash() const { return !isEndMelisma(); }
     bool setProperty(Pid propertyId, const PropertyValue& v) override;
+    void layout3();
 
 protected:
     LyricsLine(const ElementType& type, EngravingItem* parent, ElementFlags = ElementFlag::NOTHING);
@@ -197,6 +202,8 @@ public:
     };
     DECLARE_LAYOUTDATA_METHODS(LyricsLineSegment)
 
+    void layout3();
+
 protected:
     LyricsLineSegment(const ElementType& type, LyricsLine* sp, System* parent, ElementFlags f = ElementFlag::NOTHING);
 };
@@ -207,6 +214,7 @@ class PartialLyricsLine final : public LyricsLine
     DECLARE_CLASSOF(ElementType::PARTIAL_LYRICSLINE)
 
     M_PROPERTY2(int, no, setNo, 0)
+    M_PROPERTY2(int, move_lyrics, setMove_lyrics, 0)
 public:
     PartialLyricsLine(EngravingItem* parent);
     PartialLyricsLine(const PartialLyricsLine&);

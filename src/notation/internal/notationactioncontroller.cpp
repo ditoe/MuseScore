@@ -145,6 +145,14 @@ void NotationActionController::init()
     registerNoteAction("insert-a", NoteName::A, NoteAddingMode::InsertChord);
     registerNoteAction("insert-b", NoteName::B, NoteAddingMode::InsertChord);
 
+    registerNoteAction("cipher-1", NoteName::C);
+    registerNoteAction("cipher-2", NoteName::D);
+    registerNoteAction("cipher-3", NoteName::E);
+    registerNoteAction("cipher-4", NoteName::F);
+    registerNoteAction("cipher-5", NoteName::G);
+    registerNoteAction("cipher-6", NoteName::A);
+    registerNoteAction("cipher-7", NoteName::B);
+
     registerAction("next-text-element", &Controller::nextTextElement, &Controller::textNavigationAvailable);
     registerAction("prev-text-element", &Controller::prevTextElement, &Controller::textNavigationAvailable);
     registerAction("next-word", &Controller::nextWord, &Controller::textNavigationAvailable);
@@ -532,6 +540,17 @@ void NotationActionController::init()
     registerTabPadNoteAction("pad-note-256-TAB", Pad::NOTE256);
     registerTabPadNoteAction("pad-note-512-TAB", Pad::NOTE512);
     registerTabPadNoteAction("pad-note-1024-TAB", Pad::NOTE1024);
+    registerPadNoteAction("pad-note-1-CIPHER", Pad::NOTE1);
+    registerPadNoteAction("pad-note-2-CIPHER", Pad::NOTE2);
+    registerPadNoteAction("pad-note-4-CIPHER", Pad::NOTE4);
+    registerPadNoteAction("pad-note-8-CIPHER", Pad::NOTE8);
+    registerPadNoteAction("pad-note-16-CIPHER", Pad::NOTE16);
+    registerPadNoteAction("pad-note-32-CIPHER", Pad::NOTE32);
+    registerPadNoteAction("pad-note-64-CIPHER", Pad::NOTE64);
+    registerPadNoteAction("pad-note-128-CIPHER", Pad::NOTE128);
+    registerPadNoteAction("pad-note-256-CIPHER", Pad::NOTE256);
+    registerPadNoteAction("pad-note-512-CIPHER", Pad::NOTE512);
+    registerPadNoteAction("pad-note-1024-CIPHER", Pad::NOTE1024);
     registerAction("rest-TAB", &Interaction::putRestToSelection);
 
     registerAction("standard-bend", [this]() { addGuitarBend(GuitarBendType::BEND); });

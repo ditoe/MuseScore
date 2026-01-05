@@ -556,6 +556,8 @@ class EngravingItem : public apiv1::ScoreElement
 
     API_PROPERTY_T(int, verse,            VERSE)
 
+    API_PROPERTY_T(int, move, LYRICS_STAFF_SHIFT)
+
     /// For lyrics: The syllabic, one of
     /// PluginAPI::PluginAPI::Syllabic values.
     API_PROPERTY_T(int, syllabic,         SYLLABIC)
@@ -2121,6 +2123,10 @@ public:
     /// \param tick Tick location in the score, as a fraction.
     /// \since MuseScore 4.6
     Q_INVOKABLE bool isPitchedStaff(apiv1::FractionWrapper* tick);
+    /// Whether the staff is a Cipher staff at a given tick.
+    /// \param tick Tick location in the score, as a fraction.
+    /// \since MuseScore 4.6
+    //Q_INVOKABLE bool isCipherStaff(apiv1::FractionWrapper* tick);
     /// Whether the staff is a tab staff at a given tick.
     /// \param tick Tick location in the score, as a fraction.
     /// \since MuseScore 4.6

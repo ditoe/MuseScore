@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="fonts/cipher/Cipher.ttf">../../../../fonts/cipher/Cipher.ttf</file>
+        <file alias="fonts/cipher/metadata.json">../../../../fonts/cipher/cipher_metadata.json</file>
+	    </qresource>
+</RCC>

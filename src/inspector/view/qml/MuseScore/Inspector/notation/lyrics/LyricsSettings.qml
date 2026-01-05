@@ -58,6 +58,20 @@ Column {
         navigationRowStart: root.navigationRowStart
     }
 
+    SpinBoxPropertyView {
+        id: moveLyrics
+        titleText: qsTrc("inspector", "Move lyrics to a different voice")
+        propertyItem: root.model ? root.model.move : null
+
+        decimals: 0
+        step: 1
+        minValue: 0
+
+        navigationName: "SpanFrom"
+        navigationPanel: root.navigationPanel
+        navigationRowStart: root.navigationRowStart
+    }
+
     PropertyCheckBox {
         navigation.name: "Avoid barlines"
         navigation.panel: root.navigationPanel

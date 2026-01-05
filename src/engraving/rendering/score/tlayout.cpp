@@ -458,7 +458,7 @@ void TLayout::layoutItem(EngravingItem* item, LayoutContext& ctx)
     case ElementType::TIE:              layoutTie(item_cast<Tie*>(item), ctx);
         break;
     case ElementType::TIMESIG:
-        layoutTimeSig(item_cast<const TimeSig*>(item), static_cast<TimeSig::LayoutData*>(ldata), ctx);
+        layoutTimeSig(item_cast<TimeSig*>(item), static_cast<TimeSig::LayoutData*>(ldata), ctx);
         break;
     case ElementType::TIME_TICK_ANCHOR: layoutTimeTickAnchor(static_cast<TimeTickAnchor*>(item), ctx);
         break;
@@ -502,7 +502,9 @@ void TLayout::layoutAccidental(const Accidental* item, Accidental::LayoutData* l
     if (ldata->isValid()) {
         return;
     }
-
+    if (item->staff()->isCipherStaff(item->rtick())) {
+        return;
+    }
     ldata->syms.clear();
 
     // TODO: remove Accidental in layout
@@ -1033,7 +1035,7 @@ static double barLineWidth(const BarLine* item, const MStyle& style, double dotW
 void TLayout::layoutBarLine(const BarLine* item, BarLine::LayoutData* ldata, const LayoutContext& ctx)
 {
     LAYOUT_CALL_ITEM(item);
-
+        
     // barlines hidden on this staff
     if (item->staff() && item->segment()) {
         if ((!item->staff()->staffTypeForElement(item)->showBarlines() && item->segment()->segmentType() == SegmentType::EndBarLine)
@@ -1235,12 +1237,21 @@ void TLayout::layoutBarLine2(BarLine* item, LayoutContext& ctx)
             bbox.unite(item->symBbox(SymId::bracketTop).translated(0, ldata->y1));
             bbox.unite(item->symBbox(SymId::bracketBottom).translated(0, ldata->y2));
             break;
-        }
+        } 
         default:
             break;
         }
     }
 
+    // Insert in TLayout::layoutBarLine2(BarLine* item, LayoutContext& ctx)
+    // ... existing code that computes ldata and sets its X pos ...
+
+    // Special case: reverse end barline on a cipher staff -> shift left by cipher width
+    if (item->barLineType() == BarLineType::REVERSE_END && item->staff()
+        && item->staff()->isCipherStaff(item->rtick())) {
+        ldata->setPosX(0.0);
+        ldata->moveX(-ldata->bbox().width());
+    }
     ldata->setBbox(bbox);
 }
 
@@ -3527,6 +3538,25 @@ void TLayout::layoutHook(const Hook* item, Hook::LayoutData* ldata)
     if (ldata->isValid()) {
         return;
     }
+    if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
+
+        const_cast<Hook*>(item)->set_cipherLineThick(item->get_cipherHeigth() * item->style().styleD(Sid::cipherThickLine));
+        const_cast<Hook*>(item)->set_cipherLineSpace(item->get_cipherHeigth() * (item->style().styleD(Sid::cipherDistanceBetweenLines) * -1));
+        const_cast<Hook*>(item)->set_cipherHeigthLine(item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeightDisplacement) - item->get_cipherHeigth() - item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeigthLine));
+        qreal linienlaenge = item->get_cipherHeigth() * item->style().styleD(Sid::cipherWideLine);
+        const_cast<Hook*>(item)->set_cipherLineWidth(linienlaenge);
+        qreal x = item->chord()->notes()[0]->get_cipherTextPos().x();
+        x += item->chord()->notes()[0]->get_cipherWidth()/2;
+        const_cast<Hook*>(item)->set_cipherLine(LineF(x+item->style().styleD(Sid::cipherOffsetLine) - (item->get_cipherLineWidth() / 2),
+            item->get_cipherHeigthLine(),
+            x+item->style().styleD(Sid::cipherOffsetLine) - (item->get_cipherLineWidth() / 2) + item->get_cipherLineWidth(),
+            item->get_cipherHeigthLine()));
+        RectF hookbox = RectF(item->get_cipherLine().x1(),
+            item->get_cipherHeigthLine() + ((qAbs(item->hookType()) - 1) * item->get_cipherLineSpace()) - item->get_cipherLineThick(), linienlaenge,
+            (item->get_cipherHeigthLine() + ((qAbs(item->hookType()) - 1) * item->get_cipherLineSpace()) - item->get_cipherLineThick()) * -1 - item->get_cipherHeigthLine() * -1);
+        ldata->setBbox(hookbox);
+        return;
+    }
 
     ldata->setBbox(item->symBbox(item->sym()));
 }
@@ -3898,6 +3928,124 @@ void TLayout::layoutKeySig(const KeySig* item, KeySig::LayoutData* ldata, const 
         bool suffixNaturals = naturalsOn && !prefixNaturals;
 
         const signed char* lines = ClefInfo::lines(clef);
+        if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
+            qreal wds = 0.0;
+            StaffType* cipher = item->staff()->staffType(item->tick());
+            const_cast<KeySig*>(item)->set_cipherHeigth(cipher->fretBoxH() * item->magS() * item->style().styleD(Sid::cipherKeySigSize));
+            if (!item->segment()->isKeySigAnnounceType()) {
+                int staffindex = item->staff()->idx();
+                bool isZero = item->tick().isZero();
+                bool wechsel = item->staff()->key(item->tick() - Fraction::fromTicks(1)) != item->keySigEvent().key();
+                //rxpos() = 0.0;
+                if ((isZero || wechsel) && item->staff() && staffindex < 1) {
+                    const_cast<KeySig*>(item)->set_cipherEnable(item->enabled());
+                    const_cast<KeySig*>(item)->setEnabled(false);
+
+                    int sigMode = int(item->keySigEvent().mode()) - 1;
+                    if (sigMode < 0 || sigMode > 2)
+                        sigMode = 0;
+                    const_cast<KeySig*>(item)->set_cipherString(item->getCipherString(int(item->keySigEvent().key()) + 7,sigMode));
+                    const_cast<KeySig*>(item)->set_cipherLeftAdjust(item->get_cipherHeigth() * -item->style().styleD(Sid::cipherKeySigHorizontalShift));
+                    const_cast<KeySig*>(item)->set_cipherPoint(PointF(item->get_cipherLeftAdjust(), item->get_cipherHeigth() * -item->style().styleD(Sid::cipherKeySigHigth)));
+                    wds = item->cipherGetWidth(cipher, item->get_cipherString());
+                    RectF denRect = RectF(item->get_cipherPoint().x(), item->get_cipherPoint().y() - item->get_cipherHeigth(), wds, item->get_cipherHeigth());
+                    //ldata->setBbox(denRect);
+                    ldata->cipherTextRect= denRect;
+                    ldata->setBbox(RectF());
+                }
+                else {
+
+                    ldata->setBbox(RectF());
+                }
+            }
+            const_cast<KeySig*>(item)->set_cipherDrawNote(item->showCourtesy() && !item->tick().isZero());
+            if (item->get_cipherDrawNote()) {
+                if (item->get_cipherDrawNote() && item->segment()->isKeySigType()) {
+                    Segment* seg = item->segment()->next();
+                    while (seg && !seg->isChordRestType()) {
+                        seg = seg->next();
+                    }
+                    if (seg && seg->element(item->track())->isChord()) {
+                        Chord* cd = toChord(seg->element(item->track()));
+                        if (cd && cd->upNote()) {
+                            cd->upNote()->cipher_setKeysigNote(const_cast<KeySig*>(item));
+                        }
+                    }
+                }
+                if (item->segment()->isKeySigAnnounceType()) {
+
+                    if (item->measure() && item->measure()->nextMeasure()) {
+                        Segment* seg = item->measure()->nextMeasure()->first();
+                        while (seg && !seg->isChordRestType()) {
+                            seg = seg->next();
+                        }
+                        if (seg && seg->element(item->track())->isChord()) {
+                            Chord* cd = toChord(seg->element(item->track()));
+                            if (cd) {
+                                cd->upNote()->cipher_setKeysigNote(const_cast<KeySig*>(item));
+                            }
+                        }
+                    }
+                }
+                if (item->get_cipherNoteString() != "") {
+
+                    const_cast<KeySig*>(item)->set_cipherNotePoint(PointF(0.0, item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeightDisplacement) - item->get_cipherNoteShift()));
+                    const_cast<KeySig*>(item)->set_cipherNoteRecht(RectF(item->get_cipherNotePoint().x(), item->get_cipherNotePoint().y() - item->get_cipherHeigth(), item->cipherGetWidth(cipher,
+                        item->get_cipherNoteString()), item->get_cipherHeigth()));
+                    ldata->addBbox(item->get_cipherNoteRecht());
+                    qreal wd = item->cipherGetWidth(cipher, (String)"(");
+                    Font fontAccidental;
+                    fontAccidental = item->cipherKeySigFont();
+                    qreal ShapSize = item->cipherKeySigFont().pointSizeF() * item->style().styleD(Sid::cipherSizeSignSharp);
+                    qreal FlatSize = item->cipherKeySigFont().pointSizeF() * item->style().styleD(Sid::cipherSizeSignFlat);
+                    if (item->get_cipherAccidentalShift() != 0) {
+                        if (item->get_cipherAccidentalShift() == 1) {
+                            const_cast<KeySig*>(item)->set_cipherAccidentalPoint(PointF(item->get_cipherHeigth() * -item->style().styleD(Sid::cipherDistanceSignSharp) * 0.7,
+                                (item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeigthSignSharp)) - item->get_cipherNoteShift()));
+                            fontAccidental.setPointSizeF(ShapSize);
+                            FontMetrics fm2(fontAccidental);
+                            ldata->addBbox(fm2.tightBoundingRect((String)u"♯").translated(item->get_cipherAccidentalPoint()));
+                        }
+                        if (item->get_cipherAccidentalShift() == -1) {
+                            const_cast<KeySig*>(item)->set_cipherAccidentalPoint(PointF(item->get_cipherHeigth() * -item->style().styleD(Sid::cipherDistanceSignFlat) * 0.7,
+                                (item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeigthSignFlat)) - item->get_cipherNoteShift()));
+                            fontAccidental.setPointSizeF(FlatSize);
+                            FontMetrics fm2(fontAccidental);
+                            ldata->addBbox(fm2.tightBoundingRect((String)u"♭").translated(item->get_cipherAccidentalPoint()));
+                        }
+                        const_cast<KeySig*>(item)->set_cipherNoteKlammerPoint(PointF(item->get_cipherAccidentalPoint().x() - wd, item->get_cipherNotePoint().y()));
+                    }
+                    else {
+                        const_cast<KeySig*>(item)->set_cipherNoteKlammerPoint(PointF(item->get_cipherNotePoint().x() - wd, item->get_cipherNotePoint().y()));
+
+                    }
+                    const_cast<KeySig*>(item)->set_cipherNoteKlammerRecht(RectF(item->get_cipherNoteKlammerPoint().x(), item->get_cipherNoteKlammerPoint().y() - item->get_cipherHeigth(), wd, item->get_cipherHeigth()));
+                    ldata->addBbox(item->get_cipherNoteKlammerRecht());
+                    const_cast<KeySig*>(item)->set_cipherShape(RectF(item->get_cipherNoteKlammerPoint().x() - item->get_cipherHeigth() * item->style().styleD(Sid::cipherKeysigNoteDistancLeft),
+                        item->get_cipherNoteKlammerPoint().y() - item->get_cipherHeigth(),
+                        item->get_cipherNotePoint().x() - item->get_cipherNoteKlammerPoint().x() + item->get_cipherNoteRecht().width() +
+                        item->get_cipherHeigth() * item->style().styleD(Sid::cipherKeysigNoteDistancLeft) +
+                        item->get_cipherHeigth() * item->style().styleD(Sid::cipherKeysigNoteDistancReigth), item->get_cipherHeigth()));
+                    const_cast<KeySig*>(item)->set_cipherReigthAdjust(wds - item->get_cipherShape().width());
+                    ldata->addBbox(item->get_cipherShape());
+                    if (item->get_cipherReigthAdjust() < 0.0) {
+                        const_cast<KeySig*>(item)->set_cipherReigthAdjust(0.0);
+                    }
+                }
+                else {
+                    const_cast<KeySig*>(item)->set_cipherShape(RectF());
+                    const_cast<KeySig*>(item)->set_cipherReigthAdjust(wds);
+                    //rxpos()=get_cipherXpos() + _cipherHigth*-score()->styleD(Sid::cipherKeySigHorizontalShift);
+                }
+            }
+            else {
+
+                const_cast<KeySig*>(item)->set_cipherShape(RectF());
+                const_cast<KeySig*>(item)->set_cipherReigthAdjust(item->get_cipherHeigth() * item->style().styleD(Sid::cipherNoteDistanc));
+            }
+            //const_cast<KeySig*>(item)->setAutoplace(false);
+            return;
+        }
 
         if (prefixNaturals) {
             for (int i = 0; i < 7; ++i) {
@@ -3940,6 +4088,15 @@ void TLayout::layoutKeySig(const KeySig* item, KeySig::LayoutData* ldata, const 
         keySigShape.add(item->symBbox(ks.sym).translated(x, y), item);
     }
     ldata->setShape(keySigShape);
+}
+void TLayout::layoutKeySig2(KeySig* item, KeySig::LayoutData* ldata)
+{
+    if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
+        ldata->setPosY(0.0);
+        item->setEnabled(item->get_cipherEnable());
+        ldata->addBbox(ldata->cipherTextRect);
+
+    }
 }
 
 void TLayout::layoutLaissezVib(LaissezVib* item)
@@ -4033,6 +4190,12 @@ void TLayout::layoutIndicatorIcon(const IndicatorIcon* item, IndicatorIcon::Layo
 static void _layoutLedgerLine(const LedgerLine* item, const LayoutContext& ctx, LedgerLine::LayoutData* ldata)
 {
     double chordMag = item->chord()->mag();
+    if (item->staff() && item->staff()->isCipherStaff(item->chord()->tick())) {
+        const_cast<LedgerLine*>(item)->setColor(item->staff()->staffType(item->tick())->color());
+        qreal w2 = item->get_width() * .5;
+        ldata->setBbox(-w2, -w2, item->len() + item->get_width(), item->get_width());
+        return;
+    }
     ldata->setMag(chordMag);
     ldata->lineWidth = ctx.conf().styleMM(Sid::ledgerLineWidth) * chordMag;
     if (item->staff()) {
@@ -4419,7 +4582,53 @@ void TLayout::layoutNote(const Note* item, Note::LayoutData* ldata)
         double height = item->deadNote() ? tab->deadFretBoxH() : tab->fretBoxH();
 
         noteBBox = RectF(0, y * mags, w, height * mags);
-    } else {
+    } else if (item->staff() && item->staff()->isCipherStaff(item->chord()->tick())) {
+        StaffType* cipher = item->staff()->staffType(item->tick());
+
+        int accidentalshift = 0;
+        const_cast<Note*>(item)->set_drawFlat(false);
+        const_cast<Note*>(item)->set_drawSharp(false);
+        int numtransposeInterval = item->part()->instrument(item->chord()->tick())->transpose().chromatic;
+        int step = tpc2stepByKey(item->tpc(), item->staff()->key(item->tick()), accidentalshift);
+        //qWarning().nospace() << "step" << step << "acci" << accidentalshift;
+        if (accidentalshift > 1 || accidentalshift < -1)accidentalshift = 0;
+        if (accidentalshift == 1) {
+            const_cast<Note*>(item)->set_drawSharp(true);
+        }
+        else if (accidentalshift == -1) {
+            const_cast<Note*>(item)->set_drawFlat(true);
+        }
+
+        int clefshift = item->get_cipherOktave();
+        int grundtonverschibung = item->get_cipherTrans(item->staff()->key(item->tick()));
+        int zifferkomatik = ((item->pitch() - accidentalshift + grundtonverschibung + numtransposeInterval) % 12) + 1;
+        const_cast<Note*>(item)->set_trackthick(1.0);
+        if (item->track() % 4 > 0) {
+            const_cast<Note*>(item)->set_trackthick(item->style().styleD(Sid::cipherAlternativSize));
+        }
+        FontMetrics fm2(item->get_cipherFont());
+        qreal height = fm2.tightBoundingRect((String)"1234567890").height();
+        const_cast<Note*>(item)->set_cipherHeigth(height);
+        const_cast<Note*>(item)->set_fretString(const_cast<Note*>(item)->get_cipherString(zifferkomatik));
+        const_cast<Note*>(item)->set_cipherWidth(fm2.tightBoundingRect(item->fretString()).width());
+        const_cast<Note*>(item)->set_fretString(item->fretString() +
+            item->get_cipherDuration(int(item->chord()->durationType().type())) +
+            item->get_cipherDurationDot(int(item->chord()->durationType().dots())));
+        const_cast<Note*>(item)->set_cipherWidth2(fm2.tightBoundingRect(item->fretString()).width());
+        const_cast<Note*>(item)->set_cipherLedgerline(((item->pitch() + grundtonverschibung - accidentalshift + numtransposeInterval) / 12 - 5 - clefshift) / 2 );
+        const_cast<Note*>(item)->set_fretStringYShift(((item->pitch() + grundtonverschibung - accidentalshift + numtransposeInterval) / 12 - 5 - clefshift) * height *
+            item->style().styleD(Sid::cipherDistanceOctave));
+        ldata->setPosY( -item->fretStringYShift());
+        qreal w = item->get_cipherWidth(); // !! use _fretString
+        RectF stringbox = RectF(0.0, item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeightDisplacement),
+            w, item->get_cipherHeigth());
+        ldata->setBbox(stringbox);
+        const_cast<Note*>(item)->staff()->set_cipherHeight(item->get_cipherHeigth());
+
+        fillNoteShape(item, ldata);
+        return;
+    }
+    else {
         if (item->deadNote()) {
             const_cast<Note*>(item)->setHeadGroup(NoteHeadGroup::HEAD_CROSS);
         } else if (item->harmonic()) {
@@ -4458,6 +4667,100 @@ void TLayout::layoutNote(const Note* item, Note::LayoutData* ldata)
     ldata->setBbox(noteBBox);
 
     fillNoteShape(item, ldata);
+}
+
+void TLayout::layoutNoteCipherAccidental(Note* item, Note::LayoutData* ldata) {
+
+
+    if (item->staff()->isCipherStaff(item->chord()->tick())) {
+        FontMetrics fm2(item->get_cipherFont());
+        qreal w = fm2.tightBoundingRect(item->fretString()).width(); // !! use _fretString
+        qreal y = item->get_cipherHeigth() * -1 + item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeightDisplacement);
+        qreal x = -item->get_cipherWidth()/2;
+        if (item->track() % 4 == 0) {
+            EngravingItem* e = item->chord()->segment()->element(item->track() + 1);
+            if (e && e->isChord() && toChord(e)->notes()[0] && false) {
+                qreal x2 = (item->get_cipherWidth2() + toChord(e)->notes()[0]->get_cipherWidth2()) / 2 + item->get_cipherHeigth() * item->style().styleD(Sid::cipherAlternativSpace);
+                x -= x2;
+                //toChord(e)->notes()[0]->set_cipherTextPos(PointF(item->get_cipherTextPos().x() + x2, item->get_cipherTextPos().y()));
+                //toChord(e)->notes()[0]->set_cipherAccidentalPos(PointF(item->get_cipherAccidentalPos().x() + x2, item->get_cipherAccidentalPos().y()));
+            }
+        }
+        else {
+
+            EngravingItem* e = item->chord()->segment()->element(item->track() - 1);
+            if (e && e->isChord() && toChord(e)->notes()[0]) {
+                Note* n = toChord(e)->notes()[0];
+                qreal x2 = (item->get_cipherWidth2() + toChord(e)->notes()[0]->get_cipherWidth2()) / 2 + item->get_cipherHeigth() * item->style().styleD(Sid::cipherAlternativSpace);
+                x += x2;
+                n->set_cipherTextPos(PointF(n->get_cipherTextPos().x() - x2, n->get_cipherTextPos().y()));
+                n->set_cipherAccidentalPos(PointF(n->get_cipherAccidentalPos().x() - x2, n->get_cipherAccidentalPos().y()));
+                n->mutldata()->setBbox(RectF(n->mutldata()->bbox().x() - x2, n->mutldata()->bbox().y(),
+                    n->mutldata()->bbox().width(), n->mutldata()->bbox().height()));
+                if (n->chord()->hook()) {
+                    Hook* hook = n->chord()->hook();
+                    qreal xh = n->get_cipherTextPos().x();
+                    xh += n->get_cipherWidth() / 2;
+                    hook->set_cipherLine(LineF(xh + hook->style().styleD(Sid::cipherOffsetLine) - (hook->get_cipherLineWidth() / 2),
+                        hook->get_cipherHeigthLine(),
+                        xh + hook->style().styleD(Sid::cipherOffsetLine) - (hook->get_cipherLineWidth() / 2) + hook->get_cipherLineWidth(),
+                        hook->get_cipherHeigthLine()));
+                    RectF hookbox = RectF(hook->get_cipherLine().x1(),
+                        hook->get_cipherHeigthLine() + ((qAbs(hook->hookType()) - 1) * hook->get_cipherLineSpace()) - hook->get_cipherLineThick(), hook->get_cipherLineWidth(),
+                        (hook->get_cipherHeigthLine() + ((qAbs(hook->hookType()) - 1) * hook->get_cipherLineSpace()) - hook->get_cipherLineThick()) * -1 - hook->get_cipherHeigthLine() * -1);
+                    hook->mutldata()->setBbox(hookbox);
+                }
+            }
+        }
+
+        RectF stringbox = RectF(x, y,
+            w, item->get_cipherHeigth());
+        ldata->setBbox(stringbox);
+        item->set_cipherTextPos(PointF(x, item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeightDisplacement)));
+        qreal ShapSize = item->get_cipherFont().pointSizeF() * item->style().styleD(Sid::cipherSizeSignSharp);
+        qreal FlatSize = item->get_cipherFont().pointSizeF() * item->style().styleD(Sid::cipherSizeSignFlat);
+        Font fontAccidental;
+        fontAccidental = item->get_cipherAccidentalFont();
+        qreal xK = item->get_cipherTextPos().x();
+        qreal AccidentalWidth = 0.0;
+        if (item->accidental() || item->get_drawFlat() || item->get_drawSharp()) {
+            if ((item->accidental() && (item->accidental()->accidentalType() == AccidentalType::SHARP)) || item->get_drawSharp()) {
+                AccidentalWidth = item->get_cipherHeigth() * item->style().styleD(Sid::cipherDistanceSignSharp);
+                xK -= AccidentalWidth;
+                item->set_cipherAccidentalPos(PointF(xK, (item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeigthSignSharp))));
+                fontAccidental.setPointSizeF(ShapSize);
+                FontMetrics fm2(fontAccidental);
+                ldata->addBbox(fm2.tightBoundingRect((String)u"♯").translated(item->get_cipherAccidentalPos()));
+            }
+            if ((item->accidental() && (item->accidental()->accidentalType() == AccidentalType::FLAT)) || item->get_drawFlat()) {
+                AccidentalWidth = item->get_cipherHeigth() * item->style().styleD(Sid::cipherDistanceSignFlat);
+                xK -= AccidentalWidth;
+                item->set_cipherAccidentalPos(PointF(xK, (item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeigthSignFlat))));
+                fontAccidental.setPointSizeF(FlatSize);
+                FontMetrics fm2(fontAccidental);
+                ldata->addBbox(fm2.tightBoundingRect((String)u"♭").translated(item->get_cipherAccidentalPos()));
+            }
+        }
+        if (item->get_trackthick()!=1.0) {
+            if (item->style().styleB(Sid::cipherbracket)) {
+                FontMetrics fm2(item->get_cipherFont());
+                qreal wr = fm2.tightBoundingRect((String)"(").width();
+                item->set_cipherKlammerPos(PointF(xK + AccidentalWidth, item->get_cipherTextPos().y()));
+                item->set_cipherTextPos(PointF(item->get_cipherTextPos().x() + wr + AccidentalWidth, item->get_cipherTextPos().y()));
+                item->set_cipherAccidentalPos(PointF(item->get_cipherAccidentalPos().x() + wr + AccidentalWidth, item->get_cipherAccidentalPos().y()));
+                ldata->setBbox(RectF(ldata->bbox().x() + AccidentalWidth, ldata->bbox().y(), ldata->bbox().width(), ldata->bbox().height()));
+                ldata->addBbox(RectF(xK + AccidentalWidth, y, wr, item->get_cipherHeigth()));
+                ldata->addBbox(RectF(item->get_cipherTextPos().x() + item->get_cipherWidth2(), y, wr, item->get_cipherHeigth()));
+            }
+            else {
+                item->set_cipherTextPos(PointF(item->get_cipherTextPos().x() + AccidentalWidth, item->get_cipherTextPos().y()));
+                item->set_cipherAccidentalPos(PointF(item->get_cipherAccidentalPos().x() + AccidentalWidth, item->get_cipherAccidentalPos().y()));
+                ldata->setBbox(RectF(ldata->bbox().x() + AccidentalWidth, ldata->bbox().y(), ldata->bbox().width(), ldata->bbox().height()));
+
+            }
+        }
+
+    }
 }
 
 void TLayout::fillNoteShape(const Note* item, Note::LayoutData* ldata)
@@ -5510,6 +5813,9 @@ void TLayout::layoutStaffTypeChange(const StaffTypeChange* item, StaffTypeChange
 void TLayout::layoutStem(const Stem* item, Stem::LayoutData* ldata, const LayoutConfiguration& conf)
 {
     LAYOUT_CALL_ITEM(item);
+    if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
+        return;
+    }
 
     const bool up = item->up();
     const double _up = up ? -1.0 : 1.0;
@@ -5582,6 +5888,9 @@ void TLayout::layoutStemSlash(const StemSlash* item, StemSlash::LayoutData* ldat
 {
     LAYOUT_CALL_ITEM(item);
     IF_ASSERT_FAILED(item->explicitParent()) {
+        return;
+    }
+    if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
         return;
     }
 
@@ -6507,7 +6816,7 @@ void TLayout::layoutTie(Tie* item, LayoutContext&)
     UNUSED(item);
 }
 
-void TLayout::layoutTimeSig(const TimeSig* item, TimeSig::LayoutData* ldata, const LayoutContext& ctx)
+void TLayout::layoutTimeSig(TimeSig* item, TimeSig::LayoutData* ldata, const LayoutContext& ctx)
 {
     LAYOUT_CALL_ITEM(item);
     LD_INDEPENDENT;
@@ -6565,6 +6874,10 @@ void TLayout::layoutTimeSig(const TimeSig* item, TimeSig::LayoutData* ldata, con
     // determine middle staff position:
 
     double yoff = spatium * (numOfLines - 1) * .5 * lineDist;
+    if (staff && staff->isCipherStaff(tick)) {
+        if (item->timeSigType() == TimeSigType::FOUR_FOUR || item->timeSigType() == TimeSigType::ALLA_BREVE) item->set_timeSigType(TimeSigType::NORMAL);
+        sigType = item->timeSigType();
+    }
 
     // C and Ccut are placed at the middle of the staff: use yoff directly
     IEngravingFontPtr font = ctx.engravingFont();
@@ -6615,7 +6928,70 @@ void TLayout::layoutTimeSig(const TimeSig* item, TimeSig::LayoutData* ldata, con
         ldata->ns.clear();
         ldata->ns.push_back(sym);
         ldata->ds.clear();
-    } else {
+    } else if (staff && staff->isCipherStaff(tick)) {
+        if (item->segment()->isTimeSigAnnounceType()) {
+            ldata->cipherVisible=false;
+
+            ldata->setBbox(RectF());
+            return;
+        }
+        if (item->timeSigType() == TimeSigType::FOUR_FOUR || item->timeSigType() == TimeSigType::ALLA_BREVE) item->set_timeSigType(TimeSigType::NORMAL);
+        item->setEnabled(false);
+
+        const StaffType* cipher = staff->staffTypeForElement(item);
+        Font fontcipher(item->cipherTimeSigFont());
+        FontMetrics fm2(fontcipher);
+        ldata->cipher_ds = item->numeratorString().isEmpty() ? String::number(item->sig().numerator()) : item->numeratorString();//toTimeSigString(_numeratorString.isEmpty()   ? QString::number(_sig.numerator())   : _numeratorString);
+        ldata->cipher_ns = item->denominatorString().isEmpty() ? String::number(item->sig().denominator()) : item->denominatorString();//toTimeSigString(_denominatorString.isEmpty() ? QString::number(_sig.denominator()) : _denominatorString);
+
+        ldata->ns = timeSigSymIdsFromString(item->numeratorString().isEmpty() ? String::number(item->sig().numerator()) : item->numeratorString());
+        ldata->ds = timeSigSymIdsFromString(item->denominatorString().isEmpty() ? String::number(item->sig().denominator()) : item->denominatorString());
+
+        qreal px = -0.0;
+        ldata->cipherHeigthds = fm2.tightBoundingRect(ldata->cipher_ds).height();
+        ldata->cipherHeigthns = fm2.tightBoundingRect(ldata->cipher_ns).height();
+        qreal wn = fm2.width(ldata->cipher_ns);
+        qreal wd = fm2.width(ldata->cipher_ds);
+        RectF numRect = RectF(px, 0.0, wn, ldata->cipherHeigthns);
+        RectF denRect = RectF(px, 0.0, wd, ldata->cipherHeigthds);
+        qreal displ = numRect.height() * style.styleD(Sid::cipherTimeSigLineThick) * 1.5;
+
+        //align on the wider
+        qreal pzY = yoff + displ + numRect.height();
+        qreal pnY = yoff - displ;
+        qreal cipherLineWidth = denRect.width();
+        qreal boxwidth = 0.0;
+
+
+        if (numRect.width() >= denRect.width()) {
+            // numerator: one space above centre line, unless denomin. is empty (if so, directly centre in the middle)
+            ldata->pz = PointF(px, pzY);
+            // denominator: horiz: centred around centre of numerator | vert: one space below centre line
+            ldata->pn = PointF((numRect.width() - denRect.width()) * .5 + px, pnY);
+            cipherLineWidth = numRect.width();
+            //px +=(numRect.width() - denRect.width())*.5;
+            boxwidth = numRect.width();
+        }
+        else {
+            // numerator: one space above centre line, unless denomin. is empty (if so, directly centre in the middle)
+            ldata->pz = PointF((denRect.width() - numRect.width()) * .5 + px, pzY);
+            // denominator: horiz: centred around centre of numerator | vert: one space below centre line
+            ldata->pn = PointF(px, pnY);
+            cipherLineWidth = denRect.width();
+            //px +=(numRect.width() - denRect.width())*.5;
+            boxwidth = denRect.width();
+        }
+        px -= cipherLineWidth * (style.styleD(Sid::cipherTimeSigLineSize) - 1.0) * 0.5;
+        RectF timeSigRect = RectF(px, pnY - numRect.height(), boxwidth, numRect.height() * 2 + displ * 2);
+        ldata->cipherLine = LineF(px, 0, cipherLineWidth * style.styleD(Sid::cipherTimeSigLineSize) + px, 0);
+        ldata->cipherLineThick = numRect.height() * style.styleD(Sid::cipherTimeSigLineThick);
+        ldata->setBbox(timeSigRect);
+        ldata->ns.clear();
+        ldata->ns.push_back(SymId::timeSigCutCommon);
+        ldata->ds.clear();
+        return;
+    }
+    else {
         if (item->numeratorString().isEmpty()) {
             ldata->ns = timeSigSymIdsFromString(item->numeratorString().isEmpty()
                                                 ? String::number(item->sig().numerator())
@@ -6684,6 +7060,31 @@ void TLayout::layoutTimeSig(const TimeSig* item, TimeSig::LayoutData* ldata, con
     ldata->moveY(item->yPos());
 }
 
+void TLayout::layoutTimeSig2(TimeSig* item, TimeSig::LayoutData* ldata, const LayoutContext& ctx) 
+{
+    TimeSigType sigType = item->timeSigType();
+    const Staff* staff = item->staff();
+    const Segment* seg = item->segment();
+    const Measure* meas = seg ? seg->measure() : nullptr;
+    const Fraction tick = meas ? meas->tick() : item->tick();
+    const MStyle& style = item->style();
+    if (staff && staff->isCipherStaff(tick)) {
+        if (seg->isTimeSigAnnounceType()) {
+            return;
+        }
+        ldata->cipherBegin = meas->first()->isBeginBarLineType();
+        if (ldata->cipherBegin) ldata->setPosX(ldata->cipherXpos - ldata->bbox().width() - ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance));
+        else {
+
+            qreal x = ldata->bbox().width() + ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance);
+            ldata->cipherBarLine = LineF(x, -ldata->cipherBarLinelenght / 2, x, ldata->cipherBarLinelenght / 2);
+            qreal lw = style.styleMM(Sid::barWidth) * item->mag();
+            ldata->addBbox(RectF(x, -ldata->cipherBarLinelenght / 2, lw, ldata->cipherBarLinelenght));
+        }
+        item->setEnabled(true);
+    }
+
+}
 void TLayout::layoutTimeTickAnchor(TimeTickAnchor* item, LayoutContext&)
 {
     TimeTickAnchor::LayoutData* ldata = item->mutldata();

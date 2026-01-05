@@ -835,6 +835,26 @@ Timeline::Timeline(QSplitter* splitter)
         "...#.##"
     };
 
+    static const char* start_barline[] = {
+        "7 14 2 1",
+        "# c #000000",
+        ". c None",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#",
+        "...##.#"
+    };
+
     static const char* doubleBarline[] = {
         "7 14 2 1",
         "# c #000000",
@@ -918,6 +938,7 @@ Timeline::Timeline(QSplitter* splitter)
     QPixmap* startRepeatPixmap = new QPixmap(startRepeat);
     QPixmap* endRepeatPixmap = new QPixmap(endRepeat);
     QPixmap* endBarlinePixmap = new QPixmap(endBarline);
+    QPixmap* start_barline_pixmap = new QPixmap(start_barline);
     QPixmap* doubleBarlinePixmap = new QPixmap(doubleBarline);
     QPixmap* reverseEndBarlinePixmap = new QPixmap(reverseEndBarline);
     QPixmap* heavyBarlinePixmap = new QPixmap(heavyBarline);
@@ -926,6 +947,7 @@ Timeline::Timeline(QSplitter* splitter)
     _barlines[BarLineType::START_REPEAT] = startRepeatPixmap;
     _barlines[BarLineType::END_REPEAT] = endRepeatPixmap;
     _barlines[BarLineType::END] = endBarlinePixmap;
+    _barlines[BarLineType::BEGIN] = start_barline_pixmap;
     _barlines[BarLineType::DOUBLE] = doubleBarlinePixmap;
     _barlines[BarLineType::REVERSE_END] = reverseEndBarlinePixmap;
     _barlines[BarLineType::HEAVY] = heavyBarlinePixmap;
@@ -1373,6 +1395,7 @@ void Timeline::barlineMeta(Segment* seg, int* stagger, int pos)
         case BarLineType::START_REPEAT:
         case BarLineType::END_REPEAT:
         case BarLineType::END:
+        case BarLineType::BEGIN:
         case BarLineType::DOUBLE:
         case BarLineType::REVERSE_END:
         case BarLineType::HEAVY:
@@ -1613,6 +1636,7 @@ bool Timeline::addMetaValue(int x, int pos, QString metaText, int row, ElementTy
     // Adjust x for end repeats
     if ((barLineType == BarLineType::END_REPEAT
          || barLineType == BarLineType::END
+         || barLineType == BarLineType::BEGIN
          || barLineType == BarLineType::DOUBLE
          || barLineType == BarLineType::REVERSE_END
          || barLineType == BarLineType::HEAVY

@@ -140,6 +140,9 @@ public:
 
     static void changeTieType(Tie* oldTie, Note* endNote = nullptr);
 
+    qreal get_cipherHeigth() { return m_cipherHeigth; }
+    void set_cipherHeigth(qreal h) { m_cipherHeigth = h; }
+
 protected:
     Tie(const ElementType& type, EngravingItem* parent = nullptr);
 
@@ -149,5 +152,9 @@ protected:
     // Jump point information for incoming ties after repeats
     TieJumpPoint* m_jumpPoint = nullptr;
     TieJumpPointList* startTieJumpPoints() const;
+
+private:
+
+    qreal m_cipherHeigth;
 };
 } // namespace mu::engraving

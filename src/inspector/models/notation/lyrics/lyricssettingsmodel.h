@@ -30,6 +30,7 @@ class LyricsSettingsModel : public AbstractInspectorModel
     Q_OBJECT
 
     Q_PROPERTY(PropertyItem * verse READ verse CONSTANT)
+    Q_PROPERTY(PropertyItem * move READ move CONSTANT)
     Q_PROPERTY(PropertyItem * avoidBarlines READ avoidBarlines CONSTANT)
 public:
     explicit LyricsSettingsModel(QObject* parent, IElementRepositoryService* repository);
@@ -40,10 +41,12 @@ public:
     void resetProperties() override;
 
     PropertyItem* verse() const;
+    PropertyItem* move() const;
     PropertyItem* avoidBarlines() const;
 
 private:
     PropertyItem* m_verse = nullptr;
+    PropertyItem* m_move_lyrics = nullptr;
     PropertyItem* m_avoidBarlines = nullptr;
 };
 }

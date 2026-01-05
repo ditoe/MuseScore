@@ -1904,7 +1904,9 @@ void TRead::read(BarLine* b, XmlReader& e, ReadContext& ctx)
     while (e.readNextStartElement()) {
         const AsciiStringView tag(e.name());
         if (tag == "subtype") {
-            b->setBarLineType(TConv::fromXml(e.readAsciiText(), BarLineType::NORMAL));
+            AsciiStringView v = e.readAsciiText();
+            if (v == "begin")b->setBarLineType(BarLineType::REVERSE_END); else
+            b->setBarLineType(TConv::fromXml(v, BarLineType::NORMAL));
         } else if (tag == "span") {
             b->setSpanStaff(e.readBool());
         } else if (tag == "spanFromOffset") {
@@ -2979,6 +2981,8 @@ bool TRead::readProperties(Lyrics* l, XmlReader& e, ReadContext& ctx)
         if (l->isEven()) {
             l->initTextStyleType(TextStyleType::LYRICS_EVEN);
         }
+    } else if (tag == "lyricsStaffShift") {
+        l->setMove_lyrics(e.readInt());
     } else if (tag == "syllabic") {
         l->setSyllabic(TConv::fromXml(e.readAsciiText(), LyricsSyllabic::SINGLE));
     } else if (tag == "ticks") {          // obsolete

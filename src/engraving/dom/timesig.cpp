@@ -31,6 +31,7 @@
 #include "staff.h"
 
 #include "log.h"
+#include "measure.h"
 
 using namespace mu;
 using namespace mu::engraving;
@@ -483,4 +484,12 @@ void TimeSig::removed()
 
     score()->setUpTempoMapLater();
 }
+muse::draw::Font TimeSig::cipherTimeSigFont() const
+{
+    const MStyle& st = style();
+    muse::draw::Font f(st.styleSt(Sid::cipherTimeSigFont), muse::draw::Font::Type::Text);
+    f.setPointSizeF(st.styleD(Sid::cipherFontSize) * st.styleD(Sid::cipherTimeSigSize) * (spatium() / SPATIUM20));
+    return f;
+}
+
 }

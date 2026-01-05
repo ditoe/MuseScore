@@ -749,6 +749,41 @@ void Rest::editDrag(EditData& editData)
 }
 
 //---------------------------------------------------------
+//   get_cipherDuration
+//---------------------------------------------------------
+String Rest::get_cipherDuration(int n) const {
+    String get_cipherDuration[16] = {
+          (String)"",(String)"",(String)",,",(String)",",(String)"",(String)"",(String)"",
+          (String)"",(String)"",(String)"",(String)"",(String)"",(String)"",(String)"",
+          (String)"",(String)""
+
+    };
+    return get_cipherDuration[n];
+}
+
+//---------------------------------------------------------
+//   get_cipherDurationDot
+//---------------------------------------------------------
+String Rest::get_cipherDurationDot(int n) const {
+    String get_cipherDurationDot[3] = {
+          (String)"",(String)".",(String)".."
+
+    };
+    return get_cipherDurationDot[n];
+}
+
+//---------------------------------------------------------
+//   cipherTimeSigFont
+//---------------------------------------------------------
+muse::draw::Font Rest::get_cipherFont() const
+{
+    const MStyle& st = style();
+    muse::draw::Font f(st.styleSt(Sid::cipherFont), muse::draw::Font::Type::Text);
+    f.setPointSizeF((st.styleD(Sid::cipherFontSize) * (spatium() / SPATIUM20)) * m_trackthick);
+    return f;
+}
+
+//---------------------------------------------------------
 //   Rest::shouldNotBeDrawn
 //    in tab staff, do not draw rests (except mmrests)
 //    if rests are off OR if dur. symbols are on

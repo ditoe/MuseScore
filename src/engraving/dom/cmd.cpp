@@ -1927,10 +1927,6 @@ void Score::upDown(bool up, UpDownMode mode)
             }
         }
         break;
-        case StaffGroup::CIPHER:
-            // Cipher notation - treat as standard for now
-            // TODO: Implement cipher-specific up/down logic
-            // Fall through to STANDARD handling
         case StaffGroup::TAB:
         {
             const StringData* stringData = part->stringData(tick, staff->idx());
@@ -1984,6 +1980,7 @@ void Score::upDown(bool up, UpDownMode mode)
             }
         }
         break;
+        case StaffGroup::CIPHER:
         case StaffGroup::STANDARD:
             switch (mode) {
             case UpDownMode::OCTAVE:
@@ -2344,6 +2341,34 @@ void Score::changeAccidental(Note* note, AccidentalType accidental)
     AccidentalVal acc = (accidental == AccidentalType::NONE) ? acc2 : Accidental::subtype2value(accidental);
 
     int pitch = line2pitch(note->line(), clef, Key::C) + int(acc);
+    if (note->staff()->isCipherStaff(chord->tick())) {
+        int accidentalshift = 0;
+        int tpc = 0;
+        step = tpc2stepByKey(note->tpc(), note->staff()->key(note->tick()), accidentalshift);
+        tpc = step2tpcByKey(step, note->staff()->key(note->tick()));
+        int accshift = 0;
+        if (accidentalshift == 0) {
+            tpc += int(acc) * 7;
+            accshift = int(acc);
+        }
+        else
+        {
+            if (accidentalshift == -1 && int(acc) == 1) {
+                tpc += 7;
+                accshift = 1;
+            }
+            if (accidentalshift == 1 && int(acc) == -1) {
+                tpc -= 7;
+                accshift = -1;
+            }
+        }
+        pitch = note->get_cipherGroundPitch() + accshift;
+        changeAccidental2(note, pitch, tpc);
+        setPlayNote(true);
+        setSelectionChanged(true);
+        return;
+    }
+
     if (!note->concertPitch()) {
         pitch += note->transposition();
     }
@@ -2731,11 +2756,11 @@ void Score::cmdResetBeamMode()
             if (!cr) {
                 continue;
             }
-            if (cr->type() == ElementType::CHORD) {
+            if (cr->type() == ElementType::CHORD && !(cr->staff() && cr->staff()->isCipherStaff(cr->tick()))) {
                 if (cr->beamMode() != BeamMode::AUTO) {
                     cr->undoChangeProperty(Pid::BEAM_MODE, BeamMode::AUTO);
                 }
-            } else if (cr->type() == ElementType::REST) {
+            } else if (cr->type() == ElementType::REST || (cr->staff() && cr->staff()->isCipherStaff(cr->tick()))) {
                 if (cr->beamMode() != BeamMode::NONE) {
                     cr->undoChangeProperty(Pid::BEAM_MODE, BeamMode::NONE);
                 }
@@ -5066,6 +5091,7 @@ void Score::cmdAddPitch(int step, bool addFlag, bool insert)
 {
     insert = insert || inputState().usingNoteEntryMethod(NoteEntryMethod::TIMEWISE);
     Position pos;
+    pos.step = step;
     if (addFlag) {
         EngravingItem* el = selection().element();
         if (el && el->isNote()) {
