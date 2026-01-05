@@ -101,6 +101,56 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
+    },
+    {
+        "name": "linux-base",
+        "description": "Use current Qt with Clang compiler",
+        "hidden": true,
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build/${presetName}",
+        "cacheVariables": {
+            "CMAKE_TOOLCHAIN_FILE": "$env{QT_DIR}/lib/cmake/Qt6/qt.toolchain.cmake",
+            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/${presetName}/install",
+            "CMAKE_PREFIX_PATH": "$env{QT_DIR}/lib/cmake",
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang++",
+            "QT_QML_GENERATE_QMLLS_INI": "ON",
+            "CMAKE_CXX_FLAGS_DEBUG_INIT": "-DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG",
+            "CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT": "-DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG",
+            "MUSE_COMPILE_USE_UNITY": "OFF"
+        },
+        "condition": {
+            "type": "equals",
+            "lhs": "${hostSystemName}",
+            "rhs": "Linux"
+        }
+    },
+    {
+        "name": "Qt-Clang-Debug",
+        "displayName": "Qt Clang Debug",
+        "description": "Use current Qt with Clang compiler (Debug)",
+        "inherits": "linux-base",
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug"
+        }
+    },
+    {
+        "name": "Qt-Clang-RelWithDebInfo",
+        "displayName": "Qt Clang RelWithDebInfo",
+        "description": "Use current Qt with Clang compiler (RelWithDebInfo)",
+        "inherits": "linux-base",
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        }
+    },
+    {
+        "name": "Qt-Clang-Release",
+        "displayName": "Qt Clang Release",
+        "description": "Use current Qt with Clang compiler (Release)",
+        "inherits": "linux-base",
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Release"
+        }
     }
   ]
 }

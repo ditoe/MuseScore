@@ -1,0 +1,66 @@
+services:
+
+  musescore-base:
+    image: musescore4:${DOCKER_IMAGE_VERSION}-full
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["build"]
+  
+  container-user:
+    build:
+      context: .
+      dockerfile: Dockerfile.user
+      args:
+        DOCKER_IMAGE_VERSION: ${DOCKER_IMAGE_VERSION}
+        NEW_UID: ${HOST_UID}
+        NEW_GID: ${HOST_GID}
+        USERNAME: ${DOCKER_USER}
+        DOCKER_HOMEDIR: ${DOCKER_HOMEDIR}
+    profiles: ["do-not-start"]
+    volumes:
+      - ../:${MUSESCORE_REPO}
+      - SRC_Musescore_cache:${DOCKER_HOMEDIR}/.cache
+      - ${HOME}/Qt:${DOCKER_HOMEDIR}/Qt:ro
+    env_file: ".env"
+    working_dir: ${MUSESCORE_REPO}
+    privileged: true
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    ipc: host # docker run --ipc=host
+    network_mode: host
+    extra_hosts:
+      - "musescore-host:host-gateway"
+    group_add:
+      - "188" # input group for keyboard and mouse access
+      - "63" # audio group for sound access
+      - "44" # video group for GPU access
+
+  ci:
+    extends: container-user
+    profiles: !override ["ci"]
+  
+  gui:
+    extends: container-user
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:${DOCKER_HOMEDIR}/.Xauthority
+      - ${XDG_RUNTIME_DIR}:/tmp/xdg-runtime # rw needed to connect to Wayland socket
+      - /dev:/dev # for access to /dev/dmx0 and maybe other devices
+    environment:
+      DISPLAY: ${DISPLAY}
+      XAUTHORITY: ${DOCKER_HOMEDIR}/.Xauthority
+      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-0}
+      XDG_RUNTIME_DIR: /tmp/xdg-runtime
+      QT_QPA_PLATFORM: ${QT_QPA_PLATFORM:-wayland;xcb} # prefer Wayland, fall back to X11
+      # Prevents main.cpp from overriding QT_QPA_PLATFORM to "xcb" unconditionally
+      MU_QT_QPA_PLATFORM: ${QT_QPA_PLATFORM:-wayland;xcb}
+      PULSE_SERVER: ${PULSE_SERVER}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    hostname: musescore-host
+    profiles: !override ["dev"]
+
+
+volumes:
+  SRC_Musescore_cache:
