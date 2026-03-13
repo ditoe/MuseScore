@@ -115,8 +115,37 @@ void RestLayout::layoutRest(const Rest* item, Rest::LayoutData* ldata, const Lay
         muse::draw::FontMetrics fm2(item->get_cipherFont());
         qreal height = fm2.tightBoundingRect((String)"1234567890").height();
         ldata->cipherHeigth=height;
+        String duration = item->get_cipherDuration(int(item->durationType().type()));
+        if (int(item->durationType().type()) == 14) {
+            Fraction len = item->measure()->ticks();   // z.B. 4/4
+            int ticks = len.ticks();           // 1920
+            int TICKS_PER_QUARTER = 480;
+            switch (ticks)
+            {
+            case 3840:
+                duration = (String)",,,";
+                break;
+            case 2880:
+                duration = (String)",,.";
+                break;
+            case 1920:
+                duration = (String)",,";
+                break;
+            case 1440:
+                duration = (String)",.";
+                break;
+            case 960:
+                duration = (String)",";
+                break;
+            case 720:
+                duration = (String)".";
+                break;
+            default:
+                break;
+            }
+        }
         ldata->fretString = (String)"0" +
-            item->get_cipherDuration(int(item->durationType().type())) +
+            duration +
             item->get_cipherDurationDot(int(item->durationType().dots()));
         ldata->cipherWidth = fm2.tightBoundingRect(ldata->fretString).width();
 
@@ -136,6 +165,7 @@ void RestLayout::layoutRest(const Rest* item, Rest::LayoutData* ldata, const Lay
         RectF stringbox = RectF(x, ldata->cipherHeigth * item->style().styleD(Sid::cipherHeightDisplacement),
             ldata->cipherWidth, ldata->cipherHeigth);
         ldata->setBbox(hookbox);
+        item->staff()->set_cipherHeight(ldata->cipherHeigth);
         return;
 
 
@@ -672,6 +702,7 @@ void RestLayout::checkFullMeasureRestCollisions(const System* system, LayoutCont
 
 void RestLayout::fillShape(const Rest* item, Rest::LayoutData* ldata)
 {
+    if (item->staff()->isCipherStaff(item->tick())) return;
     Shape shape(Shape::Type::Composite);
 
     if (!item->isGap() && !item->shouldNotBeDrawn()) {
@@ -695,6 +726,7 @@ void RestLayout::fillShape(const Rest* item, Rest::LayoutData* ldata)
 
 void RestLayout::fillShape(const MMRest* item, MMRest::LayoutData* ldata, const LayoutConfiguration& conf)
 {
+    if (item->staff()->isCipherStaff(item->tick())) return;
     Shape shape(Shape::Type::Composite);
 
     double vStrokeHeight = conf.styleMM(Sid::mmRestHBarVStrokeHeight);

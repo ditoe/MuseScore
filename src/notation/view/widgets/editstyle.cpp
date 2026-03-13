@@ -797,6 +797,7 @@ EditStyle::EditStyle(QWidget* parent)
     tupletBracketType->clear();
     tupletBracketType->addItem(muse::qtrc("notation/editstyle", "Automatic"), int(TupletBracketType::AUTO_BRACKET));
     tupletBracketType->addItem(muse::qtrc("notation/editstyle", "Bracket"), int(TupletBracketType::SHOW_BRACKET));
+    tupletBracketType->addItem(muse::qtrc("notation/editstyle", "SHOW_SLUR"), int(TupletBracketType::SHOW_SLUR));
     tupletBracketType->addItem(muse::qtrc("notation/editstyle", "None", "no tuplet bracket type"), int(TupletBracketType::SHOW_NO_BRACKET));
 
     lyricsDashStartSystemPlacement->clear();

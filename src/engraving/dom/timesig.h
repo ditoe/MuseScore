@@ -150,6 +150,8 @@ public:
         qreal cipherHeigthds;
         qreal cipherHeigthns;
         qreal cipherBarLinelenght;
+        qreal cipherWidth;
+        RectF cipherBbox;
         bool cipherVisible;
         bool cipherBegin;
 

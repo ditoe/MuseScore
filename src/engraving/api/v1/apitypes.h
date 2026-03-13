@@ -894,6 +894,7 @@ Q_ENUM_NS(TupletNumberType);
 enum class TupletBracketType {
     AUTO_BRACKET    = int(mu::engraving::TupletBracketType::AUTO_BRACKET),
     SHOW_BRACKET    = int(mu::engraving::TupletBracketType::SHOW_BRACKET),
+    SHOW_SLUR       = int(mu::engraving::TupletBracketType::SHOW_SLUR),
     SHOW_NO_BRACKET = int(mu::engraving::TupletBracketType::SHOW_NO_BRACKET),
 };
 Q_ENUM_NS(TupletBracketType);

@@ -79,6 +79,7 @@ QVariantList TupletSettingsModel::possibleBracketTypes() const
     QVariantList types {
         object(Type::AUTO_BRACKET, muse::qtrc("inspector", "Auto")),
         object(Type::SHOW_BRACKET, muse::qtrc("inspector", "Bracket"), Icon::TUPLET_NUMBER_WITH_BRACKETS),
+        object(Type::SHOW_SLUR, muse::qtrc("inspector", "Slur"), Icon::TUPLET_SLUR),
         object(Type::SHOW_NO_BRACKET, muse::qtrc("inspector", "None"), Icon::TUPLET_NUMBER_ONLY)
     };
 

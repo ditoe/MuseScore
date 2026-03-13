@@ -3358,7 +3358,16 @@ void TDraw::draw(const Tuplet* item, Painter* painter)
         draw(item->number(), painter);
         painter->translate(-pos);
     }
-    if (item->hasBracket()) {
+    if (item->hasSlur()) {
+
+        Pen pen(color);
+        pen.setCapStyle(PenCapStyle::RoundCap);
+        pen.setJoinStyle(PenJoinStyle::RoundJoin);
+        pen.setWidthF(item->style().styleD(Sid::cipherTupletSlurThickness)*item->mag());
+        painter->setPen(pen);
+        painter->drawPath(item->get_SlurPath());
+    }
+    else if (item->hasBracket()) {
         Pen pen(color, item->absoluteFromSpatium(item->bracketWidth()));
         pen.setJoinStyle(PenJoinStyle::MiterJoin);
         pen.setCapStyle(PenCapStyle::FlatCap);

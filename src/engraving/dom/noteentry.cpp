@@ -78,6 +78,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool& error)
 
     switch (staffGroup) {
     case StaffGroup::CIPHER: {
+        line = pos.step;
         AccidentalVal acci = Accidental::subtype2value(at);
         if (line < 0)
             line *= -1;

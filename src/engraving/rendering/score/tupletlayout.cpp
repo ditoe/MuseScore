@@ -311,6 +311,11 @@ void TupletLayout::layoutBracket(Tuplet* item, const ChordRest* cr1, const Chord
 
     double leftNoteEdge = 0.0; // page coordinates
     double rightNoteEdge = 0.0;
+    double cipherHigth = 0.0;
+    if (cr1->isChord()&& item->staff()->isCipherStaff(item->tick())) {
+        const Chord* chord1 = toChord(cr1);
+        cipherHigth = chord1->upNote()->get_cipherHeigth();
+    }
     if (cr1->isChord()) {
         const Chord* chord1 = toChord(cr1);
         leftNoteEdge = chord1->up() ? chord1->downNote()->pageBoundingRect().left() : chord1->upNote()->pageBoundingRect().left();
@@ -575,9 +580,84 @@ void TupletLayout::layoutBracket(Tuplet* item, const ChordRest* cr1, const Chord
             xNumber = item->p1().x() + deltax * .5;
         }
 
+        if (item->staff()->isCipherStaff(item->tick())) {
+            yNumber += numLdata->bbox().height() / 2 + cipherHigth * style.styleD(Sid::cipherTupletNummerHigth);
+        }
         numLdata->setPos(PointF(xNumber, yNumber) - item->ldata()->pos());
     }
 
+    if ((item->bracketType() == TupletBracketType::AUTO_BRACKET && item->staff()->isCipherStaff(item->tick())) ||
+        item->bracketType() == TupletBracketType::SHOW_SLUR) {
+        item->setHasSlur(true);
+        item->setHasBracket(false);
+        if (item->isUp()) {
+            qreal h = item->p2().y() - item->p1().y();
+            //if (h < 0) h *= -1;
+            qreal widthx = item->p2().x() - item->p1().x();
+            qreal higth = 20 * item->mag() +
+                ((h / widthx) * widthx * 0.1);
+            qreal shift = 0.0;
+            qreal distanc = 0.0;
+            qreal ecke = widthx * 0.1;
+            qreal uberhang = 0;
+            if (item->staff()->isCipherStaff(item->tick())) {
+                higth = cipherHigth * style.styleD(Sid::cipherTupletSlurhigth) +
+                    ((h / widthx) * widthx * style.styleD(Sid::cipherSlurEckenform));
+                shift = cipherHigth * style.styleD(Sid::cipherTupletSlurshift);
+                distanc = cipherHigth * style.styleD(Sid::cipherTupletSlurdistans);
+                ecke = widthx * style.styleD(Sid::cipherTupletSlurEcke);
+                uberhang = cipherHigth * style.styleD(Sid::cipherTupletSluruberhang);
+            }
+
+            qreal x1 = item->p1().x() - uberhang + shift;
+            qreal x2 = item->p1().x() + ecke + shift;
+            qreal x3 = item->p2().x() - ecke + shift;
+            qreal x4 = item->p2().x() + uberhang + shift;
+            qreal y1 = item->p1().y() - distanc;
+            qreal y2 = y1 - higth;
+            qreal y4 = item->p2().y() - distanc;
+            qreal y3 = y4 - higth;
+            PainterPath path;
+            path.moveTo(x1, y1);
+            path.cubicTo(x2, y2, x3, y3, x4, y4);
+            item->set_SlurPath(path);
+        }
+        else {
+            qreal h = item->p2().y() - item->p1().y();
+            //if (h < 0) h *= -1;
+            qreal widthx = item->p2().x() - item->p1().x();
+            qreal higth = 20 * item->mag() +
+                ((h / widthx) * widthx * 0.1);
+            qreal shift = 0.0;
+            qreal distanc = 0.0;
+            qreal ecke = widthx * 0.1;
+            qreal uberhang = 0;
+            if (item->staff()->isCipherStaff(item->tick())) {
+                higth = cipherHigth * style.styleD(Sid::cipherTupletSlurhigth) +
+                    ((h / widthx) * widthx * style.styleD(Sid::cipherSlurEckenform));
+                shift = cipherHigth * style.styleD(Sid::cipherTupletSlurshift);
+                distanc = cipherHigth * style.styleD(Sid::cipherTupletSlurdistans);
+                ecke = widthx * style.styleD(Sid::cipherTupletSlurEcke);
+                uberhang = cipherHigth * style.styleD(Sid::cipherTupletSluruberhang);
+            }
+
+            qreal x1 = item->p1().x() - uberhang + shift;
+            qreal x2 = item->p1().x() + ecke + shift;
+            qreal x3 = item->p2().x() - ecke + shift;
+            qreal x4 = item->p2().x() + uberhang + shift;
+            qreal y1 = item->p1().y() + distanc;
+            qreal y2 = y1 + higth;
+            qreal y4 = item->p2().y() + distanc;
+            qreal y3 = y4 + higth;
+            PainterPath path;
+            path.moveTo(x1, y1);
+            path.cubicTo(x2, y2, x3, y3, x4, y4);
+            item->set_SlurPath(path);
+        }
+    }
+    else {
+        item->setHasSlur(false);
+    }
     if (item->hasBracket()) {
         double slope = (item->p2().y() - item->p1().y()) / (item->p2().x() - item->p1().x());
         const double numberGap = 0.35 * spatium;

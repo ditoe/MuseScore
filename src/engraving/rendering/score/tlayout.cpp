@@ -3992,7 +3992,7 @@ void TLayout::layoutKeySig(const KeySig* item, KeySig::LayoutData* ldata, const 
                     const_cast<KeySig*>(item)->set_cipherNotePoint(PointF(0.0, item->get_cipherHeigth() * item->style().styleD(Sid::cipherHeightDisplacement) - item->get_cipherNoteShift()));
                     const_cast<KeySig*>(item)->set_cipherNoteRecht(RectF(item->get_cipherNotePoint().x(), item->get_cipherNotePoint().y() - item->get_cipherHeigth(), item->cipherGetWidth(cipher,
                         item->get_cipherNoteString()), item->get_cipherHeigth()));
-                    ldata->addBbox(item->get_cipherNoteRecht());
+                    ldata->setBbox(item->get_cipherNoteRecht());
                     qreal wd = item->cipherGetWidth(cipher, (String)"(");
                     Font fontAccidental;
                     fontAccidental = item->cipherKeySigFont();
@@ -6982,10 +6982,16 @@ void TLayout::layoutTimeSig(TimeSig* item, TimeSig::LayoutData* ldata, const Lay
             boxwidth = denRect.width();
         }
         px -= cipherLineWidth * (style.styleD(Sid::cipherTimeSigLineSize) - 1.0) * 0.5;
-        RectF timeSigRect = RectF(px, pnY - numRect.height(), boxwidth, numRect.height() * 2 + displ * 2);
+        ldata->cipherBbox = RectF(px, (pnY - numRect.height()), boxwidth, (numRect.height() * 2 + displ * 2));;
         ldata->cipherLine = LineF(px, 0, cipherLineWidth * style.styleD(Sid::cipherTimeSigLineSize) + px, 0);
+        ldata->cipherWidth = boxwidth;
         ldata->cipherLineThick = numRect.height() * style.styleD(Sid::cipherTimeSigLineThick);
-        ldata->setBbox(timeSigRect);
+        ldata->cipherBegin = meas && meas->system() ? meas == meas->system()->firstMeasure():true;
+        if (!ldata->cipherBegin) {
+            RectF timeSigRect = RectF(px, (pnY - numRect.height()) * 0.5, 
+                boxwidth + ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance), (numRect.height() * 2 + displ * 2) * 0.5);
+            ldata->setBbox(timeSigRect);
+        }
         ldata->ns.clear();
         ldata->ns.push_back(SymId::timeSigCutCommon);
         ldata->ds.clear();
@@ -7072,11 +7078,14 @@ void TLayout::layoutTimeSig2(TimeSig* item, TimeSig::LayoutData* ldata, const La
         if (seg->isTimeSigAnnounceType()) {
             return;
         }
-        ldata->cipherBegin = meas->first()->isBeginBarLineType();
-        if (ldata->cipherBegin) ldata->setPosX(ldata->cipherXpos - ldata->bbox().width() - ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance));
+        ldata->cipherBegin = meas && meas->system() ? meas == meas->system()->firstMeasure() : true;
+        if (ldata->cipherBegin) {
+            ldata->setPosX(ldata->cipherXpos - ldata->cipherWidth - ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance));
+            ldata->setBbox(ldata->cipherBbox);
+        }
         else {
-
-            qreal x = ldata->bbox().width() + ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance);
+            ldata->setPosX(ldata->cipherXpos + ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance));
+            qreal x = ldata->cipherWidth + ldata->cipherHeigthds * style.styleD(Sid::cipherTimeSigDistance);
             ldata->cipherBarLine = LineF(x, -ldata->cipherBarLinelenght / 2, x, ldata->cipherBarLinelenght / 2);
             qreal lw = style.styleMM(Sid::barWidth) * item->mag();
             ldata->addBbox(RectF(x, -ldata->cipherBarLinelenght / 2, lw, ldata->cipherBarLinelenght));
