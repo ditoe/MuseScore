@@ -30,9 +30,22 @@ endif()
 
 install(FILES
     ${CMAKE_CURRENT_LIST_DIR}/languages.json
-    ${QM_FILES}
+    # ${QM_FILES}
     DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}locale
 )
+
+# Install QM files, filtering out any that don't exist or are empty
+if (MUE_RUN_LRELEASE)
+    install(CODE "
+        file(GLOB QM_FILES \"${CMAKE_CURRENT_BINARY_DIR}/*.qm\")
+        foreach(qm_file IN LISTS QM_FILES)
+            file(SIZE \"\${qm_file}\" file_size)
+            if(file_size GREATER 0)
+                file(INSTALL \"\${qm_file}\" DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}locale\")
+            endif()
+        endforeach()
+    ")
+endif()
 
 install(DIRECTORY ${QT_INSTALL_PREFIX}/translations/
     DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}locale
