@@ -32,9 +32,12 @@ services:
     extra_hosts:
       - "musescore-host:host-gateway"
     group_add:
-      - "188" # input group for keyboard and mouse access
-      - "63" # audio group for sound access
-      - "44" # video group for GPU access
+      - audio # audio group for sound access
+      - video # video group for GPU access
+      - plugdev # plugdev group for access to USB devices (e.g. MIDI controllers)
+      - dialout # dialout group for access to serial devices (e.g. MIDI controllers connected via USB-to-serial adapters)
+      - pulse-access # custom group for access to PulseAudio socket (if needed, e.g. on some Linux distributions where audio group doesn't have access)
+      - pulse
 
   ci:
     extends: container-user
