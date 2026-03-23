@@ -66,7 +66,7 @@ void TupletDialog::defaultToStyleSettings()
                                                                                mu::engraving::Sid::tupletBracketType).toInt());
     autoBracket->setChecked(bt == mu::engraving::TupletBracketType::AUTO_BRACKET);
     bracket->setChecked(bt == mu::engraving::TupletBracketType::SHOW_BRACKET);
-    SHOW_SLUR->setChecked(bt == mu::engraving::TupletBracketType::SHOW_SLUR);
+    slur->setChecked(bt == mu::engraving::TupletBracketType::SHOW_SLUR);
     noBracket->setChecked(bt == mu::engraving::TupletBracketType::SHOW_NO_BRACKET);
 }
 
@@ -89,7 +89,7 @@ TupletBracketType TupletDialog::bracketType() const
         return TupletBracketType::AUTO_BRACKET;
     } else if (bracket->isChecked()) {
         return TupletBracketType::SHOW_BRACKET;
-    } else if (SHOW_SLUR->isChecked()) {
+    } else if (slur->isChecked()) {
         return TupletBracketType::SHOW_SLUR;
     } else if (noBracket->isChecked()) {
         return TupletBracketType::SHOW_NO_BRACKET;

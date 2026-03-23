@@ -8,6 +8,7 @@ RUN apt-get update && \
         build-essential \
         ca-certificates \
         clang \
+        clangd-15 \
         coreutils \
         curl \
         desktop-file-utils \
@@ -92,6 +93,7 @@ RUN apt-get update && \
         xcb \
         xvfb \
         zsync && \
+    ln -sf /usr/bin/clangd-15 /usr/local/bin/clangd && \
     rm -rf /var/lib/apt/lists/*
 
 # Install additional libraries for runtime
