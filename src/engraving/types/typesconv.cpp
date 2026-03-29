@@ -2237,7 +2237,7 @@ static const std::vector<DrumPitchItem> DRUMPITCHS = {
     { DrumNum(87),       QT_TRANSLATE_NOOP("engraving/drumset", "Open Surdo") },
 
     { DrumNum(91),       QT_TRANSLATE_NOOP("engraving/drumset", "Snare (Rim shot)") },
-
+    { DrumNum(92),       QT_TRANSLATE_NOOP("engraving/drumset", "Hi-Hat (Half)") },
     { DrumNum(93),       QT_TRANSLATE_NOOP("engraving/drumset", "Ride (Edge)") },
 
     { DrumNum(99),       QT_TRANSLATE_NOOP("engraving/drumset", "Cowbell Low") },
