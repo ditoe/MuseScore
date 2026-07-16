@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef __SCOREORDER_H__
-#define __SCOREORDER_H__
+#ifndef MU_ENGRAVING_SCOREORDER_H
+#define MU_ENGRAVING_SCOREORDER_H
 
 #include <map>
 
-#include "types/string.h"
 #include "types/translatablestring.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class XmlWriter;
@@ -45,9 +45,9 @@ struct ScoreGroup
                                 // !isEmpty() : equal to <unsorted group="unsorted"/>
     bool notUnsorted = true;    // not an unsorted group
 
-    bool bracket { false };
-    bool barLineSpan { true };
-    bool thinBracket { true };
+    bool bracket = false;
+    bool barLineSpan = true;
+    bool thinBracket = true;
 };
 
 //---------------------------------------------------------
@@ -91,7 +91,7 @@ struct ScoreOrder
     ScoreGroup newUnsortedGroup(const String group, const String section) const;
     ScoreGroup getGroup(const String family, const String instrumentGroup) const;
     int instrumentSortingIndex(const String& instrumentId, bool isSoloist) const;
-    bool isScoreOrder(const std::list<int>& indices) const;
+    bool isScoreOrder(const std::vector<int>& indices) const;
     bool isScoreOrder(const Score* score) const;
 
     void setBracketsAndBarlines(Score* score);

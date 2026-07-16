@@ -7,11 +7,11 @@
 
 #include "importexport/guitarpro/guitarpromodule.h"
 
-int main(int argc, char* argv[])
+int main()
 {
-    mu::modularity::ioc()->registerExport<mu::draw::IFontProvider>("test", new mu::draw::FontProviderStub());
+    muse::modularity::globalIoc()->registerExport<muse::draw::IFontProvider>("test", new muse::draw::FontProviderStub());
 
-    mu::engraving::compat::ScoreAccess::createMasterScore();
+    mu::engraving::compat::ScoreAccess::createMasterScore(nullptr);
 
     mu::iex::guitarpro::GuitarProModule gm;
 }

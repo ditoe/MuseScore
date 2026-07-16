@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,15 +19,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
-FlatButton {
+PopupButton {
     id: root
 
     property var model: null
@@ -35,10 +35,7 @@ FlatButton {
                                                                                        root.model.timeSignature.numerator,
                                                                                        root.model.timeSignature.denominator)
 
-    property alias popupAnchorItem: popup.anchorItem
-
     height: 96
-    accentButton: popup.isOpened
 
     TimeSignatureView {
         id: timeSignatureView
@@ -51,15 +48,7 @@ FlatButton {
         type: root.model.timeSignatureType
     }
 
-    onClicked: {
-        if (!popup.isOpened) {
-            popup.open()
-        } else {
-            popup.close()
-        }
-    }
-
-    StyledPopupView {
+    popupComponent: StyledPopupView {
         id: popup
 
         margins: 36
@@ -119,59 +108,73 @@ FlatButton {
                 }
             }
         }
-    }
 
-    Component {
-        id: fractionComp
+        Component {
+            id: fractionComp
 
-        TimeSignatureFraction {
-            anchors.fill: parent
+            TimeSignatureFraction {
+                anchors.fill: parent
 
-            property string accessibleName: root.model.timeSignatureAccessibleName(AdditionalInfoModel.Fraction,
-                                                                                   numerator, denominator)
+                property string accessibleName: root.model.timeSignatureAccessibleName(AdditionalInfoModel.Fraction,
+                                                                                       numerator, denominator)
 
-            enabled: (root.model.timeSignatureType === AdditionalInfoModel.Fraction)
-            availableDenominators: root.model.timeSignatureDenominators()
+                enabled: (root.model.timeSignatureType === AdditionalInfoModel.Fraction)
+                availableDenominators: root.model.timeSignatureDenominators()
 
-            numerator: enabled ? root.model.timeSignature.numerator : numerator
-            denominator: enabled ? root.model.timeSignature.denominator : denominator
+                numerator: enabled ? root.model.timeSignature.numerator : numerator
+                denominator: enabled ? root.model.timeSignature.denominator : denominator
 
-            navigationSection: popup.navigationSection
-            navigationPanelOrderStart: 2
+                navigationSection: popup.navigationSection
+                navigationPanelOrderStart: 2
 
-            onNumeratorSelected: function(value) {
-                root.model.setTimeSignatureNumerator(value)
-            }
+                onNumeratorSelected: function(value) {
+                    root.model.setTimeSignatureNumerator(value)
+                }
 
-            onDenominatorSelected: function(value) {
-                root.model.setTimeSignatureDenominator(value)
+                onDenominatorSelected: function(value) {
+                    root.model.setTimeSignatureDenominator(value)
+                }
             }
         }
-    }
 
-    Component {
-        id: commonComp
+        Component {
+            id: commonComp
 
-        StyledIconLabel {
-            property string accessibleName: root.model.timeSignatureAccessibleName(AdditionalInfoModel.Common)
+            Item {
+                property string accessibleName: root.model.timeSignatureAccessibleName(AdditionalInfoModel.Common)
 
-            font.family: ui.theme.musicalFont.family
-            font.pixelSize: 30
-            horizontalAlignment: Text.AlignLeft
-            iconCode: MusicalSymbolCodes.TIMESIG_COMMON
+                implicitWidth: commonLabel.implicitWidth
+                implicitHeight: 30
+
+                StyledIconLabel {
+                    id: commonLabel
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: ui.theme.musicalFont.family
+                    font.pixelSize: 30
+                    horizontalAlignment: Text.AlignLeft
+                    iconCode: MusicalSymbolCodes.TIMESIG_COMMON
+                }
+            }
         }
-    }
 
-    Component {
-        id: cutComp
+        Component {
+            id: cutComp
 
-        StyledIconLabel {
-            property string accessibleName: root.model.timeSignatureAccessibleName(AdditionalInfoModel.Cut)
+            Item {
+                property string accessibleName: root.model.timeSignatureAccessibleName(AdditionalInfoModel.Cut)
 
-            font.family: ui.theme.musicalFont.family
-            font.pixelSize: 30
-            horizontalAlignment: Text.AlignLeft
-            iconCode: MusicalSymbolCodes.TIMESIG_CUT
+                implicitWidth: cutLabel.implicitWidth
+                implicitHeight: 30
+
+                StyledIconLabel {
+                    id: cutLabel
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: ui.theme.musicalFont.family
+                    font.pixelSize: 30
+                    horizontalAlignment: Text.AlignLeft
+                    iconCode: MusicalSymbolCodes.TIMESIG_CUT
+                }
+            }
         }
     }
 }

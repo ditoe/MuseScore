@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,14 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
-import MuseScore.Cloud 1.0
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
+import Muse.Cloud
+import MuseScore.Project
 
 ScoresView {
     id: root
@@ -125,8 +124,8 @@ ScoresView {
                 anchors.right: parent.right
                 anchors.rightMargin: root.sideMargin
 
-                title: qsTrc("project", "You don't have any online scores yet")
-                body: qsTrc("project", "Scores will appear here when you save a file to the cloud, or publish a score on <a href=\"https://musescore.com\">musescore.com</a>.")
+                title: qsTrc("project", "You don’t have any online scores yet")
+                body: qsTrc("project", "Scores will appear here when you save a file to the cloud, or publish a score on <a href=\"%1\">MuseScore.com</a>.").arg("https://musescore.com")
             }
         }
     }
@@ -151,7 +150,7 @@ ScoresView {
                     width: parent.width
 
                     title: qsTrc("project", "You are not signed in")
-                    body: qsTrc("project", "Login or create a new account on <a href=\"https://musescore.com\">musescore.com</a> to view online scores.")
+                    body: qsTrc("project", "Log in or create a new account on <a href=\"%1\">MuseScore.com</a> to view online scores.").arg("https://musescore.com")
                 }
 
                 Row {
@@ -215,7 +214,7 @@ ScoresView {
                 anchors.rightMargin: root.sideMargin
 
                 title: qsTrc("project", "Unable to load online scores")
-                body: qsTrc("project", "Please check your internet connection or try again later.")
+                body: qsTrc("global", "Please check your internet connection or try again later.")
             }
         }
     }

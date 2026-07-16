@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,28 +19,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_INSTRUMENTSSCENE_SELECTINSTRUMENTSSCENARIO_H
-#define MU_INSTRUMENTSSCENE_SELECTINSTRUMENTSSCENARIO_H
 
-#include "notation/iselectinstrumentscenario.h"
+#pragma once
+
+#include "notationscene/iselectinstrumentscenario.h"
+
+#include "global/modularity/ioc.h"
+#include "interactive/iinteractive.h"
 #include "notation/iinstrumentsrepository.h"
-#include "modularity/ioc.h"
-#include "iinteractive.h"
+
+#include "global/async/asyncable.h"
+#include "global/async/promise.h"
 
 namespace mu::instrumentsscene {
-class SelectInstrumentsScenario : public notation::ISelectInstrumentsScenario
+class SelectInstrumentsScenario : public notation::ISelectInstrumentsScenario, public muse::async::Asyncable, public muse::Contextable
 {
-    INJECT(framework::IInteractive, interactive)
-    INJECT(notation::IInstrumentsRepository, instrumentsRepository)
+    muse::ContextInject<muse::IInteractive> interactive = { this };
+    muse::GlobalInject<notation::IInstrumentsRepository> instrumentsRepository;
 
 public:
-    RetVal<notation::PartInstrumentListScoreOrder> selectInstruments() const override;
-    RetVal<notation::Instrument> selectInstrument(const notation::InstrumentKey& currentInstrumentId = notation::InstrumentKey()) const
-    override;
+
+    SelectInstrumentsScenario(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx)
+    {
+    }
+
+    muse::async::Promise<notation::PartInstrumentListScoreOrder> selectInstruments() const override;
+    muse::async::Promise<notation::InstrumentTemplate> selectInstrument(
+        const notation::InstrumentKey& currentInstrumentId = notation::InstrumentKey()) const override;
 
 private:
-    RetVal<notation::PartInstrumentListScoreOrder> selectInstruments(const QStringList& params) const;
+    muse::async::Promise<notation::PartInstrumentListScoreOrder> selectInstruments(const muse::ValMap& params) const;
 };
 }
-
-#endif // MU_INSTRUMENTSSCENE_SELECTINSTRUMENTSSCENARIO_H

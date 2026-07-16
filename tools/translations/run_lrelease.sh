@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -25,7 +25,7 @@ LRELEASE=lrelease
 TS_DIR=$HERE/../../share/locale 
 QM_DIR=$HERE/../../share/locale 
 
-for f in $TS_DIR/{musescore,instruments,qt}_*.ts
+for f in $TS_DIR/{musescore,instruments}_*.ts
 do
   FILE_NAME=$(basename $f .ts)
   $LRELEASE $f -qm $QM_DIR/${FILE_NAME}.qm 

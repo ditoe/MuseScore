@@ -9,20 +9,20 @@ The Leland Font Software is a family consisting of two fonts, Leland and Leland 
 Basic font information
 ----------------------
 
-Leland is a Unicode typeface designed by MuseScore BVBA for its music notation and scoring applications.
+Leland is a Unicode typeface designed by MuseScore Limited for its music notation and scoring applications.
 
-It is compliant with version 1.4 of the Standard Music Font Layout (SMuFL), a community-driven standard for how music symbols should be laid out in the Unicode Private Use Area (PUA) in the Basic Multilingual Plane (BMP) for compatibility between different scoring applications.
+It is compliant with version 1.5 of the Standard Music Font Layout (SMuFL), a community-driven standard for how music symbols should be laid out in the Unicode Private Use Area (PUA) in the Basic Multilingual Plane (BMP) for compatibility between different scoring applications.
 
 The latest version of the SMuFL specification can be found at:
 
-https://w3c.github.io/smufl/gitbook/
+https://w3c.github.io/smufl/latest/
 
 
 Note for developers
 -------------------
 If you are intending to use Leland as part of your own software application and would like advice on how best to use it, please first refer to the SMuFL specification for useful information about how Leland's glyphs are registered.
 
-https://w3c.github.io/smufl/gitbook/specification/index.html
+https://w3c.github.io/smufl/latest/
 
 You can also get in touch with a member of our team:
 
@@ -32,6 +32,44 @@ https://musescore.com/contact
 
 Change log
 ----------
+
+17 September 2025 (Martin Keary & Simon Smith) Leland Version 0.80
+- Leland
+  - Added:
+    - Left and right parentheses for pedal marking (E676, E677)
+    - Stylistic alternate for pedal mark (no dot) (keyboardPedalPedNoDot)
+- Leland Text:
+  - Added:
+    - Left and right parenthesis for pedal marking (E676, E677)
+    - Stylistic alternate for pedal mark (no dot) (keyboardPedalPedNoDot)
+    - Tuplet 3 numeral (E883)
+    - Ligatures and contextual alternates for creating simple metric modulations and swing markings from metronome mark glyphs
+  - Modified:
+    - Scaling and kerning for keyboard pedal marking glyphs
+
+23 August 2025 (Martin Keary & Simon Smith) Leland Version 0.79
+- Metadata
+  - Upward stem attachment point corrected for Whole (semibreve) notehead (E0A2)
+  - Cutouts corrected for Reversed flat (quarter-tone flat) (Stein) (E280)
+- Leland
+  - Added:
+    - Filled whole (semibreve) and half (minim) noteheads (E0FA, E0FB)
+    - Ligature for 'sff' dynamic
+  - Modified:
+    - Slight right sidebearing removed from dynamics (E520-E53D)
+    - Arpeggiato arrowhead down (EAAE) has been flipped vertically
+  - Kerning added for composite letters of 'Ped.' symbol (E651-E654); kerning tweaked for dynamics
+- Leland Text
+  - Kerning added for metronome mark noteheads (ECA0-ECB6) followed by augmentation dot (ECB7)
+
+
+8 May 2025 (Martin Keary & Simon Smith) Leland Version 0.78
+- Metadata
+  - Updated engravingDefaults (new values for slurEndpointThickness, tieEndpointThickness, legerLineExtension, thinThickBarlineSeparation, bracketThickness, hBarThickness)
+  - Cutouts for clefs and accidentals
+- Leland
+  - Added:
+    - Narrow time signature numerals 0-9 (stylistic alternates for E080-E089)
 
 17 May 2022 (Martin Keary & Simon Smith) Leland Version 0.77
 - Adjusted kerning for dynamics and octave symbols

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -12,21 +13,23 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         <defaultClef>G8vb</defaultClef>
         </Staff>
-      <trackName>Electric Guitar</trackName>
       <Instrument id="electric-guitar">
-        <longName>Electric Guitar</longName>
+        <InstrumentLabel>
+          <longName>Electric Guitar</longName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>pluck.guitar.electric</instrumentId>
         <singleNoteDynamics>0</singleNoteDynamics>
@@ -39,34 +42,6 @@
           <string>59</string>
           <string>64</string>
           </StringData>
-        <Articulation name="staccatissimo">
-          <velocity>100</velocity>
-          <gateTime>30</gateTime>
-          </Articulation>
-        <Articulation name="staccato">
-          <velocity>100</velocity>
-          <gateTime>50</gateTime>
-          </Articulation>
-        <Articulation name="portato">
-          <velocity>100</velocity>
-          <gateTime>67</gateTime>
-          </Articulation>
-        <Articulation name="tenuto">
-          <velocity>100</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
-        <Articulation name="accent">
-          <velocity>120</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
-        <Articulation name="marcato">
-          <velocity>144</velocity>
-          <gateTime>67</gateTime>
-          </Articulation>
-        <Articulation name="sforzato">
-          <velocity>169</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
         <Channel>
           <program value="27"/>
           <controller ctrl="7" value="119"/>
@@ -76,25 +51,32 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>E_E</eid>
         <voice>
           <KeySig>
+            <eid>F_F</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>G_G</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Tempo>
             <tempo>2</tempo>
+            <eid>H_H</eid>
             <text><sym>metNoteQuarterUp</sym> = 120</text>
             </Tempo>
           <Dynamic>
             <subtype>mf</subtype>
             <velocity>80</velocity>
+            <eid>I_I</eid>
             </Dynamic>
           <Chord>
+            <eid>J_J</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>K_K</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -102,8 +84,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>L_L</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>M_M</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -111,8 +95,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>N_N</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>O_O</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -120,8 +106,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>P_P</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -131,13 +119,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>R_R</eid>
         <voice>
           <KeySig>
+            <eid>S_S</eid>
             <concertKey>1</concertKey>
             </KeySig>
           <Chord>
+            <eid>T_T</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>U_U</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -145,8 +137,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>V_V</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>W_W</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               <fret>12</fret>
@@ -154,8 +148,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>X_X</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>Y_Y</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -163,8 +159,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>Z_Z</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>a_a</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <fret>15</fret>
@@ -174,15 +172,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>b_b</eid>
         <voice>
           <KeySig>
+            <eid>c_c</eid>
             <concertKey>2</concertKey>
             </KeySig>
           <Chord>
+            <eid>d_d</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>e_e</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>f_f</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>14</tpc>
@@ -191,8 +194,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>g_g</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>h_h</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -200,8 +205,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>i_i</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>j_j</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               <fret>12</fret>
@@ -209,8 +216,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>k_k</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>l_l</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -220,15 +229,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>m_m</eid>
         <voice>
           <KeySig>
+            <eid>n_n</eid>
             <concertKey>3</concertKey>
             </KeySig>
           <Chord>
+            <eid>o_o</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>p_p</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>q_q</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>25</tpc>
@@ -237,10 +251,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>r_r</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>s_s</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>t_t</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>18</tpc>
@@ -249,8 +266,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>u_u</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>v_v</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -258,10 +277,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>w_w</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>x_x</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>y_y</eid>
                 </Accidental>
               <pitch>48</pitch>
               <tpc>14</tpc>
@@ -272,15 +294,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>z_z</eid>
         <voice>
           <KeySig>
+            <eid>0_0</eid>
             <concertKey>4</concertKey>
             </KeySig>
           <Chord>
+            <eid>1_1</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>2_2</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>3_3</eid>
                 </Accidental>
               <pitch>48</pitch>
               <tpc>26</tpc>
@@ -289,10 +316,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>4_4</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>5_5</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>6_6</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -301,8 +331,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>7_7</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>8_8</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -310,10 +342,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>9_9</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>+_+</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>/_/</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>25</tpc>
@@ -324,15 +359,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>AB_AB</eid>
         <voice>
           <KeySig>
+            <eid>BB_BB</eid>
             <concertKey>5</concertKey>
             </KeySig>
           <Chord>
+            <eid>CB_CB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>DB_DB</eid>
               <Accidental>
                 <subtype>accidentalDoubleSharp</subtype>
+                <eid>EB_EB</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>27</tpc>
@@ -341,10 +381,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>FB_FB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>GB_GB</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>HB_HB</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>17</tpc>
@@ -353,8 +396,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>IB_IB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>JB_JB</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -362,10 +407,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>KB_KB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>LB_LB</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>MB_MB</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>26</tpc>
@@ -376,15 +424,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>NB_NB</eid>
         <voice>
           <KeySig>
+            <eid>OB_OB</eid>
             <concertKey>6</concertKey>
             </KeySig>
           <Chord>
+            <eid>PB_PB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>QB_QB</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>RB_RB</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>26</tpc>
@@ -393,10 +446,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>SB_SB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>TB_TB</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>UB_UB</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>19</tpc>
@@ -405,10 +461,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>VB_VB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>WB_WB</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>XB_XB</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>17</tpc>
@@ -417,10 +476,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>YB_YB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>ZB_ZB</eid>
               <Accidental>
                 <subtype>accidentalDoubleSharp</subtype>
+                <eid>aB_aB</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>27</tpc>
@@ -431,13 +493,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>bB_bB</eid>
         <voice>
           <KeySig>
+            <eid>cB_cB</eid>
             <concertKey>7</concertKey>
             </KeySig>
           <Chord>
+            <eid>dB_dB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>eB_eB</eid>
               <pitch>53</pitch>
               <tpc>25</tpc>
               <fret>8</fret>
@@ -445,10 +511,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>fB_fB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>gB_gB</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>hB_hB</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>18</tpc>
@@ -457,10 +526,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>iB_iB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>jB_jB</eid>
               <Accidental>
                 <subtype>accidentalDoubleSharp</subtype>
+                <eid>kB_kB</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>28</tpc>
@@ -469,8 +541,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>lB_lB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>mB_mB</eid>
               <pitch>48</pitch>
               <tpc>26</tpc>
               <fret>3</fret>
@@ -480,13 +554,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>nB_nB</eid>
         <voice>
           <KeySig>
+            <eid>oB_oB</eid>
             <concertKey>-1</concertKey>
             </KeySig>
           <Chord>
+            <eid>pB_pB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>qB_qB</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -494,8 +572,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>rB_rB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>sB_sB</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -503,8 +583,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>tB_tB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>uB_uB</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -512,8 +594,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>vB_vB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>wB_wB</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -523,13 +607,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>xB_xB</eid>
         <voice>
           <KeySig>
+            <eid>yB_yB</eid>
             <concertKey>-2</concertKey>
             </KeySig>
           <Chord>
+            <eid>zB_zB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>0B_0B</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -537,8 +625,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>1B_1B</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>2B_2B</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               <fret>12</fret>
@@ -546,10 +636,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>3B_3B</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>4B_4B</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>5B_5B</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>19</tpc>
@@ -558,8 +651,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>6B_6B</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>7B_7B</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <fret>15</fret>
@@ -569,13 +664,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>8B_8B</eid>
         <voice>
           <KeySig>
+            <eid>9B_9B</eid>
             <concertKey>-3</concertKey>
             </KeySig>
           <Chord>
+            <eid>+B_+B</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>/B_/B</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <fret>15</fret>
@@ -583,10 +682,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>AC_AC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>BC_BC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>CC_CC</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>19</tpc>
@@ -595,10 +697,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>DC_DC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>EC_EC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>FC_FC</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>17</tpc>
@@ -607,8 +712,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>GC_GC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>HC_HC</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -618,13 +725,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>IC_IC</eid>
         <voice>
           <KeySig>
+            <eid>JC_JC</eid>
             <concertKey>-4</concertKey>
             </KeySig>
           <Chord>
+            <eid>KC_KC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>LC_LC</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -632,10 +743,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>MC_MC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>NC_NC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>OC_OC</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>18</tpc>
@@ -644,10 +758,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>PC_PC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>QC_QC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>RC_RC</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -656,8 +773,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>SC_SC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>TC_TC</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -667,13 +786,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>UC_UC</eid>
         <voice>
           <KeySig>
+            <eid>VC_VC</eid>
             <concertKey>-5</concertKey>
             </KeySig>
           <Chord>
+            <eid>WC_WC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>XC_XC</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -681,10 +804,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>YC_YC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>ZC_ZC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>aC_aC</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -693,10 +819,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>bC_bC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>cC_cC</eid>
               <Accidental>
                 <subtype>accidentalFlat</subtype>
+                <eid>dC_dC</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>6</tpc>
@@ -705,10 +834,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>eC_eC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>fC_fC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>gC_gC</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>13</tpc>
@@ -719,15 +851,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>hC_hC</eid>
         <voice>
           <KeySig>
+            <eid>iC_iC</eid>
             <concertKey>-6</concertKey>
             </KeySig>
           <Chord>
+            <eid>jC_jC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>kC_kC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>lC_lC</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -736,10 +873,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>mC_mC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>nC_nC</eid>
               <Accidental>
                 <subtype>accidentalDoubleFlat</subtype>
+                <eid>oC_oC</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>5</tpc>
@@ -748,8 +888,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>pC_pC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>qC_qC</eid>
               <pitch>59</pitch>
               <tpc>7</tpc>
               <fret>14</fret>
@@ -757,10 +899,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>rC_rC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>sC_sC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>tC_tC</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>14</tpc>
@@ -771,15 +916,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>uC_uC</eid>
         <voice>
           <KeySig>
+            <eid>vC_vC</eid>
             <concertKey>-7</concertKey>
             </KeySig>
           <Chord>
+            <eid>wC_wC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>xC_xC</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>yC_yC</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>14</tpc>
@@ -788,10 +938,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>zC_zC</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>0C_0C</eid>
               <Accidental>
                 <subtype>accidentalFlat</subtype>
+                <eid>1C_1C</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>7</tpc>
@@ -800,10 +953,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>2C_2C</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>3C_3C</eid>
               <Accidental>
                 <subtype>accidentalDoubleFlat</subtype>
+                <eid>4C_4C</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>5</tpc>
@@ -812,10 +968,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>5C_5C</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>6C_6C</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>7C_7C</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -826,13 +985,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>8C_8C</eid>
         <voice>
           <KeySig>
+            <eid>9C_9C</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <Chord>
+            <eid>+C_+C</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>/C_/C</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -840,8 +1003,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>AD_AD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>BD_BD</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -849,8 +1014,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>CD_CD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>DD_DD</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -858,8 +1025,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>ED_ED</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>FD_FD</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -869,13 +1038,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>GD_GD</eid>
         <voice>
           <KeySig>
+            <eid>HD_HD</eid>
             <concertKey>1</concertKey>
             </KeySig>
           <Chord>
+            <eid>ID_ID</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>JD_JD</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -883,8 +1056,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>KD_KD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>LD_LD</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -892,8 +1067,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>MD_MD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>ND_ND</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -901,10 +1078,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>OD_OD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>PD_PD</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>QD_QD</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>13</tpc>
@@ -915,13 +1095,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>RD_RD</eid>
         <voice>
           <KeySig>
+            <eid>SD_SD</eid>
             <concertKey>2</concertKey>
             </KeySig>
           <Chord>
+            <eid>TD_TD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>UD_UD</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -929,8 +1113,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>VD_VD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>WD_WD</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               <fret>12</fret>
@@ -938,8 +1124,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>XD_XD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>YD_YD</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -947,10 +1135,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>ZD_ZD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>aD_aD</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>bD_bD</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>14</tpc>
@@ -961,15 +1152,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>cD_cD</eid>
         <voice>
           <KeySig>
+            <eid>dD_dD</eid>
             <concertKey>3</concertKey>
             </KeySig>
           <Chord>
+            <eid>eD_eD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>fD_fD</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>gD_gD</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>14</tpc>
@@ -978,8 +1174,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>hD_hD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>iD_iD</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -987,8 +1185,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>jD_jD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>kD_kD</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               <fret>12</fret>
@@ -996,10 +1196,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>lD_lD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>mD_mD</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>nD_nD</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -1010,15 +1213,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>oD_oD</eid>
         <voice>
           <KeySig>
+            <eid>pD_pD</eid>
             <concertKey>4</concertKey>
             </KeySig>
           <Chord>
+            <eid>qD_qD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>rD_rD</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>sD_sD</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>25</tpc>
@@ -1027,10 +1235,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>tD_tD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>uD_uD</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>vD_vD</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>18</tpc>
@@ -1039,10 +1250,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>wD_wD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>xD_xD</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>yD_yD</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -1051,10 +1265,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>zD_zD</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>0D_0D</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>1D_1D</eid>
                 </Accidental>
               <pitch>48</pitch>
               <tpc>26</tpc>
@@ -1065,15 +1282,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>2D_2D</eid>
         <voice>
           <KeySig>
+            <eid>3D_3D</eid>
             <concertKey>5</concertKey>
             </KeySig>
           <Chord>
+            <eid>4D_4D</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>5D_5D</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>6D_6D</eid>
                 </Accidental>
               <pitch>48</pitch>
               <tpc>26</tpc>
@@ -1082,10 +1304,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>7D_7D</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>8D_8D</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>9D_9D</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -1094,8 +1319,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>+D_+D</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>/D_/D</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -1103,10 +1330,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>AE_AE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>BE_BE</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>CE_CE</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>25</tpc>
@@ -1117,15 +1347,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>DE_DE</eid>
         <voice>
           <KeySig>
+            <eid>EE_EE</eid>
             <concertKey>6</concertKey>
             </KeySig>
           <Chord>
+            <eid>FE_FE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>GE_GE</eid>
               <Accidental>
                 <subtype>accidentalDoubleSharp</subtype>
+                <eid>HE_HE</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>27</tpc>
@@ -1134,10 +1369,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>IE_IE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>JE_JE</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>KE_KE</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>17</tpc>
@@ -1146,8 +1384,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>LE_LE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>ME_ME</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -1155,10 +1395,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>NE_NE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>OE_OE</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>PE_PE</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>26</tpc>
@@ -1169,13 +1412,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>QE_QE</eid>
         <voice>
           <KeySig>
+            <eid>RE_RE</eid>
             <concertKey>7</concertKey>
             </KeySig>
           <Chord>
+            <eid>SE_SE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>TE_TE</eid>
               <pitch>60</pitch>
               <tpc>26</tpc>
               <fret>15</fret>
@@ -1183,10 +1430,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>UE_UE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>VE_VE</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>WE_WE</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>19</tpc>
@@ -1195,10 +1445,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>XE_XE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>YE_YE</eid>
               <Accidental>
                 <subtype>accidentalDoubleSharp</subtype>
+                <eid>ZE_ZE</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>29</tpc>
@@ -1207,10 +1460,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>aE_aE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>bE_bE</eid>
               <Accidental>
                 <subtype>accidentalDoubleSharp</subtype>
+                <eid>cE_cE</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>27</tpc>
@@ -1221,13 +1477,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>dE_dE</eid>
         <voice>
           <KeySig>
+            <eid>eE_eE</eid>
             <concertKey>-1</concertKey>
             </KeySig>
           <Chord>
+            <eid>fE_fE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>gE_gE</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -1235,8 +1495,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>hE_hE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>iE_iE</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -1244,8 +1506,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>jE_jE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>kE_kE</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -1253,8 +1517,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>lE_lE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>mE_mE</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -1264,13 +1530,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>nE_nE</eid>
         <voice>
           <KeySig>
+            <eid>oE_oE</eid>
             <concertKey>-2</concertKey>
             </KeySig>
           <Chord>
+            <eid>pE_pE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>qE_qE</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -1278,8 +1548,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>rE_rE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>sE_sE</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -1287,10 +1559,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>tE_tE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>uE_uE</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>vE_vE</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>18</tpc>
@@ -1299,8 +1574,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>wE_wE</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>xE_xE</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -1310,13 +1587,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>yE_yE</eid>
         <voice>
           <KeySig>
+            <eid>zE_zE</eid>
             <concertKey>-3</concertKey>
             </KeySig>
           <Chord>
+            <eid>0E_0E</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>1E_1E</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -1324,10 +1605,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>2E_2E</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>3E_3E</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>4E_4E</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>17</tpc>
@@ -1336,10 +1620,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>5E_5E</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>6E_6E</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>7E_7E</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>19</tpc>
@@ -1348,8 +1635,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>8E_8E</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>9E_9E</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <fret>15</fret>
@@ -1359,13 +1648,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>+E_+E</eid>
         <voice>
           <KeySig>
+            <eid>/E_/E</eid>
             <concertKey>-4</concertKey>
             </KeySig>
           <Chord>
+            <eid>AF_AF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>BF_BF</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <fret>15</fret>
@@ -1373,10 +1666,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>CF_CF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>DF_DF</eid>
               <Accidental>
                 <subtype>accidentalFlat</subtype>
+                <eid>EF_EF</eid>
                 </Accidental>
               <pitch>59</pitch>
               <tpc>7</tpc>
@@ -1385,10 +1681,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>FF_FF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>GF_GF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>HF_HF</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>17</tpc>
@@ -1397,8 +1696,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>IF_IF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>JF_JF</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -1408,13 +1709,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>KF_KF</eid>
         <voice>
           <KeySig>
+            <eid>LF_LF</eid>
             <concertKey>-5</concertKey>
             </KeySig>
           <Chord>
+            <eid>MF_MF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>NF_NF</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -1422,10 +1727,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>OF_OF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>PF_PF</eid>
               <Accidental>
                 <subtype>accidentalFlat</subtype>
+                <eid>QF_QF</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>6</tpc>
@@ -1434,10 +1742,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>RF_RF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>SF_SF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>TF_TF</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -1446,8 +1757,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>UF_UF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>VF_VF</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>
@@ -1457,15 +1770,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>WF_WF</eid>
         <voice>
           <KeySig>
+            <eid>XF_XF</eid>
             <concertKey>-6</concertKey>
             </KeySig>
           <Chord>
+            <eid>YF_YF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>ZF_ZF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>aF_aF</eid>
                 </Accidental>
               <pitch>48</pitch>
               <tpc>14</tpc>
@@ -1474,10 +1792,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>bF_bF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>cF_cF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>dF_dF</eid>
                 </Accidental>
               <pitch>50</pitch>
               <tpc>16</tpc>
@@ -1486,10 +1807,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>eF_eF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>fF_fF</eid>
               <Accidental>
                 <subtype>accidentalFlat</subtype>
+                <eid>gF_gF</eid>
                 </Accidental>
               <pitch>52</pitch>
               <tpc>6</tpc>
@@ -1498,10 +1822,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>hF_hF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>iF_iF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>jF_jF</eid>
                 </Accidental>
               <pitch>53</pitch>
               <tpc>13</tpc>
@@ -1512,15 +1839,20 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>kF_kF</eid>
         <voice>
           <KeySig>
+            <eid>lF_lF</eid>
             <concertKey>-7</concertKey>
             </KeySig>
           <Chord>
+            <eid>mF_mF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>nF_nF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>oF_oF</eid>
                 </Accidental>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -1529,10 +1861,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>pF_pF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>qF_qF</eid>
               <Accidental>
                 <subtype>accidentalDoubleFlat</subtype>
+                <eid>rF_rF</eid>
                 </Accidental>
               <pitch>57</pitch>
               <tpc>5</tpc>
@@ -1541,8 +1876,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>sF_sF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>tF_tF</eid>
               <pitch>59</pitch>
               <tpc>7</tpc>
               <fret>14</fret>
@@ -1550,10 +1887,13 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>uF_uF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>vF_vF</eid>
               <Accidental>
                 <subtype>accidentalNatural</subtype>
+                <eid>wF_wF</eid>
                 </Accidental>
               <pitch>60</pitch>
               <tpc>14</tpc>
@@ -1564,13 +1904,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>xF_xF</eid>
         <voice>
           <KeySig>
+            <eid>yF_yF</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <Chord>
+            <eid>zF_zF</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>0F_0F</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <fret>15</fret>
@@ -1578,8 +1922,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>1F_1F</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>2F_2F</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               <fret>14</fret>
@@ -1587,8 +1933,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>3F_3F</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>4F_4F</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               <fret>12</fret>
@@ -1596,8 +1944,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>5F_5F</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>6F_6F</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>10</fret>
@@ -1607,10 +1957,13 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>7F_7F</eid>
         <voice>
           <Chord>
+            <eid>8F_8F</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>9F_9F</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               <fret>8</fret>
@@ -1618,8 +1971,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>+F_+F</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>/F_/F</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>7</fret>
@@ -1627,8 +1982,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>AG_AG</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>BG_BG</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               <fret>5</fret>
@@ -1636,8 +1993,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>CG_CG</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>DG_DG</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               <fret>3</fret>

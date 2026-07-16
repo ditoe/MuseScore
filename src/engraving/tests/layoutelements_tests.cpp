@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,20 +22,20 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/page.h"
-#include "dom/rest.h"
-#include "dom/staff.h"
-#include "dom/system.h"
-#include "dom/tuplet.h"
-#include "dom/note.h"
+#include "engraving/dom/lyrics.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/page.h"
+#include "engraving/dom/rest.h"
+#include "engraving/dom/staff.h"
+#include "engraving/dom/system.h"
+#include "engraving/dom/tuplet.h"
+#include "engraving/dom/note.h"
 
 #include "utils/scorerw.h"
 
 #include "log.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String ALL_ELEMENTS_DATA_DIR("all_elements_data/");
@@ -54,9 +54,8 @@ public:
 //    data.
 //---------------------------------------------------------
 
-static void isLayoutDone(void* data, EngravingItem* e)
+static void isLayoutDone(bool* result, EngravingItem* e)
 {
-    bool* result = static_cast<bool*>(data);
     if (e->isTuplet()) {
         Tuplet* t = toTuplet(e);
         if (!t->hasBracket() || !t->number()) {
@@ -77,14 +76,26 @@ static void isLayoutDone(void* data, EngravingItem* e)
         // another valid exception
         return;
     }
+    if (e->isTimeTickAnchor()) {
+        // not expected to be laid out
+        return;
+    }
+    if (e->isLyricsLineSegment() && toLyricsLineSegment(e)->lyricsLine()->isEndMelisma()) {
+        // Melisma line may be omitted if too short
+        return;
+    }
+    if (e->isLayoutBreak() || e->isSystemLockIndicator() /*TODO: || e->isStaffVisibilityIndicator()*/) {
+        return;
+    }
+
     // If layout of element is done it (usually?) has a valid
     // bounding box (bbox).
-    if (e->visible() && !e->layoutData()->bbox().isValid()) {
+    if (e->visible() && !e->ldata()->bbox().isValid()) {
         (*result) = false;
         // Print some info about the element to make test more useful...
-        if (Measure* m = toMeasure(e->findMeasure())) {
-            LOGD("Layout of %s is not done (page %zu, measure %d)", e->typeName(), m->system()->page()->no() + 1,
-                 m->no() + 1);
+        if (Measure* m = e->findMeasure()) {
+            LOGD("Layout of %s is not done (page %zu, measure %d)", e->typeName(), m->system()->page()->pageNumber() + 1,
+                 m->measureNumber() + 1);
         } else {
             LOGD("Layout of %s is not done", e->typeName());
         }
@@ -105,7 +116,7 @@ void Engraving_LayoutElementsTests::tstLayoutAll(String file)
         score->setLayoutMode(mode);
         bool layoutDone = true;
         for (Score* s : score->scoreList()) {
-            s->scanElements(&layoutDone, isLayoutDone, /* all */ true);
+            s->scanElements([&](EngravingItem* item) { isLayoutDone(&layoutDone, item); });
             EXPECT_TRUE(layoutDone);
         }
     }

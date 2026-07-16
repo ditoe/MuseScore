@@ -19,10 +19,10 @@ public:
         float tremolo{ 0 };
     };
 
-    struct StaffProperty {
+    struct StaffProperties {
         int fretCount{ 24 };
         int capoFret{ 0 };
-        std::vector<int> tunning;
+        std::vector<int> tuning;
         bool useFlats{ false };
         bool ignoreFlats{ false };
     };
@@ -34,7 +34,7 @@ public:
 
     struct Diagram {
         int id{ 0 };
-        String name;
+        muse::String name;
         int stringCount{ 0 };
         int fretCount{ 0 };
         int baseFret{ 0 };
@@ -45,15 +45,15 @@ public:
 
     struct Sound {
         int programm{ 0 };
-        String name;
-        String label;
-        String path;
-        String role;
+        muse::String name;
+        muse::String label;
+        muse::String path;
+        muse::String role;
     };
 
     struct SoundAutomation {
-        String type;
-        String value;
+        muse::String type;
+        muse::String value;
         int bar = 0;
         bool linear = 0;
         float position = 0;
@@ -63,14 +63,14 @@ public:
         : _idx(idx) {}
     virtual ~GPTrack() = default;
 
-    void setName(const String& n) { _name = n; }
-    String name() const { return _name; }
+    void setName(const muse::String& n) { _name = n; }
+    muse::String name() const { return _name; }
 
-    void setShortName(const String& s) { _shortName = s; }
-    String shortName() const { return _shortName; }
+    void setShortName(const muse::String& s) { _shortName = s; }
+    muse::String shortName() const { return _shortName; }
 
-    void setInstrument(const String& s) { _instrument = s; }
-    String instrument() const { return _instrument; }
+    void setInstrument(const muse::String& s) { _instrument = s; }
+    muse::String instrument() const { return _instrument; }
 
     void setRSE(const RSE& r) { _rse = r; }
     const RSE& rse() const { return _rse; }
@@ -84,8 +84,8 @@ public:
     void setIsGuitar(bool arg) { _isGuitar = arg; }
     bool isGuitar() const { return _isGuitar; }
 
-    void addStaffProperty(const StaffProperty& st) { _staffProperty.push_back(st); }
-    const std::vector<StaffProperty>& staffProperty() const { return _staffProperty; }
+    void setStaffProperties(const StaffProperties& st) { _staffProperties = st; }
+    const StaffProperties& staffProperties() const { return _staffProperties; }
 
     void addSound(Sound sound);
 
@@ -97,19 +97,14 @@ public:
     };
 
     void addSoundAutomation(SoundAutomation val) { _automations.insert({ { val.bar, val.position }, val }); }
-    const std::unordered_map<String, Sound>& sounds() { return _sounds; }
+    const std::unordered_map<muse::String, Sound>& sounds() { return _sounds; }
     const std::map<SoundAutomationPos, SoundAutomation>& soundAutomations() { return _automations; }
 
     std::vector<InstrumentString> strings() const
     {
         std::vector<InstrumentString> ss;
-        if (_staffProperty.empty()) {
-            return ss;
-        }
-
-        const StaffProperty& sp = _staffProperty.at(0);
-        for (size_t i = 0; i < sp.tunning.size(); ++i) {
-            ss.push_back({ static_cast<int>(i + 1), sp.tunning.at(i) });
+        for (size_t i = 0; i < _staffProperties.tuning.size(); ++i) {
+            ss.push_back({ static_cast<int>(i + 1), _staffProperties.tuning.at(i) });
         }
 
         return ss;
@@ -137,17 +132,17 @@ public:
 
 protected:
 
-    String _name;
-    String _shortName;
-    String _instrument;
+    muse::String _name;
+    muse::String _shortName;
+    muse::String _instrument;
     RSE _rse;
     int _programm{ 0 };
     int _midiChannel{ 0 };
     bool _isGuitar{ false };
     int _idx{ -1 };
     size_t _staffCount{ 1 };
-    std::vector<StaffProperty> _staffProperty;
-    std::unordered_map<String, Sound> _sounds;
+    StaffProperties _staffProperties;
+    std::unordered_map<muse::String, Sound> _sounds;
     std::map<SoundAutomationPos, SoundAutomation> _automations;
     int _transpose{ 0 };
     std::unordered_map<int, Diagram> _diagrams;

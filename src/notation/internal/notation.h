@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,34 +19,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_NOTATION_H
-#define MU_NOTATION_NOTATION_H
+
+#pragma once
 
 #include "async/asyncable.h"
 #include "modularity/ioc.h"
-#include "iengravingconfiguration.h"
 
+#include "../imasternotation.h"
 #include "../inotation.h"
-#include "igetscore.h"
 #include "../inotationconfiguration.h"
+#include "igetscore.h"
 
 namespace mu::engraving {
 class Score;
 }
 
 namespace mu::notation {
+class MasterNotation;
 class NotationInteraction;
 class NotationPlayback;
-class Notation : virtual public INotation, public IGetScore, public async::Asyncable
+class Notation : virtual public INotation, public IGetScore, public muse::Contextable, public muse::async::Asyncable
 {
-    INJECT_STATIC(INotationConfiguration, configuration)
-    INJECT(engraving::IEngravingConfiguration, engravingConfiguration)
+    muse::GlobalInject<INotationConfiguration> configuration;
 
 public:
-    explicit Notation(engraving::Score* score = nullptr);
+    explicit Notation(MasterNotation* master, const muse::modularity::ContextPtr& iocCtx, engraving::Score* score = nullptr);
     ~Notation() override;
 
-    static void init();
+    const muse::modularity::ContextPtr& iocContext() const override;
+
+    project::INotationProject* project() const override;
+    IMasterNotationPtr masterNotation() const override;
 
     QString name() const override;
     QString projectName() const override;
@@ -58,13 +61,19 @@ public:
 
     bool isOpen() const override;
     void setIsOpen(bool open) override;
-    async::Notification openChanged() const override;
+    muse::async::Notification openChanged() const override;
+
+    bool hasVisibleParts() const override;
+
+    bool isMaster() const override;
 
     ViewMode viewMode() const override;
     void setViewMode(const ViewMode& viewMode) override;
+    muse::async::Notification viewModeChanged() const override;
 
     INotationPaintingPtr painting() const override;
     INotationViewStatePtr viewState() const override;
+    INotationSoloMuteStatePtr soloMuteState() const override;
     INotationInteractionPtr interaction() const override;
     INotationMidiInputPtr midiInput() const override;
     INotationUndoStackPtr undoStack() const override;
@@ -73,30 +82,33 @@ public:
     INotationAccessibilityPtr accessibility() const override;
     INotationPartsPtr parts() const override;
 
-    async::Notification notationChanged() const override;
+    muse::async::Channel<muse::RectF> notationChanged() const override;
 
 protected:
     mu::engraving::Score* score() const override;
     void setScore(mu::engraving::Score* score);
-    async::Notification scoreInited() const override;
+    muse::async::Notification scoreInited() const override;
 
-    void notifyAboutNotationChanged();
+    void notifyAboutNotationChanged(const muse::RectF& updateRect = muse::RectF());
 
     INotationPartsPtr m_parts = nullptr;
     INotationUndoStackPtr m_undoStack = nullptr;
-    async::Notification m_notationChanged;
+    muse::async::Channel<muse::RectF> m_notationChanged;
+
+    MasterNotation* m_masterNotation = nullptr;
 
 private:
     friend class NotationInteraction;
     friend class NotationPainting;
 
     engraving::Score* m_score = nullptr;
-    async::Notification m_scoreInited;
+    muse::async::Notification m_scoreInited;
 
-    async::Notification m_openChanged;
+    muse::async::Notification m_openChanged;
 
     INotationPaintingPtr m_painting = nullptr;
     INotationViewStatePtr m_viewState = nullptr;
+    INotationSoloMuteStatePtr m_soloMuteState = nullptr;
     INotationInteractionPtr m_interaction = nullptr;
     INotationStylePtr m_style = nullptr;
     INotationMidiInputPtr m_midiInput = nullptr;
@@ -104,5 +116,3 @@ private:
     INotationElementsPtr m_elements = nullptr;
 };
 }
-
-#endif // MU_NOTATION_NOTATION_H

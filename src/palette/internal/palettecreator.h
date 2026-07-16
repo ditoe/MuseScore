@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,44 +27,56 @@
 
 #include "modularity/ioc.h"
 #include "ipaletteconfiguration.h"
+#include "engraving/ipalettescoreprovider.h"
 
 namespace mu::palette {
-class PaletteCreator
+class PaletteCreator : public muse::Contextable
 {
-    INJECT_STATIC(IPaletteConfiguration, configuration)
+    muse::GlobalInject<IPaletteConfiguration> configuration;
+    muse::ContextInject<engraving::IPaletteScoreProvider> paletteScoreProvider = { this };
 
 public:
-    static PalettePtr newTempoPalette(bool defaultPalette = false);
-    static PalettePtr newTextPalette(bool defaultPalette = false);
-    static PalettePtr newTimePalette(bool defaultPalette = false);
-    static PalettePtr newRepeatsPalette(bool defaultPalette = false);
-    static PalettePtr newBeamPalette();
-    static PalettePtr newDynamicsPalette(bool defaultPalette = false);
-    static PalettePtr newLayoutPalette();
-    static PalettePtr newFingeringPalette(bool defaultPalette = false);
-    static PalettePtr newTremoloPalette();
-    static PalettePtr newNoteHeadsPalette();
-    static PalettePtr newArticulationsPalette(bool defaultPalette = false);
-    static PalettePtr newOrnamentsPalette(bool defaultPalette = false);
-    static PalettePtr newAccordionPalette();
-    static PalettePtr newBracketsPalette();
-    static PalettePtr newBreathPalette(bool defaultPalette = false);
-    static PalettePtr newArpeggioPalette();
-    static PalettePtr newClefsPalette(bool defaultPalette = false);
-    static PalettePtr newGraceNotePalette();
-    static PalettePtr newBagpipeEmbellishmentPalette();
-    static PalettePtr newKeySigPalette();
-    static PalettePtr newAccidentalsPalette(bool defaultPalette = false);
-    static PalettePtr newBarLinePalette(bool defaultPalette = false);
-    static PalettePtr newLinesPalette(bool defaultPalette = false);
-    static PalettePtr newFretboardDiagramPalette();
-    static PalettePtr newGuitarPalette(bool defaultPalette = false);
-    static PalettePtr newKeyboardPalette();
-    static PalettePtr newPitchPalette(bool defaultPalette = false);
-    static PalettePtr newHarpPalette();
 
-    static PaletteTreePtr newMasterPaletteTree();
-    static PaletteTreePtr newDefaultPaletteTree();
+    PaletteCreator(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx)
+    {
+    }
+
+    PalettePtr newTempoPalette(bool defaultPalette = false);
+    PalettePtr newTextPalette(bool defaultPalette = false);
+    PalettePtr newTimePalette(bool defaultPalette = false);
+    PalettePtr newRepeatsPalette(bool defaultPalette = false);
+    PalettePtr newBeamPalette();
+    PalettePtr newDynamicsPalette(bool defaultPalette = false);
+    PalettePtr newLayoutPalette(bool defaultPalette = false);
+    PalettePtr newFingeringPalette(bool defaultPalette = false);
+    PalettePtr newTremoloPalette();
+    PalettePtr newNoteHeadsPalette();
+    PalettePtr newArticulationsPalette(bool defaultPalette = false);
+    PalettePtr newOrnamentsPalette(bool defaultPalette = false);
+    PalettePtr newAccordionPalette();
+    PalettePtr newBracketsPalette();
+    PalettePtr newBreathPalette(bool defaultPalette = false);
+    PalettePtr newArpeggioPalette();
+    PalettePtr newClefsPalette(bool defaultPalette = false);
+    PalettePtr newGraceNotePalette();
+    PalettePtr newBagpipeEmbellishmentPalette();
+    PalettePtr newKeySigPalette();
+    PalettePtr newAccidentalsPalette(bool defaultPalette = false);
+    PalettePtr newBarLinePalette(bool defaultPalette = false);
+    PalettePtr newLinesPalette(bool defaultPalette = false);
+    PalettePtr newFretboardDiagramPalette(bool defaultPalette = false);
+    PalettePtr newGuitarPalette(bool defaultPalette = false);
+    PalettePtr newKeyboardPalette();
+    PalettePtr newPitchPalette(bool defaultPalette = false);
+    PalettePtr newHarpPalette();
+    PalettePtr newHandbellsPalette(bool defaultPalette = false);
+
+    PaletteTreePtr newMasterPaletteTree();
+    PaletteTreePtr newDefaultPaletteTree();
+
+private:
+    engraving::MasterScore* paletteScore() const;
 };
 }
 

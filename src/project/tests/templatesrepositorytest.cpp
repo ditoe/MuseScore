@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,25 +19,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "project/internal/templatesrepository.h"
 
-#include "notation/tests/mocks/msczreadermock.h"
+#include "mocks/mscmetareadermock.h"
 #include "mocks/projectconfigurationmock.h"
 #include "global/tests/mocks/filesystemmock.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
 
-using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 
-using namespace mu;
 using namespace mu::project;
 using namespace mu::notation;
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 
 class Project_TemplatesRepositoryTest : public ::testing::Test
 {
@@ -45,13 +44,13 @@ protected:
     void SetUp() override
     {
         m_repository = std::make_shared<TemplatesRepository>();
-        m_msczReader = std::make_shared<MsczReaderMock>();
-        m_fileSystem = std::make_shared<FileSystemMock>();
-        m_configuration = std::make_shared<ProjectConfigurationMock>();
+        m_mscMetaReader = std::make_shared<NiceMock<MscMetaReaderMock> >();
+        m_fileSystem = std::make_shared<NiceMock<FileSystemMock> >();
+        m_configuration = std::make_shared<NiceMock<ProjectConfigurationMock> >();
 
-        m_repository->setconfiguration(m_configuration);
-        m_repository->setmscReader(m_msczReader);
-        m_repository->setfileSystem(m_fileSystem);
+        m_repository->configuration.set(m_configuration);
+        m_repository->mscReader.set(m_mscMetaReader);
+        m_repository->fileSystem.set(m_fileSystem);
     }
 
     QVariantMap buildCategory(const QString& title, const QStringList& files) const
@@ -63,13 +62,14 @@ protected:
         return obj;
     }
 
-    Template buildTemplate(const QString& categoryTitle, const io::path_t& path) const
+    Template buildTemplate(const QString& categoryTitle, const muse::io::path_t& path, bool isCustom) const
     {
         Template templ;
         templ.categoryTitle = categoryTitle;
         templ.meta.title = path.toQString();
         templ.meta.filePath = path;
         templ.meta.creationDate = QDate::currentDate();
+        templ.isCustom = isCustom;
 
         return templ;
     }
@@ -84,7 +84,7 @@ protected:
 
     std::shared_ptr<TemplatesRepository> m_repository;
     std::shared_ptr<ProjectConfigurationMock> m_configuration;
-    std::shared_ptr<MsczReaderMock> m_msczReader;
+    std::shared_ptr<MscMetaReaderMock> m_mscMetaReader;
     std::shared_ptr<FileSystemMock> m_fileSystem;
 };
 
@@ -96,6 +96,7 @@ inline bool operator==(const Template& templ1, const Template& templ2)
     equals &= (templ1.meta.title == templ1.meta.title);
     equals &= (templ1.categoryTitle == templ2.categoryTitle);
     equals &= (templ1.meta.creationDate == templ2.meta.creationDate);
+    equals &= (templ1.isCustom == templ2.isCustom);
 
     return equals;
 }
@@ -110,7 +111,7 @@ TEST_F(Project_TemplatesRepositoryTest, Templates)
         "/path/to/user/templates/without/categories_json"
     };
 
-    io::path_t otherUserTemplatesDir = templateDirs[2];
+    muse::io::path_t otherUserTemplatesDir = templateDirs[2];
 
     ON_CALL(*m_configuration, availableTemplateDirs())
     .WillByDefault(Return(templateDirs));
@@ -164,23 +165,23 @@ TEST_F(Project_TemplatesRepositoryTest, Templates)
 
     // [GIVEN] Expected templates after reading
     Templates expectedTemplates {
-        buildTemplate("Jazz", "/path/to/standard/templates/Big_Band.mscx"),
-        buildTemplate("Jazz", "/path/to/standard/templates/Jazz_Combo.mscz"),
-        buildTemplate("Solo", "/path/to/standard/templates/Guitar.mscx"),
-        buildTemplate("Popular", "/path/to/user/templates/Rock_Band.mscz")
+        buildTemplate("Jazz", "/path/to/standard/templates/Big_Band.mscx", false /*isCustom*/),
+        buildTemplate("Jazz", "/path/to/standard/templates/Jazz_Combo.mscz", false),
+        buildTemplate("Solo", "/path/to/standard/templates/Guitar.mscx", false),
+        buildTemplate("Popular", "/path/to/user/templates/Rock_Band.mscz", false)
     };
 
-    for (const io::path_t& otherTemplatePath : otherUserTemplates) {
-        expectedTemplates << buildTemplate("My templates", otherTemplatePath);
+    for (const muse::io::path_t& otherTemplatePath : otherUserTemplates) {
+        expectedTemplates << buildTemplate("My templates", otherTemplatePath, true /*isCustom*/);
     }
 
-    for (const Template& templ : expectedTemplates) {
-        ON_CALL(*m_msczReader, readMeta(templ.meta.filePath))
+    for (const Template& templ : std::as_const(expectedTemplates)) {
+        ON_CALL(*m_mscMetaReader, readMeta(templ.meta.filePath))
         .WillByDefault(Return(RetVal<ProjectMeta>::make_ok(templ.meta)));
     }
 
     // [WHEN] Get templates meta
-    RetVal<Templates> templates = m_repository->templates();
+    const RetVal<Templates> templates = m_repository->templates();
 
     // [THEN] Successfully got templates meta
     EXPECT_TRUE(templates.ret);

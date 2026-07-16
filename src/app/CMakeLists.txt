@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021-2024 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -22,9 +22,6 @@
 # Setup main application
 ###########################################
 
-###########################################
-# Common
-###########################################
 set(EXECUTABLE_NAME mscore)
 
 ###########################################
@@ -32,8 +29,7 @@ set(EXECUTABLE_NAME mscore)
 ###########################################
 include(GetPlatformInfo)
 if (OS_IS_WIN)
-
-    set(MSCORE_OUTPUT_NAME ${MUSESCORE_NAME}${MUSESCORE_VERSION_MAJOR})
+    set(EXECUTABLE_NAME ${MUSE_APP_NAME_MACHINE_READABLE}${MUSE_APP_VERSION_MAJOR})
 
     include(GetCompilerInfo)
 
@@ -53,9 +49,12 @@ if (OS_IS_WIN)
 
 elseif(OS_IS_LIN)
 
-    if (MUSESCORE_INSTALL_SUFFIX)
-        set(MSCORE_OUTPUT_NAME "${EXECUTABLE_NAME}${MUSESCORE_INSTALL_SUFFIX}")
-    endif(MUSESCORE_INSTALL_SUFFIX)
+    # add ssl support on local linux machine
+    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L /usr/local/lib -lcrypto -lssl")
+
+    if (MUSE_APP_INSTALL_SUFFIX)
+        set(EXECUTABLE_NAME "${EXECUTABLE_NAME}${MUSE_APP_INSTALL_SUFFIX}")
+    endif(MUSE_APP_INSTALL_SUFFIX)
 
     set(CMAKE_INSTALL_RPATH "${QT_INSTALL_LIBS}")
     if (BUILD_SHARED_LIBS)
@@ -64,52 +63,23 @@ elseif(OS_IS_LIN)
 
 elseif(OS_IS_MAC)
 
-    set(EXECUTABLE_NAME mscore MACOSX_BUNDLE)
-    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER org.musescore.${MUSESCORE_NAME})
-    set(MACOSX_BUNDLE_BUNDLE_NAME ${MUSESCORE_NAME})
-    set(MACOSX_BUNDLE_LONG_VERSION_STRING ${MUSESCORE_VERSION_FULL})
-    set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${MUSESCORE_VERSION_FULL})
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER ${MUSE_APP_GUI_IDENTIFIER})
+    set(MACOSX_BUNDLE_BUNDLE_NAME ${MUSE_APP_NAME_HUMAN_READABLE})
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING ${MUSE_APP_VERSION})
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${MUSE_APP_VERSION})
     set(MACOSX_BUNDLE_BUNDLE_VERSION ${CMAKE_BUILD_NUMBER})
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright © 1999-2023 MuseScore BVBA and others. Published under the GNU General Public License version 3.")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright © 1999-2026 MuseScore Limited and others. Published under the GNU General Public License version 3.")
 
-    set(CMAKE_INSTALL_RPATH ${QT_INSTALL_LIBS})
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${QT_INSTALL_LIBS};@loader_path/../Frameworks")
 
     message("MACOSX_BUNDLE_VERSION: ${MACOSX_BUNDLE_LONG_VERSION_STRING}.${MACOSX_BUNDLE_BUNDLE_VERSION}")
 
 elseif(OS_IS_WASM)
 
-    include_directories(${MODULE} PUBLIC
-        ${PROJECT_BINARY_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/src/framework
-        ${PROJECT_SOURCE_DIR}/src/framework/global
-    )
-    set(EMCC_LINKER_FLAGS "\
-        -s WASM=1 \
-        -s FULL_ES2=1 \
-        -s FULL_ES3=1 \
-        -s USE_WEBGL2=1 \
-        -s USE_ZLIB=1 \
-        -s EXIT_RUNTIME=1 \
-        -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['UTF16ToString', 'stringToUTF16']\" \
-        --bind \
-        -s FETCH=1 \
-        -s FORCE_FILESYSTEM=1 \
-        -g \
-        -s ASSERTIONS=2 \
-        -s DEMANGLE_SUPPORT=1 \
-        -s GL_DEBUG=0 \
-        -s ALLOW_MEMORY_GROWTH=1 \
-        -s TOTAL_MEMORY=33554432 \
-        -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
-        -O3 \
-    ")
+    set(EXECUTABLE_NAME MuseScoreStudio)
+
 elseif(OS_IS_FBSD)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L /usr/local/lib -lasound -lpthread")
-    set(MSCORE_OUTPUT_NAME "${EXECUTABLE_NAME}")
 
     set(CMAKE_INSTALL_RPATH "${QT_INSTALL_LIBS}")
     if (BUILD_SHARED_LIBS)
@@ -123,171 +93,217 @@ endif()
 # Dependency library declaration
 ###########################################
 set(LINK_LIB
-    ${QT_LIBRARIES}
-    global
-    draw
-    fonts
-    network
 
-    braille
-    diagnostics
-    engraving
-    actions
-    accessibility
-    context
-    shortcuts
-    workspace
-    audio
-    mpe
-    midi
-    learn
-    notation
-    project
-    print
-    commonscene
-    palette
-    inspector
-    playback
-    instrumentsscene
-    vst
-    update
+    # Always needed by everyone
+    ${QT_LIBRARIES}
+    muse::global
+    muse::draw
     )
 
-if (MUE_BUILD_UI_MODULE)
-    list(APPEND LINK_LIB ui)
-    list(APPEND LINK_LIB uicomponents)
-endif()
+macro(add_to_link_if_exists lib)
+    if (TARGET ${lib})
+        list(APPEND LINK_LIB ${lib})
 
-if (MUE_BUILD_CONVERTER_MODULE)
-    list(APPEND LINK_LIB converter)
-endif()
-
-if (MUE_BUILD_APPSHELL_MODULE)
-    list(APPEND LINK_LIB appshell)
-endif()
-
-if (NOT CC_IS_EMSCRIPTEN)
-    list(APPEND LINK_LIB cloud)
-    list(APPEND LINK_LIB languages)
-    list(APPEND LINK_LIB plugins)
-    list(APPEND LINK_LIB multiinstances)
-
-    if (MUE_BUILD_IMPORTEXPORT_MODULE)
-        set(LINK_LIB ${LINK_LIB}
-            iex_musicxml
-            iex_bb
-            iex_bww
-            iex_capella
-            iex_guitarpro
-            iex_midi
-            iex_musedata
-            iex_ove
-            iex_audioexport
-            iex_imagesexport
-            iex_mei
-        )
-
-        if (MUE_BUILD_VIDEOEXPORT_MODULE)
-            list(APPEND LINK_LIB iex_videoexport)
-        endif()
-    else()
-        if (MUE_BUILD_IMAGESEXPORT_MODULE)
-            list(APPEND LINK_LIB iex_imagesexport)
+        if (TARGET ${lib}_qml)
+            list(APPEND LINK_LIB ${lib}_qml)
         endif()
     endif()
+endmacro()
 
+# NOTE There may be cases:
+# 1. The module is enabled and the target exists.
+# 2. The module is disabled, but there is a stub, the target exists
+# 3. The module is disabled and the target does not exist.
+# This function also adds qml parts to the link
+add_to_link_if_exists(muse::accessibility)
+add_to_link_if_exists(muse::actions)
+add_to_link_if_exists(muse::rcommand)
+add_to_link_if_exists(muse::rcontrol)
+add_to_link_if_exists(muse::audio)
+add_to_link_if_exists(muse::audioplugins)
+add_to_link_if_exists(muse::testflow)
+add_to_link_if_exists(muse::automation)
+add_to_link_if_exists(muse::cloud)
+add_to_link_if_exists(muse::diagnostics)
+add_to_link_if_exists(muse::dockwindow)
+add_to_link_if_exists(muse::extensions)
+add_to_link_if_exists(muse::interactive)
+add_to_link_if_exists(muse::languages)
+add_to_link_if_exists(muse::learn)
+add_to_link_if_exists(muse::media)
+add_to_link_if_exists(muse::midi)
+add_to_link_if_exists(muse::midiremote)
+add_to_link_if_exists(muse::mpe)
+add_to_link_if_exists(muse::multiwindows)
+add_to_link_if_exists(muse::musesampler)
+add_to_link_if_exists(muse::network)
+add_to_link_if_exists(muse::shortcuts)
+add_to_link_if_exists(muse::tours)
+add_to_link_if_exists(muse::ui)
+add_to_link_if_exists(muse::ui_dialogs_qml)
+add_to_link_if_exists(muse::uicomponents)
+add_to_link_if_exists(muse::uicomponents_qmlapi)
+add_to_link_if_exists(muse::graphicaleffects_qml)
+add_to_link_if_exists(muse::legacytreeview_qml)
+add_to_link_if_exists(muse::update)
+add_to_link_if_exists(muse::vst)
+add_to_link_if_exists(muse::workspace)
+
+add_to_link_if_exists(appshell)
+add_to_link_if_exists(braille)
+add_to_link_if_exists(context)
+add_to_link_if_exists(converter)
+add_to_link_if_exists(engraving)
+add_to_link_if_exists(iex_audioexport)
+add_to_link_if_exists(iex_bb)
+add_to_link_if_exists(iex_bww)
+add_to_link_if_exists(iex_capella)
+add_to_link_if_exists(iex_guitarpro)
+add_to_link_if_exists(iex_imagesexport)
+add_to_link_if_exists(iex_lyricsexport)
+add_to_link_if_exists(iex_mei)
+add_to_link_if_exists(iex_midi)
+add_to_link_if_exists(iex_mnx)
+add_to_link_if_exists(iex_musedata)
+add_to_link_if_exists(iex_musicxml)
+add_to_link_if_exists(iex_ove)
+add_to_link_if_exists(iex_tabledit)
+add_to_link_if_exists(iex_videoexport)
+add_to_link_if_exists(propertiespanel)
+add_to_link_if_exists(instrumentsscene)
+add_to_link_if_exists(musesounds)
+add_to_link_if_exists(notation)
+add_to_link_if_exists(notationscene)
+add_to_link_if_exists(palette)
+add_to_link_if_exists(playback)
+add_to_link_if_exists(preferences)
+add_to_link_if_exists(print)
+add_to_link_if_exists(project)
+
+
+set(MSCORE_APPEND_SRC)
+
+if (OS_IS_WIN)
+    set(MANIFEST_FILE_NAME "${EXECUTABLE_NAME}.manifest")
+    configure_file("configs/app_win.manifest.in" ${MANIFEST_FILE_NAME} @ONLY)
+
+    list(APPEND MSCORE_APPEND_SRC
+        ${WINDOWS_ICONS_RC}
+        "${CMAKE_CURRENT_BINARY_DIR}/${MANIFEST_FILE_NAME}"
+    )
 endif()
 
-
-if (MUE_BUILD_AUTOBOT_MODULE) 
-    list(APPEND LINK_LIB autobot)
+if (MUE_CONFIGURATION_IS_APPWEB)
+    list(APPEND LINK_LIB appjs)
 endif()
 
-if (MUE_BUILD_MUSESAMPLER_MODULE)
-    list(APPEND LINK_LIB musesampler)
-endif(MUE_BUILD_MUSESAMPLER_MODULE)
-
-set (MSCORE_APPEND_SRC)
-
-if (OS_IS_WIN) 
-    list(APPEND MSCORE_APPEND_SRC ${WINDOWS_ICONS_RC})
-endif()
-
-if (CC_IS_EMSCRIPTEN)
-    list(APPEND LINK_LIB wasmtest)
-
-    foreach(link ${LINK_LIB} )
-        list(APPEND MSCORE_APPEND_SRC $<TARGET_OBJECTS:${link}>)
-    endforeach()
-
-    list(APPEND MSCORE_APPEND_SRC $<TARGET_OBJECTS:sndfile>)
-    list(APPEND MSCORE_APPEND_SRC $<TARGET_OBJECTS:fluidsynth>)
+###########################################
+# Resources
+###########################################
+qt_add_resources(APP_RCC_SOURCES app.qrc)
+if (OS_IS_WIN)
+    qt_add_resources(APP_RCC_SOURCES app_win.qrc)
 endif()
 
 ###########################################
 # Executable declaration
 ###########################################
+set(APP_SRC
+    main.cpp
+    cmdoptions.h
+    appfactory.cpp
+    appfactory.h
 
-add_executable(${EXECUTABLE_NAME}
-      main.cpp
-      app.cpp
-      app.h
-      commandlineparser.cpp
-      commandlineparser.h
-      ${MSCORE_APPEND_SRC}
-      )
+    internal/guiapp.cpp
+    internal/guiapp.h
+)
+
+if (MUE_ENABLE_CONSOLEAPP)
+    set(APP_SRC ${APP_SRC}
+        internal/commandlineparser.cpp
+        internal/commandlineparser.h
+        internal/consoleapp.cpp
+        internal/consoleapp.h
+    )
+endif()
+
+if (CC_IS_EMCC)
+    set(APP_SRC ${APP_SRC} webapi_export.cpp)
+endif()
+
+qt_add_executable(MuseScoreStudio
+    WIN32 MACOSX_BUNDLE
+    ${APP_RCC_SOURCES}
+    ${MSCORE_APPEND_SRC}
+    ${APP_SRC}
+)
 
 ###########################################
 # Setting target properties
 ###########################################
 
+set_target_properties(MuseScoreStudio PROPERTIES OUTPUT_NAME ${EXECUTABLE_NAME})
 
-# If MSCORE_OUTPUT_NAME is set (e.g, when cmake is called by the user), the output executable will be
-# called MSCORE_OUTPUT_NAME instead of 'mscore'. This can be used to have MuseScore stable and unstable
-# both installed in the same prefix on a Linux system.
-if (MSCORE_OUTPUT_NAME)
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME ${MSCORE_OUTPUT_NAME})
-endif (MSCORE_OUTPUT_NAME)
+if (MUSE_ENABLE_UNIT_TESTS_CODE_COVERAGE)
+    set(COVERAGE_FLAGS -fprofile-arcs -ftest-coverage --coverage)
+    set(COVERAGE_LINK_FLAGS --coverage)
+    target_compile_options(MuseScoreStudio PRIVATE ${COVERAGE_FLAGS})
+    target_link_options(MuseScoreStudio PRIVATE ${COVERAGE_LINK_FLAGS})
+endif()
 
 if (OS_IS_MAC)
-    set_target_properties(mscore PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/build/MacOSXBundleInfo.plist.in
-                                            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER ${MACOSX_BUNDLE_GUI_IDENTIFIER})
+    include(${PROJECT_SOURCE_DIR}/share/icons/SetupIconComposerIcon.cmake)
+    target_setup_iconcomposer_icon(MuseScoreStudio "${PROJECT_SOURCE_DIR}/share/icons/AppIcon/AppIcon.icon")
+
+    set_target_properties(MuseScoreStudio PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/buildscripts/packaging/macOS/Info.plist.in
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER ${MACOSX_BUNDLE_GUI_IDENTIFIER}
+    )
 endif (OS_IS_MAC)
 
 if (CC_IS_MINGW)
     if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
-        set_target_properties(mscore PROPERTIES LINK_FLAGS "-mwindows -mconsole")
+        set_target_properties(MuseScoreStudio PROPERTIES LINK_FLAGS "-mwindows -mconsole")
     else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
-        set_target_properties(mscore PROPERTIES LINK_FLAGS "-Wl,-S -mwindows")
+        set_target_properties(MuseScoreStudio PROPERTIES LINK_FLAGS "-Wl,-S -mwindows")
     endif (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 endif(CC_IS_MINGW)
 
 if (CC_IS_MSVC)
-    target_link_options(mscore PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
+    target_link_options(MuseScoreStudio PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
 endif(CC_IS_MSVC)
 
-if (OS_IS_WASM)
-    set_target_properties(mscore PROPERTIES LINK_FLAGS "${EMCC_LINKER_FLAGS}")
-endif(OS_IS_WASM)
+###########################################
+# Includes
+###########################################
 
-if (MSCORE_OUTPUT_NAME)
-    set(MSCORE_EXECUTABLE_NAME ${MSCORE_OUTPUT_NAME})
-else (MSCORE_OUTPUT_NAME)
-    set(MSCORE_EXECUTABLE_NAME ${EXECUTABLE_NAME})
-endif (MSCORE_OUTPUT_NAME)
-set(MSCORE_EXECUTABLE_NAME "${MSCORE_EXECUTABLE_NAME}" PARENT_SCOPE)
+target_include_directories(MuseScoreStudio PRIVATE
+    ${PROJECT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+
+    ${PROJECT_SOURCE_DIR}/src
+
+    ${MUSE_FRAMEWORK_PATH}
+    ${MUSE_FRAMEWORK_PATH}/framework
+    ${MUSE_FRAMEWORK_PATH}/framework/global
+
+    # compat
+    ${MUSE_FRAMEWORK_PATH}/src
+    ${MUSE_FRAMEWORK_PATH}/src/framework
+    ${MUSE_FRAMEWORK_PATH}/src/framework/global
+    # end compat
+)
 
 ###########################################
 # Link
 ###########################################
 
-if (NOT CC_IS_EMSCRIPTEN)
-    target_link_libraries(mscore ${LINK_LIB} )
-else()
-    target_link_libraries(mscore PRIVATE ${QT_LIBRARIES})
+target_link_libraries(MuseScoreStudio PRIVATE ${LINK_LIB} ${COVERAGE_LINK_FLAGS})
 
-    find_package(Qt5QmlImportScanner REQUIRED)
-    qt5_import_qml_plugins(mscore PATH_TO_SCAN ${CMAKE_SOURCE_DIR})
+if (CC_IS_EMCC)
+    include(exported_functions.cmake)
+    target_link_options(MuseScoreStudio PRIVATE ${EMCC_LINKER_FLAGS})
+    target_link_options(MuseScoreStudio PRIVATE ${EXPORTED_FUNCTIONS})
 endif()
 
 
@@ -295,13 +311,15 @@ endif()
 # INSTALL
 ###########################################
 
+install(TARGETS MuseScoreStudio
+    BUNDLE  DESTINATION .
+    RUNTIME DESTINATION bin
+)
+
 ###########################################
 # Windows
 ###########################################
 if (OS_IS_WIN)
-
-    install(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION bin )
-
     include(GetCompilerInfo)
 
     if (CC_IS_MINGW)
@@ -316,113 +334,50 @@ if (OS_IS_WIN)
 
     endif(CC_IS_MINGW)
 
-    # Install Qt
-    foreach (QtLibrary ${QT_LIBRARIES})
-        #message(STATUS "Library ${QtLibrary}")
-        # always use release libs
-        set_target_properties(${QtLibrary} PROPERTIES MAP_IMPORTED_CONFIG_DEBUG "RELEASE")
-        get_target_property(QtSharedLibrary ${QtLibrary} LOCATION_RELEASE)
-        if (EXISTS ${QtSharedLibrary})
-            list (APPEND QtInstallLibraries ${QtSharedLibrary})
-        endif (EXISTS ${QtSharedLibrary})
-    endforeach (QtLibrary ${QT_LIBRARIES})
-    list(REMOVE_DUPLICATES QtInstallLibraries)
-
-    install(FILES
-            ${PROJECT_SOURCE_DIR}/build/qt.conf
-            ${QtInstallLibraries}
-            ${QT_INSTALL_BINS}/libEGL.dll
-            ${QT_INSTALL_BINS}/libGLESv2.dll
-            ${QT_INSTALL_BINS}/opengl32sw.dll
-            ${QT_INSTALL_BINS}/d3dcompiler_47.dll
-            ${QT_INSTALL_BINS}/Qt5QmlModels.dll
-            ${QT_INSTALL_BINS}/Qt5QmlWorkerScript.dll
-            DESTINATION bin)
-
-    install(FILES
-            ${QT_INSTALL_PLUGINS}/iconengines/qsvgicon.dll
-            DESTINATION bin/iconengines)
-
-    install(FILES
-            ${QT_INSTALL_PLUGINS}/imageformats/qjpeg.dll
-            ${QT_INSTALL_PLUGINS}/imageformats/qsvg.dll
-            ${QT_INSTALL_PLUGINS}/imageformats/qtiff.dll
-            DESTINATION bin/imageformats)
-
-
-    install(FILES
-            ${QT_INSTALL_PLUGINS}/platforms/qwindows.dll
-            DESTINATION bin/platforms)
-
-    install(FILES
-            ${QT_INSTALL_PLUGINS}/printsupport/windowsprintersupport.dll
-            DESTINATION bin/printsupport)
-
-    install(DIRECTORY
-            ${QT_INSTALL_QML}
-            DESTINATION .
-            REGEX ".*d\\.dll" EXCLUDE
-            REGEX ".pdb" EXCLUDE
-            REGEX ".*QtMultimedia.*" EXCLUDE
-            REGEX ".*QtSensors.*" EXCLUDE
-            REGEX ".*QtTest.*" EXCLUDE
-            REGEX ".*QtWebkit.*" EXCLUDE
-            )
-
     if (SNDFILE_DLL)
         install(FILES ${SNDFILE_DLL} DESTINATION bin)
     endif()
 
-    # Install ssl
-    install(FILES
-            ${DEPENDENCIES_DIR}/libcrypto-1_1-x64.dll
-            ${DEPENDENCIES_DIR}/libssl-1_1-x64.dll
-            DESTINATION bin)
-
     if (WIN_PORTABLE)
         # deploy the files and directory structure needed for the PortableApps.com format
-        install(DIRECTORY ${PROJECT_SOURCE_DIR}/build/PortableApps/App DESTINATION ${CMAKE_INSTALL_PREFIX}/../..)
-        install(DIRECTORY ${PROJECT_SOURCE_DIR}/build/PortableApps/Other DESTINATION ${CMAKE_INSTALL_PREFIX}/../..)
-        install(FILES ${PROJECT_SOURCE_DIR}/build/PortableApps/help.html DESTINATION ${CMAKE_INSTALL_PREFIX}/../..)
-        configure_file(${PROJECT_SOURCE_DIR}/build/PortableApps/appinfo.ini.in     ${CMAKE_INSTALL_PREFIX}/../../App/AppInfo/appinfo.ini   @ONLY)
+        install(DIRECTORY ${PROJECT_SOURCE_DIR}/buildscripts/packaging/Windows/PortableApps/App DESTINATION ${CMAKE_INSTALL_PREFIX}/../..)
+        install(DIRECTORY ${PROJECT_SOURCE_DIR}/buildscripts/packaging/Windows/PortableApps/Other DESTINATION ${CMAKE_INSTALL_PREFIX}/../..)
+        install(FILES ${PROJECT_SOURCE_DIR}/buildscripts/packaging/Windows/PortableApps/help.html DESTINATION ${CMAKE_INSTALL_PREFIX}/../..)
+        configure_file(${PROJECT_SOURCE_DIR}/buildscripts/packaging/Windows/PortableApps/appinfo.ini.in     ${CMAKE_INSTALL_PREFIX}/../../App/AppInfo/appinfo.ini   @ONLY)
     endif (WIN_PORTABLE)
+
+    if (MUE_RUN_WINDEPLOYQT)
+        set(deploy_tool_options_arg "--plugindir bin --qmldir ${PROJECT_SOURCE_DIR}")
+        qt_generate_deploy_qml_app_script(
+            TARGET MuseScoreStudio
+            OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+            DEPLOY_TOOL_OPTIONS ${deploy_tool_options_arg}
+        )
+
+        install(SCRIPT ${deploy_script})
+    endif() # MUE_RUN_WINDEPLOYQT
 
 ###########################################
 # Linux
 ###########################################
 elseif(OS_IS_LIN)
-
-    install(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION bin )
     # Install mscore executable (package maintainers may add "MuseScore" and/or "musescore" aliases that symlink to mscore)
-    if (LN_EXECUTABLE)
-       add_custom_target(mscore_alias ALL
-           COMMAND echo "Creating symlink alias for mscore executable."
-           COMMAND ${LN_EXECUTABLE} -sf "mscore${MUSESCORE_INSTALL_SUFFIX}" "musescore${MUSESCORE_INSTALL_SUFFIX}"
-           COMMAND echo 'Symlink alias: musescore${MUSESCORE_INSTALL_SUFFIX} -> mscore${MUSESCORE_INSTALL_SUFFIX}'
-           )
-       install(FILES ${PROJECT_BINARY_DIR}/src/app/musescore${MUSESCORE_INSTALL_SUFFIX} DESTINATION bin)
-    else (LN_EXECUTABLE)
-       add_custom_target(mscore_alias ALL COMMAND echo "No symlink aliases will be created." VERBATIM )
-    endif (LN_EXECUTABLE)
+    install(CODE "message(STATUS \"Creating symlink \$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/musescore${MUSE_APP_INSTALL_SUFFIX} -> ${CMAKE_INSTALL_PREFIX}/bin/mscore${MUSE_APP_INSTALL_SUFFIX}\")
+                  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink \"${CMAKE_INSTALL_PREFIX}/bin/mscore${MUSE_APP_INSTALL_SUFFIX}\" \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/musescore${MUSE_APP_INSTALL_SUFFIX}\")")
 
-elseif(OS_IS_FBSD)
 ###########################################
 # FreeBSD
 ###########################################
-    install(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION bin )
-    add_custom_target(mscore_alias ALL
-           COMMAND echo "Creating symlink alias for mscore executable."
-           COMMAND ln -sfv "mscore" "musescore"
-           )
-   install(FILES ${PROJECT_BINARY_DIR}/src/app/musescore DESTINATION bin)
+elseif(OS_IS_FBSD)
+    # Install mscore executable (package maintainers may add "MuseScore" and/or "musescore" aliases that symlink to mscore)
+    install(CODE "message(STATUS \"Creating symlink \$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/musescore${MUSE_APP_INSTALL_SUFFIX} -> ${CMAKE_INSTALL_PREFIX}/bin/mscore${MUSE_APP_INSTALL_SUFFIX}\")
+                  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink \"${CMAKE_INSTALL_PREFIX}/bin/mscore${MUSE_APP_INSTALL_SUFFIX}\" \"${CMAKE_INSTALL_PREFIX}/bin/musescore${MUSE_APP_INSTALL_SUFFIX}\")")
 
 ###########################################
-# MacOS
+# macOS
 ###########################################
 elseif(OS_IS_MAC)
-
-    install(TARGETS mscore BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX})
-
     install(FILES
             ${PROJECT_SOURCE_DIR}/fonts/bravura/BravuraText.otf
             ${PROJECT_SOURCE_DIR}/fonts/campania/Campania.otf
@@ -440,41 +395,33 @@ elseif(OS_IS_MAC)
             ${PROJECT_SOURCE_DIR}/fonts/leland/LelandText.otf
             ${PROJECT_SOURCE_DIR}/fonts/mscore-BC.ttf
             ${PROJECT_SOURCE_DIR}/fonts/mscoreTab.ttf
-            ${PROJECT_SOURCE_DIR}/fonts/mscore/MScoreText.ttf
-            ${PROJECT_SOURCE_DIR}/fonts/mscore/MusescoreIcon.ttf
+            ${PROJECT_SOURCE_DIR}/fonts/mscore/MScoreText.otf
             ${PROJECT_SOURCE_DIR}/fonts/musejazz/MuseJazzText.otf
             ${PROJECT_SOURCE_DIR}/fonts/petaluma/PetalumaScript.otf
             ${PROJECT_SOURCE_DIR}/fonts/petaluma/PetalumaText.otf
             ${PROJECT_SOURCE_DIR}/fonts/finalemaestro/FinaleMaestroText-Regular.otf
             ${PROJECT_SOURCE_DIR}/fonts/finalebroadway/FinaleBroadwayText.otf
-            DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}fonts
+            DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}/fonts
     )
 
-    if(MUE_COMPILE_INSTALL_QTQML_FILES)
-        install(DIRECTORY
-                ${QT_INSTALL_QML}
-                DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}
-                REGEX ".*QtWebkit.*" EXCLUDE
-                REGEX ".*QtTest.*" EXCLUDE
-                REGEX ".*QtSensors.*" EXCLUDE
-                REGEX ".*QtMultimedia.*" EXCLUDE
-                REGEX ".*QtAudioEngine.*" EXCLUDE
-                REGEX ".*_debug\\.dylib" EXCLUDE)
-    endif()
+    qt_generate_deploy_qml_app_script(
+        TARGET MuseScoreStudio
+        OUTPUT_SCRIPT deploy_script
+        MACOS_BUNDLE_POST_BUILD
+    )
 
 ###########################################
 # Wasm
 ###########################################
 elseif(OS_IS_WASM)
 
-    function(copy_html_js_launch_files target)
-        set(APPNAME ${target})
-        configure_file("${_qt5Core_install_prefix}/plugins/platforms/wasm_shell.html" "public_html/${target}.qt.html")
-        configure_file("${_qt5Core_install_prefix}/plugins/platforms/qtloader.js" public_html/qtloader.js COPYONLY)
-        configure_file("${_qt5Core_install_prefix}/plugins/platforms/qtlogo.svg" public_html/qtlogo.svg COPYONLY)
-    endfunction()
-
-    copy_html_js_launch_files(mscore)
+    add_custom_command(
+        TARGET MuseScoreStudio
+        POST_BUILD
+        COMMAND node ${PROJECT_SOURCE_DIR}/src/web/appjs/install.js ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Install js api..."
+    )
 
 else()
     message(FATAL_ERROR "Unsupported Platform: ${CMAKE_HOST_SYSTEM_NAME}")
@@ -485,26 +432,30 @@ endif()
 # Miscellaneous Microsoft Visual Studio settings
 #################################################
 if (MSVC)
+    # Add a post-build event to deploy the application to the output folder. Same as building the INSTALL target.
+    string(TOUPPER ${CMAKE_GENERATOR} UPPER_CMAKE_GENERATOR)
+    if (${UPPER_CMAKE_GENERATOR} MATCHES "VISUAL STUDIO")
+        # We want $(Configuration) passed verbatim. Note the round brackets.
+        set(CONFIG_STR "$(Configuration)")
 
-   # Force the "install" and "package" targets not to depend on the "all" target.
-   set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
-   set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY true)
+        add_custom_command(
+            TARGET MuseScoreStudio POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -DBUILD_TYPE=${CONFIG_STR} -P cmake_install.cmake
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            VERBATIM
+        )
+    endif()
 
-   # Set the startup project to "mscore".
-   if (NOT ${CMAKE_VERSION} VERSION_LESS "3.6.0")
-      set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT mscore)
-   endif ()
+    # Force the "install" and "package" targets not to depend on the "all" target.
+    set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+    set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY true)
 
-   # Set the debugging properties for the "mscore" project.
-   file(TO_NATIVE_PATH "${CMAKE_INSTALL_PREFIX}/bin" VS_DEBUGGER_WORKING_DIRECTORY)
-   if (NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
-      set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_COMMAND "${VS_DEBUGGER_WORKING_DIRECTORY}\\${MSCORE_EXECUTABLE_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
-   endif ()
-   if (NOT ${CMAKE_VERSION} VERSION_LESS "3.8.0")
-      set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${VS_DEBUGGER_WORKING_DIRECTORY}")
-   endif ()
-   if (NOT ${CMAKE_VERSION} VERSION_LESS "3.13.0")
-      set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "--debug")
-   endif ()
+    # Set the startup project to "MuseScoreStudio".
+    set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT MuseScoreStudio)
 
+    # Set the debugging properties for the "MuseScoreStudio" project.
+    file(TO_NATIVE_PATH "${CMAKE_INSTALL_PREFIX}/bin" VS_DEBUGGER_WORKING_DIRECTORY)
+    set_target_properties(MuseScoreStudio PROPERTIES VS_DEBUGGER_COMMAND "${VS_DEBUGGER_WORKING_DIRECTORY}\\${EXECUTABLE_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
+    set_target_properties(MuseScoreStudio PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${VS_DEBUGGER_WORKING_DIRECTORY}")
+    set_target_properties(MuseScoreStudio PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "--debug")
 endif (MSVC)

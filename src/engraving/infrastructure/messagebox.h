@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,25 +25,29 @@
 #include <set>
 #include <string>
 
-#ifndef ENGRAVING_NO_INTERACTIVE
 #include "modularity/ioc.h"
-#include "iinteractive.h"
+
+#ifndef ENGRAVING_NO_INTERACTIVE
+#include "interactive/iinteractive.h"
 #endif
 
 namespace mu::engraving {
-class MessageBox
+class MessageBox : public muse::Contextable
 {
 #ifndef ENGRAVING_NO_INTERACTIVE
-    INJECT_STATIC(framework::IInteractive, interactive)
+    muse::ContextInject<muse::IInteractive> interactive = { this };
 #endif
 public:
+
+    MessageBox(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
 
     enum Button {
         Ok,
         Cancel
     };
 
-    static Button warning(const std::string& title, const std::string& text, const std::set<Button>& buttons = { Ok, Cancel });
+    Button warning(const std::string& title, const std::string& text, const std::set<Button>& buttons = { Ok, Cancel });
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,55 +23,59 @@
 #include "paletteuiactions.h"
 
 #include "context/uicontext.h"
+#include "context/shortcutcontext.h"
+#include "modularity/ioc.h"
 #include "types/translatablestring.h"
 
 using namespace mu::palette;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
+using namespace muse::actions;
 
-static const mu::actions::ActionCode MASTERPALETTE_CODE("masterpalette");
+static const muse::actions::ActionCode MASTERPALETTE_CODE("masterpalette");
 
 const UiActionList PaletteUiActions::m_actions = {
     UiAction(MASTERPALETTE_CODE,
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_ANY,
-             TranslatableString("action", "&Master palette"),
-             TranslatableString("action", "Open master palette…"),
+             TranslatableString("action", "&Master palette…"),
+             TranslatableString("action", "Open master palette"),
              Checkable::Yes
              ),
     UiAction("palette-search",
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "Palette search"),
              TranslatableString("action", "Search palettes")
              ),
     UiAction("time-signature-properties",
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Time signature properties…"),
-             TranslatableString("action", "Time signature properties…")
+             TranslatableString("action", "Time signature properties")
              ),
-    UiAction("edit-drumset",
-             mu::context::UiCtxNotationOpened,
+    UiAction("customize-kit",
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString("action", "Edit drumset…"),
-             TranslatableString("action", "Edit drumset…")
+             TranslatableString("action", "Customize kit…"),
+             TranslatableString("action", "Customize kit")
              ),
     UiAction("apply-current-palette-element",
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Apply current palette element"),
              TranslatableString("action", "Apply current palette element")
              ),
     UiAction("show-keys",
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_TEXT_EDITING,
-             TranslatableString("action", "Insert special characters"),
-             TranslatableString("action", "Insert special characters…")
+             TranslatableString("action", "Insert special characters…"),
+             TranslatableString("action", "Insert special characters")
              )
 };
 
-PaletteUiActions::PaletteUiActions(std::shared_ptr<PaletteActionsController> controller)
-    : m_controller(controller)
+PaletteUiActions::PaletteUiActions(std::shared_ptr<PaletteActionsController> controller, const muse::modularity::ContextPtr& iocCtx)
+    : muse::Contextable(iocCtx), m_controller(controller)
 {
 }
 
@@ -105,12 +109,12 @@ bool PaletteUiActions::actionChecked(const UiAction& act) const
     return false;
 }
 
-mu::async::Channel<mu::actions::ActionCodeList> PaletteUiActions::actionEnabledChanged() const
+muse::async::Channel<ActionCodeList> PaletteUiActions::actionEnabledChanged() const
 {
     return m_actionEnabledChanged;
 }
 
-mu::async::Channel<mu::actions::ActionCodeList> PaletteUiActions::actionCheckedChanged() const
+muse::async::Channel<ActionCodeList> PaletteUiActions::actionCheckedChanged() const
 {
     return m_actionCheckedChanged;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,15 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __AL_SIG_H__
-#define __AL_SIG_H__
+#pragma once
 
 #include <map>
 #include <cassert>
 
 #include "global/allocator.h"
-#include "types/string.h"
-#include "types/fraction.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 int ticks_beat(int n);
@@ -37,7 +35,7 @@ int ticks_beat(int n);
 //   BeatType
 //-------------------------------------------------------------------
 
-enum class BeatType : char {
+enum class BeatType : unsigned char {
     DOWNBEAT,                 // 1st beat of measure (rtick == 0)
     COMPOUND_STRESSED,        // e.g. eighth-note number 7 in 12/8
     SIMPLE_STRESSED,          // e.g. beat 3 in 4/4
@@ -109,27 +107,29 @@ public:
 
 class SigEvent
 {
-    TimeSigFrac _timesig;
-    TimeSigFrac _nominal;
-    int _bar;                 ///< precomputed value
-
 public:
     constexpr SigEvent()
-        : _bar(0) {}                          ///< default SigEvent is invalid
+        : m_bar(0) {}                          ///< default SigEvent is invalid
     SigEvent(const Fraction& s, int bar = 0)
-        : _timesig(s), _nominal(s), _bar(bar) {}
+        : m_timesig(s), m_nominal(s), m_bar(bar) {}
     SigEvent(const Fraction& s, const Fraction& ss, int bar = 0)
-        : _timesig(s), _nominal(ss), _bar(bar) {}
+        : m_timesig(s), m_nominal(ss), m_bar(bar) {}
 
     bool operator==(const SigEvent& e) const;
-    bool valid() const { return _timesig.isValid(); }
-    String print() const { return _timesig.toString(); }
-    TimeSigFrac timesig() const { return _timesig; }
-    void setTimesig(const TimeSigFrac& f) { _timesig = f; }
-    TimeSigFrac nominal() const { return _nominal; }
-    void setNominal(const TimeSigFrac& f) { _nominal = f; }
-    int bar() const { return _bar; }
-    void setBar(int val) { _bar = val; }
+    bool valid() const { return m_timesig.isValid(); }
+    String print() const { return m_timesig.toString(); }
+    TimeSigFrac timesig() const { return m_timesig; }
+    void setTimesig(const TimeSigFrac& f) { m_timesig = f; }
+    TimeSigFrac nominal() const { return m_nominal; }
+    void setNominal(const TimeSigFrac& f) { m_nominal = f; }
+    int bar() const { return m_bar; }
+    void setBar(int val) { m_bar = val; }
+
+private:
+
+    TimeSigFrac m_timesig;
+    TimeSigFrac m_nominal;
+    int m_bar = 0;                 ///< precomputed value
 };
 
 //---------------------------------------------------------
@@ -142,6 +142,8 @@ class TimeSigMap : public std::map<int, SigEvent>
 
 public:
     TimeSigMap() {}
+
+    static const TimeSigFrac DEFAULT_TIME_SIGNATURE;
 
     void add(int tick, const Fraction&);
     void add(int tick, const SigEvent& ev);
@@ -166,5 +168,4 @@ public:
 
     void normalize();
 };
-} // namespace mu::engraving
-#endif
+}

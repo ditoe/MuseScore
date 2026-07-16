@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,23 +19,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_MSCOREERRORSCONTROLLER_H
-#define MU_NOTATION_MSCOREERRORSCONTROLLER_H
+
+#pragma once
+
+#include "global/async/asyncable.h"
 
 #include "modularity/ioc.h"
-
-#include "iinteractive.h"
-#include "inotationconfiguration.h"
+#include "interactive/iinteractive.h"
+#include "../inotationconfiguration.h"
 
 namespace mu::notation {
-class MScoreErrorsController
+class MScoreErrorsController : public muse::Contextable, public muse::async::Asyncable
 {
-    INJECT_STATIC(INotationConfiguration, configuration)
-    INJECT_STATIC(framework::IInteractive, interactive)
+    muse::GlobalInject<INotationConfiguration> configuration;
+    muse::ContextInject<muse::IInteractive> interactive = { this };
 
 public:
-    static void checkAndShowMScoreError();
+    MScoreErrorsController(const muse::modularity::ContextPtr& iocCtx);
+
+    void checkAndShowMScoreError();
+
+private:
+    mu::engraving::MsError m_currentDialogError = mu::engraving::MsError::MS_NO_ERROR;
 };
 }
-
-#endif // MU_NOTATION_MSCOREERRORSCONTROLLER_H

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 import "internal/SaveToCloud"
 
@@ -75,12 +75,12 @@ StyledDialogView {
             }
 
             SaveLocationOption {
-                title: qsTrc("project/save", "To the Cloud (free)")
+                title: qsTrc("project/save", "To the cloud (free)")
                 description: qsTrc("project/save", "Files are saved privately on your own personal account. \
 You can share drafts with others and publish your finished scores publicly too.")
                 buttonText: qsTrc("project/save", "Save to the cloud")
 
-                imageSource: "internal/SaveToCloud/images/Cloud.png"
+                imageSource: "images/Cloud.png"
 
                 navigation.panel: optionsNavPanel
                 navigation.column: 1
@@ -97,7 +97,7 @@ You can share drafts with others and publish your finished scores publicly too."
                 description: qsTrc("project/save", "If you prefer to save your files on your computer, you can do that here.")
                 buttonText: qsTrc("project/save", "Save to computer")
 
-                imageSource: "internal/SaveToCloud/images/Laptop.png"
+                imageSource: "images/Laptop.png"
 
                 navigation.panel: optionsNavPanel
                 navigation.column: 2

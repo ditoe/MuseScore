@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,14 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
 
 MixerPanelSection {
     id: root
+
+    property bool resourcePickingActive: false
 
     //: FX is an abbreviation of "effects".
     headerTitle: qsTrc("playback", "Audio FX")
@@ -34,6 +38,8 @@ MixerPanelSection {
 
     Column {
         id: content
+
+        required property MixerChannelItem channelItem
 
         y: 0
 
@@ -46,18 +52,21 @@ MixerPanelSection {
 
         Repeater {
             id: repeater
-            anchors.horizontalCenter: parent.horizontalCenter
 
-            model: channelItem.outputResourceItemList
+            model: content.channelItem.outputResourceItemList
+
             delegate: AudioResourceControl {
-                id: inputResourceControl
+                id: resourceControl
 
-                anchors.horizontalCenter: parent.horizontalCenter
+                required property OutputResourceItem modelData
+                required property int index
+
+                anchors.horizontalCenter: content.horizontalCenter
 
                 resourceItemModel: modelData
 
-                navigationPanel: channelItem.panel
-                navigationRowStart: root.navigationRowStart + (model.index * 3) // NOTE: 3 - because AudioResourceControl have 3 controls
+                navigationPanel: content.channelItem.panel
+                navigationRowStart: root.navigationRowStart + index * 3 // NOTE: 3 - because AudioResourceControl have 3 controls
                 navigationName: modelData.id
                 accessibleName: content.accessibleName
 
@@ -75,6 +84,10 @@ MixerPanelSection {
 
                 onNavigateControlIndexChanged: function(index) {
                     root.navigateControlIndexChanged(index)
+                }
+
+                onResourcePickingActiveChanged: {
+                    root.resourcePickingActive = resourceControl.resourcePickingActive
                 }
             }
         }

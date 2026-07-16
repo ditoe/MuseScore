@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -45,7 +45,7 @@ ConnectorInfoWriter::ConnectorInfoWriter(XmlWriter& xml, WriteContext* ctx, cons
     IF_ASSERT_FAILED(current) {
         return;
     }
-    _type = connector->type();
+    m_type = connector->type();
     updateCurrentInfo(m_ctx->clipboardmode());
 }
 
@@ -62,14 +62,14 @@ void ConnectorInfoWriter::write()
     }
     if (hasPrevious()) {
         xml.startElement("prev");
-        _prevLoc.toRelative(_currentLoc);
-        TWrite::write(&_prevLoc, xml, ctx);
+        m_prevLoc.toRelative(m_currentLoc);
+        TWrite::write(&m_prevLoc, xml, ctx);
         xml.endElement();
     }
     if (hasNext()) {
         xml.startElement("next");
-        _nextLoc.toRelative(_currentLoc);
-        TWrite::write(&_nextLoc, xml, ctx);
+        m_nextLoc.toRelative(m_currentLoc);
+        TWrite::write(&m_nextLoc, xml, ctx);
         xml.endElement();
     }
     xml.endElement();
@@ -105,33 +105,35 @@ SpannerWriter::SpannerWriter(XmlWriter& xml, WriteContext* ctx, const EngravingI
     : ConnectorInfoWriter(xml, ctx, current, sp, track, frac)
 {
     const bool clipboardmode = ctx->clipboardmode();
-    if (!sp->startElement() || !sp->endElement()) {
+    if ((!sp->startElement() || !sp->endElement())
+        && (sp->anchor() == Spanner::Anchor::CHORD || sp->anchor() == Spanner::Anchor::NOTE)) {
         LOGW("SpannerWriter: spanner (%s) doesn't have an endpoint!", sp->typeName());
         return;
     }
-    if (current->isMeasure() || current->isSegment() || (sp->startElement()->type() != current->type())) {
+    if (current->isMeasure() || current->isSegment() || !sp->startElement() || !sp->endElement()
+        || (sp->startElement()->type() != current->type())) {
         // (The latter is the hairpins' case, for example, though they are
         // covered by the other checks too.)
         // We cannot determine position of the spanner from its start/end
         // elements and will try to obtain this info from the spanner itself.
         if (!start) {
-            _prevLoc.setTrack(static_cast<int>(sp->track()));
+            m_prevLoc.setTrack(static_cast<int>(sp->track()));
             Measure* m = sp->score()->tick2measure(sp->tick());
-            fillSpannerPosition(_prevLoc, m, sp->tick(), clipboardmode);
+            fillSpannerPosition(m_prevLoc, m, sp->tick(), clipboardmode);
         } else {
-            const track_idx_t track2 = (sp->track2() != mu::nidx) ? sp->track2() : sp->track();
-            _nextLoc.setTrack(static_cast<int>(track2));
+            const track_idx_t track2 = (sp->track2() != muse::nidx) ? sp->track2() : sp->track();
+            m_nextLoc.setTrack(static_cast<int>(track2));
             Measure* m = sp->score()->tick2measure(sp->tick2());
-            fillSpannerPosition(_nextLoc, m, sp->tick2(), clipboardmode);
+            fillSpannerPosition(m_nextLoc, m, sp->tick2(), clipboardmode);
         }
     } else {
         // We can obtain the spanner position info from its start/end
         // elements and will prefer this source of information.
         // Reason: some spanners contain no or wrong information (e.g. Ties).
         if (!start) {
-            updateLocation(sp->startElement(), _prevLoc, clipboardmode);
+            updateLocation(sp->startElement(), m_prevLoc, clipboardmode);
         } else {
-            updateLocation(sp->endElement(), _nextLoc, clipboardmode);
+            updateLocation(sp->endElement(), m_nextLoc, clipboardmode);
         }
     }
 }

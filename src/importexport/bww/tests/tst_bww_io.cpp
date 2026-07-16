@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -121,11 +121,11 @@ static void fixupScore(Score* score)
                     continue;
                 }
                 //if ((s->subtype() == SegClef) && st->updateClefList()) {
-                //      Clef* clef = static_cast<Clef*>(e);
+                //      Clef* clef = toClef(e);
                 //      st->setClef(s->tick(), clef->clefTypeList());
                 //      }
                 if ((s->segmentType() == Segment::Type::KeySig) && st->updateKeymap()) {
-                    KeySig* ks = static_cast<KeySig*>(e);
+                    KeySig* ks = toKeySig(e);
                     int naturals = key1 ? key1->keySigEvent().accidentalType() : 0;
                     ks->setOldSig(naturals);
                     st->setKey(s->tick(), ks->key());

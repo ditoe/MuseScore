@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,33 +19,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
-import MuseScore.Playback 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Playback
 
 import "internal"
 
 ColumnLayout {
     id: root
 
-    property alias contextMenuModel: contextMenuModel
-
     property NavigationSection navigationSection: null
-    property NavigationPanel navigationPanel: mixerPanelModel.count > 0 ? mixerPanelModel.get(0).channelItem.panel : null // first panel
+    property int contentNavigationPanelOrderStart: 1
+
+    property alias contextMenuModel: contextMenuModel
+    property Component toolbarComponent: MixerPanelToolbar {
+        navigation.section: root.navigationSection
+        navigation.order: root.contentNavigationPanelOrderStart
+    }
 
     signal resizeRequested(var newWidth, var newHeight)
 
     spacing: 0
 
-    onImplicitHeightChanged: {
-        if (contentColumn.completed) {
-            resizeRequested(width, implicitHeight)
+    function resizePanelToContentHeight() {
+        if (contentColumn.completed && implicitHeight > 0) {
+            root.resizeRequested(width, implicitHeight)
         }
+    }
+
+    onImplicitHeightChanged: {
+        root.resizePanelToContentHeight()
     }
 
     QtObject {
@@ -68,22 +78,30 @@ ColumnLayout {
         }
     }
 
+    function scrollToFocusedItem(focusedIndex) {
+        let targetScrollPosition = (focusedIndex) * (prv.channelItemWidth + 1) // + 1 for separators
+        let maxContentX = flickable.contentWidth - flickable.width
+
+        if (targetScrollPosition + prv.channelItemWidth > flickable.contentX + flickable.width) {
+            flickable.contentX = Math.min(targetScrollPosition + prv.channelItemWidth - flickable.width, maxContentX)
+        } else if (targetScrollPosition < flickable.contentX) {
+            flickable.contentX = Math.max(targetScrollPosition - prv.channelItemWidth, 0)
+        }
+    }
+
     MixerPanelModel {
         id: mixerPanelModel
 
         navigationSection: root.navigationSection
-
-        Component.onCompleted: {
-            mixerPanelModel.load()
-        }
+        navigationOrderStart: root.contentNavigationPanelOrderStart + 1 // +1 for toolbar
 
         onModelReset: {
             Qt.callLater(setupConnections)
         }
 
         function setupConnections() {
-            for (var i = 0; i < mixerPanelModel.rowCount(); i++) {
-                var item = mixerPanelModel.get(i)
+            for (let i = 0; i < mixerPanelModel.rowCount(); i++) {
+                let item = mixerPanelModel.get(i)
                 item.channelItem.panel.navigationEvent.connect(function(event) {
                     if (event.type === NavigationEvent.AboutActive) {
                         if (Boolean(prv.currentNavigateControlIndex)) {
@@ -92,6 +110,7 @@ ColumnLayout {
                         }
 
                         prv.isPanelActivated = true
+                        scrollToFocusedItem(i)
                     }
                 })
             }
@@ -117,13 +136,14 @@ ColumnLayout {
 
         implicitHeight: contentColumn.height
 
-        interactive: height < contentHeight || width < contentWidth
+        interactive: (height < contentHeight || width < contentWidth) && !flickable.resourcePickingActive
 
         ScrollBar.horizontal: horizontalScrollBar
 
         ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AlwaysOn }
 
         property bool completed: false
+        property bool resourcePickingActive: soundSection.resourcePickingActive || fxSection.resourcePickingActive
 
         function positionViewAtEnd() {
             if (!flickable.completed) {

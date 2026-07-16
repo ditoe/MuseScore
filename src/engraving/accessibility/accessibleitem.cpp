@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,7 @@
 
 using namespace mu;
 using namespace mu::engraving;
-using namespace mu::accessibility;
+using namespace muse::accessibility;
 using namespace mu::engraving;
 
 bool AccessibleItem::enabled = true;
@@ -47,7 +47,7 @@ static QString readable(QString s)
 }
 
 AccessibleItem::AccessibleItem(EngravingItem* e, Role role)
-    : m_element(e), m_role(role)
+    : muse::Contextable(e->iocContext()), m_element(e), m_role(role)
 {
 }
 
@@ -84,6 +84,10 @@ AccessibleRoot* AccessibleItem::accessibleRoot() const
 {
     if (!m_element) {
         return nullptr;
+    }
+
+    if (m_element->isType(ElementType::ROOT_ITEM)) {
+        return dynamic_cast<AccessibleRoot*>(m_element->accessible().get());
     }
 
     Score* score = m_element->score();
@@ -144,7 +148,7 @@ size_t AccessibleItem::accessibleChildCount() const
     return count;
 }
 
-const IAccessible* AccessibleItem::accessibleChild(size_t i) const
+IAccessible* AccessibleItem::accessibleChild(size_t i) const
 {
     TRACEFUNC;
 
@@ -172,6 +176,11 @@ QWindow* AccessibleItem::accessibleWindow() const
     return nullptr;
 }
 
+muse::modularity::ContextPtr AccessibleItem::iocContext() const
+{
+    return muse::Contextable::iocContext();
+}
+
 IAccessible::Role AccessibleItem::accessibleRole() const
 {
     return m_role;
@@ -184,20 +193,17 @@ QString AccessibleItem::accessibleName() const
     }
 
     AccessibleRoot* root = accessibleRoot();
-    QString commandInfo = root ? root->commandInfo() : "";
     QString staffInfo = root ? root->staffInfo() : "";
     QString barsAndBeats = m_element->formatBarsAndBeats();
 
     barsAndBeats.remove(u';'); // Too many pauses in speech
 
-    QString name = QString("%1%2%3%4%5%6")
-                   .arg(!commandInfo.isEmpty() ? (commandInfo + "; ") : "")
+    QString name = QString("%1%2%3%4%5")
                    .arg(!staffInfo.isEmpty() ? (staffInfo + "; ") : "")
                    .arg(m_element->screenReaderInfo().toQString())
-                   .arg(m_element->visible() ? "" : " " + qtrc("engraving", "invisible"))
+                   .arg(m_element->visible() ? "" : " " + muse::qtrc("engraving", "invisible"))
                    .arg(!barsAndBeats.isEmpty() ? ("; " + barsAndBeats) : "")
-                   .arg(root->isRangeSelection() ? ("; " + qtrc("engraving", "selected")) : "");
-
+                   .arg((root && root->isRangeSelection()) ? ("; " + muse::qtrc("engraving", "selected")) : "");
     return readable(name);
 }
 
@@ -208,7 +214,7 @@ QString AccessibleItem::accessibleDescription() const
     }
 
     AccessibleRoot* root = accessibleRoot();
-    if (root->isRangeSelection()) {
+    if (root && root->isRangeSelection()) {
         return readable(root->rangeSelectionInfo());
     }
 
@@ -243,8 +249,8 @@ void AccessibleItem::accessibleSelection(int selectionIndex, int* startOffset, i
         *startOffset = selectionRange.startPosition;
         *endOffset = selectionRange.endPosition;
     } else {
-        *startOffset = 0;
-        *endOffset = 0;
+        *startOffset = -1;
+        *endOffset = -1;
     }
 }
 
@@ -276,7 +282,7 @@ QString AccessibleItem::accessibleText(int startOffset, int endOffset) const
 
     TextCursor* textCursor = new TextCursor(toTextBase(m_element));
     auto startCoord = textCursor->positionToLocalCoord(startOffset);
-    if (startCoord.first == mu::nidx || startCoord.second == mu::nidx) {
+    if (startCoord.first == muse::nidx || startCoord.second == muse::nidx) {
         return QString();
     }
 
@@ -294,15 +300,21 @@ QString AccessibleItem::accessibleText(int startOffset, int endOffset) const
     return text;
 }
 
-QString AccessibleItem::accessibleTextBeforeOffset(int, TextBoundaryType, int*, int*) const
+QString AccessibleItem::accessibleTextBeforeOffset(int, TextBoundaryType, int* startOffset, int* endOffset) const
 {
     NOT_IMPLEMENTED;
+
+    *startOffset = -1;
+    *endOffset = -1;
     return QString();
 }
 
-QString AccessibleItem::accessibleTextAfterOffset(int, TextBoundaryType, int*, int*) const
+QString AccessibleItem::accessibleTextAfterOffset(int, TextBoundaryType, int* startOffset, int* endOffset) const
 {
     NOT_IMPLEMENTED;
+
+    *startOffset = -1;
+    *endOffset = -1;
     return QString();
 }
 
@@ -316,7 +328,7 @@ QString AccessibleItem::accessibleTextAtOffset(int offset, TextBoundaryType boun
 
     TextCursor* textCursor = new TextCursor(toTextBase(m_element));
     auto startCoord = textCursor->positionToLocalCoord(offset);
-    if (startCoord.first == mu::nidx || startCoord.second == mu::nidx) {
+    if (startCoord.first == muse::nidx || startCoord.second == muse::nidx) {
         return QString();
     }
 
@@ -366,6 +378,12 @@ int AccessibleItem::accessibleCharacterCount() const
 
     TextBase* text = toTextBase(m_element);
     return static_cast<int>(text->plainText().size());
+}
+
+int AccessibleItem::accessibleRowIndex() const
+{
+    NOT_IMPLEMENTED;
+    return 0;
 }
 
 bool AccessibleItem::accessibleState(State st) const
@@ -419,12 +437,12 @@ bool AccessibleItem::accessibleIgnored() const
     return false;
 }
 
-mu::async::Channel<IAccessible::Property, mu::Val> AccessibleItem::accessiblePropertyChanged() const
+muse::async::Channel<IAccessible::Property, muse::Val> AccessibleItem::accessiblePropertyChanged() const
 {
     return m_accessiblePropertyChanged;
 }
 
-mu::async::Channel<IAccessible::State, bool> AccessibleItem::accessibleStateChanged() const
+muse::async::Channel<IAccessible::State, bool> AccessibleItem::accessibleStateChanged() const
 {
     return m_accessibleStateChanged;
 }

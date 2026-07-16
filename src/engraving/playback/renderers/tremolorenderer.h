@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,21 +26,23 @@
 #include "renderbase.h"
 
 namespace mu::engraving {
-class Tremolo;
-
 class TremoloRenderer : public RenderBase<TremoloRenderer>
 {
 public:
-    static const mpe::ArticulationTypeSet& supportedTypes();
+    static const muse::mpe::ArticulationTypeSet& supportedTypes();
 
-    static void doRender(const EngravingItem* item, const mpe::ArticulationType preferredType, const RenderingContext& context,
-                         mpe::PlaybackEventList& result);
+    static void doRender(const EngravingItem* item, const muse::mpe::ArticulationType preferredType, const RenderingContext& ctx,
+                         muse::mpe::PlaybackEventList& result);
 
 private:
-    static int stepDurationTicks(const Chord* chord, const Tremolo* tremolo);
-    static void buildAndAppendEvents(const Chord* chord, const mpe::ArticulationType type, const mpe::duration_t stepDuration,
-                                     const mpe::timestamp_t timestampOffset, const RenderingContext& context,
-                                     mpe::PlaybackEventList& result);
+    using TremoloTimeCache = std::unordered_map<const Note*, muse::mpe::TimestampAndDuration>;
+
+    static int stepDurationTicks(const Chord* chord, int tremoloLines);
+    static void buildAndAppendEvents(const Chord* chord, const muse::mpe::ArticulationType type, const int stepDurationTicks,
+                                     const int startTick, const RenderingContext& ctx, TremoloTimeCache& tremoloCache,
+                                     muse::mpe::PlaybackEventList& result);
+    static const muse::mpe::TimestampAndDuration& tremoloTimeAndDuration(const Note* note, const RenderingContext& ctx,
+                                                                         TremoloTimeCache& cache);
 };
 }
 

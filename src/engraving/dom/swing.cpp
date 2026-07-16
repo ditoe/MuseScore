@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,16 +24,17 @@
 
 #include "realfn.h"
 
+#include "../editing/navigation.h"
+
 #include "chord.h"
 #include "measure.h"
-#include "navigate.h"
 #include "staff.h"
 
 using namespace mu::engraving;
 
 bool Swing::ChordDurationAdjustment::isNull() const
 {
-    return RealIsNull(remainingDurationMultiplier) && RealIsNull(durationMultiplier);
+    return muse::RealIsNull(remainingDurationMultiplier) && muse::RealIsNull(durationMultiplier);
 }
 
 //---------------------------------------------------------
@@ -47,7 +48,7 @@ static bool isSubdivided(const ChordRest* chord, int swingUnit)
         return false;
     }
 
-    const ChordRest* prev = prevChordRest(chord);
+    const ChordRest* prev = Navigation::prevChordRest(chord);
     if (chord->actualTicks().ticks() < swingUnit || (prev && prev->actualTicks().ticks() < swingUnit)) {
         return true;
     }
@@ -57,20 +58,7 @@ static bool isSubdivided(const ChordRest* chord, int swingUnit)
 
 void Swing::swingAdjustParams(const Chord* chord, const SwingParameters& params, int& onTime, int& gateTime)
 {
-    Fraction tick = chord->rtick();
-
-    // adjust for anacrusis
-    const Measure* cm = chord->measure();
-    const MeasureBase* pm = cm->prev();
-    ElementType pt = pm ? pm->type() : ElementType::INVALID;
-    if (!pm || pm->lineBreak() || pm->pageBreak() || pm->sectionBreak()
-        || pt == ElementType::VBOX || pt == ElementType::HBOX
-        || pt == ElementType::FBOX || pt == ElementType::TBOX) {
-        Fraction offset = cm->timesig() - cm->ticks();
-        if (offset > Fraction(0, 1)) {
-            tick += offset;
-        }
-    }
+    Fraction tick = chord->rtick() + chord->measure()->anacrusisOffset();
 
     int swingBeat            = params.swingUnit * 2;
     double ticksDuration     = (double)chord->actualTicks().ticks();
@@ -88,7 +76,7 @@ void Swing::swingAdjustParams(const Chord* chord, const SwingParameters& params,
 
     int endTick = startTick + ticksDuration;
     if (endTick % swingBeat == params.swingUnit) {
-        const ChordRest* ncr = nextChordRest(chord);
+        const ChordRest* ncr = Navigation::nextChordRest(chord);
 
         if (!isSubdivided(ncr, params.swingUnit)) {
             gateTime = gateTime + (swingActualAdjust / 10);

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_CHORDLIST_H
-#define MU_ENGRAVING_CHORDLIST_H
+#ifndef MU_ENGRAVING_READCHORDLISTHOOK_H
+#define MU_ENGRAVING_READCHORDLISTHOOK_H
 
 #include "types/string.h"
 
@@ -41,8 +41,8 @@ public:
 private:
     Score* m_score = nullptr;
     bool m_chordListTag = false;
-    String m_oldChordDescriptionFile;
+    muse::String m_oldChordDescriptionFile;
 };
 }
 
-#endif // MU_ENGRAVING_CHORDLIST_H
+#endif // MU_ENGRAVING_READCHORDLISTHOOK_H

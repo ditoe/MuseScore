@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TIMESIG_H__
-#define __TIMESIG_H__
+#pragma once
 
 #include "engravingitem.h"
 
@@ -29,12 +28,13 @@
 
 namespace mu::engraving {
 class Segment;
+class Transaction;
 
 //---------------------------------------------------------
 //   TimeSigType
 //---------------------------------------------------------
 
-enum class TimeSigType : char {
+enum class TimeSigType : unsigned char {
     NORMAL,              // use sz/sn text
     FOUR_FOUR,           // common time (4/4)
     ALLA_BREVE,          // cut time (2/2)
@@ -52,6 +52,8 @@ class TimeSig final : public EngravingItem
     OBJECT_ALLOCATOR(engraving, TimeSig)
     DECLARE_CLASSOF(ElementType::TIMESIG)
 
+    M_PROPERTY2(bool, isCourtesy, setIsCourtesy, false)
+
 public:
 
     void setParent(Segment* parent);
@@ -62,6 +64,9 @@ public:
     TimeSig* clone() const override { return new TimeSig(*this); }
 
     TimeSigType timeSigType() const { return m_timeSigType; }
+
+    int subtype() const override;
+    TranslatableString subtypeUserName() const override;
 
     bool operator==(const TimeSig&) const;
     bool operator!=(const TimeSig& ts) const { return !(*this == ts); }
@@ -79,7 +84,7 @@ public:
     int denominatorStretch() const { return m_stretch.denominator(); }
 
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     Segment* segment() const { return (Segment*)explicitParent(); }
     Measure* measure() const { return (Measure*)explicitParent()->explicitParent(); }
@@ -96,9 +101,6 @@ public:
     bool largeParentheses() const { return m_largeParentheses; }
     void setLargeParentheses(bool v) { m_largeParentheses = v; }
 
-    const mu::ScaleF& scale() const { return m_scale; }
-    void setScale(const mu::ScaleF& s) { m_scale = s; }
-
     void setFrom(const TimeSig*);
 
     PropertyValue getProperty(Pid propertyId) const override;
@@ -108,24 +110,37 @@ public:
     const Groups& groups() const { return m_groups; }
     void setGroups(const Groups& e) { m_groups = e; }
 
-    Fraction globalSig() const { return (m_sig * m_stretch).reduced(); }
-    void setGlobalSig(const Fraction& f) { m_stretch = (m_sig / f).reduced(); }
-
     bool isLocal() const { return m_stretch != Fraction(1, 1); }
+
+    PointF staffOffset() const override;
 
     EngravingItem* nextSegmentElement() override;
     EngravingItem* prevSegmentElement() override;
     String accessibleInfo() const override;
 
+    void initElementStyle(const ElementStyle*) override;
+    void styleChanged() override;
+    Sid getPropertyStyle(Pid id) const override;
+
+    bool showOnThisStaff() const;
+    bool isAboveStaves() const;
+    bool isAcrossStaves() const;
+    TimeSigPlacement timeSigPlacement() const;
+    TimeSigStyle timeSigStyle() const;
+    double numDist() const;
+    double yPos() const;
+    const ScaleF& scale() const { return m_scale; }
+    void setScale(const ScaleF& s) { m_scale = s; } // TODO: think about what to do with this
+
     struct LayoutData : public EngravingItem::LayoutData {
         SymIdList ns;
         SymIdList ds;
-        mu::PointF pz;
-        mu::PointF pn;
-        mu::PointF pointLargeLeftParen;
-        mu::PointF pointLargeRightParen;
+        PointF pz;
+        PointF pn;
+        PointF pointLargeLeftParen;
+        PointF pointLargeRightParen;
     };
-    DECLARE_LAYOUTDATA_METHODS(TimeSig);
+    DECLARE_LAYOUTDATA_METHODS(TimeSig)
 
 protected:
     void added() override;
@@ -143,10 +158,9 @@ private:
     Fraction m_stretch;        // localSig / globalSig
     Groups m_groups;
 
-    mu::ScaleF m_scale;
+    ScaleF m_scale = ScaleF(1.0, 1.0);
     TimeSigType m_timeSigType = TimeSigType::NORMAL;
     bool m_showCourtesySig = false;
     bool m_largeParentheses = false;
 };
 } // namespace mu::engraving
-#endif

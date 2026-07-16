@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,23 +19,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_PROJECT_IPROJECTCREATOR_H
-#define MU_PROJECT_IPROJECTCREATOR_H
+
+#pragma once
 
 #include "inotationproject.h"
 
 #include "modularity/imoduleinterface.h"
+#include "modularity/ioc.h"
 
 namespace mu::project {
-class IProjectCreator : MODULE_EXPORT_INTERFACE
+class IProjectCreator : MODULE_GLOBAL_INTERFACE
 {
     INTERFACE_ID(IProjectCreator)
 
 public:
     virtual ~IProjectCreator() = default;
 
-    virtual INotationProjectPtr newProject() const = 0;
+    virtual INotationProjectPtr newProject(const muse::modularity::ContextPtr& iocCtx) const = 0;
 };
 }
-
-#endif // MU_PROJECT_IPROJECTCREATOR_H

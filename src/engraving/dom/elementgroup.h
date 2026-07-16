@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __ELEMENTGROUP_H__
-#define __ELEMENTGROUP_H__
+#pragma once
 
 #include "global/allocator.h"
 #include "draw/types/geometry.h"
@@ -43,7 +42,7 @@ public:
     virtual ~ElementGroup() {}
 
     virtual void startDrag(EditData&) = 0;
-    virtual mu::RectF drag(EditData&) = 0;
+    virtual muse::RectF drag(EditData&) = 0;
     virtual void endDrag(EditData&) = 0;
 
     virtual bool enabled() const { return true; }
@@ -60,7 +59,7 @@ public:
     bool enabled() const override { return false; }
 
     void startDrag(EditData&) override {}
-    mu::RectF drag(EditData&) override { return mu::RectF(); }
+    muse::RectF drag(EditData&) override { return muse::RectF(); }
     void endDrag(EditData&) override {}
 };
 
@@ -73,15 +72,15 @@ class SingleElementGroup final : public ElementGroup
 {
     OBJECT_ALLOCATOR(engraving, SingleElementGroup)
 
-    EngravingItem* e;
 public:
     SingleElementGroup(EngravingItem* el)
-        : e(el) {}
+        : m_e(el) {}
 
     void startDrag(EditData& ed) override;
-    mu::RectF drag(EditData& ed) override;
+    muse::RectF drag(EditData& ed) override;
     void endDrag(EditData& ed) override;
-};
-} // namespace mu::engraving
 
-#endif
+private:
+    EngravingItem* m_e = nullptr;
+};
+}

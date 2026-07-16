@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -47,7 +47,7 @@ inline QDebug operator<<(QDebug debug, const mu::engraving::PropertyValue&)
 
 #define DEPRECATED LOGD() << "This function deprecated!!"
 #define DEPRECATED_USE(use) LOGD() << "This function deprecated!! Use:" << use
-#define NOT_IMPLEMENTED LOGW() << "Not implemented!!"
+#define NOT_IMPLEMENTED LOGD() << "Not implemented!!"
 #define NOT_IMPL_RETURN NOT_IMPLEMENTED return
 #define NOT_SUPPORTED LOGW() << "Not supported!!"
 #define NOT_SUPPORTED_USE(use) LOGW() << "Not supported!! Use:" << use

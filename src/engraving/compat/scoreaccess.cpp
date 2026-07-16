@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,22 +26,28 @@
 using namespace mu::engraving;
 using namespace mu::engraving::compat;
 
-MasterScore* ScoreAccess::createMasterScore()
+static const muse::modularity::ContextPtr utestCtx = std::make_shared<muse::modularity::Context>(1);
+
+MasterScore* ScoreAccess::createMasterScore(const muse::modularity::ContextPtr& iocCtx)
 {
-    return new MasterScore();
+    const muse::modularity::ContextPtr iocCtx_ = iocCtx ? iocCtx : utestCtx;
+    return new MasterScore(iocCtx_);
 }
 
-MasterScore* ScoreAccess::createMasterScoreWithBaseStyle()
+MasterScore* ScoreAccess::createMasterScoreWithBaseStyle(const muse::modularity::ContextPtr& iocCtx)
 {
-    return new MasterScore(DefaultStyle::baseStyle());
+    const muse::modularity::ContextPtr iocCtx_ = iocCtx ? iocCtx : utestCtx;
+    return new MasterScore(iocCtx_, DefaultStyle::baseStyle());
 }
 
-MasterScore* ScoreAccess::createMasterScoreWithDefaultStyle()
+MasterScore* ScoreAccess::createMasterScoreWithDefaultStyle(const muse::modularity::ContextPtr& iocCtx)
 {
-    return new MasterScore(DefaultStyle::defaultStyle());
+    const muse::modularity::ContextPtr iocCtx_ = iocCtx ? iocCtx : utestCtx;
+    return new MasterScore(iocCtx_, DefaultStyle::defaultStyle());
 }
 
-MasterScore* ScoreAccess::createMasterScore(const MStyle& style)
+MasterScore* ScoreAccess::createMasterScore(const muse::modularity::ContextPtr& iocCtx, const MStyle& style)
 {
-    return new MasterScore(style);
+    const muse::modularity::ContextPtr iocCtx_ = iocCtx ? iocCtx : utestCtx;
+    return new MasterScore(iocCtx_, style);
 }

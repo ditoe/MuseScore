@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,11 +22,10 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/factory.h"
-#include "dom/part.h"
-#include "dom/staff.h"
-
-#include "compat/scoreaccess.h"
+#include "engraving/compat/scoreaccess.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/staff.h"
 
 using namespace mu::engraving;
 
@@ -38,7 +37,7 @@ public:
 TEST_F(Engraving_ScoreUtilsTests, StaffIdxSetFromRange)
 {
     // [GIVEN] Score containing a bunch of parts/staves (+ linked staves)
-    MasterScore* score = compat::ScoreAccess::createMasterScore();
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
     for (int i = 0; i < 3; ++i) {
         score->appendPart(new Part(score));
     }
@@ -77,6 +76,46 @@ TEST_F(Engraving_ScoreUtilsTests, StaffIdxSetFromRange)
     // [THEN] The set is correct
     expectedStaffIdxSet = { 0, 1, 2, 3, 4, 5, 6 };
     EXPECT_EQ(actualStaffIdxSet, expectedStaffIdxSet);
+
+    delete score;
+}
+
+TEST_F(Engraving_ScoreUtilsTests, StaffTestMergeMatchingRests)
+{
+    // [GIVEN] Score containing a part and staff
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
+    score->appendPart(new Part(score));
+    score->appendStaff(Factory::createStaff(score->parts().at(0)));
+
+    // GIVEN score style setting is false
+    score->style().set(Sid::mergeMatchingRests, false);
+    // GIVEN staff setting is AUTO
+    score->staff(0)->setMergeMatchingRests(AutoOnOff::AUTO);
+    // [THEN] rests display unmerged
+    EXPECT_FALSE(score->staff(0)->shouldMergeMatchingRests());
+    // GIVEN staff setting is ON
+    score->staff(0)->setMergeMatchingRests(AutoOnOff::ON);
+    // [THEN] rests display merged
+    EXPECT_TRUE(score->staff(0)->shouldMergeMatchingRests());
+    // GIVEN staff setting is OFF
+    score->staff(0)->setMergeMatchingRests(AutoOnOff::OFF);
+    // [THEN] rests display unmerged
+    EXPECT_FALSE(score->staff(0)->shouldMergeMatchingRests());
+
+    // GIVEN score style setting is true
+    score->style().set(Sid::mergeMatchingRests, true);
+    // GIVEN staff setting is AUTO
+    score->staff(0)->setMergeMatchingRests(AutoOnOff::AUTO);
+    // [THEN] rests display merged
+    EXPECT_TRUE(score->staff(0)->shouldMergeMatchingRests());
+    // GIVEN staff setting is ON
+    score->staff(0)->setMergeMatchingRests(AutoOnOff::ON);
+    // [THEN] rests display merged
+    EXPECT_TRUE(score->staff(0)->shouldMergeMatchingRests());
+    // GIVEN staff setting is OFF
+    score->staff(0)->setMergeMatchingRests(AutoOnOff::OFF);
+    // [THEN] rests display unmerged
+    EXPECT_FALSE(score->staff(0)->shouldMergeMatchingRests());
 
     delete score;
 }

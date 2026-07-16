@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,24 +34,26 @@
 #include "../iprojectautosaver.h"
 
 namespace mu::project {
-class ProjectAutoSaver : public IProjectAutoSaver, public async::Asyncable
+class ProjectAutoSaver : public IProjectAutoSaver, public muse::async::Asyncable, public muse::Contextable
 {
-    INJECT(context::IGlobalContext, globalContext)
-    INJECT(io::IFileSystem, fileSystem)
-    INJECT(IProjectConfiguration, configuration)
+    muse::GlobalInject<muse::io::IFileSystem> fileSystem;
+    muse::GlobalInject<IProjectConfiguration> configuration;
+    muse::ContextInject<context::IGlobalContext> globalContext = { this };
 
 public:
-    ProjectAutoSaver() = default;
+    ProjectAutoSaver(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx)
+    {}
 
     void init();
 
-    bool projectHasUnsavedChanges(const io::path_t& projectPath) const override;
-    void removeProjectUnsavedChanges(const io::path_t& projectPath) override;
+    bool projectHasUnsavedChanges(const muse::io::path_t& projectPath) const override;
+    void removeProjectUnsavedChanges(const muse::io::path_t& projectPath) override;
 
-    bool isAutosaveOfNewlyCreatedProject(const io::path_t& projectPath) const override;
+    bool isAutosaveOfNewlyCreatedProject(const muse::io::path_t& projectPath) const override;
 
-    io::path_t projectOriginalPath(const io::path_t& projectAutoSavePath) const override;
-    io::path_t projectAutoSavePath(const io::path_t& projectPath) const override;
+    muse::io::path_t projectOriginalPath(const muse::io::path_t& projectAutoSavePath) const override;
+    muse::io::path_t projectAutoSavePath(const muse::io::path_t& projectPath) const override;
 
 private:
     INotationProjectPtr currentProject() const;
@@ -60,10 +62,10 @@ private:
 
     void onTrySave();
 
-    io::path_t projectPath(INotationProjectPtr project) const;
+    muse::io::path_t projectPath(INotationProjectPtr project) const;
 
     QTimer m_timer;
-    io::path_t m_lastProjectPathNeedingAutosave;
+    muse::io::path_t m_lastProjectPathNeedingAutosave;
 };
 }
 

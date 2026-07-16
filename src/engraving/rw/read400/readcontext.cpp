@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,11 +22,15 @@
 
 #include "readcontext.h"
 
-#include "dom/beam.h"
-#include "dom/linkedobjects.h"
-#include "dom/score.h"
-#include "dom/tuplet.h"
-#include "dom/undo.h"
+#include "global/containers.h"
+
+#include "engraving/dom/beam.h"
+#include "engraving/dom/linkedobjects.h"
+#include "engraving/dom/score.h"
+#include "engraving/dom/staff.h"
+#include "engraving/dom/tuplet.h"
+#include "engraving/editing/transaction/undostack.h"
+#include "engraving/types/types.h"
 
 #include "connectorinforeader.h"
 
@@ -36,8 +40,13 @@ using namespace mu;
 using namespace mu::engraving;
 using namespace mu::engraving::read400;
 
+ReadContext::ReadContext(const muse::modularity::ContextPtr& iocCtx)
+    : muse::Contextable(iocCtx)
+{
+}
+
 ReadContext::ReadContext(Score* score)
-    : m_score(score)
+    : muse::Contextable(score ? score->iocContext() : muse::modularity::globalCtx()), m_score(score)
 {
 }
 
@@ -65,46 +74,6 @@ void ReadContext::setScore(Score* score)
 Score* ReadContext::score() const
 {
     return m_score;
-}
-
-bool ReadContext::isMasterScore() const
-{
-    return m_score->isMaster();
-}
-
-void ReadContext::setMasterCtx(ReadContext* ctx)
-{
-    m_masterCtx = ctx;
-}
-
-ReadContext* ReadContext::masterCtx()
-{
-    if (!m_score) {
-        return this;
-    }
-
-    if (m_score->isMaster()) {
-        return this;
-    }
-
-    DO_ASSERT(m_masterCtx);
-
-    return m_masterCtx;
-}
-
-const ReadContext* ReadContext::masterCtx() const
-{
-    if (!m_score) {
-        return this;
-    }
-
-    if (m_score->isMaster()) {
-        return this;
-    }
-
-    DO_ASSERT(m_masterCtx);
-
-    return m_masterCtx;
 }
 
 const MStyle& ReadContext::style() const
@@ -137,12 +106,17 @@ double ReadContext::spatium() const
     return m_score->style().spatium();
 }
 
+void ReadContext::setSpatium(double v)
+{
+    m_score->style().set(Sid::spatium, v);
+}
+
 compat::DummyElement* ReadContext::dummy() const
 {
     return m_score->dummy();
 }
 
-Staff* ReadContext::staff(int n)
+Staff* ReadContext::staff(staff_idx_t n)
 {
     return m_score->staff(n);
 }
@@ -159,7 +133,7 @@ void ReadContext::addSpanner(Spanner* s)
 
 bool ReadContext::undoStackActive() const
 {
-    return m_score->undoStack()->active();
+    return m_score->undoStack()->hasActiveTransaction();
 }
 
 bool ReadContext::isSameScore(const EngravingObject* obj) const
@@ -169,11 +143,6 @@ bool ReadContext::isSameScore(const EngravingObject* obj) const
 
 rw::ReadLinks ReadContext::readLinks() const
 {
-    return doReadLinks();
-}
-
-rw::ReadLinks ReadContext::doReadLinks() const
-{
     rw::ReadLinks l;
     l.linksIndexer = m_linksIndexer;
     l.staffLinkedElements = m_staffLinkedElements;
@@ -182,21 +151,11 @@ rw::ReadLinks ReadContext::doReadLinks() const
 
 void ReadContext::initLinks(const rw::ReadLinks& l)
 {
-    doInitLinks(l);
-}
-
-void ReadContext::doInitLinks(const rw::ReadLinks& l)
-{
     m_linksIndexer = l.linksIndexer;
     m_staffLinkedElements = l.staffLinkedElements;
 }
 
 void ReadContext::addLink(Staff* staff, LinkedObjects* link, const Location& location)
-{
-    doAddLink(staff, link, location);
-}
-
-void ReadContext::doAddLink(Staff* staff, LinkedObjects* link, const Location& location)
 {
     int staffIndex = static_cast<int>(staff->idx());
     const bool isMasterScore = staff->score()->isMaster();
@@ -218,11 +177,6 @@ void ReadContext::doAddLink(Staff* staff, LinkedObjects* link, const Location& l
 }
 
 LinkedObjects* ReadContext::getLink(bool isMasterScore, const Location& location, int localIndexDiff)
-{
-    return doGetLink(isMasterScore, location, localIndexDiff);
-}
-
-LinkedObjects* ReadContext::doGetLink(bool isMasterScore, const Location& location, int localIndexDiff)
 {
     int staffIndex = location.staff();
     if (!isMasterScore) {
@@ -261,16 +215,6 @@ LinkedObjects* ReadContext::doGetLink(bool isMasterScore, const Location& locati
     return nullptr;
 }
 
-std::map<int, std::vector<std::pair<LinkedObjects*, Location> > >& ReadContext::staffLinkedElements()
-{
-    return m_staffLinkedElements;
-}
-
-std::map<int, LinkedObjects*>& ReadContext::linkIds()
-{
-    return masterCtx()->_elinks;
-}
-
 Fraction ReadContext::rtick() const
 {
     return _curMeasure ? _tick - _curMeasure->tick() : _tick;
@@ -291,13 +235,8 @@ void ReadContext::incTick(const Fraction& f)
 
 Location ReadContext::location(bool forceAbsFrac) const
 {
-    return doLocation(forceAbsFrac);
-}
-
-Location ReadContext::doLocation(bool forceAbsFrac) const
-{
     Location l = Location::absolute();
-    doFillLocation(l, forceAbsFrac);
+    fillLocation(l, forceAbsFrac);
     return l;
 }
 
@@ -311,11 +250,6 @@ Location ReadContext::doLocation(bool forceAbsFrac) const
 //---------------------------------------------------------
 
 void ReadContext::fillLocation(Location& l, bool forceAbsFrac) const
-{
-    doFillLocation(l, forceAbsFrac);
-}
-
-void ReadContext::doFillLocation(Location& l, bool forceAbsFrac) const
 {
     constexpr Location defaults = Location::absolute();
     const bool absFrac = (pasteMode() || forceAbsFrac);
@@ -338,11 +272,6 @@ void ReadContext::doFillLocation(Location& l, bool forceAbsFrac) const
 
 void ReadContext::setLocation(const Location& l)
 {
-    doSetLocation(l);
-}
-
-void ReadContext::doSetLocation(const Location& l)
-{
     if (l.isRelative()) {
         Location newLoc = l;
         newLoc.toAbsolute(location());
@@ -352,7 +281,7 @@ void ReadContext::doSetLocation(const Location& l)
             setTrack(newLoc.track() - _trackOffset);
             return;
         }
-        doSetLocation(newLoc);     // recursion
+        setLocation(newLoc); // recursion
         return;
     }
     setTrack(l.track() - _trackOffset);
@@ -363,14 +292,40 @@ void ReadContext::doSetLocation(const Location& l)
     }
 }
 
-void ReadContext::addBeam(Beam* s)
+size_t ReadContext::getStaffBarLineSpan(const staff_idx_t staffIdx) const
 {
-    _beams.insert_or_assign(s->id(), s);
+    return muse::value(m_staffBarLineSpanValues, staffIdx, 0);
 }
 
-void ReadContext::addTuplet(Tuplet* s)
+void ReadContext::setStaffBarLineSpan(const staff_idx_t staffIdx, const size_t barLineSpan)
 {
-    _tuplets.insert_or_assign(s->id(), s);
+    const auto [it, didInsert] = m_staffBarLineSpanValues.emplace(staffIdx, barLineSpan);
+    DO_ASSERT(didInsert)
+}
+
+std::optional<size_t> ReadContext::getBarLineSpan(const BarLine* barLine)
+{
+    if (!muse::contains(m_barLineSpanValues, barLine)) {
+        return std::nullopt;
+    }
+
+    return muse::value(m_barLineSpanValues, barLine);
+}
+
+void ReadContext::setBarLineSpan(const BarLine* barLine, const size_t barLineSpan)
+{
+    const auto [it, didInsert] = m_barLineSpanValues.emplace(barLine, barLineSpan);
+    DO_ASSERT(didInsert)
+}
+
+void ReadContext::addBeam(int beamId, Beam* s)
+{
+    _beams.insert_or_assign(beamId, s);
+}
+
+void ReadContext::addTuplet(int tupletId, Tuplet* s)
+{
+    _tuplets.insert_or_assign(tupletId, s);
 }
 
 void ReadContext::checkTuplets()
@@ -379,7 +334,7 @@ void ReadContext::checkTuplets()
         Tuplet* tuplet = p.second;
         if (tuplet->elements().empty()) {
             // this should not happen and is a sign of input file corruption
-            LOGD("Measure:read(): empty tuplet id %d (%p), input file corrupted?", tuplet->id(), tuplet);
+            LOGD("Measure:read(): empty tuplet id %d (%p), input file corrupted?", p.first, tuplet);
             delete tuplet;
         } else {
             //sort tuplet elements. Needed for nested tuplets #22537
@@ -403,7 +358,7 @@ void ReadContext::removeSpanner(const Spanner* s)
 {
     for (auto i : _spanner) {
         if (i.second == s) {
-            mu::remove(_spanner, i);
+            muse::remove(_spanner, i);
             return;
         }
     }
@@ -464,11 +419,6 @@ void ReadContext::addConnectorInfoLater(std::shared_ptr<read400::ConnectorInfoRe
 
 void ReadContext::checkConnectors()
 {
-    doCheckConnectors();
-}
-
-void ReadContext::doCheckConnectors()
-{
     for (std::shared_ptr<ConnectorInfoReader>& c : _pendingConnectors) {
         addConnectorInfo(c);
     }
@@ -503,7 +453,46 @@ static bool distanceSort(const std::pair<int, std::pair<ConnectorInfoReader*, Co
 
 void ReadContext::reconnectBrokenConnectors()
 {
-    doReconnectBrokenConnectors();
+    if (_connectors.empty()) {
+        return;
+    }
+    LOGD("Reconnecting broken connectors (%d nodes)", int(_connectors.size()));
+    std::vector<std::pair<int, std::pair<ConnectorInfoReader*, ConnectorInfoReader*> > > brokenPairs;
+    for (size_t i = 1; i < _connectors.size(); ++i) {
+        for (size_t j = 0; j < i; ++j) {
+            ConnectorInfoReader* c1 = _connectors[i].get();
+            ConnectorInfoReader* c2 = _connectors[j].get();
+            int d = c1->connectionDistance(*c2);
+            if (d >= 0) {
+                brokenPairs.push_back(std::make_pair(d, std::make_pair(c1, c2)));
+            } else {
+                brokenPairs.push_back(std::make_pair(-d, std::make_pair(c2, c1)));
+            }
+        }
+    }
+    std::sort(brokenPairs.begin(), brokenPairs.end(), distanceSort);
+    for (auto& distPair : brokenPairs) {
+        if (distPair.first == INT_MAX) {
+            continue;
+        }
+        auto& pair = distPair.second;
+        if (pair.first->next() || pair.second->prev()) {
+            continue;
+        }
+        pair.first->forceConnect(pair.second);
+    }
+    std::set<ConnectorInfoReader*> reconnected;
+    for (auto& conn : _connectors) {
+        ConnectorInfoReader* c = conn.get();
+        if (c->finished()) {
+            reconnected.insert(static_cast<ConnectorInfoReader*>(c->start()));
+        }
+    }
+    for (ConnectorInfoReader* cptr : reconnected) {
+        cptr->addToScore(pasteMode());
+        removeConnector(cptr);
+    }
+    LOGD() << "reconnected broken connectors: " << reconnected.size();
 }
 
 void ReadContext::clearOrphanedConnectors()
@@ -550,54 +539,10 @@ void ReadContext::clearOrphanedConnectors()
 
     for (auto& it : m_staffLinkedElements) {
         std::vector<std::pair<LinkedObjects*, Location> >& vector = it.second;
-        mu::remove_if(vector, [&deletedLinks](std::pair<LinkedObjects*, Location>& pair){
+        muse::remove_if(vector, [&deletedLinks](std::pair<LinkedObjects*, Location>& pair){
             return deletedLinks.count(pair.first);
         });
     }
-}
-
-void ReadContext::doReconnectBrokenConnectors()
-{
-    if (_connectors.empty()) {
-        return;
-    }
-    LOGD("Reconnecting broken connectors (%d nodes)", int(_connectors.size()));
-    std::vector<std::pair<int, std::pair<ConnectorInfoReader*, ConnectorInfoReader*> > > brokenPairs;
-    for (size_t i = 1; i < _connectors.size(); ++i) {
-        for (size_t j = 0; j < i; ++j) {
-            ConnectorInfoReader* c1 = _connectors[i].get();
-            ConnectorInfoReader* c2 = _connectors[j].get();
-            int d = c1->connectionDistance(*c2);
-            if (d >= 0) {
-                brokenPairs.push_back(std::make_pair(d, std::make_pair(c1, c2)));
-            } else {
-                brokenPairs.push_back(std::make_pair(-d, std::make_pair(c2, c1)));
-            }
-        }
-    }
-    std::sort(brokenPairs.begin(), brokenPairs.end(), distanceSort);
-    for (auto& distPair : brokenPairs) {
-        if (distPair.first == INT_MAX) {
-            continue;
-        }
-        auto& pair = distPair.second;
-        if (pair.first->next() || pair.second->prev()) {
-            continue;
-        }
-        pair.first->forceConnect(pair.second);
-    }
-    std::set<ConnectorInfoReader*> reconnected;
-    for (auto& conn : _connectors) {
-        ConnectorInfoReader* c = conn.get();
-        if (c->finished()) {
-            reconnected.insert(static_cast<ConnectorInfoReader*>(c->start()));
-        }
-    }
-    for (ConnectorInfoReader* cptr : reconnected) {
-        cptr->addToScore(pasteMode());
-        removeConnector(cptr);
-    }
-    LOGD() << "reconnected broken connectors: " << reconnected.size();
 }
 
 //---------------------------------------------------------

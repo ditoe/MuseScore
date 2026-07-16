@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,7 +35,7 @@ template<class T>
 class MetaParserBase
 {
 public:
-    static void parse(const EngravingItem* item, const RenderingContext& context, mpe::ArticulationMap& result)
+    static void parse(const EngravingItem* item, const RenderingContext& context, muse::mpe::ArticulationMap& result)
     {
         IF_ASSERT_FAILED(item) {
             return;
@@ -45,9 +45,10 @@ public:
     }
 
 protected:
-    static void appendArticulationData(mpe::ArticulationMeta&& meta, mpe::ArticulationMap& result)
+    static void appendArticulationData(muse::mpe::ArticulationMeta&& meta, muse::mpe::ArticulationMap& result)
     {
-        result.emplace(meta.type, mpe::ArticulationAppliedData(std::forward<mpe::ArticulationMeta>(meta), 0, mpe::HUNDRED_PERCENT));
+        result.emplace(meta.type,
+                       muse::mpe::ArticulationAppliedData(std::forward<muse::mpe::ArticulationMeta>(meta), 0, muse::mpe::HUNDRED_PERCENT));
     }
 };
 }

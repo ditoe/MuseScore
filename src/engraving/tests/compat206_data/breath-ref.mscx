@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
       <defaultsVersion>206</defaultsVersion>
-      <Spatium>1.76389</Spatium>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -16,21 +17,23 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flûte</trackName>
       <Instrument id="flute">
-        <longName>Flûte</longName>
-        <shortName>Fl.</shortName>
+        <InstrumentLabel>
+          <longName>Flûte</longName>
+          <shortName>Fl.</shortName>
+          </InstrumentLabel>
         <trackName>Flûte</trackName>
         <minPitchP>59</minPitchP>
         <maxPitchP>98</maxPitchP>
@@ -72,55 +75,69 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>E_E</eid>
         <voice>
           <TimeSig>
+            <eid>F_F</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>G_G</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <Breath>
             <symbol>breathMarkComma</symbol>
+            <eid>H_H</eid>
             </Breath>
           </voice>
         </Measure>
       <Measure>
+        <eid>I_I</eid>
         <voice>
           <Rest>
+            <eid>J_J</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <Breath>
             <symbol>caesuraCurved</symbol>
             <pause>2</pause>
+            <eid>K_K</eid>
             </Breath>
           </voice>
         </Measure>
       <Measure>
+        <eid>L_L</eid>
         <voice>
           <Rest>
+            <eid>M_M</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <Breath>
             <symbol>caesura</symbol>
             <pause>2</pause>
+            <eid>N_N</eid>
             </Breath>
           </voice>
         </Measure>
       <Measure>
+        <eid>O_O</eid>
         <LayoutBreak>
+          <eid>P_P</eid>
           <subtype>line</subtype>
           </LayoutBreak>
         <voice>
           <Rest>
+            <eid>Q_Q</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>R_R</eid>
             </BarLine>
           </voice>
         </Measure>

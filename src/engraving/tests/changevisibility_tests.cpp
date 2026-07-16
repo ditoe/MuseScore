@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,22 +22,23 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/accidental.h"
-#include "dom/measure.h"
-#include "dom/chord.h"
-#include "dom/note.h"
-#include "dom/ornament.h"
-#include "dom/rest.h"
-#include "dom/stem.h"
-#include "dom/hook.h"
-#include "dom/beam.h"
+#include "engraving/dom/accidental.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/ornament.h"
+#include "engraving/dom/rest.h"
+#include "engraving/dom/stem.h"
+#include "engraving/dom/hook.h"
+#include "engraving/dom/beam.h"
+
+#include "engraving/editing/editvisibility.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
-#include "utils/scorecomp.h"
 
 #include "log.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String CHANGEVISIBILITY_DATA_DIR(u"changevisibility_data/");
@@ -60,7 +61,7 @@ protected:
     {
         std::vector<EngravingItem*> children;
 
-        for (EngravingObject* obj : chord->scanChildren()) {
+        for (EngravingObject* obj : chord->getChildren()) {
             if (obj->isEngravingItem()) {
                 children.push_back(toEngravingItem(obj));
             }
@@ -130,7 +131,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_SingleNoteChord)
     ASSERT_FALSE(children.empty());
 
     // [WHEN] Hide the note
-    m_score->undoChangeVisible(note, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, false);
 
     // [THEN] Everything in the chord is hidden
     for (EngravingItem* child : children) {
@@ -138,7 +139,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_SingleNoteChord)
     }
 
     // [WHEN] Show the note
-    m_score->undoChangeVisible(note, true);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, true);
 
     // [THEN] Everything in the chord is visible
     for (EngravingItem* child : children) {
@@ -153,8 +154,8 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_SingleNoteChord)
     ASSERT_TRUE(stem);
 
     // [WHEN] We can also hide the parts of the note
-    m_score->undoChangeVisible(dot, false);
-    m_score->undoChangeVisible(stem, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), dot, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), stem, false);
 
     // [THEN] Everything in the chord is visible, except the parts that were hidden manually
     for (EngravingItem* child : children) {
@@ -178,21 +179,21 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_RestWithDot)
     NoteDot* dot = rest->dotList().front();
 
     // [WHEN] Hide the rest
-    m_score->undoChangeVisible(rest, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), rest, false);
 
     // [THEN] Rest and its dot are hidden
     EXPECT_FALSE(rest->visible());
     EXPECT_FALSE(dot->visible());
 
     // [WHEN] Show the rest
-    m_score->undoChangeVisible(rest, true);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), rest, true);
 
     // [THEN] Rest and its dot are visible
     EXPECT_TRUE(rest->visible());
     EXPECT_TRUE(dot->visible());
 
     // [WHEN] We can also hide the dot
-    m_score->undoChangeVisible(dot, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), dot, false);
 
     // [THEN] Rest is visible, but the dot is not
     EXPECT_TRUE(rest->visible());
@@ -215,7 +216,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_IgnoredElements)
     ASSERT_TRUE(note);
 
     // [WHEN] Hide the note
-    m_score->undoChangeVisible(note, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, false);
 
     // [THEN] The note is hidden, but the grace notes, lyrics and slur are still visible
     EXPECT_FALSE(note->visible());
@@ -226,8 +227,8 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_IgnoredElements)
         ElementType::LYRICS,
     };
 
-    for (EngravingObject* child : chord->scanChildren()) {
-        if (mu::contains(IGNORED_TYPES, child->type())) {
+    for (EngravingObject* child : chord->getChildren()) {
+        if (muse::contains(IGNORED_TYPES, child->type())) {
             EngravingItem* item = toEngravingItem(child);
             EXPECT_TRUE(item->visible());
         }
@@ -238,13 +239,13 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_IgnoredElements)
     }
 
     // [WHEN] Show the note
-    m_score->undoChangeVisible(note, true);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, true);
 
     // [THEN] Everything is visible
     EXPECT_TRUE(note->visible());
 
-    for (EngravingObject* child : chord->scanChildren()) {
-        if (mu::contains(IGNORED_TYPES, child->type())) {
+    for (EngravingObject* child : chord->getChildren()) {
+        if (muse::contains(IGNORED_TYPES, child->type())) {
             EngravingItem* item = toEngravingItem(child);
             EXPECT_TRUE(item->visible());
         }
@@ -255,7 +256,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_IgnoredElements)
     }
 
     // [WHEN] We can hide any grace note
-    m_score->undoChangeVisible(graceNotes[0], false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), graceNotes[0], false);
 
     // [THEN] Everything is visible except the previously hidden grace note
     EXPECT_TRUE(note->visible());
@@ -293,7 +294,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_ChordContainingSeveral
     ASSERT_TRUE(firstNote);
 
     // [WHEN] Hide the first note
-    m_score->undoChangeVisible(firstNote, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), firstNote, false);
 
     // [THEN] Only the first note is hidden
     EXPECT_FALSE(firstNote->visible());
@@ -318,7 +319,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_ChordContainingSeveral
     ASSERT_TRUE(secondNote);
 
     // [WHEN] Hide the second note
-    m_score->undoChangeVisible(firstNote, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), firstNote, false);
 
     // [THEN] Only the first and the second notes are hidden
     EXPECT_FALSE(firstNote->visible());
@@ -336,7 +337,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_ChordContainingSeveral
 
     // [WHEN] Hide all notes
     for (Note* note : chord->notes()) {
-        m_score->undoChangeVisible(note, false);
+        EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, false);
     }
 
     // [GIVEN] All items attached to this chord
@@ -374,7 +375,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_ChordsConnectedWithBea
 
     // [WHEN] Hide all notes in the first chord
     for (Note* note : firstChord->notes()) {
-        m_score->undoChangeVisible(note, false);
+        EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, false);
     }
 
     // [THEN] Beam/Steam is visible
@@ -407,7 +408,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_ChordsConnectedWithBea
 
         for (EngravingItem* child : children) {
             if (child->isNote()) {
-                m_score->undoChangeVisible(child, false);
+                EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), child, false);
             }
         }
     }
@@ -428,7 +429,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_ChordsConnectedWithBea
     Note* firstChordNote = firstChord->notes().front();
 
     // [WHEN] Show it
-    m_score->undoChangeVisible(firstChordNote, true);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), firstChordNote, true);
 
     // [THEN] All stems/beam are visible now
     EXPECT_TRUE(beam->visible());
@@ -471,7 +472,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_Ornaments)
     Measure* measure = m_score->tick2measure(Fraction(3, 1));
     ASSERT_TRUE(measure);
 
-    Chord* chord = toChord(measure->first()->elementAt(0));
+    Chord* chord = toChord(measure->first()->element(0));
     ASSERT_TRUE(chord);
     Note* note = chord->upNote();
     ASSERT_TRUE(note);
@@ -481,20 +482,20 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_Ornaments)
     ASSERT_TRUE(accidental);
 
     // NOTE invisible makes ORNAMENT invisible
-    m_score->undoChangeVisible(note, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), note, false);
     ASSERT_FALSE(ornament->visible());
 
     // ORNAMENT visible, but note stays invisible
-    m_score->undoChangeVisible(ornament, true);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), ornament, true);
     ASSERT_TRUE(ornament->visible());
     ASSERT_FALSE(note->visible());
 
     // Ornament accidental invisible, but ornament stays visible
-    m_score->undoChangeVisible(accidental, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), accidental, false);
     ASSERT_FALSE(accidental->visible());
     ASSERT_TRUE(ornament->visible());
 
-    chord = toChord(chord->segment()->next()->elementAt(0));
+    chord = toChord(chord->segment()->next()->element(0));
     ASSERT_TRUE(chord);
     note = chord->upNote();
     ASSERT_TRUE(note);
@@ -506,7 +507,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_Ornaments)
     ASSERT_TRUE(cueNote);
 
     // ORNAMENT invisible, cue note also becomes invisible
-    m_score->undoChangeVisible(ornament, false);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), ornament, false);
     ASSERT_FALSE(ornament->visible());
     ASSERT_FALSE(cueNote->visible());
     for (EngravingItem* el : cueNote->el()) {
@@ -514,7 +515,7 @@ TEST_F(Engraving_ChangeVisibilityTests, UndoChangeVisible_Ornaments)
     }
 
     // CUE NOTE visible, but ornament stays invisible
-    m_score->undoChangeVisible(cueNote, true);
+    EditVisibility::undoChangeVisible(m_score->transactionManager()->currentOrDummyTransaction(), cueNote, true);
     ASSERT_FALSE(ornament->visible());
     ASSERT_TRUE(cueNote->visible());
     for (EngravingItem* el : cueNote->el()) {
@@ -537,8 +538,8 @@ TEST_F(Engraving_ChangeVisibilityTests, CmdToggleVisible)
     // [WHEN] Select the first measure and call cmdToggleVisible()
     m_score->select(measure);
 
-    m_score->startCmd();
-    m_score->cmdToggleVisible();
+    m_score->startCmd(TranslatableString::untranslatable("Change visibility tests"));
+    EditVisibility::toggleVisible(m_score->transactionManager()->currentOrDummyTransaction(), m_score);
     m_score->endCmd();
 
     // [THEN] Everything on the first measure is hidden
@@ -551,7 +552,7 @@ TEST_F(Engraving_ChangeVisibilityTests, CmdToggleVisible)
     };
 
     for (const EngravingItem* item : items) {
-        if (mu::contains(alwaysVisibleItems, item->type())) {
+        if (muse::contains(alwaysVisibleItems, item->type())) {
             EXPECT_TRUE(item->visible());
         } else {
             EXPECT_FALSE(item->visible());
@@ -559,8 +560,8 @@ TEST_F(Engraving_ChangeVisibilityTests, CmdToggleVisible)
     }
 
     // [WHEN] Call cmdToggleVisible() again
-    m_score->startCmd();
-    m_score->cmdToggleVisible();
+    m_score->startCmd(TranslatableString::untranslatable("Change visibility tests"));
+    EditVisibility::toggleVisible(m_score->transactionManager()->currentOrDummyTransaction(), m_score);
     m_score->endCmd();
 
     // [THEN] Everything on the first measure is visible
@@ -577,8 +578,8 @@ TEST_F(Engraving_ChangeVisibilityTests, CmdToggleVisible)
         m_score->select(note, SelectType::ADD);
     }
 
-    m_score->startCmd();
-    m_score->cmdToggleVisible();
+    m_score->startCmd(TranslatableString::untranslatable("Change visibility tests"));
+    EditVisibility::toggleVisible(m_score->transactionManager()->currentOrDummyTransaction(), m_score);
     m_score->endCmd();
 
     // [THEN] The notes are hidden
@@ -589,8 +590,8 @@ TEST_F(Engraving_ChangeVisibilityTests, CmdToggleVisible)
     // [WHEN] Select the first measure and call cmdToggleVisible() again
     m_score->select(measure);
 
-    m_score->startCmd();
-    m_score->cmdToggleVisible();
+    m_score->startCmd(TranslatableString::untranslatable("Change visibility tests"));
+    EditVisibility::toggleVisible(m_score->transactionManager()->currentOrDummyTransaction(), m_score);
     m_score->endCmd();
 
     // [THEN] Everything on the first measure is visible

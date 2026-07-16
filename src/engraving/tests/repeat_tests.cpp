@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,14 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/repeatlist.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/repeatlist.h"
 
 #include "utils/scorerw.h"
 
 #include "log.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String REPEAT_DATA_DIR("repeat_data/");
@@ -52,10 +51,10 @@ void Engraving_RepeatTests::repeat(const char* path, const String& ref)
 
     for (const RepeatSegment* rs : score->repeatList()) {
         int startTick = rs->tick;
-        int endTick   = startTick + rs->len();
+        int endTick   = rs->endTick();
 
         for (const Measure* m = score->tick2measure(Fraction::fromTicks(startTick)); m; m = m->nextMeasure()) {
-            sl.append(String::number(m->no() + 1));
+            sl.append(String::number(m->measureNumber() + 1));
 
             if (m->endTick().ticks() >= endTick) {
                 break;
@@ -307,7 +306,7 @@ TEST_F(Engraving_RepeatTests, repeat46) {
 }
 
 TEST_F(Engraving_RepeatTests, repeat47) {
-    // #269378 Double Coda messed up repeat rewind logic
+    // #269378 Double Coda AKA Doppia Coda messed up repeat rewind logic
     repeat("repeat47.mscx", u"1;2;3; 2; 4;5;6;7; 6; 8;9;10;11; 2; 4; 13;14;15; 9;10; 16;17;18");
 }
 
@@ -414,4 +413,11 @@ TEST_F(Engraving_RepeatTests, repeat67) {
 TEST_F(Engraving_RepeatTests, repeat68) {
     // Entire score skipped by volta: gh#14685
     repeat("repeat68.mscx", u"");
+}
+
+// There are 2 instruments (Piano) in this score, and each instrument has a D.S. at the same position (3rd measure)
+// Make sure that we don't repeat the measures twice
+// See: https://github.com/musescore/MuseScore/issues/27647
+TEST_F(Engraving_RepeatTests, repeat69) {
+    repeat("repeat69.mscx", u"1; 2;3; 2;3; 4");
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,209 +23,124 @@
 #include "appshellmodule.h"
 
 #include <QQmlEngine>
+#include <string>
 
 #include "modularity/ioc.h"
 
 #include "ui/iuiactionsregister.h"
-#include "ui/iinteractiveuriregister.h"
+#include "interactive/iinteractiveuriregister.h"
 
 #include "internal/applicationuiactions.h"
 #include "internal/applicationactioncontroller.h"
 #include "internal/appshellconfiguration.h"
+#include "internal/appshellstate.h"
 #include "internal/startupscenario.h"
 #include "internal/applicationactioncontroller.h"
 #include "internal/sessionsmanager.h"
 
-#include "view/devtools/settingslistmodel.h"
-#include "view/mainwindowtitleprovider.h"
-#include "view/notationpagemodel.h"
-#include "view/notationstatusbarmodel.h"
-#include "view/aboutmodel.h"
-#include "view/firstlaunchsetup/firstlaunchsetupmodel.h"
-#include "view/firstlaunchsetup/themespagemodel.h"
-#include "view/preferences/preferencesmodel.h"
-#include "view/preferences/generalpreferencesmodel.h"
-#include "view/preferences/updatepreferencesmodel.h"
-#include "view/preferences/appearancepreferencesmodel.h"
-#include "view/preferences/folderspreferencesmodel.h"
-#include "view/preferences/noteinputpreferencesmodel.h"
-#include "view/preferences/advancedpreferencesmodel.h"
-#include "view/preferences/canvaspreferencesmodel.h"
-#include "view/preferences/saveandpublishpreferencesmodel.h"
-#include "view/preferences/scorepreferencesmodel.h"
-#include "view/preferences/importpreferencesmodel.h"
-#include "view/preferences/iopreferencesmodel.h"
-#include "view/preferences/commonaudioapiconfigurationmodel.h"
-#include "view/preferences/braillepreferencesmodel.h"
-#include "view/framelesswindow/framelesswindowmodel.h"
-#include "view/publish/publishtoolbarmodel.h"
-#include "view/windowdroparea.h"
-#include "view/internal/maintoolbarmodel.h"
-
-#include "view/dockwindow/docksetup.h"
-
 #ifdef Q_OS_MAC
-#include "view/appmenumodel.h"
-#include "view/internal/platform/macos/macosappmenumodelhook.h"
-#include "view/internal/platform/macos/macosscrollinghook.h"
+#include "internal/platform/macos/macosappmenumodelhook.h"
 #else
-#include "view/navigableappmenumodel.h"
+#include "internal/iappmenumodelhook.h"
 #endif
 
 using namespace mu::appshell;
-using namespace mu::framework;
-using namespace mu::modularity;
-using namespace mu::ui;
-using namespace mu::dock;
+using namespace muse;
+using namespace muse::modularity;
+using namespace muse::dock;
 
-static void appshell_init_qrc()
-{
-    Q_INIT_RESOURCE(appshell);
-}
-
-AppShellModule::AppShellModule()
-{
-}
+static const std::string mname("appshell");
 
 std::string AppShellModule::moduleName() const
 {
-    return "appshell";
+    return mname;
 }
 
 void AppShellModule::registerExports()
 {
-    m_applicationActionController = std::make_shared<ApplicationActionController>();
-    m_applicationUiActions = std::make_shared<ApplicationUiActions>(m_applicationActionController);
-    m_appShellConfiguration = std::make_shared<AppShellConfiguration>();
-    m_sessionsManager = std::make_shared<SessionsManager>();
+    m_appShellConfiguration = std::make_shared<AppShellConfiguration>(globalCtx());
 
-    #ifdef Q_OS_MAC
-    m_scrollingHook = std::make_shared<MacOSScrollingHook>();
-    #endif
-
-    DockSetup::registerExports();
-
-    ioc()->registerExport<IAppShellConfiguration>(moduleName(), m_appShellConfiguration);
-    ioc()->registerExport<IApplicationActionController>(moduleName(), m_applicationActionController);
-    ioc()->registerExport<IStartupScenario>(moduleName(), new StartupScenario());
-    ioc()->registerExport<ISessionsManager>(moduleName(), m_sessionsManager);
-
-#ifdef Q_OS_MAC
-    ioc()->registerExport<IAppMenuModelHook>(moduleName(), std::make_shared<MacOSAppMenuModelHook>());
-#else
-    ioc()->registerExport<IAppMenuModelHook>(moduleName(), std::make_shared<AppMenuModelHookStub>());
-#endif
+    globalIoc()->registerExport<IAppShellConfiguration>(moduleName(), m_appShellConfiguration);
 }
 
 void AppShellModule::resolveImports()
 {
-    auto ar = ioc()->resolve<ui::IUiActionsRegister>(moduleName());
-    if (ar) {
-        ar->reg(m_applicationUiActions);
-    }
-
-    auto ir = ioc()->resolve<IInteractiveUriRegister>(moduleName());
+    auto ir = globalIoc()->resolve<muse::interactive::IInteractiveUriRegister>(mname);
     if (ir) {
-        ir->registerUri(Uri("musescore://home"), ContainerMeta(ContainerType::PrimaryPage));
-        ir->registerUri(Uri("musescore://notation"), ContainerMeta(ContainerType::PrimaryPage));
-        ir->registerUri(Uri("musescore://sequencer"), ContainerMeta(ContainerType::PrimaryPage));
-        ir->registerUri(Uri("musescore://publish"), ContainerMeta(ContainerType::PrimaryPage));
-        ir->registerUri(Uri("musescore://devtools"), ContainerMeta(ContainerType::PrimaryPage));
-        ir->registerUri(Uri("musescore://about/musescore"), ContainerMeta(ContainerType::QmlDialog, "AboutDialog.qml"));
-        ir->registerUri(Uri("musescore://about/musicxml"), ContainerMeta(ContainerType::QmlDialog, "AboutMusicXMLDialog.qml"));
-        ir->registerUri(Uri("musescore://firstLaunchSetup"),
-                        ContainerMeta(ContainerType::QmlDialog, "FirstLaunchSetup/FirstLaunchSetupDialog.qml"));
-        ir->registerUri(Uri("musescore://preferences"), ContainerMeta(ContainerType::QmlDialog, "Preferences/PreferencesDialog.qml"));
+        ir->registerPageUri(Uri("musescore://home"));
+        ir->registerPageUri(Uri("musescore://notation"));
+        ir->registerPageUri(Uri("musescore://sequencer"));
+        ir->registerPageUri(Uri("musescore://publish"));
+        ir->registerPageUri(Uri("musescore://devtools"));
+
+        ir->registerQmlUri(Uri("musescore://about/musescore"), "MuseScore.AppShell", "AboutDialog");
+        ir->registerQmlUri(Uri("musescore://about/musicxml"), "MuseScore.AppShell", "AboutMusicXMLDialog");
+        ir->registerQmlUri(Uri("musescore://welcomedialog"), "MuseScore.AppShell", "WelcomeDialog");
+        ir->registerQmlUri(Uri("musescore://firstLaunchSetup"), "MuseScore.AppShell", "FirstLaunchSetupDialog");
     }
 }
 
-void AppShellModule::registerResources()
+void AppShellModule::onInit(const IApplication::RunMode&)
 {
-    appshell_init_qrc();
-}
-
-void AppShellModule::registerUiTypes()
-{
-    DockSetup::registerQmlTypes();
-
-    qmlRegisterType<SettingListModel>("MuseScore.Preferences", 1, 0, "SettingListModel");
-    qmlRegisterType<PreferencesModel>("MuseScore.Preferences", 1, 0, "PreferencesModel");
-    qmlRegisterType<GeneralPreferencesModel>("MuseScore.Preferences", 1, 0, "GeneralPreferencesModel");
-    qmlRegisterType<UpdatePreferencesModel>("MuseScore.Preferences", 1, 0, "UpdatePreferencesModel");
-    qmlRegisterType<AppearancePreferencesModel>("MuseScore.Preferences", 1, 0, "AppearancePreferencesModel");
-    qmlRegisterType<FoldersPreferencesModel>("MuseScore.Preferences", 1, 0, "FoldersPreferencesModel");
-    qmlRegisterType<NoteInputPreferencesModel>("MuseScore.Preferences", 1, 0, "NoteInputPreferencesModel");
-    qmlRegisterType<AdvancedPreferencesModel>("MuseScore.Preferences", 1, 0, "AdvancedPreferencesModel");
-    qmlRegisterType<CanvasPreferencesModel>("MuseScore.Preferences", 1, 0, "CanvasPreferencesModel");
-    qmlRegisterType<SaveAndPublishPreferencesModel>("MuseScore.Preferences", 1, 0, "SaveAndPublishPreferencesModel");
-    qmlRegisterType<ScorePreferencesModel>("MuseScore.Preferences", 1, 0, "ScorePreferencesModel");
-    qmlRegisterType<ImportPreferencesModel>("MuseScore.Preferences", 1, 0, "ImportPreferencesModel");
-    qmlRegisterType<IOPreferencesModel>("MuseScore.Preferences", 1, 0, "IOPreferencesModel");
-    qmlRegisterType<CommonAudioApiConfigurationModel>("MuseScore.Preferences", 1, 0, "CommonAudioApiConfigurationModel");
-    qmlRegisterType<BraillePreferencesModel>("MuseScore.Preferences", 1, 0, "BraillePreferencesModel");
-
-#if defined(Q_OS_MACOS)
-    qmlRegisterType<AppMenuModel>("MuseScore.AppShell", 1, 0, "PlatformAppMenuModel");
-#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    qmlRegisterType<AppMenuModel>("MuseScore.AppShell", 1, 0, "PlatformAppMenuModel");
-    qmlRegisterType<NavigableAppMenuModel>("MuseScore.AppShell", 1, 0, "AppMenuModel");
-#else
-    qmlRegisterType<NavigableAppMenuModel>("MuseScore.AppShell", 1, 0, "AppMenuModel");
-#endif
-
-    qmlRegisterType<MainWindowTitleProvider>("MuseScore.AppShell", 1, 0, "MainWindowTitleProvider");
-    qmlRegisterType<NotationPageModel>("MuseScore.AppShell", 1, 0, "NotationPageModel");
-    qmlRegisterType<NotationStatusBarModel>("MuseScore.AppShell", 1, 0, "NotationStatusBarModel");
-    qmlRegisterType<AboutModel>("MuseScore.AppShell", 1, 0, "AboutModel");
-    qmlRegisterType<FirstLaunchSetupModel>("MuseScore.AppShell", 1, 0, "FirstLaunchSetupModel");
-    qmlRegisterType<ThemesPageModel>("MuseScore.AppShell", 1, 0, "ThemesPageModel");
-    qmlRegisterType<FramelessWindowModel>("MuseScore.AppShell", 1, 0, "FramelessWindowModel");
-    qmlRegisterType<PublishToolBarModel>("MuseScore.AppShell", 1, 0, "PublishToolBarModel");
-    qmlRegisterType<MainToolBarModel>("MuseScore.AppShell", 1, 0, "MainToolBarModel");
-
-    qmlRegisterType<WindowDropArea>("MuseScore.Ui", 1, 0, "WindowDropArea");
-}
-
-void AppShellModule::onPreInit(const framework::IApplication::RunMode& mode)
-{
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
-    m_applicationActionController->preInit();
-}
-
-void AppShellModule::onInit(const IApplication::RunMode& mode)
-{
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
-    DockSetup::onInit();
-
     m_appShellConfiguration->init();
-    m_applicationActionController->init();
-    m_applicationUiActions->init();
-    m_sessionsManager->init();
-
-#ifdef Q_OS_MAC
-    m_scrollingHook->init();
-#endif
 }
 
-void AppShellModule::onAllInited(const framework::IApplication::RunMode& mode)
+void AppShellModule::onAllInited(const IApplication::RunMode&)
 {
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
     //! NOTE: process QEvent::FileOpen as early as possible if it was postponed
 #ifdef Q_OS_MACOS
     qApp->processEvents();
 #endif
 }
 
-void AppShellModule::onDeinit()
+// Context
+muse::modularity::IContextSetup* AppShellModule::newContext(const muse::modularity::ContextPtr& ctx) const
+{
+    return new AppShellContext(ctx);
+}
+
+void AppShellContext::registerExports()
+{
+    m_appshellState = std::make_shared<AppShellState>(iocContext());
+    m_applicationActionController = std::make_shared<ApplicationActionController>(iocContext());
+    m_applicationUiActions = std::make_shared<ApplicationUiActions>(m_applicationActionController, iocContext());
+    m_sessionsManager = std::make_shared<SessionsManager>(iocContext());
+
+    ioc()->registerExport<IAppShellState>(mname, m_appshellState);
+    ioc()->registerExport<IStartupScenario>(mname, new StartupScenario(iocContext()));
+    ioc()->registerExport<ISessionsManager>(mname, m_sessionsManager);
+
+#ifdef Q_OS_MAC
+    ioc()->registerExport<IAppMenuModelHook>(mname, std::make_shared<MacOSAppMenuModelHook>());
+#else
+    ioc()->registerExport<IAppMenuModelHook>(mname, std::make_shared<AppMenuModelHookStub>());
+#endif
+}
+
+void AppShellContext::resolveImports()
+{
+    auto ar = ioc()->resolve<muse::ui::IUiActionsRegister>(mname);
+    if (ar) {
+        ar->reg(m_applicationUiActions);
+    }
+}
+
+void AppShellContext::onPreInit(const muse::IApplication::RunMode&)
+{
+    m_applicationActionController->preInit();
+}
+
+void AppShellContext::onInit(const muse::IApplication::RunMode& mode)
+{
+    m_sessionsManager->init();
+
+    if (mode == IApplication::RunMode::GuiApp) {
+        m_applicationUiActions->init();
+        m_applicationActionController->init();
+    }
+}
+
+void AppShellContext::onDeinit()
 {
     m_sessionsManager->deinit();
 }

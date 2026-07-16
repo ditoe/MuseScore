@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.74978</Spatium>
+      <spatium>1.75</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -13,24 +14,27 @@
     <metaTag name="composer">Composer of the piece</metaTag>
     <metaTag name="copyright">Public domain</metaTag>
     <metaTag name="lyricist">Metastasio</metaTag>
-    <metaTag name="meiHead">&lt;meiHead&gt;&lt;fileDesc&gt;&lt;titleStmt&gt;&lt;title&gt;Metadata test (title)&lt;/title&gt;&lt;respStmt&gt;&lt;persName role=&quot;arranger&quot;&gt;Arranger of the piece&lt;/persName&gt;&lt;persName role=&quot;composer&quot;&gt;Composer of the piece&lt;/persName&gt;&lt;persName role=&quot;lyricist&quot;&gt;Metastasio&lt;/persName&gt;&lt;persName role=&quot;translator&quot;&gt;Deepl&lt;/persName&gt;&lt;/respStmt&gt;&lt;/titleStmt&gt;&lt;pubStmt&gt;&lt;date isodate=&quot;2023-08-11T14:53:16&quot;/&gt;&lt;availability&gt;&lt;distributor&gt;Public domain&lt;/distributor&gt;&lt;/availability&gt;&lt;/pubStmt&gt;&lt;/fileDesc&gt;&lt;/meiHead&gt;</metaTag>
+    <metaTag name="meiHead">&lt;meiHead&gt;&lt;fileDesc&gt;&lt;titleStmt&gt;&lt;title type=&quot;main&quot;&gt;Metadata test (title)&lt;/title&gt;&lt;title type=&quot;subordinate&quot;&gt;Subtitle&lt;/title&gt;&lt;respStmt&gt;&lt;persName role=&quot;arranger&quot;&gt;Arranger of the piece&lt;/persName&gt;&lt;persName role=&quot;composer&quot;&gt;Composer of the piece&lt;/persName&gt;&lt;persName role=&quot;lyricist&quot;&gt;Metastasio&lt;/persName&gt;&lt;persName role=&quot;translator&quot;&gt;Deepl&lt;/persName&gt;&lt;/respStmt&gt;&lt;/titleStmt&gt;&lt;pubStmt&gt;&lt;date isodate=&quot;2023-08-11T14:53:16&quot;/&gt;&lt;availability&gt;Public domain&lt;/availability&gt;&lt;/pubStmt&gt;&lt;/fileDesc&gt;&lt;/meiHead&gt;</metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
+    <metaTag name="subtitle">Subtitle</metaTag>
     <metaTag name="translator">Deepl</metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">Metadata test (title)</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName></trackName>
       <Instrument id="oboe">
-        <longName>Oboe</longName>
-        <shortName>Ob.</shortName>
+        <InstrumentLabel>
+          <longName>Oboe</longName>
+          <shortName>Ob.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>wind.reed.oboe</instrumentId>
         <Channel>
@@ -40,36 +44,45 @@
     <Staff id="1">
       <VBox>
         <height>10</height>
+        <eid>E_E</eid>
         <Text>
+          <eid>F_F</eid>
           <style>title</style>
           <text>Metadata test</text>
           </Text>
         <Text>
+          <eid>G_G</eid>
           <style>subtitle</style>
           <text>Subtitle</text>
           </Text>
         <Text>
+          <eid>H_H</eid>
           <style>composer</style>
           <text>Composer / arranger</text>
           </Text>
         </VBox>
       <Measure>
+        <eid>I_I</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>J_J</eid>
             </Clef>
           <TimeSig>
+            <eid>K_K</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>L_L</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>M_M</eid>
             </BarLine>
           </voice>
         </Measure>

@@ -1095,6 +1095,68 @@ data_COMPASSDIRECTION_extended AttConverterBase::StrToCompassdirectionExtended(c
     return COMPASSDIRECTION_extended_NONE;
 }
 
+std::string AttConverterBase::CoursetuningToStr(data_COURSETUNING data) const
+{
+    std::string value;
+    switch (data) {
+        case COURSETUNING_guitar_standard: value = "guitar.standard"; break;
+        case COURSETUNING_guitar_drop_D: value = "guitar.drop.D"; break;
+        case COURSETUNING_guitar_open_D: value = "guitar.open.D"; break;
+        case COURSETUNING_guitar_open_G: value = "guitar.open.G"; break;
+        case COURSETUNING_guitar_open_A: value = "guitar.open.A"; break;
+        case COURSETUNING_lute_renaissance_6: value = "lute.renaissance.6"; break;
+        case COURSETUNING_lute_baroque_d_major: value = "lute.baroque.d.major"; break;
+        case COURSETUNING_lute_baroque_d_minor: value = "lute.baroque.d.minor"; break;
+        default:
+            LogWarning("Unknown value '%d' for data.COURSETUNING", data);
+            value = "";
+            break;
+    }
+    return value;
+}
+
+data_COURSETUNING AttConverterBase::StrToCoursetuning(const std::string &value, bool logWarning) const
+{
+    if (value == "guitar.standard") return COURSETUNING_guitar_standard;
+    if (value == "guitar.drop.D") return COURSETUNING_guitar_drop_D;
+    if (value == "guitar.open.D") return COURSETUNING_guitar_open_D;
+    if (value == "guitar.open.G") return COURSETUNING_guitar_open_G;
+    if (value == "guitar.open.A") return COURSETUNING_guitar_open_A;
+    if (value == "lute.renaissance.6") return COURSETUNING_lute_renaissance_6;
+    if (value == "lute.baroque.d.major") return COURSETUNING_lute_baroque_d_major;
+    if (value == "lute.baroque.d.minor") return COURSETUNING_lute_baroque_d_minor;
+    if (logWarning && !value.empty())
+        LogWarning("Unsupported value '%s' for data.COURSETUNING", value.c_str());
+    return COURSETUNING_NONE;
+}
+
+std::string AttConverterBase::EnclosureToStr(data_ENCLOSURE data) const
+{
+    std::string value;
+    switch (data) {
+        case ENCLOSURE_paren: value = "paren"; break;
+        case ENCLOSURE_brack: value = "brack"; break;
+        case ENCLOSURE_box: value = "box"; break;
+        case ENCLOSURE_none: value = "none"; break;
+        default:
+            LogWarning("Unknown value '%d' for data.ENCLOSURE", data);
+            value = "";
+            break;
+    }
+    return value;
+}
+
+data_ENCLOSURE AttConverterBase::StrToEnclosure(const std::string &value, bool logWarning) const
+{
+    if (value == "paren") return ENCLOSURE_paren;
+    if (value == "brack") return ENCLOSURE_brack;
+    if (value == "box") return ENCLOSURE_box;
+    if (value == "none") return ENCLOSURE_none;
+    if (logWarning && !value.empty())
+        LogWarning("Unsupported value '%s' for data.ENCLOSURE", value.c_str());
+    return ENCLOSURE_NONE;
+}
+
 std::string AttConverterBase::EventrelToStr(data_EVENTREL data) const
 {
     std::string value;
@@ -1317,6 +1379,31 @@ data_GRACE AttConverterBase::StrToGrace(const std::string &value, bool logWarnin
     if (logWarning && !value.empty())
         LogWarning("Unsupported value '%s' for data.GRACE", value.c_str());
     return GRACE_NONE;
+}
+
+std::string AttConverterBase::HarppedalpositionToStr(data_HARPPEDALPOSITION data) const
+{
+    std::string value;
+    switch (data) {
+        case HARPPEDALPOSITION_f: value = "f"; break;
+        case HARPPEDALPOSITION_n: value = "n"; break;
+        case HARPPEDALPOSITION_s: value = "s"; break;
+        default:
+            LogWarning("Unknown value '%d' for data.HARPPEDALPOSITION", data);
+            value = "";
+            break;
+    }
+    return value;
+}
+
+data_HARPPEDALPOSITION AttConverterBase::StrToHarppedalposition(const std::string &value, bool logWarning) const
+{
+    if (value == "f") return HARPPEDALPOSITION_f;
+    if (value == "n") return HARPPEDALPOSITION_n;
+    if (value == "s") return HARPPEDALPOSITION_s;
+    if (logWarning && !value.empty())
+        LogWarning("Unsupported value '%s' for data.HARPPEDALPOSITION", value.c_str());
+    return HARPPEDALPOSITION_NONE;
 }
 
 std::string AttConverterBase::HeadshapeListToStr(data_HEADSHAPE_list data) const
@@ -3161,187 +3248,12 @@ harmVis_RENDGRID AttConverterBase::StrToHarmVisRendgrid(const std::string &value
     return harmVis_RENDGRID_NONE;
 }
 
-std::string AttConverterBase::HarpPedalLogAToStr(harpPedalLog_A data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_A_f: value = "f"; break;
-        case harpPedalLog_A_n: value = "n"; break;
-        case harpPedalLog_A_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@a", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_A AttConverterBase::StrToHarpPedalLogA(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_A_f;
-    if (value == "n") return harpPedalLog_A_n;
-    if (value == "s") return harpPedalLog_A_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@a", value.c_str());
-    return harpPedalLog_A_NONE;
-}
-
-std::string AttConverterBase::HarpPedalLogBToStr(harpPedalLog_B data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_B_f: value = "f"; break;
-        case harpPedalLog_B_n: value = "n"; break;
-        case harpPedalLog_B_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@b", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_B AttConverterBase::StrToHarpPedalLogB(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_B_f;
-    if (value == "n") return harpPedalLog_B_n;
-    if (value == "s") return harpPedalLog_B_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@b", value.c_str());
-    return harpPedalLog_B_NONE;
-}
-
-std::string AttConverterBase::HarpPedalLogCToStr(harpPedalLog_C data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_C_f: value = "f"; break;
-        case harpPedalLog_C_n: value = "n"; break;
-        case harpPedalLog_C_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@c", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_C AttConverterBase::StrToHarpPedalLogC(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_C_f;
-    if (value == "n") return harpPedalLog_C_n;
-    if (value == "s") return harpPedalLog_C_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@c", value.c_str());
-    return harpPedalLog_C_NONE;
-}
-
-std::string AttConverterBase::HarpPedalLogDToStr(harpPedalLog_D data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_D_f: value = "f"; break;
-        case harpPedalLog_D_n: value = "n"; break;
-        case harpPedalLog_D_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@d", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_D AttConverterBase::StrToHarpPedalLogD(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_D_f;
-    if (value == "n") return harpPedalLog_D_n;
-    if (value == "s") return harpPedalLog_D_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@d", value.c_str());
-    return harpPedalLog_D_NONE;
-}
-
-std::string AttConverterBase::HarpPedalLogEToStr(harpPedalLog_E data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_E_f: value = "f"; break;
-        case harpPedalLog_E_n: value = "n"; break;
-        case harpPedalLog_E_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@e", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_E AttConverterBase::StrToHarpPedalLogE(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_E_f;
-    if (value == "n") return harpPedalLog_E_n;
-    if (value == "s") return harpPedalLog_E_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@e", value.c_str());
-    return harpPedalLog_E_NONE;
-}
-
-std::string AttConverterBase::HarpPedalLogFToStr(harpPedalLog_F data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_F_f: value = "f"; break;
-        case harpPedalLog_F_n: value = "n"; break;
-        case harpPedalLog_F_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@f", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_F AttConverterBase::StrToHarpPedalLogF(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_F_f;
-    if (value == "n") return harpPedalLog_F_n;
-    if (value == "s") return harpPedalLog_F_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@f", value.c_str());
-    return harpPedalLog_F_NONE;
-}
-
-std::string AttConverterBase::HarpPedalLogGToStr(harpPedalLog_G data) const
-{
-    std::string value;
-    switch (data) {
-        case harpPedalLog_G_f: value = "f"; break;
-        case harpPedalLog_G_n: value = "n"; break;
-        case harpPedalLog_G_s: value = "s"; break;
-        default:
-            LogWarning("Unknown value '%d' for att.harpPedal.log@g", data);
-            value = "";
-            break;
-    }
-    return value;
-}
-
-harpPedalLog_G AttConverterBase::StrToHarpPedalLogG(const std::string &value, bool logWarning) const
-{
-    if (value == "f") return harpPedalLog_G_f;
-    if (value == "n") return harpPedalLog_G_n;
-    if (value == "s") return harpPedalLog_G_s;
-    if (logWarning && !value.empty())
-        LogWarning("Unsupported value '%s' for att.harpPedal.log@g", value.c_str());
-    return harpPedalLog_G_NONE;
-}
-
 std::string AttConverterBase::MeiVersionMeiversionToStr(meiVersion_MEIVERSION data) const
 {
     std::string value;
     switch (data) {
-        case meiVersion_MEIVERSION_5_0: value = "5.0"; break;
-        case meiVersion_MEIVERSION_5_0plusbasic: value = "5.0+basic"; break;
+        case meiVersion_MEIVERSION_5_1: value = "5.1"; break;
+        case meiVersion_MEIVERSION_5_1plusbasic: value = "5.1+basic"; break;
         default:
             LogWarning("Unknown value '%d' for att.meiVersion@meiversion", data);
             value = "";
@@ -3352,8 +3264,8 @@ std::string AttConverterBase::MeiVersionMeiversionToStr(meiVersion_MEIVERSION da
 
 meiVersion_MEIVERSION AttConverterBase::StrToMeiVersionMeiversion(const std::string &value, bool logWarning) const
 {
-    if (value == "5.0") return meiVersion_MEIVERSION_5_0;
-    if (value == "5.0+basic") return meiVersion_MEIVERSION_5_0plusbasic;
+    if (value == "5.1") return meiVersion_MEIVERSION_5_1;
+    if (value == "5.1+basic") return meiVersion_MEIVERSION_5_1plusbasic;
     if (logWarning && !value.empty())
         LogWarning("Unsupported value '%s' for att.meiVersion@meiversion", value.c_str());
     return meiVersion_MEIVERSION_NONE;

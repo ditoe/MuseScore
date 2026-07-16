@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,7 +29,7 @@
 namespace mu::engraving {
 EngravingItem* ElementMap::findNew(EngravingItem* o) const
 {
-    return mu::value(*this, o, nullptr);
+    return muse::value(*this, o, nullptr);
 }
 
 void ElementMap::add(EngravingItem* o, EngravingItem* n)
@@ -43,7 +43,7 @@ void ElementMap::add(EngravingItem* o, EngravingItem* n)
 
 Tuplet* TupletMap::findNew(Tuplet* o)
 {
-    for (const Tuplet2& t2 : map) {
+    for (const Tuplet2& t2 : m_map) {
         if (t2.o == o) {
             return t2.n;
         }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,13 +22,14 @@
 #ifndef MU_CONTEXT_IGLOBALCONTEXT_H
 #define MU_CONTEXT_IGLOBALCONTEXT_H
 
+#include "async/notification.h"
 #include "modularity/imoduleinterface.h"
 #include "project/inotationproject.h"
-#include "async/notification.h"
-#include "io/path.h"
+#include "audio/main/iplayer.h"
+#include "iplaybackstate.h"
 
 namespace mu::context {
-class IGlobalContext : MODULE_EXPORT_INTERFACE
+class IGlobalContext : MODULE_CONTEXT_INTERFACE
 {
     INTERFACE_ID(mu::context::IGlobalContext)
 
@@ -37,14 +38,17 @@ public:
 
     virtual void setCurrentProject(const project::INotationProjectPtr& project) = 0;
     virtual project::INotationProjectPtr currentProject() const = 0;
-    virtual async::Notification currentProjectChanged() const = 0;
+    virtual muse::async::Notification currentProjectChanged() const = 0;
 
     virtual notation::IMasterNotationPtr currentMasterNotation() const = 0;
-    virtual async::Notification currentMasterNotationChanged() const = 0;
+    virtual muse::async::Notification currentMasterNotationChanged() const = 0;
 
     virtual void setCurrentNotation(const notation::INotationPtr& notation) = 0;
     virtual notation::INotationPtr currentNotation() const = 0;
-    virtual async::Notification currentNotationChanged() const = 0;
+    virtual muse::async::Notification currentNotationChanged() const = 0;
+
+    virtual void setCurrentPlayer(const muse::audio::IPlayerPtr& player) = 0;
+    virtual IPlaybackStatePtr playbackState() const = 0;
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -42,10 +42,10 @@ static constexpr Location absDefaults = Location::absolute();
 
 int Location::track() const
 {
-    if ((_staff == absDefaults._staff) || (_voice == absDefaults._voice)) {
+    if ((m_staff == absDefaults.m_staff) || (m_voice == absDefaults.m_voice)) {
         return INT_MIN;
     }
-    return static_cast<int>(VOICES) * _staff + _voice;
+    return static_cast<int>(VOICES) * m_staff + m_voice;
 }
 
 //---------------------------------------------------------
@@ -54,8 +54,8 @@ int Location::track() const
 
 void Location::setTrack(int track)
 {
-    _staff = track / VOICES;
-    _voice = track % VOICES;
+    m_staff = track / VOICES;
+    m_voice = track % VOICES;
 }
 
 //---------------------------------------------------------
@@ -67,12 +67,12 @@ void Location::toAbsolute(const Location& ref)
     if (isAbsolute()) {
         return;
     }
-    _staff += ref._staff;
-    _voice += ref._voice;
-    _measure += ref._measure;
-    _frac += ref._frac;
-    _note += ref._note;
-    _rel = false;
+    m_staff += ref.m_staff;
+    m_voice += ref.m_voice;
+    m_measure += ref.m_measure;
+    m_frac += ref.m_frac;
+    m_note += ref.m_note;
+    m_rel = false;
 }
 
 //---------------------------------------------------------
@@ -84,12 +84,12 @@ void Location::toRelative(const Location& ref)
     if (isRelative()) {
         return;
     }
-    _staff -= ref._staff;
-    _voice -= ref._voice;
-    _measure -= ref._measure;
-    _frac -= ref._frac;
-    _note -= ref._note;
-    _rel = true;
+    m_staff -= ref.m_staff;
+    m_voice -= ref.m_voice;
+    m_measure -= ref.m_measure;
+    m_frac -= ref.m_frac;
+    m_note -= ref.m_note;
+    m_rel = true;
 }
 
 //---------------------------------------------------------
@@ -171,7 +171,7 @@ int Location::track(const EngravingItem* e)
         const MeasureBase* mb = e->findMeasureBase();
         if (mb && !mb->isMeasure()) {
             // Such elements are written in the first staff,
-            // see writeMeasure() in scorefile.cpp
+            // see writeMeasure() in rw/write/measurewrite.cpp
             track = 0;
         }
     }
@@ -236,6 +236,9 @@ int Location::note(const EngravingItem* e)
 
 PropertyValue Location::getLocationProperty(Pid pid, const EngravingItem* start, const EngravingItem* end)
 {
+    if (!start || !end) {
+        return 0;
+    }
     switch (pid) {
     case Pid::LOCATION_STAVES:
         return (track(start) / VOICES) - (track(end) / VOICES);
@@ -261,12 +264,12 @@ PropertyValue Location::getLocationProperty(Pid pid, const EngravingItem* start,
 bool Location::operator==(const Location& pi2) const
 {
     const Location& pi1 = *this;
-    return (pi1._frac == pi2._frac)
-           && (pi1._measure == pi2._measure)
-           && (pi1._voice == pi2._voice)
-           && (pi1._staff == pi2._staff)
-           && (pi1._graceIndex == pi2._graceIndex)
-           && (pi1._note == pi2._note)
+    return (pi1.m_frac == pi2.m_frac)
+           && (pi1.m_measure == pi2.m_measure)
+           && (pi1.m_voice == pi2.m_voice)
+           && (pi1.m_staff == pi2.m_staff)
+           && (pi1.m_graceIndex == pi2.m_graceIndex)
+           && (pi1.m_note == pi2.m_note)
     ;
 }
 }

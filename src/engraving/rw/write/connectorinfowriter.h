@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_CONNECTORINFOWRITER_H
-#define MU_ENGRAVING_CONNECTORINFOWRITER_H
+#pragma once
 
 #include "../../dom/connector.h"
 
@@ -47,11 +46,6 @@ public:
     ConnectorInfoWriter(XmlWriter& xml, WriteContext* ctx, const EngravingItem* current, const EngravingItem* connector, int track = -1,
                         Fraction = { -1, 1 });
     virtual ~ConnectorInfoWriter() = default;
-
-    ConnectorInfoWriter* prev() const { return static_cast<ConnectorInfoWriter*>(_prev); }
-    ConnectorInfoWriter* next() const { return static_cast<ConnectorInfoWriter*>(_next); }
-
-    const EngravingItem* connector() const { return _connector; }
 
     void write();
 
@@ -82,5 +76,3 @@ public:
     static void fillSpannerPosition(Location& l, const MeasureBase* endpoint, const Fraction& tick, bool clipboardmode);
 };
 }
-
-#endif // MU_ENGRAVING_CONNECTORINFOWRITER_H

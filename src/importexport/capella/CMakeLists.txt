@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2026 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -16,29 +16,28 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE iex_capella)
+muse_create_module(iex_capella)
 
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/capellamodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/capellamodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/capellareader.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/capellareader.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/capella.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/capella.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/capxml.cpp
-    )
+target_sources(iex_capella PRIVATE
+    capellamodule.cpp
+    capellamodule.h
 
-add_subdirectory(${THIRDPARTY_DIR}/rtf2html rtf2html)
+    internal/capellareader.cpp
+    internal/capellareader.h
+    internal/capella.cpp
+    internal/capella.h
+    internal/capxml.cpp
+)
 
-set(MODULE_LINK
+add_subdirectory(thirdparty/rtf2html)
+
+target_link_libraries(iex_capella PRIVATE
     rtf2html
     engraving
-    )
+)
 
-include(SetupModule)
-
-if (MUE_BUILD_UNIT_TESTS)
+if (MUE_BUILD_IMPORTEXPORT_TESTS)
     add_subdirectory(tests)
 endif()

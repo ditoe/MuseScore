@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,14 +20,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __BSYMBOL_H__
-#define __BSYMBOL_H__
+#pragma once
 
 #include <vector>
 
 #include "engravingitem.h"
 
 namespace mu::engraving {
+class Transaction;
+
 //---------------------------------------------------------
 //   @@ BSymbol
 ///    base class for Symbol and Image
@@ -40,27 +41,23 @@ public:
 
     Segment* segment() const { return (Segment*)explicitParent(); }
 
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
 
     BSymbol& operator=(const BSymbol&) = delete;
 
     void add(EngravingItem*) override;
     void remove(EngravingItem*) override;
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
-    mu::RectF drag(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
+    RectF drag(EditData&) override;
 
     Align align() const { return m_align; }
     void setAlign(Align a) { m_align = a; }
 
     const std::vector<EngravingItem*>& leafs() const { return m_leafs; }
-    std::vector<EngravingItem*>& leafs() { return m_leafs; }
-    mu::PointF pagePos() const override;
-    mu::PointF canvasPos() const override;
-    std::vector<mu::LineF> dragAnchorLines() const override;
+    PointF pagePos() const override;
+    PointF canvasPos() const override;
+    std::vector<LineF> dragAnchorLines() const override;
 
 protected:
     BSymbol(const ElementType& type, EngravingItem* parent, ElementFlags f = ElementFlag::NOTHING);
@@ -71,5 +68,4 @@ private:
     std::vector<EngravingItem*> m_leafs;
     Align m_align = { AlignH::LEFT, AlignV::BASELINE };
 };
-} // namespace mu::engraving
-#endif
+}

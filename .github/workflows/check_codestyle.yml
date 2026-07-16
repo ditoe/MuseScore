@@ -1,0 +1,27 @@
+name: 'Check: Codestyle'
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  codestyle:
+    runs-on: ubuntu-slim
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v7
+      with:
+        submodules: recursive
+
+    - name: Install CMake
+      run: |
+        sudo apt update
+        sudo apt install -y cmake
+        
+    - name: Test MSS coding style
+      run: |
+        cmake -P ./muse/buildscripts/ci/checkcodestyle/checkcodestyle.cmake ./src/
+
+    - name: Test MF coding style
+      run: |
+        cmake -P ./muse/buildscripts/ci/checkcodestyle/checkcodestyle.cmake ./muse/framework/  

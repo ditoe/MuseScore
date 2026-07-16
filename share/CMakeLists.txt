@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -18,10 +18,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-subdirs(autobotscripts icons templates wallpapers locale styles sound manual instruments)
+subdirs(testflowscripts icons templates wallpapers locale styles sound manual instruments)
 
 install (DIRECTORY
-      plugins
-      DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}
-      PATTERN ".*" EXCLUDE
-      )
+    plugins
+    DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}
+    PATTERN ".*" EXCLUDE
+    )
+
+install (DIRECTORY
+    extensions
+    DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}
+    PATTERN ".*" EXCLUDE
+    )
+
+install (DIRECTORY
+    workspaces
+    DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}
+    PATTERN ".*" EXCLUDE
+    )

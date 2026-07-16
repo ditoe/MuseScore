@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,14 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __PART_H__
-#define __PART_H__
+#pragma once
 
 #include <vector>
 
 #include "mscore.h"
 #include "instrument.h"
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving::read206 {
 class Read206;
@@ -36,14 +35,12 @@ class Read206;
 namespace mu::engraving {
 class Staff;
 class Score;
+class SharedPart;
 class InstrumentTemplate;
 
-//---------------------------------------------------------
-//   PreferSharpFlat
-//---------------------------------------------------------
-
-enum class PreferSharpFlat : char {
-    NONE, SHARPS, FLATS, AUTO
+struct TrackRange {
+    track_idx_t startTrack = muse::nidx;
+    track_idx_t endTrack = muse::nidx;
 };
 
 //---------------------------------------------------------
@@ -66,7 +63,7 @@ enum class PreferSharpFlat : char {
 //   @P volume          int
 //---------------------------------------------------------
 
-class Part final : public EngravingObject
+class Part : public EngravingObject
 {
     OBJECT_ALLOCATOR(engraving, Part)
     DECLARE_CLASSOF(ElementType::PART)
@@ -75,11 +72,11 @@ public:
     static const Fraction MAIN_INSTRUMENT_TICK;
     static const int DEFAULT_COLOR = 0x3399ff;
 
-    Part(Score* score = nullptr);
+    Part(Score* score = nullptr, ElementType type = ElementType::PART);
     void initFromInstrTemplate(const InstrumentTemplate*);
 
-    const ID& id() const;
-    void setId(const ID& id);
+    const muse::ID& id() const;
+    void setId(const muse::ID& id);
 
     Part* clone() const;
 
@@ -87,6 +84,7 @@ public:
     bool readProperties(XmlReader&);
 
     size_t nstaves() const;
+    size_t visibleStavesCount() const;
     const std::vector<Staff*>& staves() const;
     std::set<staff_idx_t> staveIdxList() const;
     void appendStaff(Staff* staff);
@@ -95,8 +93,7 @@ public:
     Staff* staff(staff_idx_t idx) const;
     String familyId() const;
 
-    track_idx_t startTrack() const;
-    track_idx_t endTrack() const;
+    TrackRange trackRange() const;
 
     InstrumentTrackIdList instrumentTrackIdList() const;
     InstrumentTrackIdSet instrumentTrackIdSet() const;
@@ -106,17 +103,21 @@ public:
     String instrumentName(const Fraction& tick = { -1, 1 }) const;
     String instrumentId(const Fraction& tick = { -1, 1 }) const;
 
-    const std::list<StaffName>& longNames(const Fraction& tick = { -1, 1 }) const { return instrument(tick)->longNames(); }
-    const std::list<StaffName>& shortNames(const Fraction& tick = { -1, 1 }) const { return instrument(tick)->shortNames(); }
+    void setLongName(const String& s, const Fraction& tick = { -1, 1 });
+    void setShortName(const String& s, const Fraction& tick = { -1, 1 });
+    void setLongNameAll(const String& s);  // For all instruments in _instruments
+    void setShortNameAll(const String& s); // For all instruments in _instruments
 
-    void setLongNames(std::list<StaffName>& s,  const Fraction& tick = { -1, 1 });
-    void setShortNames(std::list<StaffName>& s, const Fraction& tick = { -1, 1 });
+    int number(const Fraction& tick = { -1, 1 }) const;
+    void setNumber(int v, const Fraction& tick = { -1, 1 });
 
-    void setLongName(const String& s);
-    void setShortName(const String& s);
+    String transposition(const Fraction& tick = { -1, 1 }) const;
+    void setTransposition(const String& s, const Fraction& tick = { -1, 1 });
 
     void setPlainLongName(const String& s);
     void setPlainShortName(const String& s);
+    void setPlainLongNameAll(const String& s);
+    void setPlainShortNameAll(const String& s);
 
     void setStaves(int);
 
@@ -132,21 +133,26 @@ public:
 
     void insertStaff(Staff*, staff_idx_t idx);
     void removeStaff(Staff*);
-    bool show() const { return _show; }
-    void setShow(bool val) { _show = val; }
-    bool soloist() const { return _soloist; }
-    void setSoloist(bool val) { _soloist = val; }
+    virtual bool show() const;
+    void setShow(bool val) { m_show = val; }
+    bool soloist() const { return m_soloist; }
+    void setSoloist(bool val) { m_soloist = val; }
 
     Instrument* instrument(Fraction = { -1, 1 });
     const Instrument* instrument(Fraction = { -1, 1 }) const;
-    const Instrument* instrumentById(const std::string& id) const;
+    const Instrument* instrumentById(const String& id) const;
     void setInstrument(Instrument*, Fraction = { -1, 1 });         // transfer ownership
     void setInstrument(Instrument*, int tick);
     void setInstrument(const Instrument&&, Fraction = { -1, 1 });
     void setInstrument(const Instrument&, Fraction = { -1, 1 });
     void setInstruments(const InstrumentList& instruments);
     void removeInstrument(const Fraction&);
+    void removeNonPrimaryInstruments();
     const InstrumentList& instruments() const;
+
+    const StringData* stringData(const Fraction& tick, staff_idx_t staffIdx) const;
+    void addStringTunings(StringTunings* stringTunings);
+    void removeStringTunings(StringTunings* stringTunings);
 
     void insertTime(const Fraction& tick, const Fraction& len);
 
@@ -158,10 +164,10 @@ public:
     HarpPedalDiagram* prevHarpDiagram(const Fraction&) const;
     Fraction currentHarpDiagramTick(const Fraction&) const;
 
-    String partName() const { return _partName; }
-    void setPartName(const String& s) { _partName = s; }
-    int color() const { return _color; }
-    void setColor(int value) { _color = value; }
+    virtual String partName() const;
+
+    int color() const { return m_color; }
+    void setColor(int value) { m_color = value; }
 
     bool isVisible() const;
 
@@ -181,8 +187,14 @@ public:
     const Part* masterPart() const;
     Part* masterPart();
 
-    PreferSharpFlat preferSharpFlat() const { return _preferSharpFlat; }
-    void setPreferSharpFlat(PreferSharpFlat v) { _preferSharpFlat = v; }
+    AutoOnOff hideWhenEmpty() const { return m_hideWhenEmpty; }
+    void setHideWhenEmpty(AutoOnOff v) { m_hideWhenEmpty = v; }
+
+    bool hideStavesWhenIndividuallyEmpty() const { return m_hideStavesWhenIndividuallyEmpty; }
+    void setHideStavesWhenIndividuallyEmpty(bool v) { m_hideStavesWhenIndividuallyEmpty = v; }
+
+    PreferSharpFlat preferSharpFlat() const { return m_preferSharpFlat; }
+    void setPreferSharpFlat(PreferSharpFlat v) { m_preferSharpFlat = v; }
 
     // Allows not reading the same instrument twice on importing 2.X scores.
     // TODO: do we need instruments info in parts at all?
@@ -190,20 +202,33 @@ public:
 
     std::map<int, HarpPedalDiagram*> harpDiagrams;
 
+    const std::map<int, StringTunings*>& stringTunings() const { return m_stringTunings; }
+
+    SharedPart* sharedPart() const { return m_sharedPart; }
+    void setSharedPart(SharedPart* p) { m_sharedPart = p; }
+
 private:
     friend class read206::Read206;
+    friend class SharedPart;
 
-    String _partName;              ///< used in tracklist (mixer)
-    InstrumentList _instruments;
-    std::vector<Staff*> _staves;
-    ID _id = INVALID_ID;             ///< used for MusicXml import
-    bool _show = false;              ///< show part in partitur if true
-    bool _soloist = false;           ///< used in score ordering
-    int _capoFret = 0;
+    InstrumentList m_instruments;
+    std::vector<Staff*> m_staves;
+    muse::ID m_id = INVALID_ID;       ///< used for MusicXML import
+    bool m_show = false;              ///< show part in partitur if true
+    bool m_soloist = false;           ///< used in score ordering
+    int m_capoFret = 0;
+    int m_color = 0;                  ///User specified color for helping to label parts
 
-    int _color = 0;                  ///User specified color for helping to label parts
+    /// Hide staves in this part when empty
+    AutoOnOff m_hideWhenEmpty = AutoOnOff::AUTO;
 
-    PreferSharpFlat _preferSharpFlat = PreferSharpFlat::AUTO;
+    /// Hide staves when they are individually empty, rather than only if all this part's staves are empty
+    bool m_hideStavesWhenIndividuallyEmpty = false;
+
+    PreferSharpFlat m_preferSharpFlat = PreferSharpFlat::AUTO;
+
+    std::map<int, StringTunings*> m_stringTunings;
+
+    SharedPart* m_sharedPart = nullptr;
 };
-} // namespace mu::engraving
-#endif
+}

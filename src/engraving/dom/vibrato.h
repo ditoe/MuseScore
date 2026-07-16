@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __VIBRATO_H__
-#define __VIBRATO_H__
+#ifndef MU_ENGRAVING_VIBRATO_H
+#define MU_ENGRAVING_VIBRATO_H
 
 #include "line.h"
 
@@ -44,19 +44,16 @@ public:
 
     Vibrato* vibrato() const { return toVibrato(spanner()); }
 
-    EngravingItem* propertyDelegate(Pid) override;
+    EngravingObject* propertyDelegate(Pid) const override;
 
-    Shape shape() const override;
-    const SymIdList& symbols() const { return _symbols; }
-    void setSymbols(const SymIdList& s) { _symbols = s; }
+    const SymIdList& symbols() const { return m_symbols; }
+    void setSymbols(const SymIdList& s) { m_symbols = s; }
 
     void symbolLine(SymId start, SymId fill);
     void symbolLine(SymId start, SymId fill, SymId end);
 
 private:
-    virtual Sid getPropertyStyle(Pid) const override;
-
-    SymIdList _symbols;
+    SymIdList m_symbols;
 };
 
 //---------------------------------------------------------
@@ -68,12 +65,6 @@ class Vibrato final : public SLine
     OBJECT_ALLOCATOR(engraving, Vibrato)
     DECLARE_CLASSOF(ElementType::VIBRATO)
 
-    Sid getPropertyStyle(Pid) const override;
-
-private:
-    VibratoType _vibratoType;
-    bool _playArticulation;
-
 public:
     Vibrato(EngravingItem* parent);
     ~Vibrato();
@@ -81,12 +72,10 @@ public:
     Vibrato* clone() const override { return new Vibrato(*this); }
 
     LineSegment* createLineSegment(System* parent) override;
+    PointF linePos(Grip grip, System** system) const override;
 
-    void undoSetVibratoType(VibratoType val);
-    void setVibratoType(VibratoType tt) { _vibratoType = tt; }
-    VibratoType vibratoType() const { return _vibratoType; }
-    void setPlayArticulation(bool val) { _playArticulation = val; }
-    bool playArticulation() const { return _playArticulation; }
+    void setVibratoType(VibratoType tt) { m_vibratoType = tt; }
+    VibratoType vibratoType() const { return m_vibratoType; }
     String vibratoTypeUserName() const;
 
     Segment* segment() const { return (Segment*)explicitParent(); }
@@ -95,6 +84,12 @@ public:
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
     String accessibleInfo() const override;
+
+    int subtype() const override { return int(m_vibratoType); }
+    TranslatableString subtypeUserName() const override;
+
+private:
+    VibratoType m_vibratoType = VibratoType::GUITAR_VIBRATO;
 };
 } // namespace mu::engraving
 

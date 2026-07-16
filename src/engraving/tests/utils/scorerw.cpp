@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,8 +22,8 @@
 
 #include "scorerw.h"
 
-#include "io/file.h"
-#include "io/buffer.h"
+#include "global/io/buffer.h"
+#include "global/io/file.h"
 
 #include "engraving/compat/scoreaccess.h"
 #include "engraving/compat/mscxcompat.h"
@@ -37,10 +37,13 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 String ScoreRW::m_rootPath;
+
+//! NOTE Temporary for testing
+static const muse::modularity::ContextPtr utestCtx = std::make_shared<muse::modularity::Context>(1);
 
 void ScoreRW::setRootPath(const String& path)
 {
@@ -52,12 +55,15 @@ String ScoreRW::rootPath()
     return m_rootPath;
 }
 
-MasterScore* ScoreRW::readScore(const String& name, bool isAbsolutePath, ImportFunc importFunc)
+MasterScore* ScoreRW::readScore(const String& name, bool isAbsolutePath, ImportFunc importFunc,
+                                const muse::modularity::ContextPtr& iocCtx_)
 {
-    io::path_t path = isAbsolutePath ? name : (rootPath() + u"/" + name);
-    MasterScore* score = compat::ScoreAccess::createMasterScoreWithBaseStyle();
+    const muse::modularity::ContextPtr iocCtx = iocCtx_ ? iocCtx_ : utestCtx;
+
+    muse::io::path_t path = isAbsolutePath ? name : (rootPath() + u"/" + name);
+    MasterScore* score = compat::ScoreAccess::createMasterScoreWithBaseStyle(iocCtx);
     score->setFileInfoProvider(std::make_shared<LocalFileInfoProvider>(path));
-    std::string suffix = io::suffix(path);
+    std::string suffix = muse::io::suffix(path);
 
     ScoreLoad sl;
     Err rv;
@@ -79,44 +85,27 @@ MasterScore* ScoreRW::readScore(const String& name, bool isAbsolutePath, ImportF
         s->doLayout();
     }
 
-    // While reading the score, some elements might use `score->repeatList()` (which is incorrect
-    // anyway, because the repeatList will be incomplete because the score is incomplete, but some
-    // elements still do it).
-    // `score->repeatList()` calls `_repeatList->update()`; the repeat list then thinks that it is
-    // up-to-date from that point. But we weren't finished reading the score, so the score will still
-    // change. We need to tell the repeat list about that, so that it will be updated next time
-    // someone uses it.
-    score->setPlaylistDirty();
-
     return score;
 }
 
 bool ScoreRW::saveScore(Score* score, const String& name)
 {
-    File file(name);
-    if (file.exists()) {
-        file.remove();
-    }
+    File::remove(name);
 
-    if (!file.open(IODevice::ReadWrite)) {
+    auto output = Buffer::opened(IODevice::WriteOnly);
+    if (!rw::RWRegister::writer()->writeScore(score, &output)) {
         return false;
     }
+    output.close();
 
-    return rw::RWRegister::writer()->writeScore(score, &file, false);
+    return File::writeFile(name, output.data());
 }
 
 bool ScoreRW::saveScore(Score* score, const String& name, ExportFunc exportFunc)
 {
-    File file(name);
-    if (file.exists()) {
-        file.remove();
-    }
+    File::remove(name);
 
-    if (!file.open(IODevice::ReadWrite)) {
-        return false;
-    }
-
-    io::path_t path =  name;
+    muse::io::path_t path =  name;
     Err rv = exportFunc(score, path);
 
     if (rv != Err::NoError) {
@@ -132,8 +121,7 @@ EngravingItem* ScoreRW::writeReadElement(EngravingItem* element)
     //
     // write element
     //
-    Buffer buffer;
-    buffer.open(IODevice::WriteOnly);
+    auto buffer = Buffer::opened(IODevice::WriteOnly);
     XmlWriter xml(&buffer);
     xml.startDocument();
     rw::RWRegister::writer()->writeItem(element, xml);
@@ -151,13 +139,7 @@ EngravingItem* ScoreRW::writeReadElement(EngravingItem* element)
     return element;
 }
 
-bool ScoreRW::saveMimeData(ByteArray mimeData, const String& saveName)
+bool ScoreRW::saveMimeData(muse::ByteArray mimeData, const String& saveName)
 {
-    File f(saveName);
-    if (!f.open(IODevice::WriteOnly)) {
-        return false;
-    }
-
-    size_t size = f.write(mimeData);
-    return size == mimeData.size();
+    return File::writeFile(saveName, mimeData);
 }

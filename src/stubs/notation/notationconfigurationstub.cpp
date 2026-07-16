@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,8 +21,12 @@
  */
 #include "notationconfigurationstub.h"
 
-using namespace mu;
 using namespace mu::notation;
+
+QColor NotationConfigurationStub::notationColor() const
+{
+    return QColor();
+}
 
 QColor NotationConfigurationStub::backgroundColor() const
 {
@@ -33,9 +37,9 @@ void NotationConfigurationStub::setBackgroundColor(const QColor&)
 {
 }
 
-io::path_t NotationConfigurationStub::backgroundWallpaperPath() const
+muse::io::path_t NotationConfigurationStub::backgroundWallpaperPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
 const QPixmap& NotationConfigurationStub::backgroundWallpaper() const
@@ -44,7 +48,7 @@ const QPixmap& NotationConfigurationStub::backgroundWallpaper() const
     return p;
 }
 
-void NotationConfigurationStub::setBackgroundWallpaperPath(const io::path_t&)
+void NotationConfigurationStub::setBackgroundWallpaperPath(const muse::io::path_t&)
 {
 }
 
@@ -61,9 +65,9 @@ void NotationConfigurationStub::resetBackground()
 {
 }
 
-async::Notification NotationConfigurationStub::backgroundChanged() const
+muse::async::Notification NotationConfigurationStub::backgroundChanged() const
 {
-    static async::Notification n;
+    static muse::async::Notification n;
     return n;
 }
 
@@ -76,9 +80,9 @@ void NotationConfigurationStub::setForegroundColor(const QColor&)
 {
 }
 
-io::path_t NotationConfigurationStub::foregroundWallpaperPath() const
+muse::io::path_t NotationConfigurationStub::foregroundWallpaperPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
 const QPixmap& NotationConfigurationStub::foregroundWallpaper() const
@@ -87,7 +91,7 @@ const QPixmap& NotationConfigurationStub::foregroundWallpaper() const
     return p;
 }
 
-void NotationConfigurationStub::setForegroundWallpaperPath(const io::path_t&)
+void NotationConfigurationStub::setForegroundWallpaperPath(const muse::io::path_t&)
 {
 }
 
@@ -104,15 +108,50 @@ void NotationConfigurationStub::resetForeground()
 {
 }
 
-async::Notification NotationConfigurationStub::foregroundChanged() const
+muse::async::Notification NotationConfigurationStub::foregroundChanged() const
 {
-    static async::Notification n;
+    static muse::async::Notification n;
     return n;
 }
 
-io::path_t NotationConfigurationStub::wallpapersDefaultDirPath() const
+muse::io::path_t NotationConfigurationStub::wallpapersDefaultDirPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
+}
+
+bool NotationConfigurationStub::shouldInvertScore() const
+{
+    return false;
+}
+
+bool NotationConfigurationStub::scoreInversionEnabled() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setScoreInversionEnabled(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::scoreInversionChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::isOnlyInvertInDarkTheme() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setOnlyInvertInDarkTheme(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::isOnlyInvertInDarkThemeChanged() const
+{
+    static muse::async::Notification n;
+    return n;
 }
 
 QColor NotationConfigurationStub::borderColor() const
@@ -123,11 +162,6 @@ QColor NotationConfigurationStub::borderColor() const
 int NotationConfigurationStub::borderWidth() const
 {
     return 1;
-}
-
-QColor NotationConfigurationStub::anchorLineColor() const
-{
-    return QColor();
 }
 
 QColor NotationConfigurationStub::playbackCursorColor() const
@@ -145,7 +179,17 @@ int NotationConfigurationStub::cursorOpacity() const
     return 1;
 }
 
+bool NotationConfigurationStub::thinNoteInputCursor() const
+{
+    return false;
+}
+
 QColor NotationConfigurationStub::selectionColor(engraving::voice_idx_t) const
+{
+    return QColor();
+}
+
+QColor NotationConfigurationStub::highlightSelectionColor(engraving::voice_idx_t) const
 {
     return QColor();
 }
@@ -155,6 +199,26 @@ QColor NotationConfigurationStub::dropRectColor() const
     return QColor();
 }
 
+muse::draw::Color NotationConfigurationStub::noteInputPreviewColor() const
+{
+    return muse::draw::Color();
+}
+
+bool NotationConfigurationStub::useNoteInputCursorInInputByDuration() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setUseNoteInputCursorInInputByDuration(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::useNoteInputCursorInInputByDurationChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
 int NotationConfigurationStub::selectionProximity() const
 {
     return 1;
@@ -162,6 +226,12 @@ int NotationConfigurationStub::selectionProximity() const
 
 void NotationConfigurationStub::setSelectionProximity(int)
 {
+}
+
+muse::async::Channel<int> NotationConfigurationStub::selectionProximityChanged() const
+{
+    static muse::async::Channel<int> ch;
+    return ch;
 }
 
 ZoomType NotationConfigurationStub::defaultZoomType() const
@@ -180,6 +250,12 @@ int NotationConfigurationStub::defaultZoom() const
 
 void NotationConfigurationStub::setDefaultZoom(int)
 {
+}
+
+muse::async::Notification NotationConfigurationStub::defaultZoomChanged() const
+{
+    static muse::async::Notification n;
+    return n;
 }
 
 QList<int> NotationConfigurationStub::possibleZoomPercentageList() const
@@ -206,6 +282,12 @@ void NotationConfigurationStub::setMouseZoomPrecision(int)
 {
 }
 
+muse::async::Notification NotationConfigurationStub::mouseZoomPrecisionChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
 std::string NotationConfigurationStub::fontFamily() const
 {
     return std::string();
@@ -216,37 +298,94 @@ int NotationConfigurationStub::fontSize() const
     return 20;
 }
 
-io::path_t NotationConfigurationStub::userStylesPath() const
+muse::io::path_t NotationConfigurationStub::userStylesPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-void NotationConfigurationStub::setUserStylesPath(const io::path_t&)
+void NotationConfigurationStub::setUserStylesPath(const muse::io::path_t&)
 {
 }
 
-async::Channel<io::path_t> NotationConfigurationStub::userStylesPathChanged() const
+muse::async::Channel<muse::io::path_t> NotationConfigurationStub::userStylesPathChanged() const
 {
-    static async::Channel<io::path_t> ch;
+    static muse::async::Channel<muse::io::path_t> ch;
     return ch;
 }
 
-io::path_t NotationConfigurationStub::defaultStyleFilePath() const
+muse::io::path_t NotationConfigurationStub::defaultStyleFilePath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-void NotationConfigurationStub::setDefaultStyleFilePath(const io::path_t&)
+void NotationConfigurationStub::setDefaultStyleFilePath(const muse::io::path_t&)
 {
 }
 
-io::path_t NotationConfigurationStub::partStyleFilePath() const
+muse::async::Channel<muse::io::path_t> NotationConfigurationStub::defaultStyleFilePathChanged() const
 {
-    return io::path_t();
+    static muse::async::Channel<muse::io::path_t> ch;
+    return ch;
 }
 
-void NotationConfigurationStub::setPartStyleFilePath(const io::path_t&)
+muse::io::path_t NotationConfigurationStub::partStyleFilePath() const
 {
+    return muse::io::path_t();
+}
+
+void NotationConfigurationStub::setPartStyleFilePath(const muse::io::path_t&)
+{
+}
+
+muse::async::Channel<muse::io::path_t> NotationConfigurationStub::partStyleFilePathChanged() const
+{
+    static muse::async::Channel<muse::io::path_t> ch;
+    return ch;
+}
+
+NoteInputMethod NotationConfigurationStub::defaultNoteInputMethod() const
+{
+    return NoteInputMethod::UNKNOWN;
+}
+
+void NotationConfigurationStub::setDefaultNoteInputMethod(NoteInputMethod)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::defaultNoteInputMethodChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::addAccidentalDotsArticulationsToNextNoteEntered() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setAddAccidentalDotsArticulationsToNextNoteEntered(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::addAccidentalDotsArticulationsToNextNoteEnteredChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+muse::io::path_t NotationConfigurationStub::userMusicFontsPath() const
+{
+    return muse::io::path_t();
+}
+
+void NotationConfigurationStub::setUserMusicFontsPath(const muse::io::path_t&)
+{
+}
+
+muse::async::Channel<muse::io::path_t> NotationConfigurationStub::userMusicFontsPathChanged() const
+{
+    static muse::async::Channel<muse::io::path_t> ch;
+    return ch;
 }
 
 bool NotationConfigurationStub::isMidiInputEnabled() const
@@ -258,6 +397,27 @@ void NotationConfigurationStub::setIsMidiInputEnabled(bool)
 {
 }
 
+muse::async::Notification NotationConfigurationStub::isMidiInputEnabledChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::startNoteInputAtSelectedNoteRestWhenPressingMidiKey() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setStartNoteInputAtSelectedNoteRestWhenPressingMidiKey(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::startNoteInputAtSelectedNoteRestWhenPressingMidiKeyChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
 bool NotationConfigurationStub::isAutomaticallyPanEnabled() const
 {
     return false;
@@ -265,6 +425,25 @@ bool NotationConfigurationStub::isAutomaticallyPanEnabled() const
 
 void NotationConfigurationStub::setIsAutomaticallyPanEnabled(bool)
 {
+}
+
+muse::async::Notification NotationConfigurationStub::isAutomaticallyPanEnabledChanged() const
+{
+    return {};
+}
+
+bool NotationConfigurationStub::isSmoothPanning() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setIsSmoothPanning(bool)
+{
+}
+
+muse::async::Notification isSmoothPanningChanged() const
+{
+    return {};
 }
 
 bool NotationConfigurationStub::isPlayRepeatsEnabled() const
@@ -276,9 +455,9 @@ void NotationConfigurationStub::setIsPlayRepeatsEnabled(bool)
 {
 }
 
-async::Notification NotationConfigurationStub::isPlayRepeatsChanged() const
+muse::async::Notification NotationConfigurationStub::isPlayRepeatsChanged() const
 {
-    static async::Notification n;
+    static muse::async::Notification n;
     return n;
 }
 
@@ -291,10 +470,39 @@ void NotationConfigurationStub::setIsPlayChordSymbolsEnabled(bool)
 {
 }
 
-async::Notification NotationConfigurationStub::isPlayChordSymbolsChanged() const
+muse::async::Notification NotationConfigurationStub::isPlayChordSymbolsChanged() const
 {
-    static async::Notification n;
+    static muse::async::Notification n;
     return n;
+}
+
+bool NotationConfigurationStub::isPlayPreviewNotesInInputByDuration() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setIsPlayPreviewNotesInInputByDuration(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::isPlayPreviewNotesInInputByDurationChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::playPreviewNotesWithScoreDynamics() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setPlayPreviewNotesWithScoreDynamics(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::playPreviewNotesWithScoreDynamicsChanged() const
+{
+    return {};
 }
 
 bool NotationConfigurationStub::isMetronomeEnabled() const
@@ -306,6 +514,12 @@ void NotationConfigurationStub::setIsMetronomeEnabled(bool)
 {
 }
 
+muse::async::Notification NotationConfigurationStub::isMetronomeEnabledChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
 bool NotationConfigurationStub::isCountInEnabled() const
 {
     return false;
@@ -315,23 +529,23 @@ void NotationConfigurationStub::setIsCountInEnabled(bool)
 {
 }
 
-double NotationConfigurationStub::guiScaling() const
+double NotationConfigurationStub::guiScaling(const muse::modularity::ContextPtr&) const
 {
     return 1.0;
 }
 
-double NotationConfigurationStub::notationScaling() const
+double NotationConfigurationStub::notationScaling(const muse::modularity::ContextPtr&) const
 {
     return 1.0;
 }
 
-ValCh<framework::Orientation> NotationConfigurationStub::canvasOrientation() const
+muse::ValCh<muse::Orientation> NotationConfigurationStub::canvasOrientation() const
 {
-    static ValCh<framework::Orientation> vch;
+    static muse::ValCh<muse::Orientation> vch;
     return vch;
 }
 
-void NotationConfigurationStub::setCanvasOrientation(framework::Orientation)
+void NotationConfigurationStub::setCanvasOrientation(muse::Orientation)
 {
 }
 
@@ -344,9 +558,9 @@ void NotationConfigurationStub::setIsLimitCanvasScrollArea(bool)
 {
 }
 
-async::Notification NotationConfigurationStub::isLimitCanvasScrollAreaChanged() const
+muse::async::Notification NotationConfigurationStub::isLimitCanvasScrollAreaChanged() const
 {
-    static async::Notification n;
+    static muse::async::Notification n;
     return n;
 }
 
@@ -359,6 +573,27 @@ void NotationConfigurationStub::setColorNotesOutsideOfUsablePitchRange(bool)
 {
 }
 
+muse::async::Channel<bool> NotationConfigurationStub::colorNotesOutsideOfUsablePitchRangeChanged() const
+{
+    static muse::async::Channel<bool> ch;
+    return ch;
+}
+
+bool NotationConfigurationStub::warnGuitarBends() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setWarnGuitarBends(bool)
+{
+}
+
+muse::async::Channel<bool> NotationConfigurationStub::warnGuitarBendsChanged() const
+{
+    static muse::async::Channel<bool> ch;
+    return ch;
+}
+
 int NotationConfigurationStub::delayBetweenNotesInRealTimeModeMilliseconds() const
 {
     return 100;
@@ -366,6 +601,26 @@ int NotationConfigurationStub::delayBetweenNotesInRealTimeModeMilliseconds() con
 
 void NotationConfigurationStub::setDelayBetweenNotesInRealTimeModeMilliseconds(int)
 {
+}
+
+muse::async::Channel<int> NotationConfigurationStub::delayBetweenNotesInRealTimeModeMillisecondsChanged() const
+{
+    static muse::async::Channel<int> ch;
+    return ch;
+}
+
+bool NotationConfigurationStub::useMidiVelocityAndDurationDuringNoteInput() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setUseMidiVelocityAndDurationDuringNoteInput(bool)
+{
+}
+
+muse::async::Channel<bool> NotationConfigurationStub::useMidiVelocityAndDurationDuringNoteInputChanged() const
+{
+    return {};
 }
 
 int NotationConfigurationStub::notePlayDurationMilliseconds() const
@@ -377,6 +632,12 @@ void NotationConfigurationStub::setNotePlayDurationMilliseconds(int)
 {
 }
 
+muse::async::Channel<int> NotationConfigurationStub::notePlayDurationMillisecondsChanged() const
+{
+    static muse::async::Channel<int> ch;
+    return ch;
+}
+
 void NotationConfigurationStub::setTemplateModeEnabled(std::optional<bool>)
 {
 }
@@ -385,46 +646,56 @@ void NotationConfigurationStub::setTestModeEnabled(std::optional<bool>)
 {
 }
 
-io::path_t NotationConfigurationStub::instrumentListPath() const
+muse::io::path_t NotationConfigurationStub::instrumentsXmlPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-io::paths_t NotationConfigurationStub::scoreOrderListPaths() const
+muse::io::path_t NotationConfigurationStub::scoreOrdersXmlPath() const
 {
-    return io::paths_t();
+    return muse::io::path_t();
 }
 
-async::Notification NotationConfigurationStub::scoreOrderListPathsChanged() const
+muse::io::path_t NotationConfigurationStub::userInstrumentsFolder() const
 {
-    static async::Notification n;
-    return n;
+    return muse::io::path_t();
 }
 
-io::paths_t NotationConfigurationStub::userScoreOrderListPaths() const
+muse::io::paths_t NotationConfigurationStub::userInstrumentsAndScoreOrdersPaths() const
 {
-    return io::paths_t();
+    return muse::io::paths_t();
 }
 
-void NotationConfigurationStub::setUserScoreOrderListPaths(const io::paths_t&)
+void NotationConfigurationStub::setUserInstrumentsFolder(const muse::io::path_t&)
 {
 }
 
-bool NotationConfigurationStub::isSnappedToGrid(framework::Orientation) const
+muse::async::Channel<muse::io::path_t> NotationConfigurationStub::userInstrumentsFolderChanged() const
+{
+    static muse::async::Channel<muse::io::path_t> ch;
+    return ch;
+}
+
+muse::io::path_t NotationConfigurationStub::stringTuningsPresetsPath() const
+{
+    return muse::io::path_t();
+}
+
+bool NotationConfigurationStub::isSnappedToGrid(muse::Orientation) const
 {
     return false;
 }
 
-void NotationConfigurationStub::setIsSnappedToGrid(framework::Orientation, bool)
+void NotationConfigurationStub::setIsSnappedToGrid(muse::Orientation, bool)
 {
 }
 
-int NotationConfigurationStub::gridSizeSpatium(framework::Orientation) const
+int NotationConfigurationStub::gridSizeSpatium(muse::Orientation) const
 {
     return 20;
 }
 
-void NotationConfigurationStub::setGridSize(framework::Orientation, int)
+void NotationConfigurationStub::setGridSize(muse::Orientation, int)
 {
 }
 
@@ -446,6 +717,15 @@ void NotationConfigurationStub::setNeedToShowAddFiguredBassErrorMessage(bool)
 {
 }
 
+bool NotationConfigurationStub::needToShowAddGuitarBendErrorMessage() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setNeedToShowAddGuitarBendErrorMessage(bool)
+{
+}
+
 bool NotationConfigurationStub::needToShowMScoreError(const std::string&) const
 {
     return false;
@@ -455,9 +735,9 @@ void NotationConfigurationStub::setNeedToShowMScoreError(const std::string&, boo
 {
 }
 
-ValCh<int> NotationConfigurationStub::pianoKeyboardNumberOfKeys() const
+muse::ValCh<int> NotationConfigurationStub::pianoKeyboardNumberOfKeys() const
 {
-    static ValCh<int> vch;
+    static muse::ValCh<int> vch;
     return vch;
 }
 
@@ -465,11 +745,139 @@ void NotationConfigurationStub::setPianoKeyboardNumberOfKeys(int)
 {
 }
 
-io::path_t NotationConfigurationStub::styleFileImportPath() const
+muse::ValCh<bool> NotationConfigurationStub::midiUseWrittenPitch() const
 {
-    return io::path_t();
+    static muse::ValCh<bool> vch;
+    return vch;
 }
 
-void NotationConfigurationStub::setStyleFileImportPath(const io::path_t&)
+void NotationConfigurationStub::setMidiUseWrittenPitch(bool)
+{
+}
+
+bool NotationConfigurationStub::useNewPercussionPanel() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setUseNewPercussionPanel(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::useNewPercussionPanelChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::percussionPanelUseNotationPreview() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setPercussionPanelUseNotationPreview(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::percussionPanelUseNotationPreviewChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+PercussionPanelAutoShowMode NotationConfigurationStub::percussionPanelAutoShowMode() const
+{
+    return PercussionPanelAutoShowMode::UNPITCHED_STAFF;
+}
+
+void NotationConfigurationStub::setPercussionPanelAutoShowMode(PercussionPanelAutoShowMode)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::percussionPanelAutoShowModeChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::autoClosePercussionPanel() const
+{
+    return false;
+}
+
+void NotationConfigurationStub::setAutoClosePercussionPanel(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::autoClosePercussionPanelChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::showPercussionPanelPadSwapDialog() const
+{
+    return true;
+}
+
+void NotationConfigurationStub::setShowPercussionPanelPadSwapDialog(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::showPercussionPanelPadSwapDialogChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+bool NotationConfigurationStub::percussionPanelMoveMidiNotesAndShortcuts() const
+{
+    return true;
+}
+
+void NotationConfigurationStub::setPercussionPanelMoveMidiNotesAndShortcuts(bool)
+{
+}
+
+muse::async::Notification NotationConfigurationStub::percussionPanelMoveMidiNotesAndShortcutsChanged() const
+{
+    static muse::async::Notification n;
+    return n;
+}
+
+muse::io::path_t NotationConfigurationStub::styleFileImportPath() const
+{
+    return muse::io::path_t();
+}
+
+void NotationConfigurationStub::setStyleFileImportPath(const muse::io::path_t&)
+{
+}
+
+muse::async::Channel<std::string> NotationConfigurationStub::styleFileImportPathChanged() const
+{
+    static muse::async::Channel<std::string> ch;
+    return ch;
+}
+
+int NotationConfigurationStub::styleDialogLastPageIndex() const
+{
+    return 0;
+}
+
+void NotationConfigurationStub::setStyleDialogLastPageIndex(int)
+{
+}
+
+int NotationConfigurationStub::styleDialogLastSubPageIndex() const
+{
+    return 0;
+}
+
+void NotationConfigurationStub::setStyleDialogLastSubPageIndex(int)
+{
+}
+
+void NotationConfigurationStub::resetStyleDialogPageIndices()
 {
 }

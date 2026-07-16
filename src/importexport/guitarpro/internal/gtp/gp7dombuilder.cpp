@@ -4,6 +4,8 @@
 
 #include "global/log.h"
 
+using namespace muse;
+
 namespace mu::iex::guitarpro {
 std::pair<int, std::unique_ptr<GPTrack> > GP7DomBuilder::createGPTrack(XmlDomNode* trackNode, XmlDomNode* versionNode)
 {
@@ -15,7 +17,7 @@ std::pair<int, std::unique_ptr<GPTrack> > GP7DomBuilder::createGPTrack(XmlDomNod
         u"Automations"
     };
 
-    int trackIdx = trackNode->attribute("id").toInt();
+    int trackIdx = trackNode->toElement().attribute("id").value().toInt();
     auto track = std::make_unique<GPTrack>(trackIdx);
     XmlDomNode trackChildNode = trackNode->firstChild();
     String version = versionNode->toElement().text();
@@ -50,7 +52,7 @@ std::pair<int, std::unique_ptr<GPTrack> > GP7DomBuilder::createGPTrack(XmlDomNod
                 // there is a bug in gp v 7.0.0
                 // All parts marked to use flat for tuning string,
                 // but in real world gp uses tuning presets
-                // sp we have to ignore <Flats/> and <TuningFlat> props
+                // so we have to ignore <Flats/> and <TuningFlat> props
                 readTrackProperties(&propertyNode, track.get(), version == "7");
                 staffNode = staffNode.nextSibling();
                 staffCount++;

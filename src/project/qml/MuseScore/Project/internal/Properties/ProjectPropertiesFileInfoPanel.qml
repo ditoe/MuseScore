@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,26 +19,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+import MuseScore.Project
+import Muse.Ui
+import Muse.UiComponents
 
 ColumnLayout {
     id: root
 
-    Layout.fillWidth: true
+    required property ProjectPropertiesModel propertiesModel
 
-    spacing: 4
-
-    property int propertyNameWidth: 110
+    property int propertyNameWidth: 160
+    property int propertyRowHorizontalSpacing: 8
+    property int propertyRowRightMargin: 0
 
     property NavigationPanel navigationPanel: null
     property int navigationColumnEnd: apiLevelProperty.navigationColumnEnd
 
+    spacing: 8
+
     RowLayout {
-        spacing: 8
+        spacing: root.propertyRowHorizontalSpacing
 
         PropertyItem {
             id: filePathProperty
@@ -46,7 +49,7 @@ ColumnLayout {
             propertyNameWidth: root.propertyNameWidth
             index: 0
             propertyName: qsTrc("project/properties", "File path:")
-            propertyValue: projectPropertiesModel.filePath
+            propertyValue: root.propertiesModel.filePath
             isFileInfoPanelProperty: true
             valueFillWidth: true
 
@@ -66,21 +69,17 @@ ColumnLayout {
             navigation.column: filePathProperty.navigationColumnEnd + 1
             accessible.name: "Open file location"
 
-            onClicked: projectPropertiesModel.openFileLocation()
+            onClicked: root.propertiesModel.openFileLocation()
         }
-
-        Item { width: 8 }
     }
 
     RowLayout {
-        Layout.topMargin: 4
-
-        spacing: 8
+        spacing: root.propertyRowHorizontalSpacing
 
         PropertyItem {
             index: 2
-            propertyName: qsTrc("project/properties", "MuseScore version:")
-            propertyValue: projectPropertiesModel.version
+            propertyName: qsTrc("project/properties", "MuseScore Studio version:")
+            propertyValue: root.propertiesModel.version
             isFileInfoPanelProperty: true
 
             navigationPanel: root.navigationPanel
@@ -89,7 +88,7 @@ ColumnLayout {
         PropertyItem {
             index: 3
             propertyName: qsTrc("project/properties", "Revision:")
-            propertyValue: projectPropertiesModel.revision
+            propertyValue: root.propertiesModel.revision
             isFileInfoPanelProperty: true
 
             Layout.leftMargin: 32
@@ -103,7 +102,7 @@ ColumnLayout {
 
             index: 4
             propertyName: qsTrc("project/properties", "API-Level:")
-            propertyValue: projectPropertiesModel.apiLevel
+            propertyValue: root.propertiesModel.apiLevel
             isFileInfoPanelProperty: true
 
             navigationPanel: root.navigationPanel

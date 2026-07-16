@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,22 +22,17 @@
 #ifndef MU_ENGRAVING_DEFAULTSTYLE_H
 #define MU_ENGRAVING_DEFAULTSTYLE_H
 
-#include "io/path.h"
-
-#include "modularity/ioc.h"
-#include "iengravingconfiguration.h"
+#include "global/io/path.h"
 
 #include "style.h"
 
 namespace mu::engraving {
 class DefaultStyle
 {
-    INJECT(IEngravingConfiguration, engravingConfiguration)
-
 public:
     static DefaultStyle* instance();
 
-    void init(const io::path_t& defaultStyleFilePath, const io::path_t& partStyleFilePath);
+    void init(const muse::io::path_t& defaultStyleFilePath, const muse::io::path_t& partStyleFilePath, const SizeF& defaultPageSize);
 
     static const MStyle& baseStyle();
 
@@ -49,7 +44,7 @@ public:
 private:
     DefaultStyle() = default;
 
-    static bool doLoadStyle(MStyle* style, const io::path_t& filePath);
+    static bool doLoadStyle(MStyle* style, const muse::io::path_t& filePath);
 
     MStyle m_baseStyle; // builtin initial style
     MStyle m_defaultStyle; // builtin modified by preferences

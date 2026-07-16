@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,16 +22,17 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/keysig.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/part.h"
-#include "dom/undo.h"
+#include "engraving/dom/keysig.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/part.h"
+#include "engraving/editing/editkeysig.h"
+#include "engraving/editing/transaction/transaction.h"
+#include "engraving/editing/transpose.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String KEYSIG_DATA_DIR("keysig_data/");
@@ -47,7 +48,7 @@ TEST_F(Engraving_KeySigTests, keysig)
     String writeFile2("keysig02-test.mscx");
     String reference2(KEYSIG_DATA_DIR + "keysig02-ref.mscx");     // with Eb maj
     String writeFile3("keysig03-test.mscx");
-    String reference3(KEYSIG_DATA_DIR + "keysig.mscx");           // orig
+    String reference3(KEYSIG_DATA_DIR + "keysig03bis-ref.mscx");           // orig
     String writeFile4("keysig04-test.mscx");
     String reference4(KEYSIG_DATA_DIR + "keysig02-ref.mscx");     // with Eb maj
     String writeFile5("keysig05-test.mscx");
@@ -64,41 +65,38 @@ TEST_F(Engraving_KeySigTests, keysig)
     // add a key signature (D major) in measure 2
     KeySigEvent ke2;
     ke2.setConcertKey(Key::D);
-    score->startCmd();
-    score->undoChangeKeySig(score->staff(0), m2->tick(), ke2);
+    score->startCmd(TranslatableString::untranslatable("Key signature tests"));
+    EditKeySig::undoChangeKeySig(score->transactionManager()->currentOrDummyTransaction(), score, score->staff(0), m2->tick(), ke2);
     score->endCmd();
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
 
     // change key signature in measure 2 to E flat major
     KeySigEvent ke_3;
     ke_3.setConcertKey(Key(-3));
-    score->startCmd();
-    score->undoChangeKeySig(score->staff(0), m2->tick(), ke_3);
+    score->startCmd(TranslatableString::untranslatable("Key signature tests"));
+    EditKeySig::undoChangeKeySig(score->transactionManager()->currentOrDummyTransaction(), score, score->staff(0), m2->tick(), ke_3);
     score->endCmd();
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile2, reference2));
 
     // remove key signature in measure 2
-    Segment* s = m2->first();
-    while (!(s->isKeySigType())) {
-        s = s->next();
-    }
+    Segment* s = m2->first(SegmentType::KeySig);
     EngravingItem* e = s->element(0);
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Key signature tests"));
     score->undoRemoveElement(e);
     score->endCmd();
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile3, reference3));
 
     // undo remove
     EditData ed;
-    score->undoStack()->undo(&ed);
+    score->transactionManager()->undoRedo(true, &ed);
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile4, reference4));
 
     // undo change
-    score->undoStack()->undo(&ed);
+    score->transactionManager()->undoRedo(true, &ed);
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile5, reference5));
 
     // undo add
-    score->undoStack()->undo(&ed);
+    score->transactionManager()->undoRedo(true, &ed);
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile6, reference6));
 
     delete score;
@@ -149,19 +147,19 @@ TEST_F(Engraving_KeySigTests, preferSharpFlat)
     auto parts = score1->parts();
     Part* part1 = parts[0];
     part1->setPreferSharpFlat(PreferSharpFlat::FLATS);
-    score1->transpositionChanged(part1, part1->instrument(Fraction(0, 1))->transpose(), Fraction(0, 1), Fraction(16, 4));
-    score1->update();
-    score1->doLayout();
+    score1->transactionManager()->transaction(TranslatableString::untranslatable("Key signature tests"), [&](auto& tx) {
+        Transpose::transpositionChanged(tx, score1, part1, part1->instrument(Fraction(0, 1))->transpose(), Fraction(0, 1), Fraction(16, 4));
+    });
     EXPECT_TRUE(ScoreComp::saveCompareScore(score1, u"preferSharpFlat-1-test.mscx", KEYSIG_DATA_DIR + u"preferSharpFlat-1-ref.mscx"));
     delete score1;
 
     MasterScore* score2 = ScoreRW::readScore(KEYSIG_DATA_DIR + u"preferSharpFlat-2.mscx");
     EXPECT_TRUE(score2);
     score2->cmdSelectAll();
-    score2->startCmd();
-    // transpose augmented unison up
-    score2->transpose(TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 1, true, true, true);
-    score2->endCmd();
+    score2->transactionManager()->transaction(TranslatableString::untranslatable("Key signature tests"), [&](auto& tx) {
+        // transpose augmented unison up
+        Transpose::transpose(tx, score2, TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 1, true, true, true);
+    });
     EXPECT_TRUE(ScoreComp::saveCompareScore(score2, u"preferSharpFlat-2-test.mscx", KEYSIG_DATA_DIR + u"preferSharpFlat-2-ref.mscx"));
     delete score2;
 }
@@ -172,7 +170,7 @@ TEST_F(Engraving_KeySigTests, keysigMode)
     EXPECT_TRUE(score);
     Measure* m1 = score->firstMeasure();
     KeySig* ke = toKeySig(m1->findSegment(SegmentType::KeySig, m1->tick())->element(0));
-    ke->setProperty(Pid::KEYSIG_MODE, int(KeyMode::DORIAN));
+    ke->setProperty(Pid::KEYSIG_MODE, KeyMode::DORIAN);
     score->update();
     score->doLayout();
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, u"keysig03.mscx", KEYSIG_DATA_DIR + u"keysig03-ref.mscx"));

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,20 +22,24 @@
 
 #include "paletteactionscontroller.h"
 
-using namespace mu::palette;
-using namespace mu::ui;
+#include "notation/inotationinteraction.h"
 
-static const mu::UriQuery MASTER_PALETTE_URI("musescore://palette/masterpalette?sync=false&modal=false");
-static const mu::UriQuery SPECIAL_CHARACTERS_URI("musescore://palette/specialcharacters?sync=false");
-static const mu::UriQuery TIME_SIGNATURE_PROPERTIES_URI("musescore://palette/timesignatureproperties");
-static const mu::UriQuery EDIT_DRUMSET_URI("musescore://palette/editdrumset");
+using namespace mu::palette;
+using namespace muse;
+using namespace muse::ui;
+using namespace muse::actions;
+
+static const muse::UriQuery MASTER_PALETTE_URI("musescore://palette/masterpalette?modal=false");
+static const muse::UriQuery SPECIAL_CHARACTERS_URI("musescore://palette/specialcharacters?modal=false");
+static const muse::UriQuery TIME_SIGNATURE_PROPERTIES_URI("musescore://palette/timesignatureproperties");
+static const muse::UriQuery CUSTOMIZE_KIT_URI("musescore://palette/customizekit");
 
 void PaletteActionsController::init()
 {
     dispatcher()->reg(this, "masterpalette", this, &PaletteActionsController::toggleMasterPalette);
     dispatcher()->reg(this, "show-keys", this, &PaletteActionsController::toggleSpecialCharactersDialog);
     dispatcher()->reg(this, "time-signature-properties", this, &PaletteActionsController::openTimeSignaturePropertiesDialog);
-    dispatcher()->reg(this, "edit-drumset", this, &PaletteActionsController::openEditDrumsetDialog);
+    dispatcher()->reg(this, "customize-kit", this, &PaletteActionsController::openCustomizeKitDialog);
 
     interactive()->currentUri().ch.onReceive(this, [this](const Uri& uri) {
         //! NOTE If MasterPalette are not open, then it is reasonably to compare with the current uri,
@@ -56,12 +60,12 @@ void PaletteActionsController::init()
     });
 }
 
-mu::ValCh<bool> PaletteActionsController::isMasterPaletteOpened() const
+ValCh<bool> PaletteActionsController::isMasterPaletteOpened() const
 {
     return m_masterPaletteOpened;
 }
 
-void PaletteActionsController::toggleMasterPalette(const actions::ActionData& args)
+void PaletteActionsController::toggleMasterPalette(const ActionData& args)
 {
     if (interactive()->isOpened(MASTER_PALETTE_URI.uri()).val) {
         interactive()->close(MASTER_PALETTE_URI.uri());
@@ -89,10 +93,20 @@ void PaletteActionsController::toggleSpecialCharactersDialog()
 
 void PaletteActionsController::openTimeSignaturePropertiesDialog()
 {
+    const engraving::EngravingItem* element = interaction() ? interaction()->hitElementContext().element : nullptr;
+    if (!element || !element->isTimeSig()) {
+        return;
+    }
     interactive()->open(TIME_SIGNATURE_PROPERTIES_URI);
 }
 
-void PaletteActionsController::openEditDrumsetDialog()
+void PaletteActionsController::openCustomizeKitDialog()
 {
-    interactive()->open(EDIT_DRUMSET_URI);
+    interactive()->open(CUSTOMIZE_KIT_URI);
+}
+
+mu::notation::INotationInteractionPtr PaletteActionsController::interaction() const
+{
+    const notation::INotationPtr notation = globalContext()->currentNotation();
+    return notation ? notation->interaction() : nullptr;
 }

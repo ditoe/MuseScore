@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHORDLINE_H__
-#define __CHORDLINE_H__
+#pragma once
 
 #include "engravingitem.h"
 #include "draw/types/painterpath.h"
 
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class Factory;
@@ -47,9 +46,6 @@ class ChordLine final : public EngravingItem
 
 public:
 
-    static constexpr double WAVE_ANGEL = 20;
-    static const SymIdList WAVE_SYMBOLS;
-
     ChordLine* clone() const override { return new ChordLine(*this); }
 
     Chord* chord() const { return (Chord*)(explicitParent()); }
@@ -69,20 +65,23 @@ public:
 
     const TranslatableString& chordLineTypeName() const;
 
-    void startEditDrag(EditData&) override;
-    void editDrag(EditData&) override;
+    void startDragGrip(EditData&) override;
+    void dragGrip(EditData&) override;
 
     String accessibleInfo() const override;
+
+    int subtype() const override;
+    TranslatableString subtypeUserName() const override;
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
 
     bool needStartEditingAfterSelecting() const override { return true; }
-    int gripsCount() const override { return m_straight ? 1 : static_cast<int>(layoutData()->path.elementCount()); }
+    int gripsCount() const override { return m_straight ? 1 : static_cast<int>(ldata()->path.elementCount()); }
     Grip initialEditModeGrip() const override { return Grip(gripsCount() - 1); }
     Grip defaultGrip() const override { return initialEditModeGrip(); }
-    std::vector<mu::PointF> gripsPositions(const EditData&) const override;
+    std::vector<PointF> gripsPositions(const EditData&) const override;
 
     bool isToTheLeft() const { return m_chordLineType == ChordLineType::PLOP || m_chordLineType == ChordLineType::SCOOP; }
     bool isBelow() const { return m_chordLineType == ChordLineType::SCOOP || m_chordLineType == ChordLineType::FALL; }
@@ -93,10 +92,12 @@ public:
     void setNote(Note* note);
     Note* note() const { return m_note; }
 
+    SymId waveSym() const;
+
     struct LayoutData : public EngravingItem::LayoutData {
-        draw::PainterPath path;
+        muse::draw::PainterPath path;
     };
-    DECLARE_LAYOUTDATA_METHODS(ChordLine);
+    DECLARE_LAYOUTDATA_METHODS(ChordLine)
 
 private:
 
@@ -115,5 +116,4 @@ private:
     bool m_playChordLine = true;
     Note* m_note = nullptr;
 };
-} // namespace mu::engraving
-#endif
+}

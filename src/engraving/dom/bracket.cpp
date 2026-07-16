@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,17 +22,20 @@
 
 #include "bracket.h"
 
+#include "types/typesconv.h"
+
 #include "bracketItem.h"
 #include "measure.h"
 #include "score.h"
 #include "staff.h"
 #include "system.h"
+#include "text.h"
 
 #include "log.h"
 
 using namespace mu;
 using namespace mu::engraving;
-using namespace mu::draw;
+using namespace muse::draw;
 
 //---------------------------------------------------------
 //   Bracket
@@ -52,44 +55,18 @@ Bracket::Bracket(EngravingItem* parent)
 
 Bracket::~Bracket()
 {
+    if (m_text) {
+        delete m_text;
+    }
 }
 
-//---------------------------------------------------------
-//   playTick
-//---------------------------------------------------------
-
-Fraction Bracket::playTick() const
+void Bracket::scanElements(std::function<void(EngravingItem*)> func)
 {
-    // Brackets always have a tick value of zero, so play from the start of the first measure in the system that the bracket belongs to.
-    const auto sys = system();
-    if (sys) {
-        const auto firstMeasure = sys->firstMeasure();
-        if (firstMeasure) {
-            return firstMeasure->tick();
-        }
+    if (m_text) {
+        m_text->scanElements(func);
     }
 
-    return tick();
-}
-
-//---------------------------------------------------------
-//   setHeight
-//---------------------------------------------------------
-
-void Bracket::setHeight(double h)
-{
-    UNREACHABLE;
-    mutLayoutData()->setBracketHeight(h);
-}
-
-//---------------------------------------------------------
-//   width
-//---------------------------------------------------------
-
-double Bracket::width(LD_ACCESS) const
-{
-    UNREACHABLE;
-    return layoutData()->bracketWidth();
+    EngravingItem::scanElements(func);
 }
 
 //---------------------------------------------------------
@@ -102,7 +79,7 @@ void Bracket::setStaffSpan(size_t a, size_t b)
     m_lastStaff = b;
 
     if (bracketType() == BracketType::BRACE
-        && style().styleSt(Sid::MusicalSymbolFont) != "Emmentaler" && style().styleSt(Sid::MusicalSymbolFont) != "Gonville") {
+        && style().styleSt(Sid::musicalSymbolFont) != "Emmentaler" && style().styleSt(Sid::musicalSymbolFont) != "Gonville") {
         int v = static_cast<int>(m_lastStaff - m_firstStaff + 1);
 
         // if staves inner staves are hidden, decrease span
@@ -112,7 +89,7 @@ void Bracket::setStaffSpan(size_t a, size_t b)
             }
         }
 
-        if (style().styleSt(Sid::MusicalSymbolFont) == "Leland") {
+        if (style().styleSt(Sid::musicalSymbolFont) == "Leland") {
             v = std::min(4, v);
         }
 
@@ -157,7 +134,7 @@ void Bracket::startEdit(EditData& ed)
 
 std::vector<PointF> Bracket::gripsPositions(const EditData&) const
 {
-    return { PointF(0.0, layoutData()->bracketHeight()) + pagePos() };
+    return { PointF(0.0, ldata()->bracketHeight()) + pagePos() };
 }
 
 //---------------------------------------------------------
@@ -170,23 +147,21 @@ void Bracket::endEdit(EditData& ed)
     ed.clear(); // score layout invalidates element
 }
 
-void Bracket::editDrag(EditData& ed)
+void Bracket::dragGrip(EditData& ed)
 {
-    double bracketHeight = layoutData()->bracketHeight();
+    double bracketHeight = ldata()->bracketHeight();
     bracketHeight += ed.delta.y();
-    mutLayoutData()->setBracketHeight(bracketHeight);
-
-    renderer()->layoutItem(this);
+    mutldata()->bracketHeight.set_value(bracketHeight);
 }
 
 //---------------------------------------------------------
-//   endEditDrag
+//   endDragGrip
 //    snap to nearest staff
 //---------------------------------------------------------
 
-void Bracket::endEditDrag(EditData&)
+void Bracket::endDragGrip(EditData&)
 {
-    double ay2 = m_ay1 + layoutData()->bracketHeight();
+    double ay2 = m_ay1 + ldata()->bracketHeight();
 
     staff_idx_t staffIdx1 = staffIdx();
     staff_idx_t staffIdx2;
@@ -197,7 +172,7 @@ void Bracket::endEditDrag(EditData&)
         double ay  = parentItem()->pagePos().y();
         System* s = system();
         double y   = s->staff(staffIdx1)->y() + ay;
-        double h1  = staff()->height();
+        double h1  = staff()->staffHeight();
 
         for (staffIdx2 = staffIdx1 + 1; staffIdx2 < n; ++staffIdx2) {
             double h = s->staff(staffIdx2)->y() + ay - y;
@@ -210,8 +185,8 @@ void Bracket::endEditDrag(EditData&)
     }
 
     double sy = system()->staff(staffIdx1)->y();
-    double ey = system()->staff(staffIdx2)->y() + score()->staff(staffIdx2)->height();
-    mutLayoutData()->setBracketHeight(ey - sy);
+    double ey = system()->staff(staffIdx2)->y() + score()->staff(staffIdx2)->staffHeight();
+    mutldata()->bracketHeight.set_value(ey - sy);
     bracketItem()->undoChangeProperty(Pid::BRACKET_SPAN, staffIdx2 - staffIdx1 + 1);
 }
 
@@ -228,7 +203,7 @@ bool Bracket::acceptDrop(EditData& data) const
 //   drop
 //---------------------------------------------------------
 
-EngravingItem* Bracket::drop(EditData& data)
+EngravingItem* Bracket::drop(Transaction&, EditData& data)
 {
     EngravingItem* e = data.dropElement;
     Bracket* b = 0;
@@ -329,7 +304,7 @@ bool Bracket::setProperty(Pid id, const PropertyValue& v)
 PropertyValue Bracket::propertyDefault(Pid id) const
 {
     if (id == Pid::BRACKET_COLUMN) {
-        return 0;
+        return size_t(0);
     }
     PropertyValue v = EngravingItem::propertyDefault(id);
     if (!v.isValid()) {
@@ -339,19 +314,36 @@ PropertyValue Bracket::propertyDefault(Pid id) const
 }
 
 //---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString Bracket::subtypeUserName() const
+{
+    return TConv::userName(bracketType());
+}
+
+//---------------------------------------------------------
 //   undoChangeProperty
 //---------------------------------------------------------
 
 void Bracket::undoChangeProperty(Pid id, const PropertyValue& v, PropertyFlags ps)
 {
     if (id == Pid::COLOR) {
-        setColor(v.value<draw::Color>());
+        setColor(v.value<Color>());
     }
 
     // brackets do not survive layout() and therefore cannot be on
     // the undo stack; delegate to BracketItem:
     BracketItem* bi = bracketItem();
     bi->undoChangeProperty(id, v, ps);
+}
+
+Fraction Bracket::tick() const
+{
+    if (measure()) {
+        return measure()->tick();
+    }
+    return EngravingItem::tick();
 }
 
 //---------------------------------------------------------
@@ -361,5 +353,19 @@ void Bracket::undoChangeProperty(Pid id, const PropertyValue& v, PropertyFlags p
 void Bracket::setSelected(bool f)
 {
     m_bi->setSelected(f);
+    if (m_text) {
+        m_text->setSelected(f);
+    }
+
     EngravingItem::setSelected(f);
+}
+
+bool Bracket::intersects(const Bracket* other) const
+{
+    return m_firstStaff <= other->m_lastStaff && m_lastStaff >= other->m_firstStaff;
+}
+
+bool Bracket::contains(staff_idx_t staffIdx) const
+{
+    return staffIdx >= m_firstStaff && staffIdx <= m_lastStaff;
 }

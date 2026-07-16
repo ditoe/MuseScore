@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,16 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_IMPORTEXPORT_IMIDIIMPORTEXPORTCONFIGURATION_H
-#define MU_IMPORTEXPORT_IMIDIIMPORTEXPORTCONFIGURATION_H
+
+#pragma once
 
 #include <optional>
 
 #include "modularity/imoduleinterface.h"
+#include "async/channel.h"
 #include "io/path.h"
 
 namespace mu::iex::midi {
-class IMidiImportExportConfiguration : MODULE_EXPORT_INTERFACE
+class IMidiImportExportConfiguration : MODULE_GLOBAL_INTERFACE
 {
     INTERFACE_ID(IMidiImportExportConfiguration)
 
@@ -38,8 +39,13 @@ public:
     // import
     virtual int midiShortestNote() const = 0; //ticks
     virtual void setMidiShortestNote(int ticks) = 0;
+    virtual muse::async::Channel<int> midiShortestNoteChanged() const = 0;
 
-    virtual void setMidiImportOperationsFile(const std::optional<io::path_t>& filePath) const = 0;
+    virtual bool roundTempo() const = 0;
+    virtual void setRoundTempo(bool round) = 0;
+    virtual muse::async::Channel<bool> roundTempoChanged() const = 0;
+
+    virtual void setMidiImportOperationsFile(const std::optional<muse::io::path_t>& filePath) const = 0;
 
     // export
     virtual bool isExpandRepeats() const = 0;
@@ -49,5 +55,3 @@ public:
     virtual void setIsMidiExportRpns(bool exportRpns) = 0;
 };
 }
-
-#endif // MU_IMPORTEXPORT_IMIDIIMPORTEXPORTCONFIGURATION_H

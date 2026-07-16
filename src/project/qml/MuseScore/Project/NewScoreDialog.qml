@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 import "internal/NewScore"
 
@@ -118,23 +118,15 @@ StyledDialogView {
 
         spacing: 12
 
-        NavigationPanel {
-            id: navBottomPanel
-
-            name: "BottomPanel"
-            section: root.navigationSection
-            order: 100
-            direction: NavigationPanel.Horizontal
-        }
-
         StyledTextLabel {
             id: descriptionLabel
             text: pagesStack.currentIndex === 0
                   ? chooseInstrumentsAndTemplatePage.description
                   : ""
+            displayTruncatedTextOnHover: true
 
             Layout.fillWidth: true
-            Layout.maximumHeight: doneButton.height
+            Layout.maximumHeight: buttonBox.height
 
             font: ui.theme.bodyFont
             opacity: 0.7
@@ -142,60 +134,58 @@ StyledDialogView {
             wrapMode: Text.Wrap
         }
 
-        FlatButton {
-            navigation.name: "Cancel"
-            navigation.panel: navBottomPanel
-            navigation.column: 1
+        ButtonBox {
+            id: buttonBox
 
-            text: qsTrc("global", "Cancel")
+            Layout.preferredWidth: implicitWidth
 
-            onClicked: {
-                root.reject()
+            navigationPanel.name: "BottomPanel"
+            navigationPanel.section: root.navigationSection
+            navigationPanel.order: 100
+
+            FlatButton {
+                text: qsTrc("global", "Cancel")
+                buttonRole: ButtonBoxModel.CustomRole
+                buttonId: ButtonBoxModel.CustomButton + 1
+
+                onClicked: {
+                    root.reject()
+                }
             }
-        }
 
-        FlatButton {
-            navigation.name: "Back"
-            navigation.panel: navBottomPanel
-            navigation.column: 2
+            FlatButton {
+                text: qsTrc("global", "Back")
+                buttonRole: ButtonBoxModel.CustomRole
+                buttonId: ButtonBoxModel.CustomButton + 2
+                visible: pagesStack.currentIndex > 0
 
-            visible: pagesStack.currentIndex > 0
-
-            text: qsTrc("global", "Back")
-
-            onClicked: {
-                pagesStack.currentIndex--
+                onClicked: {
+                    pagesStack.currentIndex--
+                }
             }
-        }
 
-        FlatButton {
-            navigation.name: "Next"
-            navigation.panel: navBottomPanel
-            navigation.column: 3
+            FlatButton {
+                text: qsTrc("global", "Next")
+                buttonRole: ButtonBoxModel.CustomRole
+                buttonId: ButtonBoxModel.CustomButton + 3
+                visible: pagesStack.currentIndex < pagesStack.count - 1
+                enabled: chooseInstrumentsAndTemplatePage.hasSelection
 
-            visible: pagesStack.currentIndex < pagesStack.count - 1
-            enabled: chooseInstrumentsAndTemplatePage.hasSelection
-
-            text: qsTrc("global", "Next")
-
-            onClicked: {
-                pagesStack.currentIndex++
+                onClicked: {
+                    pagesStack.currentIndex++
+                }
             }
-        }
 
-        FlatButton {
-            id: doneButton
+            FlatButton {
+                text: qsTrc("global", "Done")
+                buttonRole: ButtonBoxModel.AcceptRole
+                buttonId: ButtonBoxModel.Done
+                accentButton: true
+                enabled: chooseInstrumentsAndTemplatePage.hasSelection
 
-            navigation.name: "Done"
-            navigation.panel: navBottomPanel
-            navigation.column: 4
-
-            enabled: chooseInstrumentsAndTemplatePage.hasSelection
-
-            text: qsTrc("global", "Done")
-
-            onClicked: {
-                root.onDone()
+                onClicked: {
+                    root.onDone()
+                }
             }
         }
     }

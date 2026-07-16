@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_LIBMSCORE_ACTIONICON_H
-#define MU_LIBMSCORE_ACTIONICON_H
+#pragma once
 
 #include "engravingitem.h"
 
+#include "draw/types/font.h"
+
 namespace mu::engraving {
-enum class ActionIconType {
+enum class ActionIconType : signed char {
     UNDEFINED = -1,
 
     ACCIACCATURA,
@@ -57,6 +58,20 @@ enum class ActionIconType {
 
     PARENTHESES,
     BRACKETS,
+
+    STANDARD_BEND,
+    PRE_BEND,
+    GRACE_NOTE_BEND,
+    SLIGHT_BEND,
+
+    DIVE,
+    PRE_DIVE,
+    DIP,
+    SCOOP,
+
+    NOTE_ANCHORED_LINE,
+
+    SYSTEM_LOCK,
 };
 
 //! Dummy element, used for drag&drop
@@ -69,8 +84,6 @@ public:
     ActionIcon(EngravingItem* score);
     ~ActionIcon() override = default;
 
-    static constexpr double DEFAULT_FONT_SIZE = 16.0;
-
     ActionIcon* clone() const override;
 
     ActionIconType actionType() const;
@@ -81,9 +94,7 @@ public:
 
     char16_t icon() const { return m_icon; }
 
-    const mu::draw::Font& iconFont() const { return m_iconFont; }
-    double fontSize() const;
-    void setFontSize(double size);
+    const muse::draw::Font& iconFont() const { return m_iconFont; }
 
     PropertyValue getProperty(Pid) const override;
     bool setProperty(Pid, const PropertyValue&) override;
@@ -92,8 +103,6 @@ private:
     ActionIconType m_actionType = ActionIconType::UNDEFINED;
     std::string m_actionCode;
     char16_t m_icon = 0;
-    mu::draw::Font m_iconFont;
+    muse::draw::Font m_iconFont;
 };
 }
-
-#endif // MU_LIBMSCORE_ACTIONICON_H

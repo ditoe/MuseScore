@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SLURTIE_H__
-#define __SLURTIE_H__
+#pragma once
 
 #include "spanner.h"
 
@@ -33,9 +32,9 @@ namespace mu::engraving {
 //---------------------------------------------------------
 
 struct SlurTiePos {
-    PointF p1;               // start point of slur
+    PointF p1;               // start point of slur in system coordinates
     System* system1 = nullptr;          // start system of slur
-    PointF p2;               // end point of slur
+    PointF p2;               // end point of slur in system coordinates
     System* system2 = nullptr;           // end system of slur
 };
 
@@ -97,24 +96,27 @@ public:
     virtual void spatiumChanged(double, double) override;
     SlurTie* slurTie() const { return (SlurTie*)spanner(); }
 
-    void startEditDrag(EditData& ed) override;
-    void endEditDrag(EditData& ed) override;
-    void editDrag(EditData&) override;
+    bool isEditAllowed(EditData&) const override;
+    bool edit(EditData&) override;
+
+    void startDragGrip(EditData& ed) override;
+    void endDragGrip(EditData& ed) override;
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid id) const override;
-    void reset() override;
+    virtual EngravingObject* propertyDelegate(Pid) const override;
+    virtual void reset() override;
     void undoChangeProperty(Pid id, const PropertyValue&, PropertyFlags ps) override;
     void move(const PointF& s) override;
     bool isEditable() const override { return true; }
 
+    int subtype() const override;
+    TranslatableString subtypeUserName() const override;
+
     void setSlurOffset(Grip i, const PointF& val) { m_ups[int(i)].off = val; }
     const UP& ups(Grip i) const { return m_ups[int(i)]; }
     UP& ups(Grip i) { return m_ups[int(i)]; }
-    Shape shape() const override { return m_shape; }
-
-    const mu::draw::PainterPath& path() const { return m_path; }
 
     bool needStartEditingAfterSelecting() const override { return true; }
     int gripsCount() const override { return int(Grip::GRIPS); }
@@ -122,27 +124,34 @@ public:
     Grip defaultGrip() const override { return Grip::DRAG; }
     std::vector<PointF> gripsPositions(const EditData& = EditData()) const override;
 
-    virtual void drawEditMode(mu::draw::Painter* painter, EditData& editData, double currentViewScaling) override;
-    virtual void computeBezier(PointF so = PointF()) = 0;
+    virtual bool isUserModified() const override;
+
+    virtual double endWidth() const = 0;
+    virtual double midWidth() const = 0;
+    virtual double dottedWidth() const = 0;
+
+    struct LayoutData : public SpannerSegment::LayoutData
+    {
+        ld_field<muse::draw::PainterPath> path = "path";
+        ld_field<double> midThickness = "midThickness";
+    };
+    DECLARE_LAYOUTDATA_METHODS(SlurTieSegment)
 
 protected:
     SlurTieSegment(const ElementType& type, System*);
     SlurTieSegment(const SlurTieSegment&);
 
     virtual void changeAnchor(EditData&, EngravingItem*) = 0;
-    std::vector<mu::LineF> gripAnchorLines(Grip grip) const override;
+    std::vector<LineF> gripAnchorLines(Grip grip) const override;
 
     struct UP m_ups[int(Grip::GRIPS)];
-
-    mu::draw::PainterPath m_path;
-    mu::draw::PainterPath m_shapePath;
-    Shape m_shape;
 };
 
 //-------------------------------------------------------------------
 //   @@ SlurTie
 //   @P lineType       int  (0 - solid, 1 - dotted, 2 - dashed, 3 - wide dashed)
 //   @P slurDirection  enum (Direction.AUTO, Direction.DOWN, Direction.UP)
+//   @P maskSlurTie    enum (AutoOnOff.AUTO, AutoOnOff.ON, AutoOnOff.OFF)
 //-------------------------------------------------------------------
 
 class SlurTie : public Spanner
@@ -163,11 +172,16 @@ public:
     void setSlurDirection(DirectionV d) { m_slurDirection = d; }
     void undoSetSlurDirection(DirectionV d);
 
-    virtual void layout2(const PointF, int, struct UP&) {}
     virtual bool contains(const PointF&) const { return false; }    // not selectable
 
     SlurStyleType styleType() const { return m_styleType; }
     void setStyleType(SlurStyleType type) { m_styleType = type; }
+
+    int subtype() const override { return static_cast<int>(m_styleType) + 1; }
+    TranslatableString subtypeUserName() const override;
+
+    AutoOnOff maskSlurTie() const { return m_maskSlurTie; }
+    void setMaskSlurTie(AutoOnOff val) { m_maskSlurTie = val; }
 
     virtual SlurTieSegment* newSlurTieSegment(System* parent) = 0;
 
@@ -176,6 +190,8 @@ public:
     PropertyValue propertyDefault(Pid id) const override;
 
     void fixupSegments(unsigned nsegs);
+
+    virtual double scalingFactor() const = 0;
 
 protected:
 
@@ -186,7 +202,6 @@ protected:
 private:
 
     SlurStyleType m_styleType = SlurStyleType::Undefined;
+    AutoOnOff m_maskSlurTie = AutoOnOff::AUTO;
 };
 }
-
-#endif

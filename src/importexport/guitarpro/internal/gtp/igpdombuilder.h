@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,7 +32,7 @@ class IGPDomBuilder
 {
 public:
     virtual ~IGPDomBuilder() = default;
-    virtual void buildGPDomModel(XmlDomElement* domElem) = 0;
+    virtual void buildGPDomModel(muse::XmlDomElement* domElem) = 0;
     virtual std::unique_ptr<GPDomModel> getGPDomModel() = 0;
 };
 } // namespace mu::iex::guitarpro

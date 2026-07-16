@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,38 +19,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "notationaccessibility.h"
 
 #include "translation.h"
 
+#include "engraving/accessibility/accessibleroot.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/segment.h"
+#include "engraving/dom/staff.h"
+
 #include "igetscore.h"
+#include "inotationinteraction.h" // IWYU pragma: keep
 #include "notation.h"
 
-#include "engraving/dom/masterscore.h"
-#include "engraving/dom/spanner.h"
-#include "engraving/dom/segment.h"
-#include "engraving/dom/slur.h"
-#include "engraving/dom/staff.h"
-#include "engraving/dom/part.h"
-#include "engraving/dom/sig.h"
-#include "engraving/dom/measure.h"
-
-#include "accessibility/accessibleroot.h"
-
 using namespace mu::notation;
-using namespace mu::async;
+using namespace muse::async;
 using namespace mu::engraving;
-using namespace mu::accessibility;
+using namespace muse::accessibility;
 
 NotationAccessibility::NotationAccessibility(const Notation* notation)
     : m_getScore(notation)
 {
     notation->interaction()->selectionChanged().onNotify(this, [this]() {
-        setTriggeredCommand("");
         updateAccessibilityInfo();
     });
 
-    notation->notationChanged().onNotify(this, [this]() {
+    notation->notationChanged().onReceive(this, [this](const muse::RectF&) {
         updateAccessibilityInfo();
     });
 }
@@ -65,7 +62,7 @@ const mu::engraving::Selection* NotationAccessibility::selection() const
     return &score()->selection();
 }
 
-mu::ValCh<std::string> NotationAccessibility::accessibilityInfo() const
+muse::ValCh<std::string> NotationAccessibility::accessibilityInfo() const
 {
     return m_accessibilityInfo;
 }
@@ -112,16 +109,6 @@ void NotationAccessibility::setEnabled(bool enabled)
 #endif
 }
 
-void NotationAccessibility::setTriggeredCommand(const std::string& command)
-{
-#ifndef ENGRAVING_NO_ACCESSIBILITY
-    score()->rootItem()->accessible()->accessibleRoot()->setCommandInfo(QString::fromStdString(command));
-    score()->dummy()->rootItem()->accessible()->accessibleRoot()->setCommandInfo(QString::fromStdString(command));
-#else
-    UNUSED(command)
-#endif
-}
-
 void NotationAccessibility::updateAccessibilityInfo()
 {
     if (!score()) {
@@ -135,7 +122,7 @@ void NotationAccessibility::updateAccessibilityInfo()
     } else if (selection()->isRange()) {
         newAccessibilityInfo = rangeAccessibilityInfo();
     } else if (selection()->isList()) {
-        newAccessibilityInfo = qtrc("notation", "List selection");
+        newAccessibilityInfo = muse::qtrc("notation", "List selection");
     }
 
     // Simplify whitespace and remove newlines
@@ -165,17 +152,22 @@ QString NotationAccessibility::rangeAccessibilityInfo() const
         endSegment = endSegment->prev1MM();
     }
 
-    std::pair<int, float> startBarbeat = selection()->startSegment()->barbeat();
-    QString start =  qtrc("notation", "Start measure: %1; Start beat: %2")
-                    .arg(startBarbeat.first)
-                    .arg(startBarbeat.second);
+    EngravingItem::BarBeat startBarbeat = selection()->startSegment()->barbeat();
 
-    std::pair<int, float> endBarbeat = endSegment->barbeat();
-    QString end =  qtrc("notation", "End measure: %1; End beat: %2")
-                  .arg(endBarbeat.first)
-                  .arg(endBarbeat.second);
+    QString start = muse::qtrc("engraving", "Start measure: %1").arg(String::number(startBarbeat.bar));
+    if (startBarbeat.displayedBar != startBarbeat.bar) {
+        start += "; " + muse::qtrc("engraving", "Start displayed measure: %1").arg(startBarbeat.displayedBar);
+    }
+    start += "; " + muse::qtrc("engraving", "Start beat: %1").arg(startBarbeat.beat);
 
-    return qtrc("notation", "Range selection; %1; %2")
+    EngravingItem::BarBeat endBarbeat = endSegment->barbeat();
+    QString end = muse::qtrc("engraving", "End measure: %1").arg(String::number(endBarbeat.bar));
+    if (endBarbeat.displayedBar != endBarbeat.bar) {
+        end += "; " + muse::qtrc("engraving", "End displayed measure: %1").arg(endBarbeat.displayedBar);
+    }
+    end += "; " + muse::qtrc("engraving", "End beat: %1").arg(endBarbeat.beat);
+
+    return muse::qtrc("notation", "Range selection; %1; %2")
            .arg(start)
            .arg(end);
 }
@@ -195,7 +187,7 @@ QString NotationAccessibility::singleElementAccessibilityInfo() const
     }
 
     if (element->hasStaff()) {
-        QString staff = qtrc("notation", "Staff %1").arg(QString::number(element->staffIdx() + 1));
+        QString staff = muse::qtrc("notation", "Staff %1").arg(QString::number(element->staffIdx() + 1));
 
         QString staffName = element->staff()->part()->longName(element->tick());
         if (staffName.isEmpty()) {

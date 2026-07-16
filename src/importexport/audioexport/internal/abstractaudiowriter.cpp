@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,19 +21,20 @@
  */
 #include "abstractaudiowriter.h"
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
 #include <QThread>
 
-#include "audio/iaudiooutput.h"
+#include "global/containers.h"
 
 #include "log.h"
 
+using namespace muse;
+using namespace muse::audio;
 using namespace mu::iex::audioexport;
 using namespace mu::project;
 using namespace mu::notation;
-using namespace mu::framework;
 
 std::vector<INotationWriter::UnitType> AbstractAudioWriter::supportedUnitTypes() const
 {
@@ -46,13 +47,13 @@ bool AbstractAudioWriter::supportsUnitType(UnitType unitType) const
     return std::find(unitTypes.cbegin(), unitTypes.cend(), unitType) != unitTypes.cend();
 }
 
-mu::Ret AbstractAudioWriter::write(INotationPtr, QIODevice&, const Options& options)
+Ret AbstractAudioWriter::write(INotationPtr, io::IODevice&, const Options& options)
 {
     IF_ASSERT_FAILED(unitTypeFromOptions(options) != UnitType::MULTI_PART) {
         return Ret(Ret::Code::NotSupported);
     }
 
-    if (supportsUnitType(options.value(OptionKey::UNIT_TYPE, Val(UnitType::PER_PAGE)).toEnum<UnitType>())) {
+    if (supportsUnitType(muse::value(options, OptionKey::UNIT_TYPE, Val(UnitType::PER_PAGE)).toEnum<UnitType>())) {
         NOT_IMPLEMENTED;
         return Ret(Ret::Code::NotImplemented);
     }
@@ -61,13 +62,13 @@ mu::Ret AbstractAudioWriter::write(INotationPtr, QIODevice&, const Options& opti
     return Ret(Ret::Code::NotSupported);
 }
 
-mu::Ret AbstractAudioWriter::writeList(const INotationPtrList&, QIODevice&, const Options& options)
+Ret AbstractAudioWriter::writeList(const INotationPtrList&, io::IODevice&, const Options& options)
 {
     IF_ASSERT_FAILED(unitTypeFromOptions(options) == UnitType::MULTI_PART) {
         return Ret(Ret::Code::NotSupported);
     }
 
-    if (supportsUnitType(options.value(OptionKey::UNIT_TYPE, Val(UnitType::PER_PAGE)).toEnum<UnitType>())) {
+    if (supportsUnitType(muse::value(options, OptionKey::UNIT_TYPE, Val(UnitType::PER_PAGE)).toEnum<UnitType>())) {
         NOT_IMPLEMENTED;
         return Ret(Ret::Code::NotImplemented);
     }
@@ -78,69 +79,117 @@ mu::Ret AbstractAudioWriter::writeList(const INotationPtrList&, QIODevice&, cons
 
 void AbstractAudioWriter::abort()
 {
-    playback()->audioOutput()->abortSavingAllSoundTracks();
+    muse::ContextInject<muse::audio::IPlayback> playback = { m_iocContext };
+    playback()->abortSavingAllSoundTracks();
+    m_writeRet = make_ret(Ret::Code::Cancel);
+    m_isCompleted = true;
 }
 
-mu::framework::Progress* AbstractAudioWriter::progress()
+muse::Progress* AbstractAudioWriter::progress()
 {
     return &m_progress;
 }
 
-mu::Ret AbstractAudioWriter::doWriteAndWait(INotationPtr notation, QIODevice& destinationDevice, const audio::SoundTrackFormat& format)
+Ret AbstractAudioWriter::doWriteAndWait(INotationPtr notation,
+                                        io::IODevice& dstDevice,
+                                        const SoundTrackFormat& format,
+                                        const Options& options)
 {
-    //!Note Temporary workaround, since QIODevice is the alias for QIODevice, which falls with SIGSEGV
-    //!     on any call from background thread. Once we have our own implementation of QIODevice
-    //!     we can pass QIODevice directly into IPlayback::IAudioOutput::saveSoundTrack
-    QFile* file = qobject_cast<QFile*>(&destinationDevice);
+    //! NOTE Temporary fix for the context injection
+    m_iocContext = notation->iocContext();
 
-    QFileInfo info(*file);
-    QString path = info.absoluteFilePath();
+    muse::ContextInject<playback::IPlaybackController> playbackController = { m_iocContext };
+
+    //! NOTE Waiting for the audio system to start if it is not already running
+    while (!startAudioController()->isAudioStarted()) {
+        application()->processEvents();
+        QThread::yieldCurrentThread();
+    }
 
     m_isCompleted = false;
-    m_writeRet = Ret();
+    m_writeRet = muse::Ret();
 
     playbackController()->setNotation(notation);
     playbackController()->setIsExportingAudio(true);
 
-    m_progress.finished.onReceive(this, [this](const auto&) {
-        playbackController()->setIsExportingAudio(false);
-        playbackController()->setNotation(globalContext()->currentNotation());
-    });
+    SoundTrackFormat actualFormat = format;
 
-    playback()->sequenceIdList()
-    .onResolve(this, [this, path, &format](const audio::TrackSequenceIdList& sequenceIdList) {
-        m_progress.started.notify();
+    double leadingSilenceSec = muse::value(options, OptionKey::LEADING_SILENCE_SEC, Val(0.0)).toDouble();
+    actualFormat.leadingSilenceDuration = std::isfinite(leadingSilenceSec)
+                                          ? static_cast<msecs_t>(leadingSilenceSec) : msecs_t(0);
 
-        for (const audio::TrackSequenceId sequenceId : sequenceIdList) {
-            playback()->audioOutput()->saveSoundTrackProgress(sequenceId).progressChanged
-            .onReceive(this, [this](int64_t current, int64_t total, std::string title) {
-                m_progress.progressChanged.send(current, total, title);
-            });
+    double trailingSilenceSec = muse::value(options, OptionKey::TRAILING_SILENCE_SEC, Val(0.0)).toDouble();
+    actualFormat.trailingSilenceDuration = std::isfinite(trailingSilenceSec)
+                                           ? static_cast<msecs_t>(trailingSilenceSec) : msecs_t(0);
 
-            playback()->audioOutput()->saveSoundTrack(sequenceId, io::path_t(path), std::move(format))
-            .onResolve(this, [this, path](const bool /*result*/) {
-                LOGD() << "Successfully saved sound track by path: " << path;
-                m_writeRet = make_ok();
-                m_isCompleted = true;
-                m_progress.finished.send(make_ok());
-            })
-            .onReject(this, [this](int errorCode, const std::string& msg) {
-                m_writeRet = Ret(errorCode, msg);
-                m_isCompleted = true;
-                m_progress.finished.send(make_ret(errorCode, msg));
-            });
+    doWrite(dstDevice, actualFormat);
+
+    const bool waitForCompletion = muse::value(options, OptionKey::WAIT_FOR_COMPLETION, Val(true)).toBool();
+    if (waitForCompletion) {
+        while (!m_isCompleted) {
+            application()->processEvents();
+            QThread::yieldCurrentThread();
         }
-    })
-    .onReject(this, [](int errorCode, const std::string& msg) {
-        LOGE() << "errorCode: " << errorCode << ", " << msg;
-    });
-
-    while (!m_isCompleted) {
-        QApplication::instance()->processEvents();
-        QThread::yieldCurrentThread();
     }
 
     return m_writeRet;
+}
+
+void AbstractAudioWriter::doWrite(io::IODevice& dstDevice, const SoundTrackFormat& format)
+{
+    muse::ContextInject<muse::audio::IPlayback> playbackInj = { m_iocContext };
+
+    const std::string processingOnlineSoundsMsg = trc("iex_audio", "Processing online sounds…");
+
+    muse::ContextInject<context::IGlobalContext> globalContext = { m_iocContext };
+    m_notationForRestore = globalContext()->currentNotation();
+
+    auto restorePlaybackState = [this]() {
+        muse::ContextInject<playback::IPlaybackController> playbackController = { m_iocContext };
+        playbackController()->setIsExportingAudio(false);
+        playbackController()->setNotation(m_notationForRestore);
+    };
+
+    auto sendProgress = [this, processingOnlineSoundsMsg](int64_t current, int64_t total, SaveSoundTrackStage stage) {
+        switch (stage) {
+        case SaveSoundTrackStage::ProcessingOnlineSounds:
+            m_progress.progress(current, total, processingOnlineSoundsMsg);
+            break;
+        case SaveSoundTrackStage::WritingSoundTrack:
+        case SaveSoundTrackStage::Unknown:
+            m_progress.progress(current, total);
+            break;
+        }
+    };
+
+    m_progress.start();
+
+    auto playback = playbackInj();
+
+    playback->saveSoundTrackProgressChanged()
+    .onReceive(this, [sendProgress](int64_t current, int64_t total, SaveSoundTrackStage stage) {
+        sendProgress(current, total, stage);
+    });
+
+    playback->saveSoundTrack(std::move(format), dstDevice)
+    .onResolve(this, [this, playback, restorePlaybackState](const bool /*result*/) {
+        LOGI() << "Successfully saved sound track";
+
+        restorePlaybackState();
+
+        m_writeRet = muse::make_ok();
+        m_isCompleted = true;
+        m_progress.finish(muse::make_ok());
+        playback->saveSoundTrackProgressChanged().disconnect(this);
+    })
+    .onReject(this, [this, playback, restorePlaybackState](int errorCode, const std::string& msg) {
+        restorePlaybackState();
+
+        m_writeRet = Ret(errorCode, msg);
+        m_isCompleted = true;
+        m_progress.finish(make_ret(errorCode, msg));
+        playback->saveSoundTrackProgressChanged().disconnect(this);
+    });
 }
 
 INotationWriter::UnitType AbstractAudioWriter::unitTypeFromOptions(const Options& options) const
@@ -151,7 +200,7 @@ INotationWriter::UnitType AbstractAudioWriter::unitTypeFromOptions(const Options
     }
 
     UnitType defaultUnitType = supported.front();
-    UnitType unitType = options.value(OptionKey::UNIT_TYPE, Val(defaultUnitType)).toEnum<UnitType>();
+    UnitType unitType = muse::value(options, OptionKey::UNIT_TYPE, Val(defaultUnitType)).toEnum<UnitType>();
     if (!supportsUnitType(unitType)) {
         return defaultUnitType;
     }

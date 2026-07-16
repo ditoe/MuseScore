@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,25 +22,29 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/accidental.h"
-#include "dom/articulation.h"
-#include "dom/articulation.h"
-#include "dom/chord.h"
-#include "dom/chordrest.h"
-#include "dom/factory.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/mscore.h"
-#include "dom/note.h"
-#include "dom/pitchspelling.h"
-#include "dom/segment.h"
-#include "dom/tremolo.h"
-
 #include "engraving/compat/scoreaccess.h"
+#include "engraving/dom/accidental.h"
+#include "engraving/dom/articulation.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/lyrics.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/mscore.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/pitchspelling.h"
+#include "engraving/dom/segment.h"
+#include "engraving/dom/tremolosinglechord.h"
+
+#include "engraving/editing/editnote.h"
+#include "engraving/editing/edittie.h"
+#include "engraving/editing/noteinput.h"
+#include "engraving/editing/transaction/transaction.h"
+
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String NOTE_DATA_DIR("note_data/");
@@ -49,6 +53,12 @@ class Engraving_NoteTests : public ::testing::Test
 {
 };
 
+static ChordRest* chordRestAtTick(Score* score, const Fraction& tick, track_idx_t track)
+{
+    Segment* segment = score->tick2segment(tick, false, SegmentType::ChordRest);
+    return segment ? toChordRest(segment->element(track)) : nullptr;
+}
+
 //---------------------------------------------------------
 ///   note
 ///   read/write test of note
@@ -56,7 +66,7 @@ class Engraving_NoteTests : public ::testing::Test
 
 TEST_F(Engraving_NoteTests, note)
 {
-    MasterScore* score = compat::ScoreAccess::createMasterScore();
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
     Chord* chord = Factory::createChord(score->dummy()->segment());
     Note* note = Factory::createNote(chord);
     chord->add(note);
@@ -197,40 +207,40 @@ TEST_F(Engraving_NoteTests, note)
     delete n;
 
     // mirror
-    note->setProperty(Pid::MIRROR_HEAD, int(DirectionH::LEFT));
+    note->setProperty(Pid::MIRROR_HEAD, DirectionH::LEFT);
     n = toNote(ScoreRW::writeReadElement(note));
     EXPECT_EQ(n->userMirror(), DirectionH::LEFT);
     delete n;
 
-    note->setProperty(Pid::MIRROR_HEAD, int(DirectionH::RIGHT));
+    note->setProperty(Pid::MIRROR_HEAD, DirectionH::RIGHT);
     n = toNote(ScoreRW::writeReadElement(note));
     EXPECT_EQ(n->userMirror(), DirectionH::RIGHT);
     delete n;
 
-    note->setProperty(Pid::MIRROR_HEAD, int(DirectionH::AUTO));
+    note->setProperty(Pid::MIRROR_HEAD, DirectionH::AUTO);
     n = toNote(ScoreRW::writeReadElement(note));
     EXPECT_EQ(n->userMirror(), DirectionH::AUTO);
     delete n;
 
     // dot position
-    note->setProperty(Pid::DOT_POSITION, PropertyValue::fromValue(DirectionV(DirectionV::UP)));
+    note->setProperty(Pid::DOT_POSITION, PropertyValue::fromValue(DirectionV::UP));
     n = toNote(ScoreRW::writeReadElement(note));
-    EXPECT_EQ(int(n->userDotPosition()), int(DirectionV::UP));
+    EXPECT_EQ(n->userDotPosition(), DirectionV::UP);
     delete n;
 
-    note->setProperty(Pid::DOT_POSITION, PropertyValue::fromValue(DirectionV(DirectionV::DOWN)));
+    note->setProperty(Pid::DOT_POSITION, PropertyValue::fromValue(DirectionV::DOWN));
     n = toNote(ScoreRW::writeReadElement(note));
-    EXPECT_EQ(int(n->userDotPosition()), int(DirectionV::DOWN));
+    EXPECT_EQ(n->userDotPosition(), DirectionV::DOWN);
     delete n;
 
-    note->setProperty(Pid::DOT_POSITION, PropertyValue::fromValue(DirectionV(DirectionV::AUTO)));
+    note->setProperty(Pid::DOT_POSITION, PropertyValue::fromValue(DirectionV::AUTO));
     n = toNote(ScoreRW::writeReadElement(note));
-    EXPECT_EQ(int(n->userDotPosition()), int(DirectionV::AUTO));
+    EXPECT_EQ(n->userDotPosition(), DirectionV::AUTO);
     delete n;
 
     // headGroup
     for (int i = 0; i < int(NoteHeadGroup::HEAD_GROUPS); ++i) {
-        note->setProperty(Pid::HEAD_GROUP, i);
+        note->setProperty(Pid::HEAD_GROUP, static_cast<NoteHeadGroup>(i));
         n = toNote(ScoreRW::writeReadElement(note));
         EXPECT_EQ(int(n->headGroup()), i);
         delete n;
@@ -238,7 +248,7 @@ TEST_F(Engraving_NoteTests, note)
 
     // headType
     for (int i = 0; i < int(NoteHeadType::HEAD_TYPES); ++i) {
-        note->setProperty(Pid::HEAD_TYPE, i);
+        note->setProperty(Pid::HEAD_TYPE, static_cast<NoteHeadType>(i));
         n = toNote(ScoreRW::writeReadElement(note));
         EXPECT_EQ(int(n->headType()), i);
         delete n;
@@ -306,36 +316,58 @@ TEST_F(Engraving_NoteTests, grace)
 
     // tie
     score->select(gn);
-    score->cmdAddTie();
+    EditTie::cmdAddTie(score);
 //      n = toNote(ScoreRW::writeReadElement(gn));
 //      QVERIFY(n->tieFor() != 0);
 //      delete n;
 
     // tremolo
-    score->startCmd();
-    Tremolo* tr = Factory::createTremolo(gc);
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
+    TremoloSingleChord* tr = Factory::createTremoloSingleChord(gc);
     tr->setTremoloType(TremoloType::R16);
     tr->setParent(gc);
     tr->setTrack(gc->track());
     score->undoAddElement(tr);
     score->endCmd();
-//      Chord* c = static_cast<Chord*>(ScoreRW::writeReadElement(gc));
+//      Chord* c = toChord(ScoreRW::writeReadElement(gc));
 //      QVERIFY(c->tremolo() != 0);
 //      delete c;
 
     // articulation
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
     Articulation* ar = Factory::createArticulation(gc);
     ar->setSymId(SymId::articAccentAbove);
     ar->setParent(gc);
     ar->setTrack(gc->track());
     score->undoAddElement(ar);
     score->endCmd();
-//      c = static_cast<Chord*>(ScoreRW::writeReadElement(gc));
+//      c = toChord(ScoreRW::writeReadElement(gc));
 //      QVERIFY(c->articulations().size() == 1);
 //      delete c;
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, u"grace-test.mscx", NOTE_DATA_DIR + u"grace-ref.mscx"));
+}
+
+//---------------------------------------------------------
+///   graceSlashSave
+///   read/write test of grace notes
+//---------------------------------------------------------
+
+TEST_F(Engraving_NoteTests, graceAfterSlashSave)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"grace.mscx");
+    score->doLayout();
+    Chord* chord = score->firstMeasure()->findChord(Fraction(0, 1), 0);
+    Note* note = chord->upNote();
+
+    // create
+    score->setGraceNote(chord, note->pitch(), NoteType::GRACE8_AFTER, Constants::DIVISION / 2);
+    Chord* gc = chord->graceNotes().front();
+    gc->undoChangeProperty(Pid::SHOW_STEM_SLASH, true);
+
+    EXPECT_TRUE(gc->showStemSlash());
+
+    EXPECT_TRUE(ScoreComp::saveCompareScore(score, u"graceAfterSlashSave-test.mscx", NOTE_DATA_DIR + u"graceAfterSlashSave-ref.mscx"));
 }
 
 //---------------------------------------------------------
@@ -352,14 +384,14 @@ TEST_F(Engraving_NoteTests, tpc)
     score->inputState().setDuration(DurationType::V_QUARTER);
     score->inputState().setNoteEntryMode(true);
     int octave = 5 * 7;
-    score->cmdAddPitch(octave + 1, false, false);
-    score->cmdAddPitch(octave + 2, false, false);
-    score->cmdAddPitch(octave + 3, false, false);
-    score->cmdAddPitch(octave + 4, false, false);
-    score->cmdAddPitch(octave + 5, false, false);
-    score->cmdAddPitch(octave + 6, false, false);
-    score->cmdAddPitch(octave + 7, false, false);
-    score->cmdAddPitch(octave + 8, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 1, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 2, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 3, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 4, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 5, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 6, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 7, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 8, false, false);
 
     score->cmdConcertPitchChanged(true);
 
@@ -375,19 +407,19 @@ TEST_F(Engraving_NoteTests, tpcTranspose)
 {
     MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"tpc-transpose.mscx");
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
     Measure* m = score->firstMeasure();
     score->select(m, SelectType::SINGLE, 0);
-    score->changeAccidental(AccidentalType::FLAT);
+    EditNote::changeAccidental(score, AccidentalType::FLAT);
     score->endCmd();
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
     m = m->nextMeasure();
     score->select(m, SelectType::SINGLE, 0);
-    score->upDown(false, UpDownMode::CHROMATIC);
+    EditNote::upDown(score, false, UpDownMode::CHROMATIC);
     score->endCmd();
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
     score->cmdConcertPitchChanged(true);
     score->endCmd();
 
@@ -408,9 +440,9 @@ TEST_F(Engraving_NoteTests, tpcTranspose2)
     score->inputState().setDuration(DurationType::V_QUARTER);
     score->inputState().setNoteEntryMode(true);
     int octave = 5 * 7;
-    score->cmdAddPitch(octave + 3, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, octave + 3, false, false);
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
     score->cmdConcertPitchChanged(true);
     score->endCmd();
 
@@ -433,30 +465,30 @@ TEST_F(Engraving_NoteTests, noteLimits)
     score->inputState().setNoteEntryMode(true);
 
     // over 127 shouldn't crash
-    score->cmdAddPitch(140, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, 140, false, false);
     // below 0 shouldn't crash
-    score->cmdAddPitch(-40, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, -40, false, false);
 
     // stack chords
-    score->cmdAddPitch(42, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, 42, false, false);
     for (int i = 1; i < 20; i++) {
-        score->cmdAddPitch(42 + i * 7, true, false);
+        NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, 42 + i * 7, true, false);
     }
 
     // interval below
-    score->cmdAddPitch(42, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, 42, false, false);
     for (int i = 0; i < 20; i++) {
         std::vector<Note*> nl = score->selection().noteList();
-        score->startCmd();
+        score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
         score->addInterval(-8, nl);
         score->endCmd();
     }
 
     // interval above
-    score->cmdAddPitch(42, false, false);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, 42, false, false);
     for (int i = 0; i < 20; i++) {
         std::vector<Note*> nl = score->selection().noteList();
-        score->startCmd();
+        score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
         score->addInterval(8, nl);
         score->endCmd();
     }
@@ -508,13 +540,13 @@ TEST_F(Engraving_NoteTests, LongNoteAfterShort_183746)
     score->cmdEnterRest(DurationType::V_128TH);
 
     score->inputState().setDuration(DurationType::V_BREVE);
-    score->cmdAddPitch(47, 0, 0);
+    NoteInput::addPitch(score->transactionManager()->currentOrDummyTransaction(), score, 47, 0, 0);
 
     Segment* s = score->tick2segment(TDuration(DurationType::V_128TH).ticks());
     EXPECT_TRUE(s && s->segmentType() == SegmentType::ChordRest);
     EXPECT_TRUE(s->tick() == Fraction(1, 128));
 
-    EngravingItem* e = s->firstElement(0);
+    EngravingItem* e = s->firstElementForNavigation(0);
     EXPECT_TRUE(e && e->isNote());
 
     std::vector<Note*> nl = toNote(e)->tiedNotes();
@@ -525,4 +557,287 @@ TEST_F(Engraving_NoteTests, LongNoteAfterShort_183746)
     }
     Fraction breveTicks = TDuration(DurationType::V_BREVE).ticks();
     EXPECT_TRUE(totalTicks == breveTicks);   // total duration same as a breve
+}
+
+TEST_F(Engraving_NoteTests, PreserveLyricsOnRepitch)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    // create a note, attach a lyric, then repitch to another note
+    score->setNoteRest(cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    score->addLyrics(tick, 0, u"la");
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(62), duration, DirectionV::AUTO);
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, RepitchDoesNotDuplicateLyrics)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    score->addLyrics(tick, 0, u"la");
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(62), duration, DirectionV::AUTO);
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(64), duration, DirectionV::AUTO);
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, ReplacingNoteWithRestDoesNotPreserveLyrics)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    score->addLyrics(tick, 0, u"la");
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(), duration, DirectionV::AUTO);
+
+    cr = chordRestAtTick(score, tick, 0);
+    // replacing with a rest intentionally drops attached lyrics
+    ASSERT_TRUE(cr && cr->isRest());
+    EXPECT_TRUE(cr->lyrics().empty());
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, RepitchWithoutLyricsStaysEmpty)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    // edge case: no lyrics on source note
+    score->setNoteRest(cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    EXPECT_TRUE(cr->lyrics().empty());
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(62), duration, DirectionV::AUTO);
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    EXPECT_TRUE(cr->lyrics().empty());
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, RepitchPreservesMultipleLyricsAndFormatting)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(62), duration, DirectionV::AUTO);
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+
+    // edge case: multiple lyrics and formatted text
+    score->addLyrics(tick, 0, u"do");
+    Lyrics* lyricVerse1 = Factory::createLyrics(cr);
+    lyricVerse1->setVerse(1);
+    lyricVerse1->setXmlText(u"re &amp; <i>mi</i>");
+    cr->add(lyricVerse1);
+
+    // preserve expected visible text and verse identity before repitch
+    auto verse0TextExpected = cr->lyrics(0)->xmlText();
+    auto verse1PlainTextExpected = cr->lyrics(1)->plainText();
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(65), duration, DirectionV::AUTO);
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 2u);
+
+    Lyrics* verse0 = cr->lyrics(0);
+    Lyrics* verse1 = cr->lyrics(1);
+    ASSERT_TRUE(verse0);
+    ASSERT_TRUE(verse1);
+    EXPECT_EQ(verse0->xmlText(), verse0TextExpected);
+    EXPECT_EQ(verse1->verse(), 1);
+    EXPECT_EQ(verse1->plainText(), verse1PlainTextExpected);
+    EXPECT_FALSE(verse1->xmlText().isEmpty());
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, RepitchLyricsUndoRedoPreservesLyrics)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
+    score->setNoteRest(cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    score->addLyrics(tick, 0, u"la");
+    score->endCmd();
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+    EXPECT_EQ(toChord(cr)->upNote()->pitch(), 60);
+
+    score->startCmd(TranslatableString::untranslatable("Engraving note tests"));
+    score->setNoteRest(cr->segment(), 0, NoteVal(67), duration, DirectionV::AUTO);
+    score->endCmd();
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+    EXPECT_EQ(toChord(cr)->upNote()->pitch(), 67);
+
+    score->undoRedo(true, nullptr);
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+    EXPECT_EQ(toChord(cr)->upNote()->pitch(), 60);
+
+    // redo should reapply the repitch without duplicating/dropping lyrics
+    score->undoRedo(false, nullptr);
+
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+    ASSERT_EQ(cr->lyrics().size(), 1u);
+    EXPECT_EQ(cr->lyrics().front()->xmlText(), u"la");
+    EXPECT_EQ(toChord(cr)->upNote()->pitch(), 67);
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, RepeatedRepitchWithTwoLyricsPreservesBoth)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr);
+    Fraction duration = cr->ticks();
+
+    score->setNoteRest(cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(cr && cr->isChord());
+
+    score->addLyrics(tick, 0, u"do");
+    Lyrics* lyricVerse1 = Factory::createLyrics(cr);
+    lyricVerse1->setVerse(1);
+    lyricVerse1->setXmlText(u"re &amp; <i>mi</i>");
+    cr->add(lyricVerse1);
+
+    auto verse0TextExpected = cr->lyrics(0)->xmlText();
+    auto verse1PlainTextExpected = cr->lyrics(1)->plainText();
+
+    // stress multiple note replacements on the same segment
+    const int pitches[] = { 62, 64, 65, 67, 69 };
+    for (int pitch : pitches) {
+        score->setNoteRest(cr->segment(), 0, NoteVal(pitch), duration, DirectionV::AUTO);
+        cr = chordRestAtTick(score, tick, 0);
+        ASSERT_TRUE(cr && cr->isChord());
+        ASSERT_EQ(cr->lyrics().size(), 2u);
+
+        Lyrics* verse0 = cr->lyrics(0);
+        Lyrics* verse1 = cr->lyrics(1);
+        ASSERT_TRUE(verse0);
+        ASSERT_TRUE(verse1);
+        EXPECT_EQ(verse0->xmlText(), verse0TextExpected);
+        EXPECT_EQ(verse1->verse(), 1);
+        EXPECT_EQ(verse1->plainText(), verse1PlainTextExpected);
+    }
+
+    delete score;
+}
+
+TEST_F(Engraving_NoteTests, RepitchInVoiceTwoDoesNotAffectVoiceOneLyrics)
+{
+    MasterScore* score = ScoreRW::readScore(NOTE_DATA_DIR + u"empty.mscx");
+    ASSERT_TRUE(score);
+
+    Fraction tick(0, 1);
+    ChordRest* voice1Cr = chordRestAtTick(score, tick, 0);
+    ASSERT_TRUE(voice1Cr);
+    Fraction duration = voice1Cr->ticks();
+
+    score->setNoteRest(voice1Cr->segment(), 0, NoteVal(60), duration, DirectionV::AUTO);
+    score->addLyrics(tick, 0, u"solo");
+
+    Segment* segment = voice1Cr->segment();
+    // add and repitch voice 2 independently from voice 1
+    score->setNoteRest(segment, 1, NoteVal(55), duration, DirectionV::AUTO);
+
+    ChordRest* voice2Cr = chordRestAtTick(score, tick, 1);
+    ASSERT_TRUE(voice2Cr && voice2Cr->isChord());
+    EXPECT_TRUE(voice2Cr->lyrics().empty());
+
+    score->setNoteRest(voice2Cr->segment(), 1, NoteVal(57), duration, DirectionV::AUTO);
+
+    voice1Cr = chordRestAtTick(score, tick, 0);
+    voice2Cr = chordRestAtTick(score, tick, 1);
+    ASSERT_TRUE(voice1Cr && voice1Cr->isChord());
+    ASSERT_TRUE(voice2Cr && voice2Cr->isChord());
+
+    ASSERT_EQ(voice1Cr->lyrics().size(), 1u);
+    EXPECT_EQ(voice1Cr->lyrics().front()->xmlText(), u"solo");
+    EXPECT_EQ(toChord(voice2Cr)->upNote()->pitch(), 57);
+    EXPECT_TRUE(voice2Cr->lyrics().empty());
+
+    delete score;
 }

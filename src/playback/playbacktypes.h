@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,16 +20,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_PLAYBACK_PLAYBACKTYPES_H
-#define MU_PLAYBACK_PLAYBACKTYPES_H
+#pragma once
 
 #include <QTime>
 
-#include "audio/audiotypes.h"
+#include "audio/common/audiotypes.h"
 
 namespace mu::playback {
-static constexpr audio::aux_channel_idx_t AUX_CHANNEL_NUM = 2;
-static constexpr audio::aux_channel_idx_t REVERB_CHANNEL_IDX = 0;
+static constexpr muse::audio::aux_channel_idx_t AUX_CHANNEL_NUM = 2;
+static constexpr muse::audio::aux_channel_idx_t REVERB_CHANNEL_IDX = 0;
 
 enum class PlaybackCursorType {
     SMOOTH,
@@ -66,30 +65,14 @@ inline QList<MixerSectionType> allMixerSectionTypes()
 
 static const QTime ZERO_TIME(0, 0, 0, 0);
 
-inline audio::msecs_t secondsToMilliseconds(float seconds)
+inline QTime timeFromSeconds(muse::audio::secs_t seconds)
 {
-    return seconds * 1000;
+    return ZERO_TIME.addMSecs(muse::secs_to_msecs(seconds));
 }
 
-inline float secondsFromMilliseconds(audio::msecs_t milliseconds)
+inline muse::audio::secs_t timeToSeconds(const QTime& time)
 {
-    return milliseconds / 1000.f;
-}
-
-inline QTime timeFromMilliseconds(audio::msecs_t milliseconds)
-{
-    return ZERO_TIME.addMSecs(milliseconds);
-}
-
-inline QTime timeFromSeconds(float seconds)
-{
-    audio::msecs_t milliseconds = secondsToMilliseconds(seconds);
-    return timeFromMilliseconds(milliseconds);
-}
-
-inline audio::msecs_t timeToMilliseconds(const QTime& time)
-{
-    return ZERO_TIME.msecsTo(time);
+    return muse::msecs_to_secs(ZERO_TIME.msecsTo(time));
 }
 
 enum class SoundProfileType {
@@ -99,8 +82,8 @@ enum class SoundProfileType {
     Custom
 };
 
-using SoundProfileName = String;
-using SoundProfileData = std::map<mpe::PlaybackSetupData, audio::AudioResourceMeta>;
+using SoundProfileName = muse::String;
+using SoundProfileData = std::map<muse::mpe::PlaybackSetupData, muse::audio::AudioResourceMeta>;
 
 struct SoundProfile {
     SoundProfileType type = SoundProfileType::Undefined;
@@ -108,14 +91,14 @@ struct SoundProfile {
 
     SoundProfileData data;
 
-    const audio::AudioResourceMeta& findResource(const mpe::PlaybackSetupData& key) const
+    const muse::audio::AudioResourceMeta& findResource(const muse::mpe::PlaybackSetupData& key) const
     {
         auto search = data.find(key);
         if (search != data.cend()) {
             return search->second;
         }
 
-        static audio::AudioResourceMeta empty;
+        static muse::audio::AudioResourceMeta empty;
         return empty;
     }
 
@@ -133,6 +116,10 @@ struct SoundProfile {
 };
 
 using SoundProfilesMap = std::map<SoundProfileName, SoundProfile>;
-}
 
-#endif // MU_PLAYBACK_PLAYBACKTYPES_H
+enum OnlineSoundsShowProgressBarMode {
+    Always = 0,
+    DuringPlayback,
+    Never,
+};
+}

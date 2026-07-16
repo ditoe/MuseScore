@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __REALIZEDHARMONY_H__
-#define __REALIZEDHARMONY_H__
+#pragma once
 
 #include <map>
 
-#include "containers.h"
-#include "types/fraction.h"
+#include "../types/fraction.h"
 
 namespace mu::engraving {
 class Harmony;
@@ -63,40 +61,23 @@ class RealizedHarmony
 public:
     using PitchMap = std::multimap<int, int>;   //map from pitch to tpc
 
-private:
-    Harmony* _harmony;
-
-    PitchMap _notes;
-
-    Voicing _voicing = Voicing::AUTO;
-    HDuration _duration = HDuration::INVALID;
-
-    //whether or not the current notes QMap is up to date
-    bool _dirty;
-
-    bool _literal = false;   //use all notes when possible and do not add any notes
-
-public:
     RealizedHarmony()
-        : _harmony(0), _notes(PitchMap()), _dirty(1) {}
+        : m_harmony(0), m_notes(PitchMap()), m_dirty(1) {}
     RealizedHarmony(Harmony* h)
-        : _harmony(h), _notes(PitchMap()), _dirty(1) {}
+        : m_harmony(h), m_notes(PitchMap()), m_dirty(1) {}
 
     void setVoicing(Voicing);
     void setDuration(HDuration);
     void setLiteral(bool);
     void setDirty(bool dirty) { cascadeDirty(dirty); }   //set dirty flag and cascade
-    void setHarmony(Harmony* h) { _harmony = h; }
+    void setHarmony(Harmony* h) { m_harmony = h; }
 
-    Voicing voicing() const { return _voicing; }
-    HDuration duration() const { return _duration; }
-    bool literal() const { return _literal; }
-    Harmony* harmony() { return _harmony; }
+    Voicing voicing() const { return m_voicing; }
+    HDuration duration() const { return m_duration; }
+    bool literal() const { return m_literal; }
+    Harmony* harmony() { return m_harmony; }
 
-    bool valid() const { return !_dirty && _harmony; }
-
-    const std::vector<int> pitches() const { return mu::keys(notes()); }
-    const std::vector<int> tpcs() const { return mu::values(notes()); }
+    bool valid() const { return !m_dirty && m_harmony; }
 
     const PitchMap& notes() const;
     const PitchMap generateNotes(int rootTpc, int bassTpc, bool literal, Voicing voicing, int transposeOffset) const;
@@ -109,7 +90,16 @@ private:
     PitchMap getIntervals(int rootTpc, bool literal = true) const;
     PitchMap normalizeNoteMap(const PitchMap& intervals, int rootTpc, int rootPitch, size_t max = 128, bool enforceMaxAsGoal = false) const;
     void cascadeDirty(bool dirty);
+
+    Harmony* m_harmony = nullptr;
+
+    PitchMap m_notes;
+
+    Voicing m_voicing = Voicing::AUTO;
+    HDuration m_duration = HDuration::INVALID;
+
+    //whether or not the current notes QMap is up to date
+    bool m_dirty = false;
+    bool m_literal = false;   //use all notes when possible and do not add any notes
 };
 }
-
-#endif // __REALIZEDHARMONY_H__

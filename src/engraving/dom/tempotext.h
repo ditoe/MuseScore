@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TEMPOTEXT_H__
-#define __TEMPOTEXT_H__
+#ifndef MU_ENGRAVING_TEMPOTEXT_H
+#define MU_ENGRAVING_TEMPOTEXT_H
 
 #include "durationtype.h"
 #include "textbase.h"
 
 namespace mu::engraving {
+enum class TempoTextType : signed char
+{
+    NORMAL,
+    A_TEMPO,
+    TEMPO_PRIMO,
+};
+
 //-------------------------------------------------------------------
 //   @@ TempoText
 ///    Tempo marker which determines the midi tempo.
@@ -48,16 +55,31 @@ public:
     Segment* segment() const { return toSegment(explicitParent()); }
     Measure* measure() const { return toMeasure(explicitParent()->explicitParent()); }
 
-    BeatsPerSecond tempo() const { return _tempo; }
+    TempoTextType tempoTextType() const { return m_tempoTextType; }
+    void setTempoTextType(TempoTextType);
+
+    BeatsPerSecond tempo() const { return m_tempo; }
     double tempoBpm() const;
     void setTempo(BeatsPerSecond v);
-    void undoSetTempo(double v);
-    bool isRelative() { return _isRelative; }
-    void setRelative(double v) { _isRelative = true; _relative = v; }
+    bool isRelative() const { return m_isRelative; }
+    void setRelative(double v) { m_isRelative = true; m_relative = v; }
 
-    bool followText() const { return _followText; }
-    void setFollowText(bool v) { _followText = v; }
-    void undoSetFollowText(bool v);
+    bool isNormal() const { return m_tempoTextType == TempoTextType::NORMAL; }
+    void setNormal() { setTempoTextType(TempoTextType::NORMAL); }
+
+    bool isATempo() const { return m_tempoTextType == TempoTextType::A_TEMPO; }
+    void setATempo() { setTempoTextType(TempoTextType::A_TEMPO); }
+
+    bool isTempoPrimo() const { return m_tempoTextType == TempoTextType::TEMPO_PRIMO; }
+    void setTempoPrimo() { setTempoTextType(TempoTextType::TEMPO_PRIMO); }
+
+    bool playTempoText() const { return m_playTempoText; }
+    void setPlayTempoText(bool v) { m_playTempoText = v; }
+
+    bool followText() const { return m_followText; }
+    void setFollowText(bool v) { m_followText = v; }
+
+    void updateTempo();
     void updateRelative();
 
     TDuration duration() const;
@@ -71,6 +93,12 @@ public:
     PropertyValue propertyDefault(Pid id) const override;
     String accessibleInfo() const override;
 
+    bool positionRelativeToNoteheadRest() const override { return true; }
+
+    String tempoInfo() const;
+
+    static constexpr double DEFAULT_SYM_SIZE_RATIO = 5.0 / 3.0;
+
 protected:
     void added() override;
     void removed() override;
@@ -79,12 +107,14 @@ protected:
     void undoChangeProperty(Pid id, const PropertyValue&, PropertyFlags ps) override;
 
     void updateScore();
-    void updateTempo();
 
-    BeatsPerSecond _tempo;             // beats per second
-    bool _followText;         // parse text to determine tempo
-    double _relative;
-    bool _isRelative;
+    TempoTextType m_tempoTextType;
+    BeatsPerSecond m_tempo;             // beats per second
+    bool m_followText = false;          // parse text to determine tempo
+    bool m_playTempoText = true;
+    double m_relative = 0.0;
+    bool m_isRelative = false;
+    bool m_alignRightOfRehearsalMark = true;
 };
 } // namespace mu::engraving
 #endif

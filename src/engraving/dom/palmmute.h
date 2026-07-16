@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __PALM_MUTE_H__
-#define __PALM_MUTE_H__
+#ifndef MU_ENGRAVING_PALM_MUTE_H
+#define MU_ENGRAVING_PALM_MUTE_H
 
 #include "chordtextlinebase.h"
 
@@ -36,8 +36,6 @@ class PalmMuteSegment final : public TextLineBaseSegment
 {
     OBJECT_ALLOCATOR(engraving, PalmMuteSegment)
     DECLARE_CLASSOF(ElementType::PALM_MUTE_SEGMENT)
-
-    Sid getPropertyStyle(Pid) const override;
 
 public:
     PalmMuteSegment(PalmMute* sp, System* parent);
@@ -58,8 +56,6 @@ class PalmMute final : public ChordTextLineBase
     OBJECT_ALLOCATOR(engraving, PalmMute)
     DECLARE_CLASSOF(ElementType::PALM_MUTE)
 
-    Sid getPropertyStyle(Pid) const override;
-
 public:
     PalmMute(EngravingItem* parent);
 
@@ -71,6 +67,9 @@ public:
     PropertyValue propertyDefault(Pid propertyId) const override;
 
     void setChannel();
+
+protected:
+    Sid defaultPosSid() const override;
 
     friend class PalmMuteLine;
 };

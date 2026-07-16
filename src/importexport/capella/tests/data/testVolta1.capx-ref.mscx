@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
       <minSystemDistance>8</minSystemDistance>
       <maxSystemDistance>12</maxSystemDistance>
       <measureSpacing>1</measureSpacing>
       <smallStaffMag>0.681818</smallStaffMag>
-      <Spatium>1.76</Spatium>
+      <spatium>1.76</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -20,22 +21,24 @@
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
     <metaTag name="originalFormat">capx</metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName></trackName>
       <Instrument>
-        <longName>Guitar</longName>
-        <shortName>Gtr.</shortName>
+        <InstrumentLabel>
+          <longName>Guitar</longName>
+          <shortName>Gtr.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <Channel>
           <program value="24"/>
@@ -45,27 +48,41 @@
     <Staff id="1">
       <VBox>
         <height>14</height>
+        <eid>E_E</eid>
         </VBox>
       <Measure>
+        <eid>F_F</eid>
         <voice>
           <Clef>
             <concertClefType>G8vb</concertClefType>
             <transposingClefType>G8vb</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>G_G</eid>
             </Clef>
+          <KeySig>
+            <eid>H_H</eid>
+            <concertKey>0</concertKey>
+            </KeySig>
           <TimeSig>
+            <eid>I_I</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <StaffText>
+            <eid>J_J</eid>
+            <offset x="0" y="0.024053"/>
             <text>Volta 1</text>
             </StaffText>
           <StaffText>
+            <eid>K_K</eid>
+            <offset x="0" y="0.024053"/>
             <text>MuseScore testfile</text>
             </StaffText>
           <Chord>
+            <eid>L_L</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>M_M</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               </Note>
@@ -73,12 +90,14 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>N_N</eid>
         <endRepeat>2</endRepeat>
         <voice>
           <Spanner type="Volta">
             <Volta>
               <endHookType>1</endHookType>
               <beginText>1.</beginText>
+              <eid>O_O</eid>
               <endings>1</endings>
               </Volta>
             <next>
@@ -88,8 +107,10 @@
               </next>
             </Spanner>
           <Chord>
+            <eid>P_P</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>57</pitch>
               <tpc>17</tpc>
               </Note>
@@ -97,6 +118,7 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>R_R</eid>
         <voice>
           <Spanner type="Volta">
             <prev>
@@ -108,6 +130,7 @@
           <Spanner type="Volta">
             <Volta>
               <beginText>2.</beginText>
+              <eid>S_S</eid>
               <endings>2</endings>
               </Volta>
             <next>
@@ -117,8 +140,10 @@
               </next>
             </Spanner>
           <Chord>
+            <eid>T_T</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>U_U</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               </Note>
@@ -126,11 +151,15 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>V_V</eid>
         <LayoutBreak>
+          <eid>W_W</eid>
           <subtype>line</subtype>
           </LayoutBreak>
         <voice>
           <StaffText>
+            <eid>X_X</eid>
+            <offset x="0" y="0.024053"/>
             <text>Leon Vinken</text>
             </StaffText>
           <Spanner type="Volta">
@@ -141,8 +170,10 @@
               </prev>
             </Spanner>
           <Chord>
+            <eid>Y_Y</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>Z_Z</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               </Note>

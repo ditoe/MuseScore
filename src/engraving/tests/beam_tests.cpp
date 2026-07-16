@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,18 +22,20 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/beam.h"
-#include "dom/chord.h"
-#include "dom/chordrest.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/note.h"
-#include "dom/tremolo.h"
+#include "engraving/dom/beam.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/tremolotwochord.h"
+
+#include "engraving/editing/flip.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String BEAM_DATA_DIR("beam_data/");
@@ -193,7 +195,7 @@ TEST_F(Engraving_BeamTests, beamStemDir)
     Measure* m1 = score->firstMeasure();
     ChordRest* cr = toChordRest(m1->findSegment(SegmentType::ChordRest, m1->tick())->element(0));
 
-    cr->beam()->setBeamDirection(DirectionV::UP);
+    cr->beam()->setDirection(DirectionV::UP);
 
     score->update();
     score->doLayout();
@@ -220,10 +222,10 @@ TEST_F(Engraving_BeamTests, flipBeamStemDir)
     Chord* c2 = toChord(cr->beam()->elements()[1]);
 
     score->select(c2);
-    score->startCmd();
-    score->cmdFlip();
+    score->startCmd(TranslatableString::untranslatable("Engraving beam tests"));
+    Flip::flip(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
-    cr->beam()->setBeamDirection(DirectionV::DOWN);
+    cr->beam()->setDirection(DirectionV::DOWN);
 
     score->update();
     score->doLayout();
@@ -247,14 +249,14 @@ TEST_F(Engraving_BeamTests, flipTremoloStemDir)
 
     Measure* m1 = score->firstMeasure();
     ChordRest* cr = toChordRest(m1->findSegment(SegmentType::ChordRest, m1->tick())->element(0));
-    Tremolo* t = toChord(cr)->tremolo();
+    TremoloTwoChord* t = toChord(cr)->tremoloTwoChord();
     Chord* c1 = t->chord1();
     Chord* c2 = t->chord2();
     EXPECT_TRUE(t->up() && c1->up() && c2->up());
 
     score->select(c1->upNote());
-    score->startCmd();
-    score->cmdFlip();
+    score->startCmd(TranslatableString::untranslatable("Engraving beam tests"));
+    Flip::flip(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
 
     score->update();
@@ -262,4 +264,82 @@ TEST_F(Engraving_BeamTests, flipTremoloStemDir)
     EXPECT_FALSE(t->up() || c1->up() || c2->up());
 
     delete score;
+}
+
+TEST_F(Engraving_BeamTests, deleteBeamStemDirection)
+{
+    MasterScore* score = ScoreRW::readScore(BEAM_DATA_DIR + "deleteBeamStemDirection.mscx");
+    EXPECT_TRUE(score);
+
+    Measure* m1 = score->firstMeasure();
+    ChordRest* cr1 = toChordRest(m1->findSegment(SegmentType::ChordRest, Fraction(0, 8))->element(0));
+    EXPECT_TRUE(cr1);
+    ChordRest* cr2 = toChordRest(m1->findSegment(SegmentType::ChordRest, Fraction(1, 8))->element(0));
+    EXPECT_TRUE(cr2);
+    ChordRest* cr3 = toChordRest(m1->findSegment(SegmentType::ChordRest, Fraction(2, 8))->element(0));
+    EXPECT_TRUE(cr3);
+    ChordRest* cr4 = toChordRest(m1->findSegment(SegmentType::ChordRest, Fraction(3, 8))->element(0));
+    EXPECT_TRUE(cr4);
+
+    for (ChordRest* cr : { cr1, cr2, cr3, cr4 }) {
+        EXPECT_TRUE(cr->ldata()->up);
+    }
+
+    score->startCmd(TranslatableString::untranslatable("Engraving beam tests"));
+    score->select({ cr2, cr3, cr4 }, SelectType::RANGE);
+    score->cmdDeleteSelection();
+    score->endCmd();
+    score->setLayoutAll();
+    score->doLayout();
+
+    EXPECT_FALSE(cr1->ldata()->up);
+
+    score->undoRedo(true, nullptr);
+
+    toChord(cr1)->setStemDirection(DirectionV::UP);
+
+    score->startCmd(TranslatableString::untranslatable("Engraving beam tests"));
+    score->select({ cr2, cr3, cr4 }, SelectType::RANGE);
+    score->cmdDeleteSelection();
+    score->endCmd();
+    score->setLayoutAll();
+    score->doLayout();
+
+    EXPECT_TRUE(cr1->ldata()->up);
+}
+
+TEST_F(Engraving_BeamTests, drumKitBeam)
+{
+    MasterScore* score = ScoreRW::readScore(BEAM_DATA_DIR + "drumKitBeam.mscx");
+    EXPECT_TRUE(score);
+    score->setLayoutAll();
+    score->doLayout();
+    Measure* m = score->firstMeasure();
+    Chord* cr1 = toChord(m->findSegment(SegmentType::ChordRest, Fraction(0, 1))->element(0));
+    EXPECT_TRUE(cr1);
+    EXPECT_TRUE(cr1->up() && cr1->stemDirection() == DirectionV::UP);
+    Chord* cr2 = toChord(m->findSegment(SegmentType::ChordRest, Fraction(2, 8))->element(0));
+    EXPECT_TRUE(cr2);
+    EXPECT_TRUE(cr2->up() && cr2->stemDirection() == DirectionV::UP);
+    Chord* cr3 = toChord(m->findSegment(SegmentType::ChordRest, Fraction(3, 8))->element(0));
+    EXPECT_TRUE(cr3);
+    EXPECT_TRUE(cr3->up() && cr3->stemDirection() == DirectionV::UP);
+
+    score->startCmd(TranslatableString::untranslatable("Engraving beam tests"));
+    score->select({ cr1, cr2, cr3 }, SelectType::RANGE);
+    Flip::flip(score->transactionManager()->currentOrDummyTransaction(), score);
+    score->setLayoutAll();
+    score->doLayout();
+    score->endCmd();
+
+    EXPECT_TRUE(!cr1->up() && cr1->stemDirection() == DirectionV::DOWN);
+    EXPECT_TRUE(!cr2->up() && cr2->stemDirection() == DirectionV::DOWN);
+    EXPECT_TRUE(!cr3->up() && cr3->stemDirection() == DirectionV::DOWN);
+
+    score->undoRedo(true, nullptr);
+
+    EXPECT_TRUE(cr1->up() && cr1->stemDirection() == DirectionV::UP);
+    // These chords inherit their direction from the beam
+    EXPECT_TRUE(cr2->up() && cr2->stemDirection() == DirectionV::AUTO);
+    EXPECT_TRUE(cr3->up() && cr3->stemDirection() == DirectionV::AUTO);
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,14 +24,35 @@
 #include "modularity/ioc.h"
 #include "internal/convertercontroller.h"
 
+#include "global/api/iapiregister.h"
+#include "api/converterapi.h"
+
+using namespace muse::modularity;
 using namespace mu::converter;
+
+static const std::string mname("converter");
 
 std::string ConverterModule::moduleName() const
 {
-    return "converter";
+    return mname;
 }
 
-void ConverterModule::registerExports()
+void ConverterModule::registerApi()
 {
-    modularity::ioc()->registerExport<IConverterController>(moduleName(), new ConverterController());
+    using namespace muse::api;
+
+    auto api = globalIoc()->resolve<IApiRegister>(mname);
+    if (api) {
+        api->regApiCreator(mname, "MuseApi.Converter", new ApiCreator<api::ConverterApi>());
+    }
+}
+
+muse::modularity::IContextSetup* ConverterModule::newContext(const muse::modularity::ContextPtr& ctx) const
+{
+    return new ConverterModuleContext(ctx);
+}
+
+void ConverterModuleContext::registerExports()
+{
+    ioc()->registerExport<IConverterController>(mname, new ConverterController(iocContext()));
 }

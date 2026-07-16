@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,16 +24,21 @@
 
 #include "log.h"
 
+using namespace muse::audio;
 using namespace mu::iex::audioexport;
-using namespace mu::io;
+using namespace muse::io;
 
-mu::Ret FlacWriter::write(notation::INotationPtr notation, QIODevice& destinationDevice, const Options&)
+muse::Ret FlacWriter::write(notation::INotationPtr notation, muse::io::IODevice& destinationDevice, const Options&)
 {
-    const audio::SoundTrackFormat format {
-        audio::SoundTrackType::FLAC,
-        static_cast<audio::sample_rate_t>(configuration()->exportSampleRate()),
-        2 /* audioChannelsNumber */,
-        128 /* bitRate */
+    const SoundTrackFormat format {
+        SoundTrackType::FLAC,
+        {
+            static_cast<sample_rate_t>(configuration()->exportSampleRate()),
+            configuration()->exportBufferSize(),
+            2 /* audioChannelsNumber */
+        },
+        configuration()->exportFlacSampleFormat(),
+        0 /* bitRate */
     };
 
     return doWriteAndWait(notation, destinationDevice, format);

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,14 +20,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __STAFFSTATE_H__
-#define __STAFFSTATE_H__
+#ifndef MU_ENGRAVING_STAFFSTATE_H
+#define MU_ENGRAVING_STAFFSTATE_H
 
 #include "engravingitem.h"
 #include "instrument.h"
 #include "draw/types/painterpath.h"
 
 namespace mu::engraving {
+class Transaction;
+
 enum class StaffStateType : char {
     INSTRUMENT,
     TYPE,
@@ -56,7 +58,7 @@ public:
     String staffStateTypeName() const;
 
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     Instrument* instrument() const { return m_instrument; }
     void setInstrument(const Instrument* i) { *m_instrument = *i; }
@@ -65,9 +67,9 @@ public:
 
     struct LayoutData : public EngravingItem::LayoutData {
         double lw = 0.0;
-        mu::draw::PainterPath path;
+        muse::draw::PainterPath path;
     };
-    DECLARE_LAYOUTDATA_METHODS(StaffState);
+    DECLARE_LAYOUTDATA_METHODS(StaffState)
 
 private:
 

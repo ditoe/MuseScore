@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,16 +23,20 @@
 
 #include <QMimeData>
 
-#include "engraving/dom/masterscore.h"
+#include "engraving/dom/score.h"
 #include "engraving/dom/segment.h"
 #include "engraving/dom/measure.h"
+
+#include "engraving/editing/edittie.h"
 
 #include "notationselectionrange.h"
 #include "notationerrors.h"
 
 #include "log.h"
 
+using namespace muse;
 using namespace mu::notation;
+using namespace mu::engraving;
 
 NotationSelection::NotationSelection(IGetScore* getScore)
     : m_getScore(getScore)
@@ -55,7 +59,7 @@ SelectionState NotationSelection::state() const
     return score()->selection().state();
 }
 
-mu::Ret NotationSelection::canCopy() const
+Ret NotationSelection::canCopy() const
 {
     if (isNone()) {
         return make_ret(Err::EmptySelection);
@@ -65,10 +69,15 @@ mu::Ret NotationSelection::canCopy() const
         return make_ret(Err::SelectCompleteTupletOrTremolo);
     }
 
-    return make_ok();
+    return muse::make_ok();
 }
 
-QMimeData* NotationSelection::mimeData() const
+muse::ByteArray NotationSelection::mimeData() const
+{
+    return score()->selection().mimeData();
+}
+
+QMimeData* NotationSelection::qMimeData() const
 {
     QString mimeType = score()->selection().mimeType();
     if (mimeType.isEmpty()) {
@@ -86,22 +95,16 @@ EngravingItem* NotationSelection::element() const
     return score()->selection().element();
 }
 
-std::vector<EngravingItem*> NotationSelection::elements() const
+const std::vector<EngravingItem*>& NotationSelection::elements() const
 {
-    std::vector<EngravingItem*> els;
-    std::vector<mu::engraving::EngravingItem*> list = score()->selection().elements();
-    els.reserve(list.size());
-    for (mu::engraving::EngravingItem* e : list) {
-        els.push_back(e);
-    }
-    return els;
+    return score()->selection().elements();
 }
 
 std::vector<Note*> NotationSelection::notes(NoteFilter filter) const
 {
     switch (filter) {
     case NoteFilter::All: return score()->selection().noteList();
-    case NoteFilter::WithTie: return score()->cmdTieNoteList(score()->selection(), false);
+    case NoteFilter::WithTie: return mu::engraving::EditTie::cmdTieNoteList(score()->selection(), false);
     case NoteFilter::WithSlur: {
         NOT_IMPLEMENTED;
         return {};
@@ -111,7 +114,7 @@ std::vector<Note*> NotationSelection::notes(NoteFilter filter) const
     return {};
 }
 
-mu::RectF NotationSelection::canvasBoundingRect() const
+muse::RectF NotationSelection::canvasBoundingRect() const
 {
     if (isNone()) {
         return RectF();
@@ -135,7 +138,7 @@ INotationSelectionRangePtr NotationSelection::range() const
     return m_range;
 }
 
-mu::engraving::Score* NotationSelection::score() const
+Score* NotationSelection::score() const
 {
     return m_getScore->score();
 }
@@ -145,7 +148,32 @@ void NotationSelection::onElementHit(EngravingItem* el)
     m_lastElementHit = el;
 }
 
+MeasureBase* NotationSelection::startMeasureBase() const
+{
+    return score()->selection().startMeasureBase();
+}
+
+MeasureBase* NotationSelection::endMeasureBase() const
+{
+    return score()->selection().endMeasureBase();
+}
+
+std::vector<System*> NotationSelection::selectedSystems() const
+{
+    return score()->selection().selectedSystems();
+}
+
+std::vector<mu::engraving::Page*> NotationSelection::pagesContainingSelection() const
+{
+    return score()->selection().pagesContainingSelection();
+}
+
 EngravingItem* NotationSelection::lastElementHit() const
 {
     return m_lastElementHit;
+}
+
+bool NotationSelection::elementsSelected(const mu::engraving::ElementTypeSet& types) const
+{
+    return score()->selection().elementsSelected(types);
 }

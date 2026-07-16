@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,10 +19,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
+import QtQuick
+import QtQuick.Effects
 
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
+import Muse.UiComponents
+import Muse.Ui
 
 Item {
     id: root
@@ -130,6 +131,16 @@ Item {
         }
     ]
 
+    MultiEffect {
+        anchors.fill: icon
+        source: icon
+
+        shadowEnabled: true
+        shadowVerticalOffset: 1
+        shadowColor: Qt.rgba(0, 0, 0, 0.25)
+        blurMax: 4
+    }
+
     StyledIconLabel {
         id: icon
         anchors.centerIn: parent
@@ -139,20 +150,11 @@ Item {
         color: "white"
     }
 
-    StyledDropShadow {
-        anchors.fill: icon
-
-        horizontalOffset: 0
-        verticalOffset: 1
-        radius: 4
-
-        source: icon
-    }
-
     MouseArea {
         id: mouseArea
         anchors.fill: root
 
+        enabled: root.enabled
         hoverEnabled: true
 
         onContainsMouseChanged: {

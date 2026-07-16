@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,6 +25,7 @@
 #include "log.h"
 
 using namespace mu;
+using namespace muse::draw;
 
 namespace mu::engraving {
 XmlReader::~XmlReader()
@@ -54,10 +55,10 @@ PointF XmlReader::readPoint()
 //   readColor
 //---------------------------------------------------------
 
-mu::draw::Color XmlReader::readColor()
+Color XmlReader::readColor()
 {
     assert(tokenType() == XmlStreamReader::StartElement);
-    draw::Color c;
+    Color c;
     c.setRed(intAttribute("r"));
     c.setGreen(intAttribute("g"));
     c.setBlue(intAttribute("b"));
@@ -121,7 +122,7 @@ Fraction XmlReader::readFraction()
     AsciiStringView s = readAsciiText();
     if (!s.empty()) {
         size_t i = s.indexOf('/');
-        if (i == mu::nidx) {
+        if (i == muse::nidx) {
             return Fraction::fromTicks(s.toInt());
         } else {
             String str = String::fromAscii(s.ascii());
@@ -143,10 +144,9 @@ void XmlReader::unknown()
         LOGD("%s ", muPrintable(errorString()));
     }
     if (!m_docName.isEmpty()) {
-        LOGD("tag in <%s> line %ld col %lld: %s", muPrintable(m_docName), lineNumber() + m_offsetLines,
-             columnNumber(), name().ascii());
+        LOGD() << "tag in <" << m_docName << "> byte offset " << byteOffset() + m_byteOffsetAdjustment << ": " << name();
     } else {
-        LOGD("line %lld col %ld: %s", lineNumber() + m_offsetLines, columnNumber(), name().ascii());
+        LOGD() << "byte offset " << byteOffset() + m_byteOffsetAdjustment << ": " << name();
     }
     skipCurrentElement();
 }
@@ -168,11 +168,12 @@ double XmlReader::readDouble(double min, double max)
 
 void XmlReader::htmlToString(int level, String* s)
 {
+    bool selfClosing = noChildren();
     *s += u'<' + String::fromAscii(name().ascii());
     for (const Attribute& a : attributes()) {
         *s += u' ' + String::fromAscii(a.name.ascii()) + u"=\"" + a.value + u'\"';
     }
-    *s += u'>';
+    *s += selfClosing ? u"/>" : u">";
     ++level;
     for (;;) {
         XmlStreamReader::TokenType t = readNext();
@@ -181,7 +182,9 @@ void XmlReader::htmlToString(int level, String* s)
             htmlToString(level, s);
             break;
         case XmlStreamReader::EndElement:
-            *s += u"</" + String::fromAscii(name().ascii()) + u'>';
+            if (!selfClosing) {
+                *s += u"</" + String::fromAscii(name().ascii()) + u'>';
+            }
             --level;
             return;
         case XmlStreamReader::Characters:

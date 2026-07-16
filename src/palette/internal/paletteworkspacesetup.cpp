@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,34 +23,46 @@
 
 #include "io/buffer.h"
 
-#include "paletteprovider.h"
 #include "palettecreator.h"
+#include "../palettetypes.h"
 
+#include "engraving/dom/masterscore.h"
 #include "engraving/rw/xmlreader.h"
 #include "engraving/rw/xmlwriter.h"
 
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
 using namespace mu::palette;
-using namespace mu::workspace;
+using namespace muse;
+using namespace muse::io;
+using namespace muse::workspace;
 
 static const AsciiStringView PALETTE_XML_TAG("PaletteBox");
 
-static PaletteTreePtr readPalette(const ByteArray& data)
+PaletteTreePtr PaletteWorkspaceSetup::readPalette(const ByteArray& data, const muse::modularity::ContextPtr& iocCtx)
 {
     ByteArray ba = ByteArray::fromRawData(data.constData(), data.size());
-    Buffer buf(&ba);
-    buf.open(IODevice::ReadOnly);
+    auto buf = Buffer::opened(IODevice::ReadOnly, &ba);
     mu::engraving::XmlReader reader(&buf);
 
     while (!reader.atEnd()) {
         reader.readNextStartElement();
 
         if (reader.name() == PALETTE_XML_TAG) {
+            int mscVersion = 0;
+            if (reader.hasAttribute("version")) {
+                const String version = reader.attribute("version");
+                const StringList sl = version.split(u'.');
+                mscVersion = sl.size() == 2 ? sl[0].toInt() * 100 + sl[1].toInt() : 0;
+            } else {
+                // Versioning workspace palette files started in 4.7. All unversioned files should be treated like 4.6 files
+                mscVersion = 460;
+            }
+            paletteScoreProvider()->paletteScore()->setMscVersion(mscVersion);
+
             PaletteTreePtr tree = std::make_shared<PaletteTree>();
-            tree->read(reader, false);
+            tree->read(reader, false, iocCtx);
             return tree;
         }
     }
@@ -58,12 +70,12 @@ static PaletteTreePtr readPalette(const ByteArray& data)
     return nullptr;
 }
 
-static void writePalette(const PaletteTreePtr& tree, QByteArray& data)
+void PaletteWorkspaceSetup::writePalette(const PaletteTreePtr& tree, QByteArray& data)
 {
-    Buffer buf;
-    buf.open(IODevice::WriteOnly);
+    auto buf = Buffer::opened(IODevice::WriteOnly);
     mu::engraving::XmlWriter writer(&buf);
     tree->write(writer, false);
+    writer.flush();
     data = buf.data().toQByteArray();
 }
 
@@ -73,29 +85,37 @@ void PaletteWorkspaceSetup::setup()
         return;
     }
 
-    paletteProvider()->setDefaultPaletteTree(PaletteCreator::newDefaultPaletteTree());
+    paletteProvider()->setDefaultPaletteTree(PaletteCreator(iocContext()).newDefaultPaletteTree());
 
-    paletteProvider()->userPaletteTreeChanged().onNotify(this, [this]() {
+    auto saveData = [this]() {
         PaletteTreePtr tree = paletteProvider()->userPaletteTree();
 
         QByteArray newData;
         writePalette(tree, newData);
 
-        workspacesDataProvider()->setRawData(DataKey::Palettes, newData);
-    });
+        workspacesDataProvider()->setRawData(WS_Palettes, newData);
+    };
 
-    auto loadData = [this]() {
-        RetVal<QByteArray> data = workspacesDataProvider()->rawData(DataKey::Palettes);
+    paletteProvider()->userPaletteTreeChanged().onNotify(this, saveData);
+
+    auto loadData = [this, saveData]() {
+        RetVal<QByteArray> data = workspacesDataProvider()->rawData(WS_Palettes);
         PaletteTreePtr tree;
         if (data.ret && !data.val.isEmpty()) {
             LOGD() << "there is palette data in the workspace, we will use it";
             ByteArray ba = ByteArray::fromQByteArrayNoCopy(data.val);
-            tree = readPalette(ba);
+            tree = readPalette(ba, iocContext());
         } else {
             LOGD() << "no palette data in workspace, will use default";
-            tree = PaletteCreator::newDefaultPaletteTree();
+            tree = PaletteCreator(iocContext()).newDefaultPaletteTree();
         }
         paletteProvider()->setUserPaletteTree(tree);
+
+        if (paletteScoreProvider()->paletteScore()->mscVersion() < engraving::Constants::MSC_VERSION) {
+            LOGD() << "Workspace file found with palette file version " << paletteScoreProvider()->paletteScore()->mscVersion() <<
+                ". Migrating palette file to " << engraving::Constants::MSC_VERSION;
+            saveData();
+        }
     };
 
     workspacesDataProvider()->workspaceChanged().onNotify(this, loadData);

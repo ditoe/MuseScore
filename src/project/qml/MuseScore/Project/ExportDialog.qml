@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 import "internal/Export"
 
@@ -35,15 +34,11 @@ StyledDialogView {
     title: qsTrc("project/export", "Export")
 
     contentWidth: 756
-    contentHeight: 372
+    contentHeight: 420
     margins: 24
 
     ExportDialogModel {
         id: exportModel
-    }
-
-    Component.onCompleted: {
-        exportModel.load()
     }
 
     onNavigationActivateRequested: {
@@ -130,6 +125,8 @@ StyledDialogView {
             }
 
             ExportOptionsView {
+                id: exportOptionsView
+
                 Layout.fillHeight: true
                 Layout.fillWidth: true
 
@@ -142,39 +139,30 @@ StyledDialogView {
                 Layout.alignment: Qt.AlignRight
                 spacing: 12
 
-                NavigationPanel {
-                    id: rightButtonsNavPanel
-                    name: "ExportBottom"
-                    section: root.navigationSection
-                    order: 4
-                    direction: NavigationPanel.Horizontal
-                }
+                ButtonBox {
+                    Layout.fillWidth: true
 
-                FlatButton {
-                    text: qsTrc("global", "Cancel")
+                    buttons: [ ButtonBoxModel.Cancel ]
 
-                    navigation.name: "Cancel"
-                    navigation.panel: rightButtonsNavPanel
-                    navigation.order: 2
+                    navigationPanel.section: root.navigationSection
+                    navigationPanel.order: 4
 
-                    onClicked: {
-                        root.hide()
+                    FlatButton {
+                        text: qsTrc("project/export", "Export…")
+                        buttonRole: ButtonBoxModel.AcceptRole
+                        buttonId: ButtonBoxModel.Done
+                        enabled: exportModel.selectionLength > 0 && exportOptionsView.isExportAvailable
+                        accentButton: true
+
+                        onClicked: {
+                            if (exportModel.exportScores()) {
+                                root.hide();
+                            }
+                        }
                     }
-                }
 
-                FlatButton {
-                    id: exportButton
-
-                    text: qsTrc("project/export", "Export…")
-                    enabled: exportModel.selectionLength > 0
-                    accentButton: enabled
-
-                    navigation.name: "Export"
-                    navigation.panel: rightButtonsNavPanel
-                    navigation.order: 1
-
-                    onClicked: {
-                        if (exportModel.exportScores()) {
+                    onStandardButtonClicked: function(buttonId) {
+                        if (buttonId === ButtonBoxModel.Cancel) {
                             root.hide()
                         }
                     }

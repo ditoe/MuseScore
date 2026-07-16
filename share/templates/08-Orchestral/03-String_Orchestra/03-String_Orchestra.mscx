@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <programVersion>3.6.0</programVersion>
   <programRevision></programRevision>
   <Score>
@@ -16,7 +16,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -84,16 +83,17 @@
         <bracket type="2" span="2" col="1"/>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>Violins I</trackName>
+      <trackName>Violins 1</trackName>
       <Instrument id="violins">
-        <longName>Violins I</longName>
-        <shortName>Vlns. I</shortName>
-        <trackName>Violins</trackName>
+        <longName>Violins 1</longName>
+        <shortName>Vlns. 1</shortName>
+        <trackName>Violins (section)</trackName>
         <minPitchP>55</minPitchP>
         <maxPitchP>103</maxPitchP>
         <minPitchA>55</minPitchA>
         <maxPitchA>88</maxPitchA>
         <instrumentId>strings.group</instrumentId>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -161,16 +161,17 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>Violins II</trackName>
+      <trackName>Violins 2</trackName>
       <Instrument id="violins">
-        <longName>Violins II</longName>
-        <shortName>Vlns. II</shortName>
-        <trackName>Violins</trackName>
+        <longName>Violins 2</longName>
+        <shortName>Vlns. 2</shortName>
+        <trackName>Violins (section)</trackName>
         <minPitchP>55</minPitchP>
         <maxPitchP>103</maxPitchP>
         <minPitchA>55</minPitchA>
         <maxPitchA>88</maxPitchA>
         <instrumentId>strings.group</instrumentId>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -243,13 +244,14 @@
       <Instrument id="violas">
         <longName>Violas</longName>
         <shortName>Vlas.</shortName>
-        <trackName>Violas</trackName>
+        <trackName>Violas (section)</trackName>
         <minPitchP>48</minPitchP>
         <maxPitchP>93</maxPitchP>
         <minPitchA>48</minPitchA>
         <maxPitchA>79</maxPitchA>
         <instrumentId>strings.group</instrumentId>
         <clef>C3</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -322,13 +324,14 @@
       <Instrument id="violoncellos">
         <longName>Violoncellos</longName>
         <shortName>Vcs.</shortName>
-        <trackName>Violoncellos</trackName>
+        <trackName>Violoncellos (section)</trackName>
         <minPitchP>36</minPitchP>
         <maxPitchP>90</maxPitchP>
         <minPitchA>36</minPitchA>
         <maxPitchA>67</maxPitchA>
         <instrumentId>strings.group</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -401,7 +404,7 @@
       <Instrument id="contrabasses">
         <longName>Contrabasses</longName>
         <shortName>Cbs.</shortName>
-        <trackName>Contrabasses</trackName>
+        <trackName>Contrabasses (section)</trackName>
         <minPitchP>24</minPitchP>
         <maxPitchP>67</maxPitchP>
         <minPitchA>28</minPitchA>
@@ -411,6 +414,7 @@
         <instrumentId>strings.group</instrumentId>
         <concertClef>F8vb</concertClef>
         <transposingClef>F</transposingClef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>

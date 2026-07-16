@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,19 +19,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Layouts
+
+import Muse.Ui
+import Muse.UiComponents
 
 Item {
     id: root
 
-    property QtObject resourceItemModel: null
-
-    property var menuAnchorItem: undefined
+    property AbstractAudioResourceItem resourceItemModel
 
     readonly property string title: root.resourceItemModel ? root.resourceItemModel.title : ""
     readonly property bool isActive: root.resourceItemModel ? root.resourceItemModel.isActive : false
@@ -81,8 +81,8 @@ Item {
         Loader {
             id: activityLoader
 
-            Layout.preferredWidth: activityLoader.active ? root.height : 0
-            Layout.preferredHeight: root.height
+            Layout.fillHeight: true
+            Layout.preferredWidth: root.height
             Layout.alignment: Qt.AlignLeft
 
             visible: root.supportsByPassing && root.showAdditionalButtons
@@ -161,7 +161,7 @@ Item {
             id: titleLoader
 
             Layout.fillWidth: true
-            Layout.preferredHeight: root.height
+            Layout.fillHeight: true
 
             visible: root.supportsTitle
             active: visible
@@ -169,8 +169,7 @@ Item {
             sourceComponent: FlatButton {
                 id: titleButton
 
-                height: root.height
-                width: titleLoader.width
+                anchors.fill: parent
 
                 enabled: root.showAdditionalButtons
                          ? (root.resourceItemModel ? root.resourceItemModel.hasNativeEditorSupport : false)
@@ -230,9 +229,8 @@ Item {
                 }
 
                 contentItem: StyledTextLabel {
-                    // To do: this causes a binding loop warning
-                    width: titleLoader.width - 8 // 4px padding on each side
-                    height: root.height
+                    width: titleButton.width - 8 // 4px padding on each side
+                    height: titleButton.height
 
                     text: root.title
                 }
@@ -247,8 +245,8 @@ Item {
             id: selectorLoader
 
             Layout.fillWidth: !titleLoader.visible
+            Layout.fillHeight: true
             Layout.preferredWidth: root.height
-            Layout.preferredHeight: root.height
             Layout.alignment: Qt.AlignRight
 
             visible: root.showAdditionalButtons && root.supportsMenu
@@ -268,12 +266,12 @@ Item {
                 }
 
                 contentItem: Item {
-                    width: titleLoader.visible ? root.height : root.width
-                    height: root.height
+                    width: menuButton.width
+                    height: menuButton.height
 
                     StyledIconLabel {
                         anchors.right: parent.right
-                        width: selectorLoader.Layout.preferredWidth
+                        width: titleLoader.visible ? parent.width : parent.height
                         height: parent.height
                         iconCode: IconCode.SMALL_ARROW_DOWN
                     }
@@ -327,9 +325,11 @@ Item {
                 StyledMenuLoader {
                     id: menuLoader
 
+                    isSearchable: true
+
                     onHandleMenuItem: function(itemId) {
                         if (root.resourceItemModel) {
-                            root.resourceItemModel.handleMenuItem(itemId)
+                            Qt.callLater(root.resourceItemModel.handleMenuItem, itemId)
                         }
                     }
 
@@ -368,8 +368,9 @@ Item {
 
     MouseArea {
         id: rootMouseArea
-
         anchors.fill: parent
+
+        enabled: parent.enabled
         acceptedButtons: Qt.NoButton
         hoverEnabled: true
     }

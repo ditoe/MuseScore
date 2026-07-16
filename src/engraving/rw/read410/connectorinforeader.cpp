@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,6 +30,7 @@
 #include "../../dom/chordrest.h"
 #include "../../dom/measure.h"
 #include "../../dom/note.h"
+#include "../../dom/noteline.h"
 #include "../../dom/tie.h"
 #include "../../dom/chord.h"
 #include "../../dom/staff.h"
@@ -82,17 +83,17 @@ bool ConnectorInfoReader::read()
 {
     XmlReader& e = *m_reader;
     const AsciiStringView name(e.asciiAttribute("type"));
-    _type = TConv::fromXml(name, ElementType::INVALID);
+    m_type = TConv::fromXml(name, ElementType::INVALID);
 
-    m_ctx->fillLocation(_currentLoc);
+    m_ctx->fillLocation(m_currentLoc);
 
     while (e.readNextStartElement()) {
         const AsciiStringView tag(e.name());
 
         if (tag == "prev") {
-            readEndpointLocation(_prevLoc);
+            readEndpointLocation(m_prevLoc);
         } else if (tag == "next") {
-            readEndpointLocation(_nextLoc);
+            readEndpointLocation(m_nextLoc);
         } else {
             if (tag == name) {
                 m_connector = Factory::createItemByName(tag, m_connectorReceiver->score()->dummy());
@@ -105,7 +106,7 @@ bool ConnectorInfoReader::read()
                 e.unknown();
                 return false;
             }
-            m_connector->setTrack(_currentLoc.track());
+            m_connector->setTrack(m_currentLoc.track());
             TRead::readItem(m_connector, e, *m_ctx);
         }
     }
@@ -130,6 +131,11 @@ void ConnectorInfoReader::readEndpointLocation(Location& l)
     }
 }
 
+Fraction ConnectorInfoReader::curTick() const
+{
+    return m_ctx->tick();
+}
+
 //---------------------------------------------------------
 //   ConnectorInfoReader::update
 //---------------------------------------------------------
@@ -140,10 +146,10 @@ void ConnectorInfoReader::update()
         updateCurrentInfo(m_ctx->pasteMode());
     }
     if (hasPrevious()) {
-        _prevLoc.toAbsolute(_currentLoc);
+        m_prevLoc.toAbsolute(m_currentLoc);
     }
     if (hasNext()) {
-        _nextLoc.toAbsolute(_currentLoc);
+        m_nextLoc.toAbsolute(m_currentLoc);
     }
 }
 
@@ -256,19 +262,21 @@ void ConnectorInfoReader::readAddConnector(ChordRest* item, ConnectorInfoReader*
 
         if (info->isStart()) {
             spanner->setTrack(l.track());
-            spanner->setTick(item->tick());
+            // trillCueNotes have unreliable tick() while reading so use instead tick from readContext
+            Fraction startTick = item->isChord() && toChord(item)->isTrillCueNote() ? info->curTick() : item->tick();
+            spanner->setTick(startTick);
             spanner->setStartElement(item);
             if (pasteMode) {
                 item->score()->undoAddElement(spanner);
-                for (EngravingObject* ee : spanner->linkList()) {
-                    if (ee == spanner) {
+                for (EngravingObject* linkedSpanner : spanner->linkList()) {
+                    if (linkedSpanner == spanner) {
                         continue;
                     }
-                    Spanner* ls = toSpanner(ee);
+                    Spanner* ls = toSpanner(linkedSpanner);
                     ls->setTick(spanner->tick());
-                    for (EngravingObject* eee : item->linkList()) {
-                        ChordRest* cr = toChordRest(eee);
-                        if (cr->score() == eee->score() && cr->staffIdx() == ls->staffIdx()) {
+                    for (EngravingObject* linkedCR : item->linkList()) {
+                        ChordRest* cr = toChordRest(linkedCR);
+                        if (cr->score() == linkedSpanner->score() && cr->staffIdx() == ls->staffIdx()) {
                             ls->setTrack(cr->track());
                             if (ls->isSlur()) {
                                 ls->setStartElement(cr);
@@ -285,17 +293,17 @@ void ConnectorInfoReader::readAddConnector(ChordRest* item, ConnectorInfoReader*
             spanner->setTick2(item->tick());
             spanner->setEndElement(item);
             if (pasteMode) {
-                for (EngravingObject* ee : spanner->linkList()) {
-                    if (ee == spanner) {
+                for (EngravingObject* linkedSpanner : spanner->linkList()) {
+                    if (linkedSpanner == spanner) {
                         continue;
                     }
-                    Spanner* ls = static_cast<Spanner*>(ee);
+                    Spanner* ls = toSpanner(linkedSpanner);
                     ls->setTick2(spanner->tick2());
-                    for (EngravingObject* eee : item->linkList()) {
-                        ChordRest* cr = toChordRest(eee);
-                        if (cr->score() == eee->score() && cr->staffIdx() == ls->staffIdx()) {
+                    for (EngravingObject* linkedCR : item->linkList()) {
+                        ChordRest* cr = toChordRest(linkedCR);
+                        if (cr->score() == linkedSpanner->score() && cr->staffIdx() == ls->staffIdx()) {
                             ls->setTrack2(cr->track());
-                            if (ls->type() == ElementType::SLUR) {
+                            if (ls->isSlur()) {
                                 ls->setEndElement(cr);
                             }
                             break;
@@ -326,6 +334,7 @@ void ConnectorInfoReader::readAddConnector(Measure* item, ConnectorInfoReader* i
     case ElementType::GRADUAL_TEMPO_CHANGE:
     case ElementType::VIBRATO:
     case ElementType::PALM_MUTE:
+    case ElementType::PARTIAL_LYRICSLINE:
     case ElementType::WHAMMY_BAR:
     case ElementType::RASGUEADO:
     case ElementType::HARMONIC_MARK:
@@ -338,11 +347,18 @@ void ConnectorInfoReader::readAddConnector(Measure* item, ConnectorInfoReader* i
         Fraction spTick   = pasteMode ? lTick : (item->tick() + lTick);
         if (info->isStart()) {
             sp->setTrack(l.track());
+            sp->setTrack2(sp->track());
             sp->setTick(spTick);
-            item->score()->addSpanner(sp);
+            // Defer computing the end element: the end anchor (tick2/track2) is only known once the
+            // matching end connector is processed (below). Computing it here would cache a wrong value
+            // (tick2 == tick) that nothing recomputes until layout. See readAddConnector end branch.
+            item->score()->addSpanner(sp, /*computeStartEnd=*/ false);
+            sp->computeStartElement();
         } else if (info->isEnd()) {
             sp->setTrack2(l.track());
             sp->setTick2(spTick);
+            // Now that the end anchor is set, compute the end element once with the final value.
+            sp->computeEndElement();
         }
     }
     break;
@@ -359,6 +375,8 @@ void ConnectorInfoReader::readAddConnector(Note* item, ConnectorInfoReader* info
     case ElementType::TIE:
     case ElementType::TEXTLINE:
     case ElementType::GLISSANDO:
+    case ElementType::GUITAR_BEND:
+    case ElementType::NOTELINE:
     {
         Spanner* sp = toSpanner(info->connector());
         if (info->isStart()) {
@@ -384,10 +402,16 @@ void ConnectorInfoReader::readAddConnector(Note* item, ConnectorInfoReader* info
             sp->setTick2(item->tick());
             sp->setEndElement(item);
             if (sp->isTie()) {
-                item->setTieBack(toTie(sp));
+                Tie* tie = toTie(sp);
+                item->setTieBack(tie);
+                if (pasteMode) {
+                    tie->updatePossibleJumpPoints();
+                }
             } else {
-                if (sp->isGlissando() && item->explicitParent() && item->explicitParent()->isChord()) {
-                    toChord(item->explicitParent())->setEndsGlissando(true);
+                bool isNoteAnchoredTextLine = sp->isNoteLine() && toNoteLine(sp)->enforceMinLength();
+                if ((sp->isGlissando() || sp->isGuitarBend() || isNoteAnchoredTextLine) && item->explicitParent()
+                    && item->explicitParent()->isChord()) {
+                    toChord(item->explicitParent())->setEndsNoteAnchoredLine(true);
                 }
                 item->addSpannerBack(sp);
             }
@@ -412,6 +436,11 @@ void ConnectorInfoReader::readAddConnector(Score* item, ConnectorInfoReader* inf
         LOGD("Score::readAddConnector is called not in paste mode.");
         return;
     }
+
+    if (info->connector()->systemFlag()) {
+        return;
+    }
+
     const ElementType type = info->type();
     switch (type) {
     case ElementType::HAIRPIN:
@@ -419,14 +448,13 @@ void ConnectorInfoReader::readAddConnector(Score* item, ConnectorInfoReader* inf
     case ElementType::OTTAVA:
     case ElementType::TRILL:
     case ElementType::TEXTLINE:
-    case ElementType::VOLTA:
     case ElementType::PALM_MUTE:
+    case ElementType::PARTIAL_LYRICSLINE:
     case ElementType::WHAMMY_BAR:
     case ElementType::RASGUEADO:
     case ElementType::HARMONIC_MARK:
     case ElementType::PICK_SCRAPE:
     case ElementType::LET_RING:
-    case ElementType::GRADUAL_TEMPO_CHANGE:
     case ElementType::VIBRATO:
     {
         Spanner* sp = toSpanner(info->connector());

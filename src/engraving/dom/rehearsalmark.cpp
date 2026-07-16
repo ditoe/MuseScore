@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -62,21 +62,43 @@ RehearsalMark::RehearsalMark(Segment* parent)
 }
 
 //---------------------------------------------------------
+//   isEditAllowed
+//---------------------------------------------------------
+
+bool RehearsalMark::isEditAllowed(EditData& ed) const
+{
+    bool ctrlPressed  = ed.modifiers & ControlModifier;
+    bool shiftPressed = ed.modifiers & ShiftModifier;
+    bool altPressed = ed.modifiers & AltModifier;
+    if (altPressed && !ctrlPressed && !shiftPressed && (ed.key == Key_Left || ed.key == Key_Right)) {
+        return false;
+    }
+
+    return TextBase::isEditAllowed(ed);
+}
+
+RectF RehearsalMark::drag(EditData& ed)
+{
+    // Not TextBase::drag because we don't allow reanchoring on drag
+    return EngravingItem::drag(ed);
+}
+
+//---------------------------------------------------------
 //   setType
 //---------------------------------------------------------
 
 void RehearsalMark::setType(RehearsalMark::Type type)
 {
-    if (type == _type) {
+    if (type == m_type) {
         return;
     }
-    _type = type;
+    m_type = type;
     applyTypeStyle();
 }
 
 void RehearsalMark::applyTypeStyle()
 {
-    const auto& elemStyleMap = (_type == Type::Main ? mainRehearsalMarkStyle : additionalRehearsalMarkStyle);
+    const auto& elemStyleMap = (m_type == Type::Main ? mainRehearsalMarkStyle : additionalRehearsalMarkStyle);
     for (const auto& elem : elemStyleMap) {
         if (propertyFlags(elem.pid) == PropertyFlags::STYLED) {
             setProperty(elem.pid, style().styleV(elem.sid));

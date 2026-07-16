@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,29 +22,29 @@
 
 #include <gtest/gtest.h>
 
-#include <QApplication>
-#include <QClipboard>
 #include <QMimeData>
 
-#include "internal/qmimedataadapter.h"
+#include "engraving/internal/qmimedataadapter.h"
 
-#include "dom/factory.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+
+#include "engraving/editing/paste.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
 #include "log.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String CPSYMBOLLIST_DATA_DIR(u"copypastesymbollist_data/");
 
 class Engraving_CopyPasteSymbolListTests : public ::testing::Test
 {
-public:
+protected:
     void copypastecommon(MasterScore*, const char16_t*);
     void copypaste(const char16_t*, ElementType);
     void copypastepart(const char16_t*, ElementType);
@@ -62,7 +62,6 @@ void Engraving_CopyPasteSymbolListTests::copypastecommon(MasterScore* score, con
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     // select first chord in 5th measure
     Measure* m = score->firstMeasure();
@@ -71,15 +70,14 @@ void Engraving_CopyPasteSymbolListTests::copypastecommon(MasterScore* score, con
     }
     score->select(m->first()->element(0));
 
-    score->startCmd();
-    const QMimeData* ms = QApplication::clipboard()->mimeData();
-    if (!ms->hasFormat(mimeSymbolListFormat)) {
+    score->startCmd(TranslatableString::untranslatable("Copy/paste symbol tests"));
+    if (!mimeData->hasFormat(mimeSymbolListFormat)) {
         LOGD("wrong type mime data");
         return;
     }
 
-    QMimeDataAdapter ma(ms);
-    score->cmdPaste(&ma, 0);
+    QMimeDataAdapter ma(mimeData);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
     score->doLayout();
 
@@ -106,6 +104,11 @@ void Engraving_CopyPasteSymbolListTests::copypaste(const char16_t* name, Element
 TEST_F(Engraving_CopyPasteSymbolListTests, copypasteArticulation)
 {
     copypaste(u"articulation", ElementType::ARTICULATION);
+}
+
+TEST_F(Engraving_CopyPasteSymbolListTests, copypasteOrnament)
+{
+    copypaste(u"ornament", ElementType::ORNAMENT);
 }
 
 TEST_F(Engraving_CopyPasteSymbolListTests, copypasteChordNames)
@@ -136,6 +139,11 @@ TEST_F(Engraving_CopyPasteSymbolListTests, copypasteStaffText)
 TEST_F(Engraving_CopyPasteSymbolListTests, copypasteSticking)
 {
     copypaste(u"sticking", ElementType::STICKING);
+}
+
+TEST_F(Engraving_CopyPasteSymbolListTests, copypasteTremoloSingleChord)
+{
+    copypaste(u"tremolo-single-chord", ElementType::TREMOLO_SINGLECHORD);
 }
 
 TEST_F(Engraving_CopyPasteSymbolListTests, copypasteArticulationRest)

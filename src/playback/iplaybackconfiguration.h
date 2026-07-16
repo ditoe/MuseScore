@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,11 +23,12 @@
 #define MU_PLAYBACK_IPLAYBACKCONFIGURATION_H
 
 #include "modularity/imoduleinterface.h"
-#include "types/retval.h"
+#include "async/channel.h"
+#include "async/notification.h"
 #include "playbacktypes.h"
 
 namespace mu::playback {
-class IPlaybackConfiguration : MODULE_EXPORT_INTERFACE
+class IPlaybackConfiguration : MODULE_GLOBAL_INTERFACE
 {
     INTERFACE_ID(IPlaybackConfiguration)
 
@@ -36,34 +37,68 @@ public:
 
     virtual bool playNotesWhenEditing() const = 0;
     virtual void setPlayNotesWhenEditing(bool value) = 0;
+    virtual muse::async::Notification playNotesWhenEditingChanged() const = 0;
 
     virtual bool playChordWhenEditing() const = 0;
     virtual void setPlayChordWhenEditing(bool value) = 0;
+    virtual muse::async::Channel<bool> playChordWhenEditingChanged() const = 0;
 
     virtual bool playHarmonyWhenEditing() const = 0;
     virtual void setPlayHarmonyWhenEditing(bool value) = 0;
+    virtual muse::async::Channel<bool> playHarmonyWhenEditingChanged() const = 0;
+
+    virtual bool playNotesOnMidiInput() const = 0;
+    virtual void setPlayNotesOnMidiInput(bool value) = 0;
+    virtual muse::async::Channel<bool> playNotesOnMidiInputChanged() const = 0;
 
     virtual PlaybackCursorType cursorType() const = 0;
 
     virtual bool isMixerSectionVisible(MixerSectionType sectionType) const = 0;
     virtual void setMixerSectionVisible(MixerSectionType sectionType, bool visible) = 0;
+    virtual muse::async::Channel<MixerSectionType, bool> isMixerSectionVisibleChanged() const = 0;
 
-    virtual bool isAuxSendVisible(audio::aux_channel_idx_t index) const = 0;
-    virtual void setAuxSendVisible(audio::aux_channel_idx_t index, bool visible) = 0;
-    virtual async::Channel<audio::aux_channel_idx_t, bool> isAuxSendVisibleChanged() const = 0;
+    virtual bool isAuxSendVisible(muse::audio::aux_channel_idx_t index) const = 0;
+    virtual void setAuxSendVisible(muse::audio::aux_channel_idx_t index, bool visible) = 0;
+    virtual muse::async::Channel<muse::audio::aux_channel_idx_t, bool> isAuxSendVisibleChanged() const = 0;
 
-    virtual bool isAuxChannelVisible(audio::aux_channel_idx_t index) const = 0;
-    virtual void setAuxChannelVisible(audio::aux_channel_idx_t index, bool visible) const = 0;
-    virtual async::Channel<audio::aux_channel_idx_t, bool> isAuxChannelVisibleChanged() const = 0;
+    virtual bool isAuxChannelVisible(muse::audio::aux_channel_idx_t index) const = 0;
+    virtual void setAuxChannelVisible(muse::audio::aux_channel_idx_t index, bool visible) const = 0;
+    virtual muse::async::Channel<muse::audio::aux_channel_idx_t, bool> isAuxChannelVisibleChanged() const = 0;
 
-    virtual audio::gain_t defaultAuxSendValue(audio::aux_channel_idx_t index, audio::AudioSourceType sourceType,
-                                              const String& instrumentSoundId) const = 0;
+    virtual muse::audio::gain_t defaultAuxSendValue(muse::audio::aux_channel_idx_t index, muse::audio::AudioSourceType sourceType,
+                                                    const muse::String& instrumentSoundId) const = 0;
+
+    virtual bool muteHiddenInstruments() const = 0;
+    virtual void setMuteHiddenInstruments(bool mute) = 0;
+    virtual muse::async::Channel<bool> muteHiddenInstrumentsChanged() const = 0;
 
     virtual const SoundProfileName& basicSoundProfileName() const = 0;
-    virtual const SoundProfileName& museSoundProfileName() const = 0;
+    virtual const SoundProfileName& museSoundsProfileName() const = 0;
+    virtual const SoundProfileName& compatMuseSoundsProfileName() const = 0;
 
     virtual SoundProfileName defaultProfileForNewProjects() const = 0;
     virtual void setDefaultProfileForNewProjects(const SoundProfileName& name) = 0;
+
+    virtual bool soundPresetsMultiSelectionEnabled() const = 0;
+    virtual void setSoundPresetsMultiSelectionEnabled(bool enabled) = 0;
+
+    virtual bool needToShowResetSoundFlagsWhenChangeSoundWarning() const = 0;
+    virtual void setNeedToShowResetSoundFlagsWhenChangeSoundWarning(bool show) = 0;
+
+    virtual bool needToShowResetSoundFlagsWhenChangePlaybackProfileWarning() const = 0;
+    virtual void setNeedToShowResetSoundFlagsWhenChangePlaybackProfileWarning(bool show) = 0;
+
+    virtual bool shouldShowOnlineSoundsProcessingError() const = 0;
+    virtual void setShouldShowOnlineSoundsProcessingError(bool show) = 0;
+    virtual muse::async::Notification shouldShowOnlineSoundsProcessingErrorChanged() const = 0;
+
+    virtual muse::String onlineSoundsHandbookUrl() const = 0;
+
+    virtual OnlineSoundsShowProgressBarMode onlineSoundsShowProgressBarMode() const = 0;
+    virtual void setOnlineSoundsShowProgressBarMode(OnlineSoundsShowProgressBarMode mode) = 0;
+    virtual muse::async::Notification onlineSoundsShowProgressBarModeChanged() const = 0;
+
+    virtual bool shouldMeasureInputLag() const = 0;
 };
 }
 

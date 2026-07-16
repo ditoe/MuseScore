@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,7 +22,7 @@
 #ifndef MU_ENGRAVING_SCOREACCESS_H
 #define MU_ENGRAVING_SCOREACCESS_H
 
-#include "dom/masterscore.h"
+#include "../dom/masterscore.h"
 
 //! NOTE This is a temporary class for controlling (master)score access
 //! See Project class description for detail
@@ -32,10 +32,10 @@ class ScoreAccess
 {
 public:
 
-    static MasterScore* createMasterScore();
-    static MasterScore* createMasterScoreWithBaseStyle();
-    static MasterScore* createMasterScoreWithDefaultStyle();
-    static MasterScore* createMasterScore(const MStyle& style);
+    static MasterScore* createMasterScore(const muse::modularity::ContextPtr& iocCtx);
+    static MasterScore* createMasterScoreWithBaseStyle(const muse::modularity::ContextPtr& iocCtx);
+    static MasterScore* createMasterScoreWithDefaultStyle(const muse::modularity::ContextPtr& iocCtx);
+    static MasterScore* createMasterScore(const muse::modularity::ContextPtr& iocCtx, const MStyle& style);
 };
 }
 

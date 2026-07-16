@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_NOTATIONCONFIGURATIONSTUB_H
-#define MU_NOTATION_NOTATIONCONFIGURATIONSTUB_H
+
+#pragma once
 
 #include "notation/inotationconfiguration.h"
 
@@ -30,57 +30,79 @@ class NotationConfigurationStub : public INotationConfiguration
 public:
     NotationConfigurationStub() = default;
 
+    QColor notationColor() const override;
+
     QColor backgroundColor() const override;
     void setBackgroundColor(const QColor& color)  override;
 
-    io::path_t backgroundWallpaperPath() const override;
+    muse::io::path_t backgroundWallpaperPath() const override;
     const QPixmap& backgroundWallpaper() const override;
-    void setBackgroundWallpaperPath(const io::path_t& path)  override;
+    void setBackgroundWallpaperPath(const muse::io::path_t& path)  override;
 
     bool backgroundUseColor() const override;
     void setBackgroundUseColor(bool value)  override;
 
     void resetBackground()  override;
 
-    async::Notification backgroundChanged() const override;
+    muse::async::Notification backgroundChanged() const override;
 
     QColor foregroundColor() const override;
     void setForegroundColor(const QColor& color)  override;
 
-    io::path_t foregroundWallpaperPath() const override;
+    muse::io::path_t foregroundWallpaperPath() const override;
     const QPixmap& foregroundWallpaper() const override;
-    void setForegroundWallpaperPath(const io::path_t& path)  override;
+    void setForegroundWallpaperPath(const muse::io::path_t& path)  override;
 
     bool foregroundUseColor() const override;
     void setForegroundUseColor(bool value)  override;
 
     void resetForeground()  override;
 
-    async::Notification foregroundChanged() const override;
+    muse::async::Notification foregroundChanged() const override;
 
-    io::path_t wallpapersDefaultDirPath() const override;
+    muse::io::path_t wallpapersDefaultDirPath() const override;
+
+    bool shouldInvertScore() const override;
+
+    bool scoreInversionEnabled() const override;
+    void setScoreInversionEnabled(bool value) override;
+    muse::async::Notification scoreInversionChanged() const override;
+
+    bool isOnlyInvertInDarkTheme() const override;
+    void setOnlyInvertInDarkTheme(bool value) override;
+    muse::async::Notification isOnlyInvertInDarkThemeChanged() const override;
 
     QColor borderColor() const override;
     int borderWidth() const override;
-
-    QColor anchorLineColor() const override;
 
     QColor playbackCursorColor() const override;
     QColor loopMarkerColor() const override;
     int cursorOpacity() const override;
 
+    bool thinNoteInputCursor() const override;
+
     QColor selectionColor(engraving::voice_idx_t voiceIndex = 0) const override;
+    QColor highlightSelectionColor(engraving::voice_idx_t voiceIndex = 0) const override;
 
     QColor dropRectColor() const override;
 
+    muse::draw::Color noteInputPreviewColor() const override;
+
+    bool useNoteInputCursorInInputByDuration() const override;
+    void setUseNoteInputCursorInInputByDuration(bool use) override;
+    muse::async::Notification useNoteInputCursorInInputByDurationChanged() const override;
+
     int selectionProximity() const override;
     void setSelectionProximity(int proximity)  override;
+    muse::async::Channel<int> selectionProximityChanged() const override;
 
     ZoomType defaultZoomType() const override;
     void setDefaultZoomType(ZoomType zoomType)  override;
 
     int defaultZoom() const override;
     void setDefaultZoom(int zoomPercentage)  override;
+
+    muse::async::Notification defaultZoomChanged() const override;
 
     QList<int> possibleZoomPercentageList() const override;
 
@@ -89,75 +111,122 @@ public:
 
     int mouseZoomPrecision() const override;
     void setMouseZoomPrecision(int precision)  override;
+    muse::async::Notification mouseZoomPrecisionChanged() const override;
 
     std::string fontFamily() const override;
     int fontSize() const override;
 
-    io::path_t userStylesPath() const override;
-    void setUserStylesPath(const io::path_t& path)  override;
-    async::Channel<io::path_t> userStylesPathChanged() const override;
+    muse::io::path_t userStylesPath() const override;
+    void setUserStylesPath(const muse::io::path_t& path)  override;
+    muse::async::Channel<muse::io::path_t> userStylesPathChanged() const override;
 
-    io::path_t defaultStyleFilePath() const override;
-    void setDefaultStyleFilePath(const io::path_t& path)  override;
+    muse::io::path_t defaultStyleFilePath() const override;
+    void setDefaultStyleFilePath(const muse::io::path_t& path)  override;
+    muse::async::Channel<muse::io::path_t> defaultStyleFilePathChanged() const override;
 
-    io::path_t partStyleFilePath() const override;
-    void setPartStyleFilePath(const io::path_t& path)  override;
+    muse::io::path_t partStyleFilePath() const override;
+    void setPartStyleFilePath(const muse::io::path_t& path)  override;
+    muse::async::Channel<muse::io::path_t> partStyleFilePathChanged() const override;
+
+    NoteInputMethod defaultNoteInputMethod() const override;
+    void setDefaultNoteInputMethod(NoteInputMethod method) override;
+    muse::async::Notification defaultNoteInputMethodChanged() const override;
+
+    bool addAccidentalDotsArticulationsToNextNoteEntered() const override;
+    void setAddAccidentalDotsArticulationsToNextNoteEntered(bool value) override;
+    muse::async::Notification addAccidentalDotsArticulationsToNextNoteEnteredChanged() const override;
+
+    muse::io::path_t userMusicFontsPath() const override;
+    void setUserMusicFontsPath(const muse::io::path_t& path) override;
+    muse::async::Channel<muse::io::path_t> userMusicFontsPathChanged() const override;
 
     bool isMidiInputEnabled() const override;
     void setIsMidiInputEnabled(bool enabled)  override;
+    muse::async::Notification isMidiInputEnabledChanged() const override;
+
+    bool startNoteInputAtSelectedNoteRestWhenPressingMidiKey() const override;
+    void setStartNoteInputAtSelectedNoteRestWhenPressingMidiKey(bool value) override;
+    muse::async::Notification startNoteInputAtSelectedNoteRestWhenPressingMidiKeyChanged() const override;
 
     bool isAutomaticallyPanEnabled() const override;
     void setIsAutomaticallyPanEnabled(bool enabled)  override;
+    muse::async::Notification isAutomaticallyPanEnabledChanged() const override;
+
+    bool isSmoothPanning() const override;
+    void setIsSmoothPanning(bool value) override;
+    muse::async::Notification isSmoothPanningChanged() const override;
 
     bool isPlayRepeatsEnabled() const override;
     void setIsPlayRepeatsEnabled(bool enabled)  override;
-    async::Notification isPlayRepeatsChanged() const override;
+    muse::async::Notification isPlayRepeatsChanged() const override;
 
     bool isPlayChordSymbolsEnabled() const override;
     void setIsPlayChordSymbolsEnabled(bool enabled)  override;
-    async::Notification isPlayChordSymbolsChanged() const override;
+    muse::async::Notification isPlayChordSymbolsChanged() const override;
+
+    bool isPlayPreviewNotesInInputByDuration() const override;
+    void setIsPlayPreviewNotesInInputByDuration(bool play) override;
+    muse::async::Notification isPlayPreviewNotesInInputByDurationChanged() const override;
+
+    bool playPreviewNotesWithScoreDynamics() const override;
+    void setPlayPreviewNotesWithScoreDynamics(bool use) override;
+    muse::async::Notification playPreviewNotesWithScoreDynamicsChanged() const override;
 
     bool isMetronomeEnabled() const override;
     void setIsMetronomeEnabled(bool enabled)  override;
+    muse::async::Notification isMetronomeEnabledChanged() const override;
 
     bool isCountInEnabled() const override;
     void setIsCountInEnabled(bool enabled)  override;
 
-    double guiScaling() const override;
-    double notationScaling() const override;
+    double guiScaling(const muse::modularity::ContextPtr& ctx) const override;
+    double notationScaling(const muse::modularity::ContextPtr& ctx) const override;
 
-    ValCh<framework::Orientation> canvasOrientation() const override;
-    void setCanvasOrientation(framework::Orientation orientation)  override;
+    muse::ValCh<muse::Orientation> canvasOrientation() const override;
+    void setCanvasOrientation(muse::Orientation orientation)  override;
 
     bool isLimitCanvasScrollArea() const override;
     void setIsLimitCanvasScrollArea(bool limited)  override;
-    async::Notification isLimitCanvasScrollAreaChanged() const override;
+    muse::async::Notification isLimitCanvasScrollAreaChanged() const override;
 
     bool colorNotesOutsideOfUsablePitchRange() const override;
     void setColorNotesOutsideOfUsablePitchRange(bool value)  override;
+    muse::async::Channel<bool> colorNotesOutsideOfUsablePitchRangeChanged() const override;
+
+    bool warnGuitarBends() const override;
+    void setWarnGuitarBends(bool value) override;
+    muse::async::Channel<bool> warnGuitarBendsChanged() const override;
 
     int delayBetweenNotesInRealTimeModeMilliseconds() const override;
     void setDelayBetweenNotesInRealTimeModeMilliseconds(int delayMs)  override;
+    muse::async::Channel<int> delayBetweenNotesInRealTimeModeMillisecondsChanged() const override;
+
+    bool useMidiVelocityAndDurationDuringNoteInput() const override;
+    void setUseMidiVelocityAndDurationDuringNoteInput(bool use) override;
+    muse::async::Channel<bool> useMidiVelocityAndDurationDuringNoteInputChanged() const override;
 
     int notePlayDurationMilliseconds() const override;
     void setNotePlayDurationMilliseconds(int durationMs)  override;
+    muse::async::Channel<int> notePlayDurationMillisecondsChanged() const override;
 
     void setTemplateModeEnabled(std::optional<bool> enabled) override;
     void setTestModeEnabled(std::optional<bool> enabled) override;
 
-    io::path_t instrumentListPath() const override;
+    muse::io::path_t instrumentsXmlPath() const override;
+    muse::io::path_t scoreOrdersXmlPath() const override;
 
-    io::paths_t scoreOrderListPaths() const override;
-    async::Notification scoreOrderListPathsChanged() const override;
+    muse::io::path_t userInstrumentsFolder() const override;
+    muse::io::paths_t userInstrumentsAndScoreOrdersPaths() const override;
+    void setUserInstrumentsFolder(const muse::io::path_t& path) override;
+    muse::async::Channel<muse::io::path_t> userInstrumentsFolderChanged() const override;
 
-    io::paths_t userScoreOrderListPaths() const override;
-    void setUserScoreOrderListPaths(const io::paths_t& paths)  override;
+    muse::io::path_t stringTuningsPresetsPath() const override;
 
-    bool isSnappedToGrid(framework::Orientation gridOrientation) const override;
-    void setIsSnappedToGrid(framework::Orientation gridOrientation, bool isSnapped)  override;
+    bool isSnappedToGrid(muse::Orientation gridOrientation) const override;
+    void setIsSnappedToGrid(muse::Orientation gridOrientation, bool isSnapped)  override;
 
-    int gridSizeSpatium(framework::Orientation gridOrientation) const override;
-    void setGridSize(framework::Orientation gridOrientation, int sizeSpatium)  override;
+    int gridSizeSpatium(muse::Orientation gridOrientation) const override;
+    void setGridSize(muse::Orientation gridOrientation, int sizeSpatium)  override;
 
     bool needToShowAddTextErrorMessage() const override;
     void setNeedToShowAddTextErrorMessage(bool show)  override;
@@ -165,15 +234,52 @@ public:
     bool needToShowAddFiguredBassErrorMessage() const override;
     void setNeedToShowAddFiguredBassErrorMessage(bool show)  override;
 
+    bool needToShowAddGuitarBendErrorMessage() const override;
+    void setNeedToShowAddGuitarBendErrorMessage(bool show) override;
+
     bool needToShowMScoreError(const std::string& errorKey) const override;
     void setNeedToShowMScoreError(const std::string& errorKey, bool show)  override;
 
-    ValCh<int> pianoKeyboardNumberOfKeys() const override;
+    muse::ValCh<int> pianoKeyboardNumberOfKeys() const override;
     void setPianoKeyboardNumberOfKeys(int number)  override;
 
-    io::path_t styleFileImportPath() const override;
-    void setStyleFileImportPath(const io::path_t& path)  override;
+    muse::ValCh<bool> midiUseWrittenPitch() const override;
+    void setMidiUseWrittenPitch(bool value)  override;
+
+    bool useNewPercussionPanel() const override;
+    void setUseNewPercussionPanel(bool use) override;
+    muse::async::Notification useNewPercussionPanelChanged() const override;
+
+    bool percussionPanelUseNotationPreview() const override;
+    void setPercussionPanelUseNotationPreview(bool use) override;
+    muse::async::Notification percussionPanelUseNotationPreviewChanged() const override;
+
+    PercussionPanelAutoShowMode percussionPanelAutoShowMode() const override;
+    void setPercussionPanelAutoShowMode(PercussionPanelAutoShowMode autoShowMode) override;
+    muse::async::Notification percussionPanelAutoShowModeChanged() const override;
+
+    bool autoClosePercussionPanel() const override;
+    void setAutoClosePercussionPanel(bool autoClose) override;
+    muse::async::Notification autoClosePercussionPanelChanged() const override;
+
+    bool showPercussionPanelPadSwapDialog() const override;
+    void setShowPercussionPanelPadSwapDialog(bool show) override;
+    muse::async::Notification showPercussionPanelPadSwapDialogChanged() const override;
+
+    bool percussionPanelMoveMidiNotesAndShortcuts() const override;
+    void setPercussionPanelMoveMidiNotesAndShortcuts(bool move) override;
+    muse::async::Notification percussionPanelMoveMidiNotesAndShortcutsChanged() const override;
+
+    muse::io::path_t styleFileImportPath() const override;
+    void setStyleFileImportPath(const muse::io::path_t& path)  override;
+    muse::async::Channel<std::string> styleFileImportPathChanged() const override;
+
+    int styleDialogLastPageIndex() const override;
+    void setStyleDialogLastPageIndex(int value) override;
+
+    int styleDialogLastSubPageIndex() const override;
+    void setStyleDialogLastSubPageIndex(int value) override;
+
+    void resetStyleDialogPageIndices() override;
 };
 }
-
-#endif // MU_NOTATION_NOTATIONCONFIGURATIONSTUB_H

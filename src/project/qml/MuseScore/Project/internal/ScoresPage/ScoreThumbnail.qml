@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,11 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 Item {
     id: root
@@ -89,19 +92,19 @@ Item {
                         case "gpx":
                         case "gp":
                         case "ptb":
-                            return "qrc:/resources/Placeholder_GP.png"
+                            return "images/Placeholder_GP.png"
                         case "mid":
                         case "midi":
                         case "kar":
-                            return "qrc:/resources/Placeholder_MIDI.png"
+                            return "images/Placeholder_MIDI.png"
                         case "mxl":
                         case "musicxml":
                         case "xml":
-                            return "qrc:/resources/Placeholder_MXML.png"
+                            return "images/Placeholder_MXML.png"
                         case "mei":
-                            return "qrc:/resources/Placeholder_MEI.png"
+                            return "images/Placeholder_MEI.png"
                         default:
-                            return "qrc:/resources/Placeholder_Other.png"
+                            return "images/Placeholder_Other.png"
                         }
                     }
 

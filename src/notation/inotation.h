@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,35 +19,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_INOTATION_H
-#define MU_NOTATION_INOTATION_H
 
-#include <QString>
+#pragma once
 
+#include "async/channel.h"
 #include "async/notification.h"
-#include "internal/inotationundostack.h"
-#include "notationtypes.h"
-#include "inotationpainting.h"
-#include "inotationviewstate.h"
-#include "inotationstyle.h"
-#include "inotationplayback.h"
-#include "inotationelements.h"
-#include "inotationinteraction.h"
-#include "inotationaccessibility.h"
-#include "inotationmidiinput.h"
-#include "inotationparts.h"
-#include "notationtypes.h"
+#include "draw/types/geometry.h"
+#include "modularity/ioc.h"
+
+#include "inotation_fwd.h" // IWYU pragma: export
+#include "types/viewmode.h"
+
+class QString;
+
+namespace mu::project {
+class INotationProject;
+}
 
 namespace mu::notation {
-class INotation;
-using INotationPtr = std::shared_ptr<INotation>;
-using INotationWeakPtr = std::weak_ptr<INotation>;
-using INotationPtrList = std::vector<INotationPtr>;
-
 class INotation
 {
 public:
     virtual ~INotation() = default;
+
+    virtual const muse::modularity::ContextPtr& iocContext() const = 0;
+
+    virtual project::INotationProject* project() const = 0;
+    virtual IMasterNotationPtr masterNotation() const = 0;
 
     /// For MasterScores: the filename without extension
     /// For Scores: the excerpt name
@@ -64,14 +62,22 @@ public:
 
     virtual bool isOpen() const = 0;
     virtual void setIsOpen(bool opened) = 0;
-    virtual async::Notification openChanged() const = 0;
+    virtual muse::async::Notification openChanged() const = 0;
+
+    virtual bool hasVisibleParts() const = 0;
+
+    virtual bool isMaster() const = 0;
 
     // draw
     virtual ViewMode viewMode() const = 0;
     virtual void setViewMode(const ViewMode& viewMode) = 0;
+    virtual muse::async::Notification viewModeChanged() const = 0;
 
     virtual INotationPaintingPtr painting() const = 0;
     virtual INotationViewStatePtr viewState() const = 0;
+
+    // solo-mute state
+    virtual INotationSoloMuteStatePtr soloMuteState() const = 0;
 
     // input (mouse)
     virtual INotationInteractionPtr interaction() const = 0;
@@ -95,8 +101,8 @@ public:
     virtual INotationPartsPtr parts() const = 0;
 
     // notify
-    virtual async::Notification notationChanged() const = 0;
+    virtual muse::async::Channel<muse::RectF> notationChanged() const = 0;
 };
-}
 
-#endif // MU_NOTATION_INOTATION_H
+using INotationPtr = std::shared_ptr<INotation>;
+}

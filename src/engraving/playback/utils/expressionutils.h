@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,10 +25,73 @@
 
 #include "mpe/mpetypes.h"
 
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
-struct DynamicTransition {
+constexpr muse::mpe::dynamic_level_t NATURAL_DYNAMIC_LEVEL = muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::Natural);
+
+inline const std::unordered_map<DynamicType, muse::mpe::dynamic_level_t> ORDINARY_DYNAMIC_LEVELS {
+    { DynamicType::N, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ppppppppp) },
+    { DynamicType::PPPPPP, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::pppppp) },
+    { DynamicType::PPPPP, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ppppp) },
+    { DynamicType::PPPP, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::pppp) },
+    { DynamicType::PPP, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ppp) },
+    { DynamicType::PP, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::pp) },
+    { DynamicType::P, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::p) },
+    { DynamicType::MP, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::mp) },
+    { DynamicType::MF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::mf) },
+    { DynamicType::F, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::f) },
+    { DynamicType::FF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ff) },
+    { DynamicType::FFF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::fff) },
+    { DynamicType::FFFF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ffff) },
+    { DynamicType::FFFFF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::fffff) },
+    { DynamicType::FFFFFF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ffffff) }
+};
+
+inline bool isOrdinaryDynamicType(const DynamicType type)
+{
+    return ORDINARY_DYNAMIC_LEVELS.find(type) != ORDINARY_DYNAMIC_LEVELS.cend();
+}
+
+inline muse::mpe::dynamic_level_t dynamicLevelFromOrdinaryType(const DynamicType type,
+                                                               const muse::mpe::dynamic_level_t defLevel = NATURAL_DYNAMIC_LEVEL)
+{
+    auto search = ORDINARY_DYNAMIC_LEVELS.find(type);
+    if (search != ORDINARY_DYNAMIC_LEVELS.cend()) {
+        return search->second;
+    }
+
+    return defLevel;
+}
+
+inline const std::unordered_map<DynamicType, muse::mpe::dynamic_level_t> SINGLE_NOTE_DYNAMIC_LEVELS {
+    { DynamicType::SF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::f) },
+    { DynamicType::SFZ, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::f) },
+    { DynamicType::SFF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ff) },
+    { DynamicType::SFFZ, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::ff) },
+    { DynamicType::SFFF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::fff) },
+    { DynamicType::SFFFZ, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::fff) },
+    { DynamicType::RFZ, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::f) },
+    { DynamicType::RF, muse::mpe::dynamicLevelFromType(muse::mpe::DynamicType::f) }
+};
+
+inline bool isSingleNoteDynamicType(const DynamicType type)
+{
+    return SINGLE_NOTE_DYNAMIC_LEVELS.find(type) != SINGLE_NOTE_DYNAMIC_LEVELS.cend();
+}
+
+inline muse::mpe::dynamic_level_t dynamicLevelFromSingleNoteType(const DynamicType type,
+                                                                 const muse::mpe::dynamic_level_t defLevel = NATURAL_DYNAMIC_LEVEL)
+{
+    auto search = SINGLE_NOTE_DYNAMIC_LEVELS.find(type);
+    if (search != SINGLE_NOTE_DYNAMIC_LEVELS.cend()) {
+        return search->second;
+    }
+
+    return defLevel;
+}
+
+struct CompoundDynamic {
     DynamicType from = DynamicType::OTHER;
     DynamicType to = DynamicType::OTHER;
 
@@ -38,147 +101,91 @@ struct DynamicTransition {
     }
 };
 
-inline mpe::dynamic_level_t dynamicLevelFromType(const DynamicType type,
-                                                 const mpe::dynamic_level_t defLevel = mpe::dynamicLevelFromType(mpe::DynamicType::Natural))
+inline const std::unordered_map<DynamicType, CompoundDynamic> COMPOUND_DYNAMICS {
+    { DynamicType::FP, { DynamicType::F, DynamicType::P } },
+    { DynamicType::PF, { DynamicType::P, DynamicType::F } },
+    { DynamicType::SFP, { DynamicType::F, DynamicType::P } },
+    { DynamicType::SFPP, { DynamicType::F, DynamicType::PP } }
+};
+
+inline bool isCompoundDynamicType(const DynamicType type)
 {
-    static const std::unordered_map<DynamicType, mpe::dynamic_level_t> DYNAMIC_LEVELS = {
-        { DynamicType::PPPPPP, mpe::dynamicLevelFromType(mpe::DynamicType::pppppp) },
-        { DynamicType::PPPPP, mpe::dynamicLevelFromType(mpe::DynamicType::ppppp) },
-        { DynamicType::PPPP, mpe::dynamicLevelFromType(mpe::DynamicType::pppp) },
-        { DynamicType::PPP, mpe::dynamicLevelFromType(mpe::DynamicType::ppp) },
-        { DynamicType::PP, mpe::dynamicLevelFromType(mpe::DynamicType::pp) },
-        { DynamicType::P, mpe::dynamicLevelFromType(mpe::DynamicType::p) },
-        { DynamicType::MP, mpe::dynamicLevelFromType(mpe::DynamicType::mp) },
-        { DynamicType::MF, mpe::dynamicLevelFromType(mpe::DynamicType::mf) },
-        { DynamicType::F, mpe::dynamicLevelFromType(mpe::DynamicType::f) },
-        { DynamicType::FF, mpe::dynamicLevelFromType(mpe::DynamicType::ff) },
-        { DynamicType::FFF, mpe::dynamicLevelFromType(mpe::DynamicType::fff) },
-        { DynamicType::FFFF, mpe::dynamicLevelFromType(mpe::DynamicType::ffff) },
-        { DynamicType::FFFFF, mpe::dynamicLevelFromType(mpe::DynamicType::fffff) },
-        { DynamicType::FFFFFF, mpe::dynamicLevelFromType(mpe::DynamicType::ffffff) },
-        { DynamicType::SF, mpe::dynamicLevelFromType(mpe::DynamicType::f) },
-        { DynamicType::SFZ, mpe::dynamicLevelFromType(mpe::DynamicType::f) },
-        { DynamicType::SFF, mpe::dynamicLevelFromType(mpe::DynamicType::ff) },
-        { DynamicType::SFFZ, mpe::dynamicLevelFromType(mpe::DynamicType::ff) },
-        { DynamicType::RFZ, mpe::dynamicLevelFromType(mpe::DynamicType::f) },
-        { DynamicType::RF, mpe::dynamicLevelFromType(mpe::DynamicType::f) },
-        { DynamicType::FZ, mpe::dynamicLevelFromType(mpe::DynamicType::f) },
-        { DynamicType::N, mpe::dynamicLevelFromType(mpe::DynamicType::ppppppppp) }
-    };
+    return COMPOUND_DYNAMICS.find(type) != COMPOUND_DYNAMICS.cend();
+}
 
-    auto search = DYNAMIC_LEVELS.find(type);
-
-    if (search != DYNAMIC_LEVELS.cend()) {
+inline const CompoundDynamic& compoundDynamicFromType(const DynamicType type)
+{
+    auto search = COMPOUND_DYNAMICS.find(type);
+    if (search != COMPOUND_DYNAMICS.cend()) {
         return search->second;
     }
 
-    return defLevel;
-}
-
-inline mpe::dynamic_level_t dynamicLevelRangeByTypes(const DynamicType dynamicTypeFrom,
-                                                     const DynamicType dynamicTypeTo,
-                                                     const mpe::dynamic_level_t nominalDynamicLevelFrom,
-                                                     const mpe::dynamic_level_t nominalDynamicLevelTo, const bool isCrescendo)
-{
-    mpe::dynamic_level_t dynamicLevelFrom = 0;
-    mpe::dynamic_level_t dynamicLevelTo = 0;
-
-    dynamicLevelFrom = dynamicLevelFromType(dynamicTypeFrom, nominalDynamicLevelFrom);
-
-    mpe::dynamic_level_t defaultStep = mpe::DYNAMIC_LEVEL_STEP;
-    if (!isCrescendo) {
-        defaultStep = -mpe::DYNAMIC_LEVEL_STEP;
-    }
-
-    if (nominalDynamicLevelTo == mpe::dynamicLevelFromType(mpe::DynamicType::Natural)) {
-        dynamicLevelTo = dynamicLevelFromType(dynamicTypeTo, dynamicLevelFrom + defaultStep);
-    } else {
-        dynamicLevelTo = dynamicLevelFromType(dynamicTypeTo, nominalDynamicLevelTo);
-    }
-
-    return dynamicLevelTo - dynamicLevelFrom;
-}
-
-inline bool isOrdinaryDynamicType(const DynamicType type)
-{
-    static const std::set<DynamicType> ORDINARY_DYNAMIC_TYPES = {
-        DynamicType::PPPPPP,
-        DynamicType::PPPPP,
-        DynamicType::PPPP,
-        DynamicType::PPP,
-        DynamicType::PP,
-        DynamicType::P,
-        DynamicType::MP,
-        DynamicType::MF,
-        DynamicType::F,
-        DynamicType::FF,
-        DynamicType::FFF,
-        DynamicType::FFFF,
-        DynamicType::FFFFF,
-        DynamicType::FFFFFF
-    };
-
-    return ORDINARY_DYNAMIC_TYPES.find(type) != ORDINARY_DYNAMIC_TYPES.cend();
-}
-
-inline bool isSingleNoteDynamicType(const DynamicType type)
-{
-    static const std::set<DynamicType> SINGLE_NOTE_DYNAMIC_TYPES = {
-        DynamicType::SF,
-        DynamicType::SFZ,
-        DynamicType::SFFZ,
-        DynamicType::RFZ,
-        DynamicType::RF
-    };
-
-    return SINGLE_NOTE_DYNAMIC_TYPES.find(type) != SINGLE_NOTE_DYNAMIC_TYPES.cend();
-}
-
-inline const DynamicTransition& dynamicTransitionFromType(const DynamicType type)
-{
-    static const std::unordered_map<DynamicType, DynamicTransition> DYNAMIC_TRANSITIONS = {
-        { DynamicType::FP, { DynamicType::F, DynamicType::P } },
-        { DynamicType::PF, { DynamicType::P, DynamicType::F } },
-        { DynamicType::SFP, { DynamicType::F, DynamicType::P } },
-        { DynamicType::SFPP, { DynamicType::F, DynamicType::PP } }
-    };
-
-    auto search = DYNAMIC_TRANSITIONS.find(type);
-    if (search != DYNAMIC_TRANSITIONS.cend()) {
-        return search->second;
-    }
-
-    static DynamicTransition empty;
+    static CompoundDynamic empty;
     return empty;
 }
 
-inline mpe::ArticulationType articulationFromPlayTechType(const PlayingTechniqueType technique)
+inline muse::mpe::ArticulationType articulationFromPlayTechType(const PlayingTechniqueType technique)
 {
-    static const std::unordered_map<PlayingTechniqueType, mpe::ArticulationType> PLAYING_TECH_TYPES = {
-        { PlayingTechniqueType::Undefined, mpe::ArticulationType::Undefined },
-        { PlayingTechniqueType::Natural, mpe::ArticulationType::Standard },
-        { PlayingTechniqueType::Pizzicato, mpe::ArticulationType::Pizzicato },
-        { PlayingTechniqueType::Open, mpe::ArticulationType::Open },
-        { PlayingTechniqueType::Mute, mpe::ArticulationType::Mute },
-        { PlayingTechniqueType::Tremolo, mpe::ArticulationType::Tremolo64th },
-        { PlayingTechniqueType::Detache, mpe::ArticulationType::Detache },
-        { PlayingTechniqueType::Martele, mpe::ArticulationType::Martele },
-        { PlayingTechniqueType::ColLegno, mpe::ArticulationType::ColLegno },
-        { PlayingTechniqueType::SulPonticello, mpe::ArticulationType::SulPont },
-        { PlayingTechniqueType::SulTasto, mpe::ArticulationType::SulTasto },
-        { PlayingTechniqueType::Distortion, mpe::ArticulationType::Distortion },
-        { PlayingTechniqueType::Overdrive, mpe::ArticulationType::Overdrive },
-        { PlayingTechniqueType::Harmonics, mpe::ArticulationType::Harmonic },
-        { PlayingTechniqueType::JazzTone, mpe::ArticulationType::JazzTone },
-    };
-
-    auto search = PLAYING_TECH_TYPES.find(technique);
-
-    if (search != PLAYING_TECH_TYPES.cend()) {
-        return search->second;
+    switch (technique) {
+    case PlayingTechniqueType::Natural: return muse::mpe::ArticulationType::Standard;
+    case PlayingTechniqueType::Pizzicato: return muse::mpe::ArticulationType::Pizzicato;
+    case PlayingTechniqueType::Open: return muse::mpe::ArticulationType::Open;
+    case PlayingTechniqueType::Mute: return muse::mpe::ArticulationType::Mute;
+    case PlayingTechniqueType::Tremolo: return muse::mpe::ArticulationType::Tremolo64th;
+    case PlayingTechniqueType::Detache: return muse::mpe::ArticulationType::Detache;
+    case PlayingTechniqueType::Martele: return muse::mpe::ArticulationType::Martele;
+    case PlayingTechniqueType::ColLegno: return muse::mpe::ArticulationType::ColLegno;
+    case PlayingTechniqueType::SulPonticello: return muse::mpe::ArticulationType::SulPont;
+    case PlayingTechniqueType::SulTasto: return muse::mpe::ArticulationType::SulTasto;
+    case PlayingTechniqueType::Distortion: return muse::mpe::ArticulationType::Distortion;
+    case PlayingTechniqueType::Overdrive: return muse::mpe::ArticulationType::Overdrive;
+    case PlayingTechniqueType::Harmonics: return muse::mpe::ArticulationType::Harmonic;
+    case PlayingTechniqueType::JazzTone: return muse::mpe::ArticulationType::JazzTone;
+    case PlayingTechniqueType::Vibrato: return muse::mpe::ArticulationType::Vibrato;
+    case PlayingTechniqueType::Legato: return muse::mpe::ArticulationType::Legato;
+    case PlayingTechniqueType::HandbellsSwing: return muse::mpe::ArticulationType::Swing;
+    case PlayingTechniqueType::HandbellsSwingUp: return muse::mpe::ArticulationType::Swing;
+    case PlayingTechniqueType::HandbellsSwingDown: return muse::mpe::ArticulationType::Swing;
+    case PlayingTechniqueType::HandbellsEcho1: return muse::mpe::ArticulationType::Echo;
+    case PlayingTechniqueType::HandbellsEcho2: return muse::mpe::ArticulationType::Echo;
+    case PlayingTechniqueType::HandbellsLV: return muse::mpe::ArticulationType::Pedal;
+    case PlayingTechniqueType::HandbellsDamp: return muse::mpe::ArticulationType::Standard;
+    case PlayingTechniqueType::HandbellsR: return muse::mpe::ArticulationType::Ring;
+    case PlayingTechniqueType::Undefined: return muse::mpe::ArticulationType::Undefined;
     }
 
-    return mpe::ArticulationType::Undefined;
+    return muse::mpe::ArticulationType::Undefined;
+}
+
+static const muse::mpe::ArticulationTypeSet GRACE_NOTE_ARTICULATION_TYPES {
+    muse::mpe::ArticulationType::Acciaccatura,
+    muse::mpe::ArticulationType::PostAppoggiatura,
+    muse::mpe::ArticulationType::PreAppoggiatura,
+};
+
+inline bool isGraceNotePlacedBeforePrincipalNote(const muse::mpe::ArticulationType type)
+{
+    return type == muse::mpe::ArticulationType::Acciaccatura || type == muse::mpe::ArticulationType::PreAppoggiatura;
+}
+
+inline void updateArticulationBoundaries(const muse::mpe::ArticulationType type, const muse::mpe::timestamp_t nominalTimestamp,
+                                         const muse::mpe::duration_t nominalDuration,
+                                         muse::mpe::ArticulationMap& articulations)
+{
+    if (articulations.empty()) {
+        return;
+    }
+
+    const muse::mpe::ArticulationAppliedData& articulationData = articulations.at(type);
+
+    muse::mpe::timestamp_t articulationOccupiedFrom = nominalTimestamp - articulationData.meta.timestamp;
+    muse::mpe::timestamp_t articulationOccupiedTo = nominalTimestamp + nominalDuration - articulationData.meta.timestamp;
+
+    articulations.updateOccupiedRange(type,
+                                      muse::mpe::occupiedPercentage(articulationOccupiedFrom,
+                                                                    articulationData.meta.overallDuration),
+                                      muse::mpe::occupiedPercentage(articulationOccupiedTo,
+                                                                    articulationData.meta.overallDuration));
 }
 }
 

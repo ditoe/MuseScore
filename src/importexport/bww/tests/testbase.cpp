@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,9 +22,6 @@
 
 #include "testbase.h"
 
-#include <QProcess>
-#include <QTextStream>
-
 #include "io/file.h"
 
 #include "engraving/dom/masterscore.h"
@@ -34,23 +31,24 @@
 #include "engraving/compat/scoreaccess.h"
 #include "engraving/compat/writescorehook.h"
 #include "engraving/rw/rwregister.h"
+#include "engraving/tests/utils/scorecomp.h"
 
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 namespace mu::engraving {
 MasterScore* MTest::readScore(const QString& name)
 {
-    io::path_t path = root + "/" + name;
-    MasterScore* score = mu::engraving::compat::ScoreAccess::createMasterScoreWithBaseStyle();
+    muse::io::path_t path = root + "/" + name;
+    MasterScore* score = mu::engraving::compat::ScoreAccess::createMasterScoreWithBaseStyle(nullptr);
     score->setFileInfoProvider(std::make_shared<LocalFileInfoProvider>(path));
-    std::string suffix = io::suffix(path);
+    std::string suffix = muse::io::suffix(path);
 
     ScoreLoad sl;
-    Ret ret;
+    muse::Ret ret;
     if (suffix == "mscz" || suffix == "mscx") {
         ret = compat::loadMsczOrMscx(score, path.toQString(), false);
     } else {
@@ -81,31 +79,12 @@ bool MTest::saveScore(Score* score, const QString& name) const
         return false;
     }
 
-    return rw::RWRegister::writer()->writeScore(score, &file, false);
+    return rw::RWRegister::writer()->writeScore(score, &file);
 }
 
 bool MTest::compareFilesFromPaths(const QString& f1, const QString& f2)
 {
-    QString cmd = "diff";
-    QStringList args;
-    args.append("-u");
-    args.append("--strip-trailing-cr");
-    args.append(f2);
-    args.append(f1);
-    QProcess p;
-    LOGD() << "Running " << cmd << " with arg1: " << f2 << " and arg2: " << f1;
-    p.start(cmd, args);
-    if (!p.waitForFinished() || p.exitCode()) {
-        QByteArray ba = p.readAll();
-        //LOGD("%s", qPrintable(ba));
-        //LOGD("   <diff -u %s %s failed", qPrintable(compareWith),
-        //   qPrintable(QString(root + "/" + saveName)));
-        QTextStream outputText(stdout);
-        outputText << QString(ba);
-        outputText << QString("   <diff -u %1 %2 failed").arg(f2).arg(f1);
-        return false;
-    }
-    return true;
+    return ScoreComp::compareFiles(String::fromQString(f1), String::fromQString(f2));
 }
 
 bool MTest::compareFiles(const QString& saveName, const QString& compareWith) const

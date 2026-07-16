@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,12 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SPANNERMAP_H__
-#define __SPANNERMAP_H__
+#ifndef MU_ENGRAVING_SPANNERMAP_H
+#define MU_ENGRAVING_SPANNERMAP_H
 
 #include <map>
 
-#include "thirdparty/intervaltree/IntervalTree.h"
+#include "engraving/thirdparty/intervaltree/IntervalTree.h"
 
 namespace mu::engraving {
 class Spanner;
@@ -36,11 +36,6 @@ class Spanner;
 
 class SpannerMap : std::multimap<int, Spanner*>
 {
-    mutable bool dirty;
-    mutable interval_tree::IntervalTree<Spanner*> tree;
-    mutable interval_tree::IntervalTree<Spanner*> collisionFreeTree;
-    mutable std::vector<interval_tree::Interval<Spanner*> > results;
-
 public:
     typedef typename std::multimap<int, Spanner*>::const_reverse_iterator const_reverse_it;
     typedef typename std::multimap<int, Spanner*>::const_iterator const_it;
@@ -61,13 +56,20 @@ public:
     const_it cend() const { return std::multimap<int, Spanner*>::cend(); }
     void addSpanner(Spanner* s);
     bool removeSpanner(Spanner* s);
-    void clear() { std::multimap<int, Spanner*>::clear(); dirty = true; }
+    void clear() { std::multimap<int, Spanner*>::clear(); m_dirty = true; }
     bool empty() const { return std::multimap<int, Spanner*>::empty(); }
     void update() const;
-    void setDirty() const { dirty = true; }     // must be called if a spanner changes start/length
+    void setDirty() const { m_dirty = true; }     // must be called if a spanner changes start/length
 #ifndef NDEBUG
     void dump() const;
 #endif
+
+private:
+
+    mutable bool m_dirty = false;
+    mutable interval_tree::IntervalTree<Spanner*> m_tree;
+    mutable interval_tree::IntervalTree<Spanner*> m_collisionFreeTree;
+    mutable std::vector<interval_tree::Interval<Spanner*> > m_results;
 };
 } // namespace mu::engraving
 

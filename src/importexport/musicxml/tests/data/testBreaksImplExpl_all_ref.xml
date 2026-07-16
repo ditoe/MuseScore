@@ -14,8 +14,8 @@
     </identification>
   <part-list>
     <score-part id="P1">
-      <part-name>Voice</part-name>
-      <part-abbreviation>Vo.</part-abbreviation>
+      <part-name print-object="no">Voice</part-name>
+      <part-abbreviation print-object="no">Vo.</part-abbreviation>
       <score-instrument id="P1-I1">
         <instrument-name>Voice</instrument-name>
         </score-instrument>
@@ -131,8 +131,8 @@
         </note>
       </measure>
     <measure number="12">
-      <print new-page="yes"/>
-      <direction>
+      <print new-page="yes" page-number="2"/>
+      <direction placement="above" system="only-top">
         <direction-type>
           <words>After system break</words>
           </direction-type>

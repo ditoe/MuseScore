@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,13 +29,7 @@
 #include "translation.h"
 #include "types/typesconv.h"
 
-#include "chord.h"
 #include "key.h"
-#include "note.h"
-#include "part.h"
-#include "score.h"
-#include "staff.h"
-#include "utils.h"
 
 #include "log.h"
 
@@ -98,13 +92,8 @@ int step2tpcByKey(int step, Key key)
     while (step < 0) {
         step += STEP_DELTA_OCTAVE;
     }
-    while (key < Key::MIN) {
-        key  += Key::DELTA_ENHARMONIC;
-    }
-    while (key > Key::MAX) {
-        key  -= Key::DELTA_ENHARMONIC;
-    }
-    return tpcByStepAndKey[int(key) - int(Key::MIN)][step % STEP_DELTA_OCTAVE];
+
+    return tpcByStepAndKey[int(clampKey(key)) - int(Key::MIN)][step % STEP_DELTA_OCTAVE];
 }
 
 //---------------------------------------------------------
@@ -193,16 +182,10 @@ static const int pitchByStepAndKey[int(Key::NUM_OF)][STEP_DELTA_OCTAVE] = {
 
 int step2deltaPitchByKey(int step, Key key)
 {
-    while (step < 0) {
-        step+= STEP_DELTA_OCTAVE;
+    while (step < MIN_STEP) {
+        step += STEP_DELTA_OCTAVE;
     }
-    while (key < Key::MIN) {
-        key += Key::DELTA_ENHARMONIC;
-    }
-    while (key > Key::MAX) {
-        key -= Key::DELTA_ENHARMONIC;
-    }
-    return pitchByStepAndKey[int(key) - int(Key::MIN)][step % STEP_DELTA_OCTAVE];
+    return pitchByStepAndKey[int(clampKey(key)) - int(Key::MIN)][step % STEP_DELTA_OCTAVE];
 }
 
 //---------------------------------------------------------
@@ -276,7 +259,7 @@ void tpc2name(int tpc, NoteSpellingType noteSpelling, NoteCaseType noteCase, Str
     switch (accVal) {
     case AccidentalVal::FLAT3:
         if (explicitAccidental) {
-            acc = mtrc("engraving", TConv::userName(AccidentalVal::FLAT3, full));
+            acc = muse::mtrc("engraving", TConv::userName(AccidentalVal::FLAT3, full));
         } else if (noteSpelling == NoteSpellingType::GERMAN_PURE) {
             switch (tpc) {
             case TPC_A_BBB: acc = u"sasas";
@@ -291,7 +274,7 @@ void tpc2name(int tpc, NoteSpellingType noteSpelling, NoteCaseType noteCase, Str
         break;
     case AccidentalVal::FLAT2:
         if (explicitAccidental) {
-            acc = mtrc("engraving", TConv::userName(AccidentalVal::FLAT2, full));
+            acc = muse::mtrc("engraving", TConv::userName(AccidentalVal::FLAT2, full));
         } else if (noteSpelling == NoteSpellingType::GERMAN_PURE) {
             switch (tpc) {
             case TPC_A_BB: acc = u"sas";
@@ -306,7 +289,7 @@ void tpc2name(int tpc, NoteSpellingType noteSpelling, NoteCaseType noteCase, Str
         break;
     case AccidentalVal::FLAT:
         if (explicitAccidental) {
-            acc = mtrc("engraving", TConv::userName(AccidentalVal::FLAT, full));
+            acc = muse::mtrc("engraving", TConv::userName(AccidentalVal::FLAT, full));
         } else if (noteSpelling == NoteSpellingType::GERMAN_PURE) {
             acc = (tpc == TPC_A_B || tpc == TPC_E_B) ? u"s" : u"es";
         } else {
@@ -317,21 +300,21 @@ void tpc2name(int tpc, NoteSpellingType noteSpelling, NoteCaseType noteCase, Str
         break;
     case  AccidentalVal::SHARP:
         if (explicitAccidental) {
-            acc = mtrc("engraving", TConv::userName(AccidentalVal::SHARP, full));
+            acc = muse::mtrc("engraving", TConv::userName(AccidentalVal::SHARP, full));
         } else {
             acc = (noteSpelling == NoteSpellingType::GERMAN_PURE) ? u"is" : u"#";
         }
         break;
     case  AccidentalVal::SHARP2:
         if (explicitAccidental) {
-            acc = mtrc("engraving", TConv::userName(AccidentalVal::SHARP2, full));
+            acc = muse::mtrc("engraving", TConv::userName(AccidentalVal::SHARP2, full));
         } else {
             acc = (noteSpelling == NoteSpellingType::GERMAN_PURE) ? u"isis" : u"##";
         }
         break;
     case AccidentalVal::SHARP3:
         if (explicitAccidental) {
-            acc = mtrc("engraving", TConv::userName(AccidentalVal::SHARP3, full));
+            acc = muse::mtrc("engraving", TConv::userName(AccidentalVal::SHARP3, full));
         } else {
             acc = (noteSpelling == NoteSpellingType::GERMAN_PURE) ? u"isisis" : u"###";
         }
@@ -401,366 +384,17 @@ Char tpc2stepName(int tpc)
     return names.at((tpc - Tpc::TPC_MIN) % 7);
 }
 
-// table of alternative spellings for one octave
-// each entry is the TPC of the note
-//    tab1 does not contain double sharps
-//    tab2 does not contain double flats
-
-static const int tab1[24] = {
-    14,  2,    // 60  C   Dbb
-    21,  9,    // 61  C#  Db
-    16,  4,    // 62  D   Ebb
-    23, 11,    // 63  D#  Eb
-    18,  6,    // 64  E   Fb
-    13,  1,    // 65  F   Gbb
-    20,  8,    // 66  F#  Gb
-    15,  3,    // 67  G   Abb
-    22, 10,    // 68  G#  Ab
-    17,  5,    // 69  A   Bbb
-    24, 12,    // 70  A#  Bb
-    19,  7,    // 71  B   Cb
-};
-
-static const int tab2[24] = {
-    26, 14,    // 60  B#  C
-    21,  9,    // 61  C#  Db
-    28, 16,    // 62  C## D
-    23, 11,    // 63  D#  Eb
-    30, 18,    // 64  D## E
-    25, 13,    // 65  E#  F
-    20,  8,    // 66  F#  Gb
-    27, 15,    // 67  F## G
-    22, 10,    // 68  G#  Ab
-    29, 17,    // 69  G## A
-    24, 12,    // 70  A#  Bb
-    31, 19,    // 71  A## B
-};
-
-int intervalPenalty[13] = {
-    0, 0, 0, 0, 0, 0, 1, 3, 1, 1, 1, 3, 3
-};
-
-//---------------------------------------------------------
-//   enharmonicSpelling
-//---------------------------------------------------------
-
-static const int enharmonicSpelling[15][34] = {
-    {
-//Ces f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        0, 0, 0, 0, 0, 0, 0, // b
-        1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//Ges f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 0, 0, 0, 0, 0, 0, // b
-        0, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//Des f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b
-        0, 0, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//As  f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b
-        0, 0, 0, 0, 0, 0, 0,
-        0, 1, 1, 1, 1, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//Es  f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b
-        0, 0, 0, 0, 1, 1, 1,
-        0, 0, 1, 1, 1, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//Bb  f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b
-        0, 0, 0, 0, 0, 1, 1,
-        1, 0, 0, 1, 1, 1, 1, // #     // (ws) penalty for f#
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//F   f  c  g  d  a  e  b           // extra penalty for a# b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b
-        0, 0, 0, 0, 0, 0, 1,
-        0, 0, 0, 0, 1, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//C   f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b
-        0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//G   f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 1, 0, 0, 0, 0, // b
-        1, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//D   f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 1, 1, 0, 0, 0, // b
-        1, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//A   f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 1, 1, 1, 0, 0, // b
-        1, 1, 1, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//E   f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 1, 1, 1, 1, 0, // b
-        1, 1, 1, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, // #
-        0, 0, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//H   f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 1, 1, 1, 1, 1, // b
-        1, 1, 1, 1, 1, 0, 0,
-        0, 0, 0, 0, 0, 1, 1, // #
-        1, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//Fis f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 1, 1, 1, 1, 1, // b
-        100, 1, 1, 1, 1, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, // #
-        0, 1, 1, 1, 1, 1, 1 // ##
-    },
-    {
-//Cis f  c  g  d  a  e  b
-        1, 1, 1, 1, 1, 1,  // bb
-        1, 1, 0, 0, 0, 0, 0, // b  //Fis
-        100, 1, 1, 1, 1, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, // #
-        0, 0, 1, 1, 1, 1, 1 // ##
-    }
-};
-
-//---------------------------------------------------------
-//   penalty
-//---------------------------------------------------------
-
-static int penalty(int lof1, int lof2, int k)
+String tpcUserName(int tpc, int pitch, bool explicitAccidental, bool full)
 {
-    IF_ASSERT_FAILED((k >= 0 && k < 15)) {
-        return 0;
-    }
-    assert(lof1 >= 0 && lof1 < 34);
-    assert(lof2 >= 0 && lof2 < 34);
-    int penalty  = enharmonicSpelling[k][lof1] * 4 + enharmonicSpelling[k][lof2] * 4;
-    int distance = lof2 > lof1 ? lof2 - lof1 : lof1 - lof2;
-    if (distance > 12) {
-        penalty += 3;
-    } else {
-        penalty += intervalPenalty[distance];
-    }
-    return penalty;
-}
-
-static const int WINDOW       = 9;
-
-//---------------------------------------------------------
-//   tpc
-//---------------------------------------------------------
-
-int tpc(int idx, int pitch, int opt)
-{
-    const int* tab;
-    if (opt < 0) {
-        tab = tab2;
-        opt *= -1;
-    } else {
-        tab = tab1;
-    }
-    int i = (pitch % 12) * 2 + ((opt & (1 << idx)) >> idx);
-    assert(i >= 0 && i < 24);
-    return tab[i];
-}
-
-//---------------------------------------------------------
-//   computeWindow
-//---------------------------------------------------------
-
-int computeWindow(const std::vector<Note*>& notes, int start, int end)
-{
-    int p   = 10000;
-    int idx = -1;
-    int pitch[10];
-    int key[10];
-
-    int i = start;
-    int k = 0;
-    while (i < end) {
-        pitch[k] = notes[i]->pitch() % 12;
-        Fraction tick = notes[i]->chord()->tick();
-        key[k]   = int(notes[i]->staff()->key(tick)) + 7;
-        if (key[k] < 0 || key[k] > 14) {
-            LOGD("illegal key at tick %d: %d, window %d-%d",
-                 tick.ticks(), key[k] - 7, start, end);
-            return 0;
-            // abort();
-        }
-        ++k;
-        ++i;
+    String pitchStr = tpc2name(tpc, NoteSpellingType::STANDARD, NoteCaseType::AUTO, explicitAccidental, full);
+    if (!explicitAccidental) {
+        pitchStr.replace(u"b", u"♭");
+        pitchStr.replace(u"#", u"♯");
     }
 
-    for (; k < 10; ++k) {
-        pitch[k] = pitch[k - 1];
-        key[k]   = key[k - 1];
-    }
+    const String octaveStr = String::number(((pitch - static_cast<int>(tpc2alter(tpc))) / PITCH_DELTA_OCTAVE) - 1);
 
-    for (i = 0; i < 512; ++i) {
-        int pa    = 0;
-        int pb    = 0;
-        int l     = pitch[0] * 2 + (i & 1);
-        assert(l >= 0 && l <= static_cast<int>(sizeof(tab1) / sizeof(*tab1)));
-        int lof1a = tab1[l];
-        int lof1b = tab2[l];
-
-        for (k = 1; k < 10; ++k) {
-            int l1 = pitch[k] * 2 + ((i & (1 << k)) >> k);
-            assert(l1 >= 0 && l1 <= static_cast<int>(sizeof(tab1) / sizeof(*tab1)));
-            int lof2a = tab1[l1];
-            int lof2b = tab2[l1];
-            pa += penalty(lof1a, lof2a, key[k]);
-            pb += penalty(lof1b, lof2b, key[k]);
-            lof1a = lof2a;
-            lof1b = lof2b;
-        }
-        if (pa < pb) {
-            if (pa < p) {
-                p   = pa;
-                idx = i;
-            }
-        } else {
-            if (pb < p) {
-                p   = pb;
-                idx = i * -1;
-            }
-        }
-    }
-/*      LOGD("compute window\n   ");
-      for (int i = 0; i < 10; ++i)
-            LOGD("%2d ", pitch[i]);
-      LOGD("\n   ");
-      for (int i = 0; i < 10; ++i)
-            LOGD("%2d ", key[i]);
-      LOGD("\n   ");
-      for (int i = 0; i < 10; ++i)
-            LOGD("%2d ", tpc(i, pitch[i], idx));
-*/
-    return idx;
-}
-
-//---------------------------------------------------------
-//   changeAllTpcs
-//---------------------------------------------------------
-
-void changeAllTpcs(Note* n, int tpc1)
-{
-    if (!n) {
-        return;
-    }
-    Interval v;
-    Fraction tick = n->chord() ? n->chord()->tick() : Fraction(-1, 1);
-    if (n->part() && n->part()->instrument(tick)) {
-        v = n->staff()->transpose(tick);
-        v.flip();
-    }
-    int tpc2 = mu::engraving::transposeTpc(tpc1, v, true);
-    n->undoChangeProperty(Pid::TPC1, tpc1);
-    n->undoChangeProperty(Pid::TPC2, tpc2);
-}
-
-//---------------------------------------------------------
-//   spell
-//---------------------------------------------------------
-
-void Score::spellNotelist(std::vector<Note*>& notes)
-{
-    int n = int(notes.size());
-
-    int start = 0;
-    while (start < n) {
-        int end = start + WINDOW;
-        if (end > n) {
-            end = n;
-        }
-        int opt = computeWindow(notes, start, end);
-        const int* tab;
-        if (opt < 0) {
-            tab = tab2;
-            opt *= -1;
-        } else {
-            tab = tab1;
-        }
-
-        if (start == 0) {
-            changeAllTpcs(notes[0], tab[(notes[0]->pitch() % 12) * 2 + (opt & 1)]);
-            if (n > 1) {
-                changeAllTpcs(notes[1], tab[(notes[1]->pitch() % 12) * 2 + ((opt & 2) >> 1)]);
-            }
-            if (n > 2) {
-                changeAllTpcs(notes[2], tab[(notes[2]->pitch() % 12) * 2 + ((opt & 4) >> 2)]);
-            }
-        }
-        if ((end - start) >= 6) {
-            changeAllTpcs(notes[start + 3], tab[(notes[start + 3]->pitch() % 12) * 2 + ((opt & 8) >> 3)]);
-            changeAllTpcs(notes[start + 4], tab[(notes[start + 4]->pitch() % 12) * 2 + ((opt & 16) >> 4)]);
-            changeAllTpcs(notes[start + 5], tab[(notes[start + 5]->pitch() % 12) * 2 + ((opt & 32) >> 5)]);
-        }
-        if (end == n) {
-            int n1 = end - start;
-            int k;
-            switch (n1 - 6) {
-            case 3:
-                k = end - start - 3;
-                changeAllTpcs(notes[end - 3], tab[(notes[end - 3]->pitch() % 12) * 2 + ((opt & (1 << k)) >> k)]);
-            // FALLTHROUGH
-            case 2:
-                k = end - start - 2;
-                changeAllTpcs(notes[end - 2], tab[(notes[end - 2]->pitch() % 12) * 2 + ((opt & (1 << k)) >> k)]);
-            // FALLTHROUGH
-            case 1:
-                k = end - start - 1;
-                changeAllTpcs(notes[end - 1], tab[(notes[end - 1]->pitch() % 12) * 2 + ((opt & (1 << k)) >> k)]);
-            }
-            break;
-        }
-        // advance to next window
-        start += 3;
-    }
+    return pitchStr + octaveStr;
 }
 
 //---------------------------------------------------------
@@ -808,24 +442,9 @@ int pitch2tpc(int pitch, Key key, Prefer prefer)
 int pitch2absStepByKey(int pitch, int tpc, Key key, int& alter)
 {
     // sanitize input data
-    if (pitch < 0) {
-        pitch += PITCH_DELTA_OCTAVE;
-    }
-    if (pitch > 127) {
-        pitch -= PITCH_DELTA_OCTAVE;
-    }
-    if (tpc < Tpc::TPC_MIN) {
-        tpc   += TPC_DELTA_ENHARMONIC;
-    }
-    if (tpc > Tpc::TPC_MAX) {
-        tpc   -= TPC_DELTA_ENHARMONIC;
-    }
-    if (key < Key::MIN) {
-        key   += Key::DELTA_ENHARMONIC;
-    }
-    if (key > Key::MAX) {
-        key   -= Key::DELTA_ENHARMONIC;
-    }
+    pitch = clampPitchOctaved(pitch);
+    tpc = clampEnharmonic(tpc);
+    key = clampKey(key);
 
     int octave = (pitch - int(tpc2alter(tpc))) / PITCH_DELTA_OCTAVE;
     int step = tpc2step(tpc);
@@ -841,18 +460,13 @@ int pitch2absStepByKey(int pitch, int tpc, Key key, int& alter)
 int absStep2pitchByKey(int step, Key key)
 {
     // sanitize input data
-    if (step < 0) {
+    if (step < MIN_STEP) {
         step += STEP_DELTA_OCTAVE;
     }
-    if (step > 74) {
+    if (step > MAX_STEP) {
         step -= STEP_DELTA_OCTAVE;
     }
-    if (key < Key::MIN) {
-        key  += Key::DELTA_ENHARMONIC;
-    }
-    if (key > Key::MAX) {
-        key  -= Key::DELTA_ENHARMONIC;
-    }
+    key = clampKey(key);
 
     int octave = step / STEP_DELTA_OCTAVE;
     int deltaPitch = step2deltaPitchByKey(step % STEP_DELTA_OCTAVE, key);
@@ -887,17 +501,9 @@ int tpcInterval(int startTpc, int interval, int alter)
         0, 2, 4, -1, 1, 3, 5
     };
 
-    int result = startTpc + intervals[(interval - 1) % 7] + alter * TPC_DELTA_SEMITONE;
     //ensure that we don't have anything more than double sharp or double flat
     //(I know, breaking some convention, but it's the best we can do for now)
-    while (result > Tpc::TPC_MAX) {
-        result -= TPC_DELTA_ENHARMONIC;
-    }
-    while (result < Tpc::TPC_MIN) {
-        result += TPC_DELTA_ENHARMONIC;
-    }
-
-    return result;
+    return clampEnharmonic(startTpc + intervals[(interval - 1) % 7] + alter * TPC_DELTA_SEMITONE);
 }
 
 //---------------------------------------------------------
@@ -921,30 +527,297 @@ int step2pitchInterval(int step, int alter)
     return intervals[(step - 1) % 7] + alter;
 }
 
+void tpc2Function(int tpc, Key key, String& accName, String& stepName)
+{
+    if (key == Key::INVALID) {
+        LOGD() << "Invalid key";
+        return;
+    }
+    int step = tpc2degree(tpc, key);
+    static const String stepNames = u"1234567";
+    assert(step < (int)stepNames.size());
+    stepName = stepNames.at(step);
+
+    int alter = tpc2alterByKey(tpc, key);
+    int accidentalNo = std::abs(alter);
+    accName = String();
+    bool flat = alter < 0;
+    for (int i = 0; i < accidentalNo; i++) {
+        accName.append(flat ? u"b" : u"#");
+    }
+}
+
+String tpc2Function(int tpc, Key key)
+{
+    String accStr;
+    String stepStr;
+    tpc2Function(tpc, key, accStr, stepStr);
+    return accStr + stepStr;
+}
+
 //----------------------------------------------
 //   function2Tpc
 ///   might be temporary, just used to parse nashville notation now
 ///
 //----------------------------------------------
+
 int function2Tpc(const String& s, Key key)
 {
-    //TODO - PHV: allow for alternate spellings
+    size_t idx = 0;
+    return function2Tpc(s, key, idx);
+}
+
+int function2Tpc(const String& s, Key key, size_t& idx)
+{
+    // TODO - PHV: allow for alternate spellings
     int alter = 0;
     int step;
+
     if (!s.isEmpty() && s.at(0).isDigit()) {
         step = s.at(0).digitValue();
-    } else if (s.size() > 1 && s.at(1).isDigit()) {
-        step = s.at(1).digitValue();
-        if (s.at(0) == u'b') {
+        idx = 1;
+    } else if (s.size() > 1) {
+        constexpr int NUM_LEN = 1;
+        size_t accIdx = s.size() - NUM_LEN;
+        String acc = s.left(accIdx);
+        String num = s.right(NUM_LEN);
+        if (num.size() > NUM_LEN || num.empty() || !num.at(0).isDigit()) {
+            return Tpc::TPC_INVALID;
+        }
+
+        step = num.at(0).digitValue();
+        idx = NUM_LEN;
+        if (acc.startsWith(u"bb")) {
+            alter = -2;
+            idx += 2;
+        } else if (acc.startsWith(u"b")) {
             alter = -1;
-        } else if (s.at(0) == u'#') {
+            idx += 1;
+        } else if (acc.startsWith(u"#")) {
             alter = 1;
+            idx += 1;
+        } else if (acc.startsWith(u"##")) {
+            alter = 2;
+            idx += 2;
         }
     } else {
         return Tpc::TPC_INVALID;
     }
 
     int keyTpc = int(key) + 14;   //tpc of key (ex. F# major would be Tpc::F_S)
-    return tpcInterval(keyTpc, step, alter);
+    int tpc = tpcInterval(keyTpc, step, alter);
+    return tpc;
+}
+
+//---------------------------------------------------------
+//   convertNote
+//    convert something like "C#" into tpc 21
+//---------------------------------------------------------
+int convertNote(const String& s, NoteSpellingType noteSpelling, NoteCaseType& noteCase, size_t& idx)
+{
+    bool useGerman = false;
+    bool useSolfeggio = false;
+    static const int spellings[] = {
+        // bb  b   -   #  ##
+        0,  7, 14, 21, 28,      // C
+        2,  9, 16, 23, 30,      // D
+        4, 11, 18, 25, 32,      // E
+        -1,  6, 13, 20, 27,     // F
+        1,  8, 15, 22, 29,      // G
+        3, 10, 17, 24, 31,      // A
+        5, 12, 19, 26, 33,      // B
+    };
+    if (s.empty()) {
+        return Tpc::TPC_INVALID;
+    }
+    noteCase = s.at(0).isLower() ? NoteCaseType::LOWER : NoteCaseType::CAPITAL;
+    int acci;
+    switch (noteSpelling) {
+    case NoteSpellingType::SOLFEGGIO:
+    case NoteSpellingType::FRENCH:
+        useSolfeggio = true;
+        if (s.startsWith(u"sol", muse::CaseInsensitive)) {
+            acci = 3;
+        } else {
+            acci = 2;
+        }
+        break;
+    case NoteSpellingType::GERMAN:
+    case NoteSpellingType::GERMAN_PURE:
+        useGerman = true;
+    // fall through
+    default:
+        acci = 1;
+    }
+    idx = acci;
+    int alter = 0;
+    size_t n = s.size();
+    String acc = s.right(n - acci);
+    if (!acc.empty()) {
+        if (acc.startsWith(u"bb")) {
+            alter = -2;
+            idx += 2;
+        } else if (acc.startsWith(u"b")) {
+            alter = -1;
+            idx += 1;
+        } else if (useGerman && acc.startsWith(u"eses")) {
+            alter = -2;
+            idx += 4;
+        } else if (useGerman && (acc.startsWith(u"ses") || acc.startsWith(u"sas"))) {
+            alter = -2;
+            idx += 3;
+        } else if (useGerman && acc.startsWith(u"es")) {
+            alter = -1;
+            idx += 2;
+        } else if (useGerman && acc.startsWith(u"s") && !acc.startsWith(u"su")) {
+            alter = -1;
+            idx += 1;
+        } else if (acc.startsWith(u"##")) {
+            alter = 2;
+            idx += 2;
+        } else if (acc.startsWith(u"x")) {
+            alter = 2;
+            idx += 1;
+        } else if (acc.startsWith(u"#")) {
+            alter = 1;
+            idx += 1;
+        } else if (useGerman && acc.startsWith(u"isis")) {
+            alter = 2;
+            idx += 4;
+        } else if (useGerman && acc.startsWith(u"is")) {
+            alter = 1;
+            idx += 2;
+        }
+    }
+    int r;
+    if (useGerman) {
+        switch (s.at(0).toLower().toAscii()) {
+        case 'c':   r = 0;
+            break;
+        case 'd':   r = 1;
+            break;
+        case 'e':   r = 2;
+            break;
+        case 'f':   r = 3;
+            break;
+        case 'g':   r = 4;
+            break;
+        case 'a':   r = 5;
+            break;
+        case 'h':   r = 6;
+            break;
+        case 'b':
+            if (alter && alter != -1) {
+                return Tpc::TPC_INVALID;
+            }
+            r = 6;
+            alter = -1;
+            break;
+        default:
+            return Tpc::TPC_INVALID;
+        }
+    } else if (useSolfeggio) {
+        if (s.size() < 2) {
+            return Tpc::TPC_INVALID;
+        }
+        if (s.at(1).isUpper()) {
+            noteCase = NoteCaseType::UPPER;
+        }
+        String ss = s.toLower().left(2);
+        if (ss == "do") {
+            r = 0;
+        } else if (ss == "re" || ss == "ré") {
+            r = 1;
+        } else if (ss == "mi") {
+            r = 2;
+        } else if (ss == "fa") {
+            r = 3;
+        } else if (ss == "so") {    // sol, but only check first 2 characters
+            r = 4;
+        } else if (ss == "la") {
+            r = 5;
+        } else if (ss == "si") {
+            r = 6;
+        } else {
+            return Tpc::TPC_INVALID;
+        }
+    } else {
+        switch (s.at(0).toLower().toAscii()) {
+        case 'c':   r = 0;
+            break;
+        case 'd':   r = 1;
+            break;
+        case 'e':   r = 2;
+            break;
+        case 'f':   r = 3;
+            break;
+        case 'g':   r = 4;
+            break;
+        case 'a':   r = 5;
+            break;
+        case 'b':   r = 6;
+            break;
+        default:    return Tpc::TPC_INVALID;
+        }
+    }
+    r = spellings[r * 5 + alter + 2];
+    return r;
+}
+
+int clampEnharmonic(int tpc, bool useDoubleSharpsFlats)
+{
+    while (tpc > (useDoubleSharpsFlats ? Tpc::TPC_MAX : Tpc::TPC_B_S)) {
+        tpc -= TPC_DELTA_ENHARMONIC;
+    }
+    while (tpc < (useDoubleSharpsFlats ? Tpc::TPC_MIN : Tpc::TPC_F_B)) {
+        tpc += TPC_DELTA_ENHARMONIC;
+    }
+    return tpc;
+}
+
+int clampPitch(int pitch)
+{
+    return std::clamp(pitch, MIN_PITCH, MAX_PITCH);
+}
+
+int clampPitchOctaved(int pitch)
+{
+    while (pitch > MAX_PITCH) {
+        pitch -= PITCH_DELTA_OCTAVE;
+    }
+    while (pitch < MIN_PITCH) {
+        pitch += PITCH_DELTA_OCTAVE;
+    }
+    return pitch;
+}
+
+Key clampKey(Key key, PreferSharpFlat prefer)
+{
+    Key smallest = Key::G_B;
+    Key largest = Key::F_S;
+
+    if (prefer != PreferSharpFlat::AUTO) {
+        smallest = (prefer == PreferSharpFlat::SHARPS) ? Key::A_B : Key::MIN;
+        largest  = (prefer == PreferSharpFlat::FLATS) ? Key::E : Key::MAX;
+    }
+
+    while (key < smallest) {
+        key += Key::DELTA_ENHARMONIC;
+    }
+    while (key > largest) {
+        key -= Key::DELTA_ENHARMONIC;
+    }
+
+    return key;
+}
+
+int key2Tpc(Key key)
+{
+    return (int)key + KEY_TO_TPC_OFFSET;
+}
+
+Key tpc2Key(int tpc)
+{
+    return Key(tpc - KEY_TO_TPC_OFFSET);
 }
 }

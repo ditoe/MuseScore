@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
@@ -14,7 +14,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -53,10 +52,11 @@
         <bracket type="0" span="5" col="0"/>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>B♭ Trumpet 1</trackName>
+      <trackName>Trumpet in B♭ 1</trackName>
       <Instrument id="bb-trumpet">
-        <longName>B♭ Trumpet 1</longName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 1</longName>
+        <shortName>Tpt. in B♭ 1</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -125,10 +125,11 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>B♭ Trumpet 2</trackName>
+      <trackName>Trumpet in B♭ 2</trackName>
       <Instrument id="bb-trumpet">
-        <longName>B♭ Trumpet 2</longName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 2</longName>
+        <shortName>Tpt. in B♭ 2</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -200,7 +201,8 @@
       <trackName>Horn in F</trackName>
       <Instrument id="horn">
         <longName>Horn in F</longName>
-        <trackName>Horn in F</trackName>
+        <shortName>Hn. in F</shortName>
+        <trackName>Horn</trackName>
         <minPitchP>31</minPitchP>
         <maxPitchP>77</maxPitchP>
         <minPitchA>41</minPitchA>
@@ -267,6 +269,7 @@
       <trackName>Trombone</trackName>
       <Instrument id="trombone">
         <longName>Trombone</longName>
+        <shortName>Tbn.</shortName>
         <trackName>Trombone</trackName>
         <minPitchP>35</minPitchP>
         <maxPitchP>74</maxPitchP>
@@ -274,6 +277,7 @@
         <maxPitchA>70</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -332,6 +336,7 @@
       <trackName>Tuba</trackName>
       <Instrument id="tuba">
         <longName>Tuba</longName>
+        <shortName>Tba.</shortName>
         <trackName>Tuba</trackName>
         <minPitchP>22</minPitchP>
         <maxPitchP>72</maxPitchP>
@@ -399,6 +404,10 @@
         <voice>
           <BarLine>
             </BarLine>
+          <KeySig>
+            <concertKey>0</concertKey>
+            <actualKey>2</actualKey>
+            </KeySig>
           <TimeSig>
             <sigN>4</sigN>
             <sigD>4</sigD>
@@ -509,6 +518,10 @@
         <voice>
           <BarLine>
             </BarLine>
+          <KeySig>
+            <concertKey>0</concertKey>
+            <actualKey>2</actualKey>
+            </KeySig>
           <TimeSig>
             <sigN>4</sigN>
             <sigD>4</sigD>
@@ -616,6 +629,10 @@
         <voice>
           <BarLine>
             </BarLine>
+          <KeySig>
+            <concertKey>0</concertKey>
+            <actualKey>1</actualKey>
+            </KeySig>
           <TimeSig>
             <sigN>4</sigN>
             <sigD>4</sigD>

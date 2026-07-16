@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
@@ -14,7 +14,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -102,9 +101,9 @@
         <shortName>Alto 1</shortName>
         <trackName>Alto Saxophone</trackName>
         <minPitchP>49</minPitchP>
-        <maxPitchP>87</maxPitchP>
+        <maxPitchP>92</maxPitchP>
         <minPitchA>49</minPitchA>
-        <maxPitchA>82</maxPitchA>
+        <maxPitchA>80</maxPitchA>
         <transposeDiatonic>-5</transposeDiatonic>
         <transposeChromatic>-9</transposeChromatic>
         <instrumentId>wind.reed.saxophone.alto</instrumentId>
@@ -171,9 +170,9 @@
         <shortName>Alto 2</shortName>
         <trackName>Alto Saxophone</trackName>
         <minPitchP>49</minPitchP>
-        <maxPitchP>87</maxPitchP>
+        <maxPitchP>92</maxPitchP>
         <minPitchA>49</minPitchA>
-        <maxPitchA>82</maxPitchA>
+        <maxPitchA>80</maxPitchA>
         <transposeDiatonic>-5</transposeDiatonic>
         <transposeChromatic>-9</transposeChromatic>
         <instrumentId>wind.reed.saxophone.alto</instrumentId>
@@ -242,9 +241,9 @@
         <shortName>Tenor 1</shortName>
         <trackName>Tenor Saxophone</trackName>
         <minPitchP>44</minPitchP>
-        <maxPitchP>82</maxPitchP>
+        <maxPitchP>87</maxPitchP>
         <minPitchA>44</minPitchA>
-        <maxPitchA>77</maxPitchA>
+        <maxPitchA>75</maxPitchA>
         <transposeDiatonic>-8</transposeDiatonic>
         <transposeChromatic>-14</transposeChromatic>
         <instrumentId>wind.reed.saxophone.tenor</instrumentId>
@@ -315,9 +314,9 @@
         <shortName>Tenor 2</shortName>
         <trackName>Tenor Saxophone</trackName>
         <minPitchP>44</minPitchP>
-        <maxPitchP>82</maxPitchP>
+        <maxPitchP>87</maxPitchP>
         <minPitchA>44</minPitchA>
-        <maxPitchA>77</maxPitchA>
+        <maxPitchA>75</maxPitchA>
         <transposeDiatonic>-8</transposeDiatonic>
         <transposeChromatic>-14</transposeChromatic>
         <instrumentId>wind.reed.saxophone.tenor</instrumentId>
@@ -387,9 +386,9 @@
         <shortName>Bari</shortName>
         <trackName>Baritone Saxophone</trackName>
         <minPitchP>36</minPitchP>
-        <maxPitchP>75</maxPitchP>
-        <minPitchA>37</minPitchA>
-        <maxPitchA>70</maxPitchA>
+        <maxPitchP>80</maxPitchP>
+        <minPitchA>36</minPitchA>
+        <maxPitchA>68</maxPitchA>
         <transposeDiatonic>-12</transposeDiatonic>
         <transposeChromatic>-21</transposeChromatic>
         <instrumentId>wind.reed.saxophone.baritone</instrumentId>
@@ -453,11 +452,11 @@
         <bracket type="0" span="4" col="0"/>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>Trumpet 1</trackName>
+      <trackName>Trumpet in B♭ 1</trackName>
       <Instrument id="bb-trumpet">
-        <longName>Trumpet 1</longName>
-        <shortName>Tpt. 1</shortName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 1</longName>
+        <shortName>Tpt. in B♭ 1</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -530,11 +529,11 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>Trumpet 2</trackName>
+      <trackName>Trumpet in B♭ 2</trackName>
       <Instrument id="bb-trumpet">
-        <longName>Trumpet 2</longName>
-        <shortName>Tpt. 2</shortName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 2</longName>
+        <shortName>Tpt. in B♭ 2</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -607,11 +606,11 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>Trumpet 3</trackName>
+      <trackName>Trumpet in B♭ 3</trackName>
       <Instrument id="bb-trumpet">
-        <longName>Trumpet 3</longName>
-        <shortName>Tpt. 3</shortName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 3</longName>
+        <shortName>Tpt. in B♭ 3</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -683,11 +682,11 @@
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Trumpet 4</trackName>
+      <trackName>Trumpet in B♭ 4</trackName>
       <Instrument id="bb-trumpet">
-        <longName>Trumpet 4</longName>
-        <shortName>Tpt. 4</shortName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 4</longName>
+        <shortName>Tpt. in B♭ 4</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -773,6 +772,7 @@
         <maxPitchA>71</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -848,6 +848,7 @@
         <maxPitchA>71</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -923,6 +924,7 @@
         <maxPitchA>71</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -997,6 +999,7 @@
         <maxPitchA>71</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1080,6 +1083,8 @@
           <string>59</string>
           <string>64</string>
           </StringData>
+        <singleNoteDynamics>0</singleNoteDynamics>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1183,6 +1188,7 @@
         <maxPitchA>108</maxPitchA>
         <instrumentId>keyboard.piano</instrumentId>
         <clef staff="2">F</clef>
+        <singleNoteDynamics>0</singleNoteDynamics>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>95</gateTime>
@@ -1239,9 +1245,9 @@
         <defaultConcertClef>F8vb</defaultConcertClef>
         <defaultTransposingClef>F</defaultTransposingClef>
         </Staff>
-      <trackName>Bass</trackName>
+      <trackName>Acoustic Bass</trackName>
       <Instrument id="acoustic-bass">
-        <longName>Bass</longName>
+        <longName>Acoustic Bass</longName>
         <shortName>Bass</shortName>
         <trackName>Acoustic Bass</trackName>
         <minPitchP>28</minPitchP>
@@ -1340,56 +1346,51 @@
           </StaffType>
         <defaultClef>PERC</defaultClef>
         </Staff>
-      <trackName>Drums</trackName>
-      <Instrument id="drumset">
-        <longName>Drums</longName>
-        <shortName>Drums</shortName>
-        <trackName>Drumset</trackName>
-        <instrumentId>drum.group.set</instrumentId>
-        <useDrumset>1</useDrumset>
-        <Drum pitch="35">
-          <head>normal</head>
-          <line>7</line>
-          <voice>1</voice>
-          <name>Acoustic Bass Drum</name>
-          <stem>2</stem>
-          </Drum>
+      <Instrument id="drum-kit-4">
+      <longName>Drum Kit</longName>
+      <shortName>D. Kit</shortName>
+      <trackName>Drum Kit</trackName>
+      <instrumentId>drum.group.set</instrumentId>
+      <useDrumset>1</useDrumset>
+      <singleNoteDynamics>0</singleNoteDynamics>
         <Drum pitch="36">
           <head>normal</head>
           <line>7</line>
           <voice>1</voice>
-          <name>Bass Drum 1</name>
+          <name>Bass Drum</name>
           <stem>2</stem>
-          <shortcut>B</shortcut>
+          <shortcut>A</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>0</panelColumn>
           </Drum>
         <Drum pitch="37">
-          <head>cross</head>
+          <head>slashed1</head>
           <line>3</line>
           <voice>0</voice>
-          <name>Side Stick</name>
+          <name>Cross-stick</name>
           <stem>1</stem>
+          <panelRow>1</panelRow>
+          <panelColumn>1</panelColumn>
           </Drum>
         <Drum pitch="38">
           <head>normal</head>
           <line>3</line>
           <voice>0</voice>
-          <name>Acoustic Snare</name>
+          <name>Snare</name>
           <stem>1</stem>
-          <shortcut>A</shortcut>
-          </Drum>
-        <Drum pitch="40">
-          <head>normal</head>
-          <line>3</line>
-          <voice>0</voice>
-          <name>Electric Snare</name>
-          <stem>1</stem>
+          <shortcut>B</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>1</panelColumn>
           </Drum>
         <Drum pitch="41">
           <head>normal</head>
           <line>5</line>
           <voice>0</voice>
-          <name>Low Floor Tom</name>
+          <name>Floor Tom</name>
           <stem>1</stem>
+          <shortcut>H</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>7</panelColumn>
           </Drum>
         <Drum pitch="42">
           <head>cross</head>
@@ -1397,14 +1398,9 @@
           <voice>0</voice>
           <name>Closed Hi-Hat</name>
           <stem>1</stem>
-          <shortcut>G</shortcut>
-          </Drum>
-        <Drum pitch="43">
-          <head>normal</head>
-          <line>5</line>
-          <voice>1</voice>
-          <name>High Floor Tom</name>
-          <stem>2</stem>
+          <shortcut>C</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>2</panelColumn>
           </Drum>
         <Drum pitch="44">
           <head>cross</head>
@@ -1412,66 +1408,48 @@
           <voice>1</voice>
           <name>Pedal Hi-Hat</name>
           <stem>2</stem>
-          <shortcut>F</shortcut>
-          </Drum>
-        <Drum pitch="45">
-          <head>normal</head>
-          <line>2</line>
-          <voice>0</voice>
-          <name>Low Tom</name>
-          <stem>1</stem>
+          <panelRow>1</panelRow>
+          <panelColumn>0</panelColumn>
           </Drum>
         <Drum pitch="46">
-          <head>cross</head>
-          <line>1</line>
+          <head>xcircle</head>
+          <line>-1</line>
           <voice>0</voice>
           <name>Open Hi-Hat</name>
           <stem>1</stem>
-          </Drum>
-        <Drum pitch="47">
-          <head>normal</head>
-          <line>1</line>
-          <voice>0</voice>
-          <name>Low-Mid Tom</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="48">
-          <head>normal</head>
-          <line>0</line>
-          <voice>0</voice>
-          <name>Hi-Mid Tom</name>
-          <stem>1</stem>
+          <shortcut>D</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>3</panelColumn>
           </Drum>
         <Drum pitch="49">
           <head>cross</head>
           <line>-2</line>
           <voice>0</voice>
-          <name>Crash Cymbal 1</name>
-          <stem>1</stem>
-          <shortcut>C</shortcut>
-          </Drum>
-        <Drum pitch="50">
-          <head>normal</head>
-          <line>0</line>
-          <voice>0</voice>
-          <name>High Tom</name>
+          <name>Crash Cymbal</name>
           <stem>1</stem>
           <shortcut>E</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>4</panelColumn>
           </Drum>
-        <Drum pitch="51">
+        <Drum pitch="50"> 
+          <head>normal</head>
+          <line>1</line>
+          <voice>0</voice>
+          <name>Tom</name>
+          <stem>1</stem>
+          <shortcut>G</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>6</panelColumn>
+          </Drum>
+        <Drum pitch="51"> 
           <head>cross</head>
           <line>0</line>
           <voice>0</voice>
-          <name>Ride Cymbal 1</name>
+          <name>Ride Cymbal</name>
           <stem>1</stem>
-          <shortcut>D</shortcut>
-          </Drum>
-        <Drum pitch="52">
-          <head>cross</head>
-          <line>-3</line>
-          <voice>0</voice>
-          <name>Chinese Cymbal</name>
-          <stem>1</stem>
+          <shortcut>F</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>5</panelColumn>
           </Drum>
         <Drum pitch="53">
           <head>diamond</head>
@@ -1479,55 +1457,8 @@
           <voice>0</voice>
           <name>Ride Bell</name>
           <stem>1</stem>
-          </Drum>
-        <Drum pitch="54">
-          <head>diamond</head>
-          <line>2</line>
-          <voice>0</voice>
-          <name>Tambourine</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="55">
-          <head>cross</head>
-          <line>-3</line>
-          <voice>0</voice>
-          <name>Splash Cymbal</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="56">
-          <head>triangle-down</head>
-          <line>1</line>
-          <voice>0</voice>
-          <name>Cowbell</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="57">
-          <head>cross</head>
-          <line>-3</line>
-          <voice>0</voice>
-          <name>Crash Cymbal 2</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="59">
-          <head>cross</head>
-          <line>2</line>
-          <voice>0</voice>
-          <name>Ride Cymbal 2</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="63">
-          <head>cross</head>
-          <line>4</line>
-          <voice>0</voice>
-          <name>Open Hi Conga</name>
-          <stem>1</stem>
-          </Drum>
-        <Drum pitch="64">
-          <head>cross</head>
-          <line>6</line>
-          <voice>0</voice>
-          <name>Low Conga</name>
-          <stem>1</stem>
+          <panelRow>1</panelRow>
+          <panelColumn>2</panelColumn>
           </Drum>
         <clef>PERC</clef>
         <Articulation>

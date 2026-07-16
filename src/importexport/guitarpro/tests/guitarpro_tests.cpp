@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,15 +31,13 @@
 #include "engraving/dom/excerpt.h"
 
 #include "modularity/ioc.h"
-#include "importexport/guitarpro/iguitarproconfiguration.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String GUITARPRO_DIR(u"data/");
 
 namespace mu::iex::guitarpro {
-extern Err importGTP(MasterScore*, mu::io::IODevice* io, bool createLinkedTabForce = false, bool experimental = false);
+extern Err importGTP(MasterScore*, muse::io::IODevice* io, const muse::modularity::ContextPtr& iocCtx, bool experimental = false);
 
 class GuitarPro_Tests : public ::testing::Test
 {
@@ -51,9 +49,9 @@ void GuitarPro_Tests::gpReadTest(const char* file, const char* ext)
 {
     String fileName = String::fromUtf8(file) + u'.' + String::fromUtf8(ext);
 
-    auto importFunc = [](MasterScore* score, const io::path_t& path) -> Err {
-        mu::io::File file(path);
-        return importGTP(score, &file);
+    auto importFunc = [](MasterScore* score, const muse::io::path_t& path) -> Err {
+        muse::io::File file(path);
+        return importGTP(score, &file, muse::modularity::globalCtx());
     };
 
     MasterScore* score = ScoreRW::readScore(GUITARPRO_DIR + fileName, false, importFunc);
@@ -677,6 +675,9 @@ TEST_F(GuitarPro_Tests, gpOttava5) {
 TEST_F(GuitarPro_Tests, gpxOttava5) {
     gpReadTest("ottava5", "gpx");
 }
+TEST_F(GuitarPro_Tests, gpOttavaSimile) {
+    gpReadTest("ottava-simile", "gp");
+}
 TEST_F(GuitarPro_Tests, gpChornamesKeyboard) {
     gpReadTest("chordnames_keyboard", "gp");
 }
@@ -748,5 +749,19 @@ TEST_F(GuitarPro_Tests, gpBeamModes) {
 }
 TEST_F(GuitarPro_Tests, gpHideRests) {
     gpReadTest("hide-rests", "gp");
+}
+TEST_F(GuitarPro_Tests, gpTupletEmptyMeasure) {
+    gpReadTest("tuplet-empty-measure", "gp");
+}
+TEST_F(GuitarPro_Tests, gpSkippedTiedNotes) {
+    gpReadTest("skipped_tied_notes", "gp5");
+}
+
+TEST_F(GuitarPro_Tests, gpBendAndGlissando) {
+    gpReadTest("bend_and_glissando", "gp");
+}
+
+TEST_F(GuitarPro_Tests, gp5BendAndGlissando) {
+    gpReadTest("bend_and_glissando", "gp5");
 }
 }

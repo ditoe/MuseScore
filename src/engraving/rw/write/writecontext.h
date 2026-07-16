@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,23 +19,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef MU_ENGRAVING_WRITECONTEXT_H
-#define MU_ENGRAVING_WRITECONTEXT_H
-
-#include <map>
+#pragma once
 
 #include "containers.h"
-#include "../linksindexer.h"
-#include "dom/select.h"
+
+#include "engraving/dom/select.h"
+#include "engraving/dom/score.h"
 
 namespace mu::engraving::write {
+struct WriteRange {
+    MeasureBase* startMeasure = nullptr;
+    MeasureBase* endMeasure = nullptr;
+    staff_idx_t startStaffIdx = muse::nidx;
+    staff_idx_t endStaffIdx = muse::nidx;
+
+    bool operator==(const WriteRange& r) const
+    {
+        return startMeasure == r.startMeasure
+               && endMeasure == r.endMeasure
+               && startStaffIdx == r.startStaffIdx
+               && endStaffIdx == r.endStaffIdx;
+    }
+};
+
 class WriteContext
 {
 public:
-    int assignLocalIndex(const Location& mainElementLocation);
-    void setLidLocalIndex(int lid, int localIndex);
-    int lidLocalIndex(int lid) const;
+
+    WriteContext(const Score* s)
+        : m_score(s) {}
+
+    std::shared_ptr<IEngravingConfiguration> configuration() const
+    {
+        return m_score->configuration();
+    }
 
     Fraction curTick() const { return _curTick; }
     void setCurTick(const Fraction& v) { _curTick   = v; }
@@ -50,20 +67,16 @@ public:
     void setTrackDiff(int v) { _trackDiff = v; }
 
     bool clipboardmode() const { return _clipboardmode; }
-    bool excerptmode() const { return _excerptmode; }
-    bool isMsczMode() const { return _msczMode; }
-    bool writeTrack() const { return _writeTrack; }
-    bool writePosition() const { return _writePosition; }
-
     void setClipboardmode(bool v) { _clipboardmode = v; }
-    void setExcerptmode(bool v) { _excerptmode = v; }
-    void setIsMsczMode(bool v) { _msczMode = v; }
-    void setWriteTrack(bool v) { _writeTrack= v; }
-    void setWritePosition(bool v) { _writePosition = v; }
 
-    void setFilter(SelectionFilter f) { _filter = f; }
+    void setFilter(const SelectionFilter& f) { _filter = f; }
     bool canWrite(const EngravingItem*) const;
+    bool canWriteNoteIdx(size_t noteIdx, size_t totalNotesInChord) const;
     bool canWriteVoice(track_idx_t track) const;
+
+    bool shouldWriteRange() const { return _range.has_value(); }
+    const std::optional<WriteRange>& range() const { return _range; }
+    void setRange(const WriteRange& v) { _range = v; }
 
     inline bool operator==(const WriteContext& c) const
     {
@@ -72,35 +85,24 @@ public:
                && _curTrack == c._curTrack
                && _trackDiff == c._trackDiff
                && _clipboardmode == c._clipboardmode
-               && _excerptmode == c._excerptmode
-               && _msczMode == c._msczMode
-               && _writeTrack == c._writeTrack
-               && _writePosition == c._writePosition
                && _filter == c._filter
-               && m_linksIndexer == c.m_linksIndexer
-               && m_lidLocalIndices == c.m_lidLocalIndices;
+               && _range == c._range;
     }
 
     inline bool operator!=(const WriteContext& c) const { return !this->operator==(c); }
 
 private:
 
+    const Score* m_score = nullptr;
+
     Fraction _curTick    { 0, 1 };           // used to optimize output
     Fraction _tickDiff   { 0, 1 };
-    track_idx_t _curTrack = mu::nidx;
+    track_idx_t _curTrack = muse::nidx;
     int _trackDiff       { 0 };             // saved track is curTrack-trackDiff
 
     bool _clipboardmode  { false };     // used to modify write() behaviour
-    bool _excerptmode    { false };     // true when writing a part
-    bool _msczMode       { true };      // false if writing into *.msc file
-    bool _writeTrack     { false };
-    bool _writePosition  { false };
 
-    SelectionFilter _filter;
-
-    LinksIndexer m_linksIndexer;
-    std::map<int, int> m_lidLocalIndices;
+    std::optional<WriteRange> _range;
+    std::optional<SelectionFilter> _filter;
 };
 }
-
-#endif // MU_ENGRAVING_WRITECONTEXT_H

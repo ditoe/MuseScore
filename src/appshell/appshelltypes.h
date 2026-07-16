@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,22 +30,25 @@ using DockName = QString;
 
 // Panels:
 static const DockName PALETTES_PANEL_NAME("palettesPanel");
-static const DockName INSTRUMENTS_PANEL_NAME("instrumentsPanel");
-static const DockName INSPECTOR_PANEL_NAME("inspectorPanel");
+static const DockName LAYOUT_PANEL_NAME("layoutPanel");
+static const DockName PROPERTIES_PANEL_NAME("propertiesPanel");
 static const DockName SELECTION_FILTERS_PANEL_NAME("selectionFiltersPanel");
+static const DockName UNDO_HISTORY_PANEL_NAME("undoHistoryPanel");
 
 static const DockName NOTATION_NAVIGATOR_PANEL_NAME("notationNavigatorPanel");
+static const DockName NOTATION_BRAILLE_PANEL_NAME("notationBraillePanel");
 
 static const DockName MIXER_PANEL_NAME("mixerPanel");
 static const DockName PIANO_KEYBOARD_PANEL_NAME("pianoKeyboardPanel");
 static const DockName TIMELINE_PANEL_NAME("timelinePanel");
-static const DockName DRUMSET_PANEL_NAME("drumsetPanel");
+static const DockName PERCUSSION_PANEL_NAME("percussionPanel");
 
 // Toolbars:
 static const DockName NOTATION_TOOLBAR_NAME("notationToolBar");
 static const DockName UNDO_REDO_TOOLBAR_NAME("undoRedoToolBar");
 static const DockName NOTE_INPUT_BAR_NAME("noteInputBar");
 static const DockName PLAYBACK_TOOLBAR_NAME("playbackToolBar");
+static const DockName EXTENSIONS_TOOLBAR_NAME("extensionsToolBar");
 
 // Other:
 static const DockName NOTATION_STATUSBAR_NAME("notationStatusBar");
@@ -55,7 +58,8 @@ enum class StartupModeType
     StartEmpty,
     ContinueLastSession,
     StartWithNewScore,
-    StartWithScore
+    StartWithScore,
+    Recovery
 };
 }
 

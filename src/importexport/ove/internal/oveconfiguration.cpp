@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,7 +23,8 @@
 
 #include "settings.h"
 
-using namespace mu::framework;
+using namespace mu;
+using namespace muse;
 using namespace mu::iex::ove;
 
 static const Settings::Key IMPORT_OVERTURE_CHARSET_KEY("iex_ove", "import/overture/charset");
@@ -31,6 +32,9 @@ static const Settings::Key IMPORT_OVERTURE_CHARSET_KEY("iex_ove", "import/overtu
 void OveConfiguration::init()
 {
     settings()->setDefaultValue(IMPORT_OVERTURE_CHARSET_KEY, Val("GBK"));
+    settings()->valueChanged(IMPORT_OVERTURE_CHARSET_KEY).onReceive(this, [this](const Val& val) {
+        m_importOvertureCharsetChanged.send(val.toString());
+    });
 }
 
 std::string OveConfiguration::importOvertureCharset() const
@@ -41,4 +45,9 @@ std::string OveConfiguration::importOvertureCharset() const
 void OveConfiguration::setImportOvertureCharset(const std::string& charset)
 {
     settings()->setSharedValue(IMPORT_OVERTURE_CHARSET_KEY, Val(charset));
+}
+
+async::Channel<std::string> OveConfiguration::importOvertureCharsetChanged() const
+{
+    return m_importOvertureCharsetChanged;
 }

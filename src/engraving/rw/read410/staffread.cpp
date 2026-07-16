@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "staffread.h"
-
-#include "rw/write/twrite.h"
 
 #include "dom/factory.h"
 #include "dom/measure.h"
@@ -55,17 +53,24 @@ void StaffRead::readStaff(Score* score, XmlReader& e, ReadContext& ctx)
                 // inherit timesig from previous measure
                 //
                 Measure* m = ctx.lastMeasure();             // measure->prevMeasure();
-                Fraction f(m ? m->timesig() : Fraction(4, 4));
+                Fraction timeSigForThisMeasure = ctx.timeSigForNextMeasure();
+                Fraction f(timeSigForThisMeasure != Fraction(0, 1) ? ctx.timeSigForNextMeasure() : m ? m->timesig() : Fraction(4, 4));
                 measure->setTicks(f);
                 measure->setTimesig(f);
 
                 MeasureRead::readMeasure(measure, e, ctx, staff);
                 measure->checkMeasure(staff);
                 if (!measure->isMMRest()) {
-                    score->measures()->add(measure);
+                    score->measures()->append(measure);
+                    if (m && m->mmRest()) {
+                        m->mmRest()->setNext(measure);
+                    }
                     score->checkSpanner(ctx.tick(), ctx.tick() + measure->ticks(), /*removeOrphans*/ false);
                     ctx.setLastMeasure(measure);
-                    ctx.setTick(measure->tick() + measure->ticks());
+                    ctx.setTick(measure->endTick());
+                    if (timeSigForThisMeasure != Fraction(0, 1) && ctx.timeSigForNextMeasure() == timeSigForThisMeasure) {
+                        ctx.setTimeSigForNextMeasure(Fraction(0, 1));
+                    }
                 } else {
                     // this is a multi measure rest
                     // always preceded by the first measure it replaces
@@ -74,13 +79,19 @@ void StaffRead::readStaff(Score* score, XmlReader& e, ReadContext& ctx)
                     if (m1) {
                         m1->setMMRest(measure);
                         measure->setTick(m1->tick());
+                        measure->setPrev(m1->prev());
                     }
                 }
             } else if (tag == "HBox" || tag == "VBox" || tag == "TBox" || tag == "FBox") {
                 MeasureBase* mb = toMeasureBase(Factory::createItemByName(tag, ctx.dummy()));
-                TRead::readItem(mb, e, ctx);
                 mb->setTick(ctx.tick());
-                score->measures()->add(mb);
+                score->measures()->append(mb);
+                // This default value needs initialising after being added to the score, as it depends on whether this is the title frame
+                if (mb->score()->mscVersion() >= 440) {
+                    mb->setSizeIsSpatiumDependent(mb->propertyDefault(Pid::SIZE_SPATIUM_DEPENDENT).toBool());
+                }
+
+                TRead::readItem(mb, e, ctx);
             } else if (tag == "tick") {
                 ctx.setTick(Fraction::fromTicks(ctx.fileDivision(e.readInt())));
             } else {
@@ -97,7 +108,7 @@ void StaffRead::readStaff(Score* score, XmlReader& e, ReadContext& ctx)
                     LOGD("Score::readStaff(): missing measure!");
                     measure = Factory::createMeasure(ctx.dummy()->system());
                     measure->setTick(ctx.tick());
-                    score->measures()->add(measure);
+                    score->measures()->append(measure);
                 }
                 ctx.setTick(measure->tick());
                 ctx.setCurrentMeasureIndex(measureIdx++);

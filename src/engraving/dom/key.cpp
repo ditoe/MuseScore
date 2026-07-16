@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -248,49 +248,6 @@ bool KeySigEvent::operator==(const KeySigEvent& e) const
 }
 
 //---------------------------------------------------------
-//   transposeKey
-//---------------------------------------------------------
-
-Key transposeKey(Key key, const Interval& interval, PreferSharpFlat prefer)
-{
-    int tpc = int(key) + 14;
-    tpc     = transposeTpc(tpc, interval, false);
-
-    // ignore prefer for octave transposing instruments
-    if (interval.chromatic % 12 != 0 || interval.diatonic % 7 != 0) {
-        // prefer key with less accidentals
-        if (tpc < 8 && prefer == PreferSharpFlat::AUTO) {
-            tpc += 12;
-        }
-        if (tpc > 20 && prefer == PreferSharpFlat::AUTO) {
-            tpc -= 12;
-        }
-
-        // change between 5/6/7 sharps and 7/6/5 flats
-        // other key signatures cannot be changed enharmonically
-        // without causing double-sharp/flat
-        // (-7 <=) tpc-14 <= -5, which has Cb, Gb, Db
-        if (tpc <= 9 && prefer == PreferSharpFlat::SHARPS) {
-            tpc += 12;
-        }
-
-        // 5 <= tpc-14 <= 7, which has B, F#, C#, enharmonic with Cb, Gb, Db respectively
-        if (tpc >= 19 && tpc <= 21 && prefer == PreferSharpFlat::FLATS) {
-            tpc -= 12;
-        }
-    }
-
-    // check for valid key sigs
-    if (tpc > 21) {
-        tpc -= 12;     // no more than 7 sharps in keysig
-    }
-    if (tpc < 7) {
-        tpc += 12;     // no more than 7 flats in keysig
-    }
-    return Key(tpc - 14);
-}
-
-//---------------------------------------------------------
 //   calculateInterval
 //    Calculates the interval to move from one key to another
 //---------------------------------------------------------
@@ -349,7 +306,7 @@ AccidentalVal AccidentalState::accidentalVal(int line, bool& error) const
         error = true;
         return AccidentalVal::NATURAL;
     }
-    return AccidentalVal((state[line] & 0x0f) + int(AccidentalVal::MIN));
+    return AccidentalVal((m_state[line] & 0x0f) + int(AccidentalVal::MIN));
 }
 
 //---------------------------------------------------------
@@ -363,7 +320,7 @@ static const int ACC_STATE_SHARP = int(AccidentalVal::SHARP) - int(AccidentalVal
 
 void AccidentalState::init(Key key)
 {
-    memset(state, ACC_STATE_NATURAL, MAX_ACC_STATE);
+    memset(m_state, ACC_STATE_NATURAL, MAX_ACC_STATE);
     // The numerical value of key tells us the number of sharps (or flats, if negative) in the key signature
     if (key > 0 && key <= Key::MAX) {
         for (int i = 0; i < int(key); ++i) {
@@ -374,7 +331,7 @@ void AccidentalState::init(Key key)
                 if (j >= MAX_ACC_STATE) {
                     break;
                 }
-                state[j] = ACC_STATE_SHARP;
+                m_state[j] = ACC_STATE_SHARP;
             }
         }
     } else if (key < 0 && key >= Key::MIN) {
@@ -386,7 +343,7 @@ void AccidentalState::init(Key key)
                 if (j >= MAX_ACC_STATE) {
                     break;
                 }
-                state[j] = ACC_STATE_FLAT;
+                m_state[j] = ACC_STATE_FLAT;
             }
         }
     }
@@ -409,7 +366,7 @@ void AccidentalState::init(const KeySigEvent& keySig)
                 if (i >= MAX_ACC_STATE) {
                     break;
                 }
-                state[i] = static_cast<uint8_t>(int(a) - int(AccidentalVal::MIN));
+                m_state[i] = static_cast<uint8_t>(int(a) - int(AccidentalVal::MIN));
             }
         }
     }
@@ -423,7 +380,7 @@ void AccidentalState::init(const KeySigEvent& keySig)
 AccidentalVal AccidentalState::accidentalVal(int line) const
 {
     assert(line >= MIN_ACC_STATE && line < MAX_ACC_STATE);
-    return AccidentalVal((state[line] & 0x0f) + int(AccidentalVal::MIN));
+    return AccidentalVal((m_state[line] & 0x0f) + int(AccidentalVal::MIN));
 }
 
 bool AccidentalState::forceRestateAccidental(int line) const
@@ -439,7 +396,7 @@ bool AccidentalState::forceRestateAccidental(int line) const
 bool AccidentalState::tieContext(int line) const
 {
     assert(line >= MIN_ACC_STATE && line < MAX_ACC_STATE);
-    return state[line] & TIE_CONTEXT;
+    return m_state[line] & TIE_CONTEXT;
 }
 
 //---------------------------------------------------------
@@ -451,7 +408,7 @@ void AccidentalState::setAccidentalVal(int line, AccidentalVal val, bool tieCont
     assert(line >= MIN_ACC_STATE && line < MAX_ACC_STATE);
     // casts needed to work around a bug in Xcode 4.2 on Mac, see #25910
     assert(int(val) >= int(AccidentalVal::MIN) && int(val) <= int(AccidentalVal::MAX));
-    state[line] = (int(val) - int(AccidentalVal::MIN)) | (tieContext ? TIE_CONTEXT : 0);
+    m_state[line] = (int(val) - int(AccidentalVal::MIN)) | (tieContext ? TIE_CONTEXT : 0);
 }
 
 void AccidentalState::setForceRestateAccidental(int line, bool forceRestate)
@@ -482,7 +439,7 @@ SymId KeySigEvent::symInKey(SymId sym, int degree) const
     int accIndex = std::distance(std::begin(accTable), std::find(std::begin(accTable), std::end(accTable), sym));
 
     // non transposed key
-    if (keyval == 0 || abs(keyval) > 7) {
+    if (keyval == 0 || std::abs(keyval) > 7) {
         return sym;
     }
 
@@ -491,7 +448,7 @@ SymId KeySigEvent::symInKey(SymId sym, int degree) const
         return SymId::noSym;
     }
 
-    for (int i = 1; i <= abs(keyval); ++i) {
+    for (int i = 1; i <= std::abs(keyval); ++i) {
         if ((degree * 2 + 2) % 7 == (keyval < 0 ? 8 - i : i) % 7) {
             accIndex += keyval < 0 ? -1 : 1;
         }

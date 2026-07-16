@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,18 +20,68 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TUPLET_H__
-#define __TUPLET_H__
+#pragma once
 
 #include <set>
 
 #include "durationelement.h"
 #include "property.h"
-#include "types.h"
 
 namespace mu::engraving {
 class Text;
 class Spanner;
+
+enum class TupletNumberType : unsigned char {
+    SHOW_NUMBER, SHOW_RELATION, NO_TEXT
+};
+
+inline std::string str_conv(TupletNumberType type)
+{
+    switch (type) {
+    case TupletNumberType::SHOW_NUMBER: return "number";
+    case TupletNumberType::SHOW_RELATION: return "relation";
+    case TupletNumberType::NO_TEXT: return "none";
+    }
+    return "";
+}
+
+inline TupletNumberType str_conv(const std::string& type, TupletNumberType def)
+{
+    if (type == "number") {
+        return TupletNumberType::SHOW_NUMBER;
+    } else if (type == "relation") {
+        return TupletNumberType::SHOW_RELATION;
+    } else if (type == "none") {
+        return TupletNumberType::NO_TEXT;
+    }
+    return def;
+}
+
+enum class TupletBracketType : unsigned char {
+    AUTO_BRACKET, SHOW_BRACKET, SHOW_NO_BRACKET
+};
+
+inline std::string str_conv(TupletBracketType type)
+{
+    switch (type) {
+    case TupletBracketType::AUTO_BRACKET: return "auto";
+    case TupletBracketType::SHOW_BRACKET: return "show";
+    case TupletBracketType::SHOW_NO_BRACKET: return "none";
+    }
+    return "";
+}
+
+inline TupletBracketType str_conv(const std::string& type, TupletBracketType def)
+{
+    if (type == "auto") {
+        return TupletBracketType::AUTO_BRACKET;
+    } else if (type == "show") {
+        return TupletBracketType::SHOW_BRACKET;
+    } else if (type == "none") {
+        return TupletBracketType::SHOW_NO_BRACKET;
+    }
+    return def;
+}
 
 //------------------------------------------------------------------------
 //   @@ Tuplet
@@ -55,10 +105,6 @@ public:
 
     void setParent(Measure* parent);
 
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
-
     Tuplet* clone() const override { return new Tuplet(*this); }
     void setTrack(track_idx_t val) override;
 
@@ -71,8 +117,8 @@ public:
     static void resetNumberProperty(Text* number);
 
     bool isEditable() const override;
-    void startEditDrag(EditData&) override;
-    void editDrag(EditData&) override;
+    void startDragGrip(EditData&) override;
+    void dragGrip(EditData&) override;
 
     void setSelected(bool f) override;
 
@@ -84,8 +130,8 @@ public:
     void setBracketType(TupletBracketType val) { m_bracketType = val; }
     bool hasBracket() const { return m_hasBracket; }
     void setHasBracket(bool b) { m_hasBracket = b; }
-    Millimetre bracketWidth() const { return m_bracketWidth; }
-    void setBracketWidth(Millimetre s) { m_bracketWidth = s; }
+    Spatium bracketWidth() const { return m_bracketWidth; }
+    void setBracketWidth(Spatium s) { m_bracketWidth = s; }
 
     const Fraction& ratio() const { return m_ratio; }
     void setRatio(const Fraction& r) { m_ratio = r; }
@@ -100,12 +146,9 @@ public:
         return std::find(m_currentElements.begin(), m_currentElements.end(), el) != m_currentElements.end();
     }
 
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
 
     void reset() override;
-
-    int id() const { return m_id; }
-    void setId(int i) const { m_id = i; }
 
     TDuration baseLen() const { return m_baseLen; }
     void setBaseLen(const TDuration& d) { m_baseLen = d; }
@@ -124,30 +167,31 @@ public:
     Fraction elementsDuration();
     void sortElements();
     bool cross() const;
+    staff_idx_t vStaffIdx() const override;
 
-    const mu::PointF& p1() const { return m_p1; }
-    mu::PointF& p1() { return m_p1; }
-    void setP1(const mu::PointF& p) { m_p1 = p; }
-    const mu::PointF& p2() const { return m_p2; }
-    mu::PointF& p2() { return m_p2; }
-    void setP2(const mu::PointF& p) { m_p2 = p; }
+    const PointF& p1() const { return m_p1; }
+    PointF& p1() { return m_p1; }
+    void setP1(const PointF& p) { m_p1 = p; }
+    const PointF& p2() const { return m_p2; }
+    PointF& p2() { return m_p2; }
+    void setP2(const PointF& p) { m_p2 = p; }
 
-    const mu::PointF& userP1() const { return m_userP1; }
-    const mu::PointF& userP2() const { return m_userP2; }
+    const PointF& userP1() const { return m_userP1; }
+    const PointF& userP2() const { return m_userP2; }
 
     void setVisible(bool f) override;
+    void setColor(const Color& col) override;
 
+    EngravingObject* propertyDelegate(Pid id) const override;
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue& v) override;
     PropertyValue propertyDefault(Pid id) const override;
 
-    Shape shape() const override;
-
     bool needStartEditingAfterSelecting() const override { return true; }
-    int gripsCount() const override { return 2; }
-    Grip initialEditModeGrip() const override { return Grip::END; }
-    Grip defaultGrip() const override { return Grip::START; }
-    std::vector<mu::PointF> gripsPositions(const EditData&) const override;
+    int gripsCount() const override;
+    Grip initialEditModeGrip() const override { return Grip::MIDDLE; }
+    Grip defaultGrip() const override { return Grip::MIDDLE; }
+    std::vector<PointF> gripsPositions(const EditData&) const override;
 
     void sanitizeTuplet();
     void addMissingElements();
@@ -156,8 +200,12 @@ public:
 
     static int computeTupletDenominator(int numerator, Fraction totalDuration);
 
-    mu::PointF bracketL[4];
-    mu::PointF bracketR[3];
+    PointF bracketL[4];
+    PointF bracketR[3];
+
+    EngravingItem* nextElement() override;
+    EngravingItem* prevElement() override;
+
 private:
 
     friend class DurationElement;
@@ -178,7 +226,7 @@ private:
     DirectionV m_direction = DirectionV::AUTO;
     TupletNumberType m_numberType = TupletNumberType::SHOW_NUMBER;
     TupletBracketType m_bracketType = TupletBracketType::AUTO_BRACKET;
-    Millimetre m_bracketWidth;
+    Spatium m_bracketWidth;
 
     bool m_hasBracket = false;
     Fraction m_ratio;
@@ -189,11 +237,9 @@ private:
 
     Fraction m_tick;
 
-    mu::PointF m_p1, m_p2;
-    mu::PointF m_userP1, m_userP2;      // user offset
-    mutable int m_id;                   // used during read/write
+    PointF m_p1, m_p2;
+    PointF m_userP1, m_userP2;      // user offset
 
     Text* m_number = nullptr;
 };
-} // namespace mu::engraving
-#endif
+}

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,17 +20,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __BEAM_H__
-#define __BEAM_H__
+#pragma once
 
-#include <memory>
-
+#include "beambase.h"
 #include "engravingitem.h"
 #include "property.h"
-
-namespace mu::engraving::rendering::dev {
-class BeamTremoloLayout;
-}
 
 namespace mu::engraving {
 class Chord;
@@ -38,40 +32,9 @@ class ChordRest;
 class Factory;
 class Skyline;
 class System;
-class Beam;
-enum class ActionIconType;
-enum class SpannerSegmentType;
-
-//---------------------------------------------------------
-//   BeamFragment
-//    position of primary beam
-//    idx 0 - DirectionV::AUTO or DirectionV::DOWN
-//        1 - DirectionV::UP
-//---------------------------------------------------------
-
-struct BeamFragment {
-    double py1[2];
-    double py2[2];
-};
-
-class BeamSegment
-{
-    OBJECT_ALLOCATOR(engraving, BeamSegment)
-public:
-    mu::LineF line;
-    int level = 0;
-    bool above = false; // above level 0 or below? (meaningless for level 0)
-    Fraction startTick;
-    Fraction endTick;
-    bool isBeamlet = false;
-    bool isBefore = false;
-
-    Shape shape() const;
-    EngravingItem* parentElement;
-
-    BeamSegment(EngravingItem* b)
-        : parentElement(b) {}
-};
+class Transaction;
+enum class ActionIconType : signed char;
+enum class SpannerSegmentType : unsigned char;
 
 struct TremAnchor {
     ChordRest* chord1 = nullptr;
@@ -79,15 +42,11 @@ struct TremAnchor {
     double y2 = 0.;
 };
 
-enum class ChordBeamAnchorType {
-    Start, End, Middle
-};
-
 //---------------------------------------------------------
 //   @@ Beam
 //---------------------------------------------------------
 
-class Beam final : public EngravingItem
+class Beam final : public BeamBase
 {
     OBJECT_ALLOCATOR(engraving, Beam)
     DECLARE_CLASSOF(ElementType::BEAM)
@@ -95,17 +54,11 @@ class Beam final : public EngravingItem
 public:
     ~Beam();
 
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-
     Beam* clone() const override { return new Beam(*this); }
-    mu::PointF pagePos() const override;      ///< position in page coordinates
-    mu::PointF canvasPos() const override;    ///< position in page coordinates
 
     bool isEditable() const override { return true; }
     void startEdit(EditData&) override;
-    void endEdit(EditData&) override;
-    void editDrag(EditData&) override;
+    void dragGrip(EditData&) override;
 
     Fraction tick() const override;
     Fraction rtick() const override;
@@ -129,30 +82,21 @@ public:
     void add(EngravingItem*) override;
     void remove(EngravingItem*) override;
 
-    void move(const mu::PointF&) override;
+    void move(const PointF&) override;
 
-    bool up() const { return m_up; }
-    void setUp(bool v) { m_up = v; }
-    void setId(int i) const { m_id = i; }
-    int id() const { return m_id; }
-
-    void setBeamDirection(DirectionV d);
-    DirectionV beamDirection() const { return m_direction; }
+    void setDirection(DirectionV d) override;
 
     void calcBeamBreaks(const ChordRest* chord, const ChordRest* prevChord, int level, bool& isBroken32, bool& isBroken64) const;
 
     //!Note Unfortunately we have no FEATHERED_BEAM_MODE for now int BeamMode enum, so we'll handle this locally
     void setAsFeathered(const bool slower);
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     double growLeft() const { return m_growLeft; }
     double growRight() const { return m_growRight; }
     void setGrowLeft(double val) { m_growLeft = val; }
     void setGrowRight(double val) { m_growRight = val; }
-
-    bool userModified() const;
-    void setUserModified(bool val);
 
     PairF beamPos() const;
     void setBeamPos(const PairF& bp);
@@ -167,14 +111,8 @@ public:
     void setNoSlope(bool b);
 
     double slope() const { return m_slope; }
+    void computeAndSetSlope();
     void setSlope(double val) { m_slope = val; }
-
-    const mu::PointF& startAnchor() const { return m_startAnchor; }
-    mu::PointF& startAnchor() { return m_startAnchor; }
-    void setStartAnchor(const mu::PointF& p) { m_startAnchor = p; }
-    const mu::PointF& endAnchor() const { return m_endAnchor; }
-    mu::PointF& endAnchor() { return m_endAnchor; }
-    void setEndAnchor(const mu::PointF& p) { m_endAnchor = p; }
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
@@ -186,10 +124,13 @@ public:
     bool cross() const { return m_cross; }
     void setCross(bool val) { m_cross = val; }
 
-    int minMove() { return m_minMove; }
-    void setMinMove(int val) { m_minMove = val; }
-    int maxMove() { return m_maxMove; }
-    void setMaxMove(int val) { m_maxMove = val; }
+    bool fullCross() const { return m_fullCross; }
+    void setFullCross(bool v) { m_fullCross = v; }
+
+    int minCRMove() const override { return m_minCRMove; }
+    void setMinMove(int val) { m_minCRMove = val; }
+    int maxCRMove() const override { return m_maxCRMove; }
+    void setMaxMove(int val) { m_maxCRMove = val; }
 
     void addSkyline(Skyline&);
 
@@ -199,17 +140,15 @@ public:
     int gripsCount() const override { return 3; }
     Grip initialEditModeGrip() const override { return Grip::END; }
     Grip defaultGrip() const override { return Grip::MIDDLE; }
-    std::vector<mu::PointF> gripsPositions(const EditData&) const override;
+    std::vector<PointF> gripsPositions(const EditData&) const override;
 
     static ActionIconType actionIconTypeForBeamMode(BeamMode);
 
-    mu::RectF drag(EditData&) override;
+    RectF drag(EditData&) override;
     bool isMovable() const override;
     void startDrag(EditData&) override;
 
     bool hasAllRests();
-
-    Shape shape() const override;
 
     const std::vector<TremAnchor>& tremAnchors() const { return m_tremAnchors; }
     std::vector<TremAnchor>& tremAnchors() { return m_tremAnchors; }
@@ -218,20 +157,19 @@ public:
     std::vector<BeamFragment*>& beamFragments() { return m_fragments; }
     void addBeamFragment(BeamFragment* f) { m_fragments.push_back(f); }
 
-    const std::vector<BeamSegment*>& beamSegments() const { return m_beamSegments; }
-    std::vector<BeamSegment*>& beamSegments() { return m_beamSegments; }
+    void clearBeamSegments() override;
 
     const StaffType* tab() const { return m_tab; }
     void setTab(const StaffType* t) { m_tab = t; }
     bool isBesideTabStaff() const { return m_isBesideTabStaff; }
     void setIsBesideTabStaff(bool val) { m_isBesideTabStaff = val; }
 
-    const std::vector<int>& notes() const { return m_notes; }
-    std::vector<int>& notes() { return m_notes; }
+    const std::vector<NotePosition>& notePositions() const { return m_notePositions; }
+    std::vector<NotePosition>& notePositions() { return m_notePositions; }
 
     const Chord* findChordWithCustomStemDirection() const;
 
-    std::shared_ptr<rendering::dev::BeamTremoloLayout> layoutInfo;
+    const BeamSegment* topLevelSegmentForElement(const ChordRest* element) const;
 
 private:
 
@@ -248,22 +186,16 @@ private:
     void removeChordRest(ChordRest* a);
 
     std::vector<ChordRest*> m_elements;          // must be sorted by tick
-    std::vector<BeamSegment*> m_beamSegments;
-    DirectionV m_direction = DirectionV::AUTO;
 
-    bool m_up = true;
-
-    bool m_userModified[2]{ false };    // 0: auto/down  1: up
     bool m_isGrace = false;
     bool m_cross = false;
+    bool m_fullCross = false;
 
     double m_growLeft = 1.0;               // define "feather" beams
     double m_growRight = 1.0;
     double m_beamDist = 0.0;
     int m_beamSpacing = 3;              // how far apart beams are spaced in quarter spaces
     double m_beamWidth = 0.0;           // how wide each beam is
-    mu::PointF m_startAnchor;
-    mu::PointF m_endAnchor;
 
     // for tabs
     bool m_isBesideTabStaff = false;
@@ -271,16 +203,14 @@ private:
 
     std::vector<BeamFragment*> m_fragments; // beam splits across systems
 
-    mutable int m_id = 0;                // used in read()/write()
-
-    int m_minMove = 0;                   // set in layout1()
-    int m_maxMove = 0;
+    int m_minCRMove = 0;                   // set in layout1()
+    int m_maxCRMove = 0;
+    int m_crossBeamPos = 0;
 
     bool m_noSlope = false;
-    double m_slope = 0.0;
+    real_t m_slope = 0.0;
 
-    std::vector<int> m_notes;
+    std::vector<NotePosition> m_notePositions;
     std::vector<TremAnchor> m_tremAnchors;
 };
 } // namespace mu::engraving
-#endif

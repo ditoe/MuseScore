@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,30 +25,31 @@
 
 #include "bb.h"
 
-#include "engravingerrors.h"
-#include "engraving/dom/mscore.h"
-
+#include "engraving/dom/box.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/chordlist.h"
+#include "engraving/dom/drumset.h"
 #include "engraving/dom/factory.h"
+#include "engraving/dom/harmony.h"
+#include "engraving/dom/key.h"
+#include "engraving/dom/keysig.h"
+#include "engraving/dom/layoutbreak.h"
 #include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/mscore.h"
+#include "engraving/dom/note.h"
 #include "engraving/dom/part.h"
+#include "engraving/dom/pitchspelling.h"
+#include "engraving/dom/rest.h"
+#include "engraving/dom/segment.h"
+#include "engraving/dom/slur.h"
 #include "engraving/dom/staff.h"
 #include "engraving/dom/text.h"
-#include "engraving/dom/box.h"
-#include "engraving/dom/slur.h"
 #include "engraving/dom/tie.h"
-#include "engraving/dom/note.h"
-#include "engraving/dom/chord.h"
-#include "engraving/dom/rest.h"
-#include "engraving/dom/drumset.h"
 #include "engraving/dom/utils.h"
-#include "engraving/dom/chordlist.h"
-#include "engraving/dom/harmony.h"
-#include "engraving/dom/layoutbreak.h"
-#include "engraving/dom/key.h"
-#include "engraving/dom/pitchspelling.h"
-#include "engraving/dom/measure.h"
-#include "engraving/dom/segment.h"
-#include "engraving/dom/keysig.h"
+#include "engraving/editing/editenharmonicspelling.h"
+#include "engraving/editing/transpose.h"
+#include "engraving/engravingerrors.h"
 
 #include "log.h"
 
@@ -264,7 +265,7 @@ bool BBFile::read(const QString& name)
     _measures = ((maxbeat + timesigZ() - 1) / timesigZ()) + 1;
 
     if (roots != _chords.size()) {
-        LOGD("import bb: roots %d != extensions %d", roots, _chords.size());
+        LOGD("import bb: roots %d != extensions %lld", roots, _chords.size());
         return false;
     }
     LOGD("Measures %d", _measures);
@@ -431,7 +432,7 @@ Err importBB(MasterScore* score, const QString& name)
         Fraction ts = score->sigmap()->timesig(tick.ticks()).timesig();
         measure->setTimesig(ts);
         measure->setTicks(ts);
-        score->measures()->add(measure);
+        score->measures()->append(measure);
     }
 
     //---------------------------------------------------
@@ -444,7 +445,7 @@ Err importBB(MasterScore* score, const QString& name)
 
     if (tracks->isEmpty()) {
         for (MeasureBase* mb = score->first(); mb; mb = mb->next()) {
-            if (mb->type() != ElementType::MEASURE) {
+            if (!mb->isMeasure()) {
                 continue;
             }
             Measure* measure = (Measure*)mb;
@@ -462,7 +463,7 @@ Err importBB(MasterScore* score, const QString& name)
     }
 
     for (MeasureBase* mb = score->first(); mb; mb = mb->next()) {
-        if (mb->type() != ElementType::MEASURE) {
+        if (!mb->isMeasure()) {
             continue;
         }
         Measure* measure = (Measure*)mb;
@@ -476,7 +477,7 @@ Err importBB(MasterScore* score, const QString& name)
         }
     }
 
-    score->spell();
+    EditEnharmonicSpelling::spell(score);
 
     //---------------------------------------------------
     //    create title
@@ -486,11 +487,10 @@ Err importBB(MasterScore* score, const QString& name)
     Text* text = Factory::createText(measureB, TextStyleType::TITLE);
     text->setPlainText(String::fromUtf8(bb.title()));
 
-    if (measureB->type() != ElementType::VBOX) {
-        measureB = Factory::createVBox(score->dummy()->system());
-        measureB->setTick(Fraction(0, 1));
+    if (!measureB->isVBox()) {
+        measureB = Factory::createTitleVBox(score->dummy()->system());
         measureB->setNext(score->first());
-        score->measures()->add(measureB);
+        score->measures()->append(measureB);
     }
     measureB->add(text);
 
@@ -512,16 +512,17 @@ Err importBB(MasterScore* score, const QString& name)
         }
         Segment* s = m->getSegment(SegmentType::ChordRest, tick);
         Harmony* h = Factory::createHarmony(s);
+        HarmonyInfo* info = new HarmonyInfo(score);
         h->setTrack(0);
-        h->setRootTpc(table[c.root - 1]);
+        info->setRootTpc(table[c.root - 1]);
         if (c.bass > 0) {
-            h->setBaseTpc(table[c.bass - 1]);
+            info->setBassTpc(table[c.bass - 1]);
         } else {
-            h->setBaseTpc(Tpc::TPC_INVALID);
+            info->setBassTpc(Tpc::TPC_INVALID);
         }
-        h->setId(c.extension);
-        h->getDescription();
-        h->render();
+        info->setId(c.extension);
+        h->addChord(info);
+
         s->add(h);
     }
 
@@ -535,7 +536,7 @@ Err importBB(MasterScore* score, const QString& name)
 
     int n = 0;
     for (MeasureBase* mb = score->first(); mb; mb = mb->next()) {
-        if (mb->type() != ElementType::MEASURE) {
+        if (!mb->isMeasure()) {
             continue;
         }
         Measure* measure = (Measure*)mb;
@@ -553,14 +554,14 @@ Err importBB(MasterScore* score, const QString& name)
         ++n;
     }
 
-    foreach (Staff* staff, score->staves()) {
+    for (Staff* staff : score->staves()) {
         Fraction tick = Fraction(0, 1);
         KeySigEvent ke;
         Key key = Key(bb.key());
         Key cKey = key;
         Interval v = staff->part()->instrument(tick)->transpose();
         if (!v.isZero() && !score->style().styleB(Sid::concertPitch)) {
-            cKey = transposeKey(key, v);
+            cKey = Transpose::transposeKey(key, v);
             // if there are more than 6 accidentals in transposing key, it cannot be PreferSharpFlat::AUTO
             if ((key > 6 || key < -6) && staff->part()->preferSharpFlat() == PreferSharpFlat::AUTO) {
                 staff->part()->setPreferSharpFlat(PreferSharpFlat::NONE);
@@ -800,6 +801,18 @@ void BBFile::convertTrack(Score* score, BBTrack* track, int staffIdx)
 }
 
 //---------------------------------------------------------
+//   quantizeLen
+//---------------------------------------------------------
+
+int quantizeLen(int len, int raster)
+{
+    if (raster == 0) {
+        return len;
+    }
+    return int(((float)len / raster) + 0.5) * raster;   //round to the closest multiple of raster
+}
+
+//---------------------------------------------------------
 //   quantize
 //    process one segment (measure)
 //---------------------------------------------------------
@@ -924,7 +937,7 @@ void BBTrack::cleanup()
     // quantize
     //
     int lastTick = 0;
-    foreach (const Event& e, _events) {
+    for (const Event& e : _events) {
         if (e.type() != ME_NOTE) {
             continue;
         }

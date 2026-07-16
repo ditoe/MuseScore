@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __RASGUEADO_H__
-#define __RASGUEADO_H__
+#ifndef MU_ENGRAVING_RASGUEADO_H
+#define MU_ENGRAVING_RASGUEADO_H
 
 #include "chordtextlinebase.h"
 
@@ -65,6 +65,9 @@ public:
 
     PropertyValue propertyDefault(Pid propertyId) const override;
     Sid getPropertyStyle(Pid) const override;
+
+protected:
+    Sid defaultPosSid() const override;
 };
 } // namespace mu::engraving
 #endif

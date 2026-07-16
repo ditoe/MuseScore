@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,11 +22,19 @@
 
 #include "notationmidiwriter.h"
 
-#include "log.h"
+#include <QBuffer>
+
+#include "engraving/dom/score.h"
+
+#include "notation/inotationelements.h" // IWYU pragma: keep
+
 #include "midiexport/exportmidi.h"
 
+#include "log.h"
+
 using namespace mu::iex::midi;
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 using namespace mu::project;
 using namespace mu::notation;
 using namespace mu::engraving;
@@ -42,7 +50,7 @@ bool NotationMidiWriter::supportsUnitType(UnitType unitType) const
     return std::find(unitTypes.cbegin(), unitTypes.cend(), unitType) != unitTypes.cend();
 }
 
-mu::Ret NotationMidiWriter::write(INotationPtr notation, QIODevice& destinationDevice, const Options&)
+Ret NotationMidiWriter::write(INotationPtr notation, io::IODevice& destinationDevice, const Options&)
 {
     IF_ASSERT_FAILED(notation) {
         return make_ret(Ret::Code::UnknownError);
@@ -60,12 +68,20 @@ mu::Ret NotationMidiWriter::write(INotationPtr notation, QIODevice& destinationD
     bool isMidiExportRpns = midiImportExportConfiguration()->isMidiExportRpns();
     SynthesizerState synthesizerState = score->synthesizerState();
 
-    bool ok = exportMidi.write(&destinationDevice, isPlayRepeatsEnabled, isMidiExportRpns, synthesizerState);
+    QByteArray qdata;
+    QBuffer buf(&qdata);
+    buf.open(QIODevice::WriteOnly);
+
+    bool ok = exportMidi.write(&buf, isPlayRepeatsEnabled, isMidiExportRpns, synthesizerState);
+    if (ok) {
+        ByteArray data = ByteArray::fromQByteArrayNoCopy(qdata);
+        destinationDevice.write(data);
+    }
 
     return ok ? make_ret(Ret::Code::Ok) : make_ret(Ret::Code::InternalError);
 }
 
-mu::Ret NotationMidiWriter::writeList(const notation::INotationPtrList&, QIODevice&, const Options&)
+Ret NotationMidiWriter::writeList(const notation::INotationPtrList&, io::IODevice&, const Options&)
 {
     NOT_SUPPORTED;
     return Ret(Ret::Code::NotSupported);

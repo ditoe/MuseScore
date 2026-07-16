@@ -15,7 +15,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -77,9 +76,6 @@
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
-          <BarLine>
-            <span>1</span>
-            </BarLine>
           </voice>
         </Measure>
       <Measure>
@@ -88,9 +84,6 @@
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
-          <BarLine>
-            <span>1</span>
-            </BarLine>
           </voice>
         </Measure>
       <Measure>
@@ -99,9 +92,6 @@
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
-          <BarLine>
-            <span>1</span>
-            </BarLine>
           </voice>
         </Measure>
       <Measure>
@@ -110,9 +100,6 @@
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
-          <BarLine>
-            <span>1</span>
-            </BarLine>
           </voice>
         </Measure>
       <Measure>
@@ -121,10 +108,6 @@
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
-          <BarLine>
-            <subtype>end</subtype>
-            <span>1</span>
-            </BarLine>
           </voice>
         </Measure>
       </Staff>

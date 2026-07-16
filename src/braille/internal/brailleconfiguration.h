@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef MU_BRAILLE_BRAILLECONFIGURATION_H
 #define MU_BRAILLE_BRAILLECONFIGURATION_H
 
@@ -27,24 +28,28 @@
 #include "ibrailleconfiguration.h"
 
 namespace mu::engraving {
-class BrailleConfiguration : public mu::braille::IBrailleConfiguration, public async::Asyncable
+class BrailleConfiguration : public mu::braille::IBrailleConfiguration, public muse::async::Asyncable
 {
 public:
     void init();
 
-    async::Notification braillePanelEnabledChanged() const override;
+    muse::async::Notification braillePanelEnabledChanged() const override;
     bool braillePanelEnabled() const override;
     void setBraillePanelEnabled(const bool enabled) override;
 
-    async::Notification brailleTableChanged() const override;
-    QString brailleTable() const override;
-    void setBrailleTable(const QString table) override;
+    muse::async::Notification intervalDirectionChanged() const override;
+    braille::BrailleIntervalDirection intervalDirection() const override;
+    void setIntervalDirection(const braille::BrailleIntervalDirection) override;
 
-    QStringList brailleTableList() override;
+    muse::async::Notification brailleTableChanged() const override;
+    QString brailleTable() const override;
+    void setBrailleTable(const QString& table) override;
+    QStringList brailleTableList() const override;
 
 private:
-    async::Notification m_braillePanelEnabledChanged;
-    async::Notification m_brailleTableChanged;
+    muse::async::Notification m_braillePanelEnabledChanged;
+    muse::async::Notification m_brailleTableChanged;
+    muse::async::Notification m_intervalDirectionChanged;
 };
 }
 

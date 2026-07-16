@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,22 +29,25 @@
 #include "modularity/ioc.h"
 #include "actions/iactionsdispatcher.h"
 #include "context/iglobalcontext.h"
-#include "multiinstances/imultiinstancesprovider.h"
+#include "multiwindows/imultiwindowsprovider.h"
 #include "project/iprojectconfiguration.h"
 #include "iappshellconfiguration.h"
 
 #include "isessionsmanager.h"
 
 namespace mu::appshell {
-class SessionsManager : public ISessionsManager, public async::Asyncable
+class SessionsManager : public ISessionsManager, public muse::Contextable, public muse::async::Asyncable
 {
-    INJECT(actions::IActionsDispatcher, dispatcher)
-    INJECT(mi::IMultiInstancesProvider, multiInstancesProvider)
-    INJECT(context::IGlobalContext, globalContext)
-    INJECT(project::IProjectConfiguration, projectConfiguration)
-    INJECT(IAppShellConfiguration, configuration)
+    muse::GlobalInject<muse::mi::IMultiWindowsProvider> multiwindowsProvider;
+    muse::GlobalInject<project::IProjectConfiguration> projectConfiguration;
+    muse::GlobalInject<IAppShellConfiguration> configuration;
+    muse::ContextInject<muse::actions::IActionsDispatcher> dispatcher = { this };
+    muse::ContextInject<context::IGlobalContext> globalContext = { this };
 
 public:
+    SessionsManager(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
+
     void init();
     void deinit();
 
@@ -56,10 +59,10 @@ public:
 private:
     void update();
 
-    void removeProjectFromSession(const io::path_t& projectPath);
-    void addProjectToSession(const io::path_t& projectPath);
+    void removeProjectFromSession(const muse::io::path_t& projectPath);
+    void addProjectToSession(const muse::io::path_t& projectPath);
 
-    io::path_t m_lastOpenedProjectPath;
+    muse::io::path_t m_lastOpenedProjectPath;
 };
 }
 

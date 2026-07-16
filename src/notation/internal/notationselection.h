@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,16 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_NOTATIONSELECTION_H
-#define MU_NOTATION_NOTATIONSELECTION_H
+
+#pragma once
 
 #include "../inotationselection.h"
 
 #include "igetscore.h"
-
-namespace mu::engraving {
-class Score;
-}
 
 namespace mu::notation {
 class NotationSelection : public INotationSelection
@@ -40,29 +36,35 @@ public:
     bool isRange() const override;
     SelectionState state() const override;
 
-    Ret canCopy() const override;
-    QMimeData* mimeData() const override;
+    muse::Ret canCopy() const override;
+    muse::ByteArray mimeData() const override;
+    QMimeData* qMimeData() const override;
 
-    EngravingItem* element() const override;
-    std::vector<EngravingItem*> elements() const override;
+    engraving::EngravingItem* element() const override;
+    const std::vector<engraving::EngravingItem*>& elements() const override;
 
-    std::vector<Note*> notes(NoteFilter filter) const override;
+    std::vector<engraving::Note*> notes(NoteFilter filter) const override;
 
-    RectF canvasBoundingRect() const override;
+    muse::RectF canvasBoundingRect() const override;
 
     INotationSelectionRangePtr range() const override;
 
-    EngravingItem* lastElementHit() const override;
+    engraving::EngravingItem* lastElementHit() const override;
 
-    void onElementHit(EngravingItem*);
+    void onElementHit(engraving::EngravingItem*);
+
+    mu::engraving::MeasureBase* startMeasureBase() const override;
+    mu::engraving::MeasureBase* endMeasureBase() const override;
+    std::vector<mu::engraving::System*> selectedSystems() const override;
+    std::vector<mu::engraving::Page*> pagesContainingSelection() const override;
+
+    bool elementsSelected(const mu::engraving::ElementTypeSet& types) const override;
 
 private:
     mu::engraving::Score* score() const;
-    EngravingItem* m_lastElementHit;
 
+    engraving::EngravingItem* m_lastElementHit = nullptr;
     IGetScore* m_getScore = nullptr;
     INotationSelectionRangePtr m_range;
 };
 }
-
-#endif // MU_NOTATION_NOTATIONSELECTION_H

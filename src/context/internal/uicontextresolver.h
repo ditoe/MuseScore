@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2025 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,43 +19,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_CONTEXT_UICONTEXTRESOLVER_H
-#define MU_CONTEXT_UICONTEXTRESOLVER_H
+#pragma once
+
+#include <QTimer>
 
 #include "../iuicontextresolver.h"
 #include "async/asyncable.h"
 #include "modularity/ioc.h"
-#include "playback/iplaybackcontroller.h"
-#include "iinteractive.h"
+#include "interactive/iinteractive.h"
 #include "../iglobalcontext.h"
 #include "ui/inavigationcontroller.h"
 
 namespace mu::context {
-class UiContextResolver : public IUiContextResolver, public async::Asyncable
+class UiContextResolver : public IUiContextResolver, public muse::Contextable, public muse::async::Asyncable
 {
-    INJECT(framework::IInteractive, interactive)
-    INJECT(playback::IPlaybackController, playbackController)
-    INJECT(IGlobalContext, globalContext)
-    INJECT(ui::INavigationController, navigationController)
+    muse::ContextInject<muse::IInteractive> interactive = { this };
+    muse::ContextInject<IGlobalContext> globalContext = { this };
+    muse::ContextInject<muse::ui::INavigationController> navigationController = { this };
 
 public:
-    UiContextResolver() = default;
+    UiContextResolver(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
 
     void init();
 
-    ui::UiContext currentUiContext() const override;
-    async::Notification currentUiContextChanged() const override;
+    const muse::ui::UiContext& currentUiContext() const override;
+    muse::async::Notification currentUiContextChanged() const override;
 
-    bool match(const ui::UiContext& currentCtx, const ui::UiContext& actCtx) const override;
-    bool matchWithCurrent(const ui::UiContext& ctx) const override;
+    bool match(const muse::ui::UiContext& currentCtx, const muse::ui::UiContext& actCtx) const override;
+    bool matchWithCurrent(const muse::ui::UiContext& ctx) const override;
 
     bool isShortcutContextAllowed(const std::string& scContext) const override;
 
 private:
-    void notifyAboutContextChanged();
+    void updateCurrentUiContext();
+    muse::ui::UiContext resolveCurrentUiContext() const;
 
-    async::Notification m_currentUiContextChanged;
+    muse::ui::UiContext m_currentUiContext;
+    muse::async::Notification m_currentUiContextChanged;
+
+    //! NOTE Owned by this resolver, so that a pending timeout is cancelled when the resolver is destroyed
+    QTimer m_currentUriChangedTimer;
 };
 }
-
-#endif // MU_CONTEXT_UICONTEXTRESOLVER_H

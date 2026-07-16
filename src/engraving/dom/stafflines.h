@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_LIBMSCORE_STAFFLINES_H
-#define MU_LIBMSCORE_STAFFLINES_H
+#ifndef MU_ENGRAVING_STAFFLINES_H
+#define MU_ENGRAVING_STAFFLINES_H
 
 #include <vector>
 
@@ -43,13 +43,11 @@ public:
 
     StaffLines* clone() const override { return new StaffLines(*this); }
 
-    mu::PointF pagePos() const override;      ///< position in page coordinates
-    mu::PointF canvasPos() const override;    ///< position in page coordinates
+    PointF pagePos() const override;      ///< position in page coordinates
+    PointF canvasPos() const override;    ///< position in page coordinates
 
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
-
-    const std::vector<mu::LineF>& lines() const { return m_lines; }
-    void setLines(const std::vector<mu::LineF>& l) { m_lines = l; }
+    const std::vector<LineF>& lines() const { return m_lines; }
+    void setLines(const std::vector<LineF>& l) { m_lines = l; }
 
     Measure* measure() const { return (Measure*)explicitParent(); }
     double y1() const;
@@ -60,12 +58,14 @@ public:
     RectF hitBBox() const override;
     Shape hitShape() const override;
 
+    bool collectForDrawing() const override;
+
 private:
     friend class Factory;
     StaffLines(Measure* parent);
 
     double m_lw = 0.0;
-    std::vector<mu::LineF> m_lines;
+    std::vector<LineF> m_lines;
 };
 }
 

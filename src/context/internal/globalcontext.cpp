@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,7 +26,12 @@
 using namespace mu::context;
 using namespace mu::project;
 using namespace mu::notation;
-using namespace mu::async;
+using namespace muse::async;
+
+GlobalContext::GlobalContext()
+{
+    m_playbackState = std::make_shared<PlaybackState>();
+}
 
 void GlobalContext::setCurrentProject(const INotationProjectPtr& project)
 {
@@ -95,4 +100,14 @@ void GlobalContext::doSetCurrentNotation(const INotationPtr& notation)
     if (m_currentNotation) {
         m_currentNotation->setIsOpen(true);
     }
+}
+
+void GlobalContext::setCurrentPlayer(const muse::audio::IPlayerPtr& player)
+{
+    m_playbackState->setPlayer(player);
+}
+
+IPlaybackStatePtr GlobalContext::playbackState() const
+{
+    return m_playbackState;
 }

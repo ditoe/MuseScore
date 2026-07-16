@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.InstrumentsScene 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.InstrumentsScene
 
 Item {
     id: root
@@ -36,7 +37,7 @@ Item {
     property int currentGenreIndex: -1
     property int currentGroupIndex: -1
 
-    property alias navigation: navPanel
+    property alias navigation: groupsView.navigation
 
     signal genreSelected(int newIndex)
     signal groupSelected(int newIndex)
@@ -54,28 +55,9 @@ Item {
     }
 
     function focusGroupNavigation(groupIndex: int) {
-        var item = groupsView.itemAtIndex(groupIndex)
+        var item = groupsView.itemAtIndex(groupIndex) as ListItemBlank
         if (item && item.navigation) {
             item.navigation.requestActive()
-        }
-    }
-
-    NavigationPanel {
-        id: navPanel
-        name: "FamilyView"
-        direction: NavigationPanel.Vertical
-        enabled: root.enabled && root.visible
-
-        onNavigationEvent: function(event) {
-            if (event.type === NavigationEvent.AboutActive) {
-                for (var i = 0; i < groupsView.count; ++i) {
-                    var item = groupsView.itemAtIndex(i)
-                    if (item.isSelected) {
-                        event.setData("controlIndex", [item.navigation.row, item.navigation.column])
-                        return
-                    }
-                }
-            }
         }
     }
 
@@ -98,7 +80,7 @@ Item {
         anchors.right: parent.right
 
         navigation.name: "genreBox"
-        navigation.panel: navPanel
+        navigation.panel: groupsView.navigation
         navigation.row: 1
 
         currentIndex: root.currentGenreIndex
@@ -117,6 +99,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        navigation.name: "FamilyView"
+        accessible.name: titleLabel.text
+
         onModelChanged: {
             groupsView.currentIndex = Qt.binding(() => (root.currentGroupIndex))
         }
@@ -124,14 +109,19 @@ Item {
         delegate: ListItemBlank {
             id: item
 
-            property string groupName: modelData
+            required property string modelData
+            required property int index
 
-            isSelected: groupsView.currentIndex === model.index
+            readonly property string groupName: modelData
 
-            navigation.name: modelData
-            navigation.panel: navPanel
-            navigation.row: 2 + model.index
+            isSelected: groupsView.currentIndex === index
+            hint: itemTitleLabel.truncated ? groupName : ""
+
+            navigation.name: groupName
+            navigation.panel: groupsView.navigation
+            navigation.row: 2 + index
             navigation.accessible.name: itemTitleLabel.text
+            navigation.accessible.row: index
 
             StyledTextLabel {
                 id: itemTitleLabel
@@ -140,11 +130,11 @@ Item {
 
                 font: ui.theme.bodyBoldFont
                 horizontalAlignment: Text.AlignLeft
-                text: groupName
+                text: item.groupName
             }
 
             onClicked: {
-                root.groupSelected(model.index)
+                root.groupSelected(index)
             }
         }
     }

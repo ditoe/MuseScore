@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,10 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_CONVERTER_NOTATIONMETA_H
-#define MU_CONVERTER_NOTATIONMETA_H
 
-#include "notation/inotation.h"
+#pragma once
+
+#include "types/retval.h"
+
+#include "notation/inotation_fwd.h"
 
 namespace mu::engraving {
 class Score;
@@ -33,7 +35,9 @@ namespace mu::converter {
 class NotationMeta
 {
 public:
-    static RetVal<std::string> metaJson(notation::INotationPtr notation);
+    static muse::RetVal<std::string> metaJson(notation::INotationPtr notation);
+
+    static QJsonArray tracksJsonArray(notation::INotationPtr notation);
 
 private:
     static QString title(const mu::engraving::Score* score);
@@ -47,5 +51,3 @@ private:
     static QJsonObject typeDataJson(mu::engraving::Score* score);
 };
 }
-
-#endif // MU_CONVERTER_NOTATIONMETA_H

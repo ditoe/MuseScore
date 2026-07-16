@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
@@ -14,7 +14,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -48,6 +47,7 @@
       <trackName>Violin I</trackName>
       <Instrument id="violin">
         <longName>Violin I</longName>
+        <shortName>Vln. I</shortName>
         <trackName>Violin</trackName>
         <minPitchP>55</minPitchP>
         <maxPitchP>103</maxPitchP>
@@ -61,6 +61,7 @@
           <string>69</string>
           <string>76</string>
           </StringData>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -129,6 +130,7 @@
       <trackName>Violin II</trackName>
       <Instrument id="violin">
         <longName>Violin II</longName>
+        <shortName>Vln. II</shortName>
         <trackName>Violin</trackName>
         <minPitchP>55</minPitchP>
         <maxPitchP>103</maxPitchP>
@@ -142,6 +144,7 @@
           <string>69</string>
           <string>76</string>
           </StringData>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -211,6 +214,7 @@
       <trackName>Viola</trackName>
       <Instrument id="viola">
         <longName>Viola</longName>
+        <shortName>Vla.</shortName>
         <trackName>Viola</trackName>
         <minPitchP>48</minPitchP>
         <maxPitchP>93</maxPitchP>
@@ -225,6 +229,7 @@
           <string>62</string>
           <string>69</string>
           </StringData>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -293,6 +298,7 @@
       <trackName>Violoncello</trackName>
       <Instrument id="violoncello">
         <longName>Violoncello</longName>
+        <shortName>Vc.</shortName>
         <trackName>Violoncello</trackName>
         <minPitchP>36</minPitchP>
         <maxPitchP>90</maxPitchP>
@@ -307,6 +313,7 @@
           <string>50</string>
           <string>57</string>
           </StringData>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>

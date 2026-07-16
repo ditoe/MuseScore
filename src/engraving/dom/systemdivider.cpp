@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,8 +27,6 @@
 #include "score.h"
 #include "system.h"
 
-#include "log.h"
-
 using namespace mu;
 using namespace mu::engraving;
 
@@ -37,11 +35,16 @@ namespace mu::engraving {
 //   SystemDivider
 //---------------------------------------------------------
 
+static const ElementStyle dividerStyle {
+    { Sid::dividerLeftSize, Pid::SYMBOLS_SIZE }, // left or right is decided later
+    { Sid::musicalSymbolFont, Pid::SCORE_FONT }
+};
+
 SystemDivider::SystemDivider(System* parent)
-    : Symbol(ElementType::SYSTEM_DIVIDER, parent, ElementFlag::SYSTEM | ElementFlag::NOT_SELECTABLE)
+    : Symbol(ElementType::SYSTEM_DIVIDER, parent, ElementFlag::SYSTEM | ElementFlag::MOVABLE)
 {
     // default value, but not valid until setDividerType()
-    m_dividerType = SystemDivider::Type::LEFT;
+    m_dividerType = SystemDividerType::LEFT;
     m_sym = SymId::systemDivider;
 }
 
@@ -59,23 +62,87 @@ SystemDivider::SystemDivider(const SystemDivider& sd)
 //   setDividerType
 //---------------------------------------------------------
 
-void SystemDivider::setDividerType(SystemDivider::Type v)
+void SystemDivider::setDividerType(SystemDividerType v)
 {
     m_dividerType = v;
-    if (v == SystemDivider::Type::LEFT) {
-        setOffset(PointF(style().styleD(Sid::dividerLeftX), style().styleD(Sid::dividerLeftY)));
+
+    if (v == SystemDividerType::LEFT) {
+        setSym(SymNames::symIdByName(style().styleSt(Sid::dividerLeftSym)));
     } else {
-        setOffset(PointF(style().styleD(Sid::dividerRightX), style().styleD(Sid::dividerRightY)));
+        setSym(SymNames::symIdByName(style().styleSt(Sid::dividerRightSym)));
     }
+
+    initElementStyle(&dividerStyle);
+}
+
+void SystemDivider::styleChanged()
+{
+    if (m_dividerType == SystemDividerType::LEFT) {
+        setSym(SymNames::symIdByName(style().styleSt(Sid::dividerLeftSym)));
+    } else {
+        setSym(SymNames::symIdByName(style().styleSt(Sid::dividerRightSym)));
+    }
+
+    if (isStyled(Pid::SYMBOLS_SIZE)) {
+        m_symbolsSize = style().styleD(getPropertyStyle(Pid::SYMBOLS_SIZE));
+    }
+
+    Symbol::styleChanged();
+}
+
+Sid SystemDivider::getPropertyStyle(Pid id) const
+{
+    if (id == Pid::SYMBOLS_SIZE) {
+        return m_dividerType == SystemDividerType::LEFT ? Sid::dividerLeftSize : Sid::dividerRightSize;
+    }
+
+    return Symbol::getPropertyStyle(id);
+}
+
+std::vector<LineF> SystemDivider::dragAnchorLines() const
+{
+    std::vector<LineF> result;
+
+    const System* system = toSystem(parentItem());
+    IF_ASSERT_FAILED(system) {
+        return result;
+    }
+
+    RectF systemBBox = system->canvasBoundingRect();
+    PointF p1 =  PointF(m_dividerType == SystemDividerType::LEFT
+                        ? systemBBox.left() + system->leftMargin() : systemBBox.right(), systemBBox.bottom());
+
+    RectF thisBBox = canvasBoundingRect();
+    PointF p2 = 0.5 * (thisBBox.topLeft() + thisBBox.bottomRight());
+
+    result.push_back(LineF(p1, p2));
+
+    return result;
+}
+
+void SystemDivider::reset()
+{
+    Symbol::reset();
+    setGenerated(true);
 }
 
 //---------------------------------------------------------
 //   drag
 //---------------------------------------------------------
 
-mu::RectF SystemDivider::drag(EditData& ed)
+RectF SystemDivider::drag(EditData& ed)
 {
     setGenerated(false);
     return Symbol::drag(ed);
+}
+
+PropertyValue SystemDivider::propertyDefault(Pid id) const
+{
+    switch (id) {
+    case Pid::SYMBOLS_SIZE:
+        return style().styleD(m_dividerType == SystemDividerType::LEFT ? Sid::dividerLeftSize : Sid::dividerRightSize);
+    default:
+        return Symbol::propertyDefault(id);
+    }
 }
 } // namespace mu::engraving

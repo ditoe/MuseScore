@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __VOLTA_H__
-#define __VOLTA_H__
+#ifndef MU_ENGRAVING_VOLTA_H
+#define MU_ENGRAVING_VOLTA_H
 
 #include "textlinebase.h"
 
@@ -47,7 +47,7 @@ public:
 
     Volta* volta() const { return (Volta*)spanner(); }
 
-    EngravingItem* propertyDelegate(Pid) override;
+    EngravingObject* propertyDelegate(Pid) const override;
 };
 
 //---------------------------------------------------------
@@ -59,8 +59,6 @@ class Volta final : public TextLineBase
 {
     OBJECT_ALLOCATOR(engraving, Volta)
     DECLARE_CLASSOF(ElementType::VOLTA)
-
-    std::vector<int> _endings;
 
 public:
     enum class Type : char {
@@ -75,12 +73,13 @@ public:
 
     LineSegment* createLineSegment(System* parent) override;
 
-    void setVelocity() const;
+    bool allowTimeAnchor() const override { return false; }
+
     void setChannel() const;
     void setTempo() const;
 
-    std::vector<int> endings() const { return _endings; }
-    std::vector<int>& endings() { return _endings; }
+    std::vector<int> endings() const { return m_endings; }
+    std::vector<int>& endings() { return m_endings; }
     void setEndings(const std::vector<int>& l);
     void setText(const String& s);
     String text() const;
@@ -91,16 +90,26 @@ public:
     void setVoltaType(Volta::Type);       // deprecated
     Type voltaType() const;               // deprecated
 
+    bool isFirstVolta() const { return m_endings.size() == 1 && hasEnding(1); }
+
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
 
     String accessibleInfo() const override;
+
+    PointF linePos(Grip grip, System** system) const override;
+
+protected:
+    Sid defaultPosSid() const override;
+
+private:
+    std::vector<int> m_endings;
 };
 } // namespace mu::engraving
 
 #ifndef NO_QT_SUPPORT
-Q_DECLARE_METATYPE(mu::engraving::Volta::Type);
+Q_DECLARE_METATYPE(mu::engraving::Volta::Type)
 #endif
 
 #endif

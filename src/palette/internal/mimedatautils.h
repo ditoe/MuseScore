@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,6 +24,8 @@
 
 #include "io/buffer.h"
 
+#include "global/modularity/ioc.h"
+
 #include "engraving/rw/xmlreader.h"
 #include "engraving/rw/xmlwriter.h"
 
@@ -31,22 +33,22 @@ namespace mu::palette {
 template<class T>
 QByteArray toMimeData(T* t)
 {
-    io::Buffer buffer;
-    buffer.open(io::IODevice::WriteOnly);
+    auto buffer = muse::io::Buffer::opened(muse::io::IODevice::WriteOnly);
     engraving::XmlWriter xml(&buffer);
     t->write(xml, true);
+    xml.flush();
     buffer.close();
     return buffer.data().toQByteArray();
 }
 
 template<class T>
-std::shared_ptr<T> fromMimeData(const QByteArray& data, const AsciiStringView& tagName)
+std::shared_ptr<T> fromMimeData(const QByteArray& data, const muse::AsciiStringView& tagName, const muse::modularity::ContextPtr& iocCtx)
 {
     engraving::XmlReader e(data);
     while (e.readNextStartElement()) {
-        const AsciiStringView tag(e.name());
+        const muse::AsciiStringView tag(e.name());
         if (tag == tagName) {
-            std::shared_ptr<T> t(new T);
+            std::shared_ptr<T> t(new T(iocCtx));
             if (!t->read(e, true)) {
                 return nullptr;
             }

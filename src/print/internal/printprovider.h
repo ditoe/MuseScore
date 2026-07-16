@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,19 +19,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_PRINT_PRINTPROVIDER_H
-#define MU_PRINT_PRINTPROVIDER_H
+#pragma once
 
-#include "../iprintprovider.h"
+#include "print/iprintprovider.h"
+
+#include "global/modularity/ioc.h"
+#include "ui/imainwindow.h"
 
 namespace mu::print {
-class PrintProvider : public IPrintProvider
+class PrintProvider : public IPrintProvider, public muse::Contextable
 {
-public:
-    PrintProvider() = default;
+    muse::ContextInject<muse::ui::IMainWindow> mainWindow{ this };
 
-    Ret printNotation(notation::INotationPtr notation) override;
+public:
+    explicit PrintProvider(const muse::modularity::ContextPtr&);
+
+    muse::Ret printNotation(notation::INotationPtr notation) override;
 };
 }
-
-#endif // MU_PRINT_PRINTPROVIDER_H

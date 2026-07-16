@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,17 +21,21 @@
  */
 #include "recentfilescontroller.h"
 
-#include <QtConcurrent>
+#include "global/async/async.h"
+#include "global/defer.h"
+#include "global/serialization/json.h"
 
-#include "async/async.h"
-#include "defer.h"
+#include "multiwindows/resourcelockguard.h"
 
-#include "serialization/json.h"
+#include "app_config.h"
 
-#include "multiinstances/resourcelockguard.h"
+#ifdef QT_CONCURRENT_SUPPORTED
+#include "global/concurrency/concurrent.h"
+#endif
 
 using namespace mu::project;
-using namespace mu::async;
+using namespace muse;
+using namespace muse::async;
 
 static const std::string RECENT_FILES_RESOURCE_NAME("RECENT_FILES");
 
@@ -41,7 +45,7 @@ void RecentFilesController::init()
 
     m_dirty = true;
 
-    multiInstancesProvider()->resourceChanged().onReceive(this, [this](const std::string& resourceName) {
+    multiwindowsProvider()->resourceChanged().onReceive(this, [this](const std::string& resourceName) {
         if (resourceName == RECENT_FILES_RESOURCE_NAME) {
             if (!m_isSaving) {
                 m_dirty = true;
@@ -52,7 +56,7 @@ void RecentFilesController::init()
     });
 }
 
-const ProjectFilesList& RecentFilesController::recentFilesList() const
+const RecentFilesList& RecentFilesController::recentFilesList() const
 {
     TRACEFUNC;
 
@@ -70,7 +74,7 @@ Notification RecentFilesController::recentFilesListChanged() const
     return m_recentFilesListChanged;
 }
 
-void RecentFilesController::prependRecentFile(const ProjectFile& newFile)
+void RecentFilesController::prependRecentFile(const RecentFile& newFile)
 {
     if (!newFile.isValid()) {
         return;
@@ -78,11 +82,11 @@ void RecentFilesController::prependRecentFile(const ProjectFile& newFile)
 
     TRACEFUNC;
 
-    ProjectFilesList newList;
+    RecentFilesList newList;
     newList.reserve(m_recentFilesList.size() + 1);
     newList.push_back(newFile);
 
-    for (const ProjectFile& file : m_recentFilesList) {
+    for (const RecentFile& file : m_recentFilesList) {
         if (file.path != newFile.path && fileSystem()->exists(file.path)) {
             newList.push_back(file);
         }
@@ -93,12 +97,12 @@ void RecentFilesController::prependRecentFile(const ProjectFile& newFile)
     prependPlatformRecentFile(newFile.path);
 }
 
-void RecentFilesController::moveRecentFile(const io::path_t& before, const ProjectFile& after)
+void RecentFilesController::moveRecentFile(const muse::io::path_t& before, const RecentFile& after)
 {
     bool moved = false;
-    ProjectFilesList newList = m_recentFilesList;
+    RecentFilesList newList = m_recentFilesList;
 
-    for (ProjectFile& file : newList) {
+    for (RecentFile& file : newList) {
         if (file.path == before) {
             file = after;
             moved = true;
@@ -118,13 +122,13 @@ void RecentFilesController::clearRecentFiles()
     clearPlatformRecentFiles();
 }
 
-void RecentFilesController::prependPlatformRecentFile(const io::path_t&) {}
+void RecentFilesController::prependPlatformRecentFile(const muse::io::path_t&) {}
 
 void RecentFilesController::clearPlatformRecentFiles() {}
 
 void RecentFilesController::loadRecentFilesList()
 {
-    ProjectFilesList newList;
+    RecentFilesList newList;
 
     DEFER {
         setRecentFilesList(newList, false);
@@ -132,7 +136,7 @@ void RecentFilesController::loadRecentFilesList()
 
     RetVal<ByteArray> data;
     {
-        mi::ReadResourceLockGuard lock_guard(multiInstancesProvider(), RECENT_FILES_RESOURCE_NAME);
+        mi::ReadResourceLockGuard lock_guard(multiwindowsProvider(), RECENT_FILES_RESOURCE_NAME);
         data = fileSystem()->readFile(configuration()->recentFilesJsonPath());
     }
 
@@ -160,13 +164,13 @@ void RecentFilesController::loadRecentFilesList()
         const JsonValue val = array.at(i);
 
         if (val.isString()) {
-            newList.emplace_back(io::path_t(val.toStdString()));
+            newList.emplace_back(muse::io::path_t(val.toStdString()));
         } else if (val.isObject()) {
             const JsonObject obj = val.toObject();
-            ProjectFile file;
+            RecentFile file;
             file.path = obj["path"].toStdString();
             file.displayNameOverride = QString::fromStdString(obj["displayName"].toStdString());
-            newList.push_back(file);
+            newList.emplace_back(std::move(file));
         } else {
             continue;
         }
@@ -177,10 +181,10 @@ void RecentFilesController::removeNonexistentFiles()
 {
     bool removed = false;
 
-    ProjectFilesList newList;
+    RecentFilesList newList;
     newList.reserve(m_recentFilesList.size());
 
-    for (const ProjectFile& file : m_recentFilesList) {
+    for (const RecentFile& file : m_recentFilesList) {
         if (fileSystem()->exists(file.path)) {
             newList.push_back(file);
         } else {
@@ -199,7 +203,7 @@ void RecentFilesController::removeNonexistentFiles()
     }
 }
 
-void RecentFilesController::setRecentFilesList(const ProjectFilesList& list, bool saveAndNotify)
+void RecentFilesController::setRecentFilesList(const RecentFilesList& list, bool saveAndNotify)
 {
     if (m_recentFilesList == list) {
         return;
@@ -227,7 +231,7 @@ void RecentFilesController::saveRecentFilesList()
     };
 
     JsonArray jsonArray;
-    for (const ProjectFile& file : m_recentFilesList) {
+    for (const RecentFile& file : m_recentFilesList) {
         if (!file.displayNameOverride.isEmpty()) {
             JsonObject obj;
             obj["path"] = file.path.toStdString();
@@ -240,21 +244,23 @@ void RecentFilesController::saveRecentFilesList()
 
     JsonDocument json(jsonArray);
 
-    mi::WriteResourceLockGuard resource_guard(multiInstancesProvider(), RECENT_FILES_RESOURCE_NAME);
-    Ret ret = fileSystem()->writeFile(configuration()->recentFilesJsonPath(), json.toJson());
-    if (!ret) {
-        LOGE() << "Failed to save recent files list: " << ret.toString();
+    {
+        mi::WriteResourceLockGuard resource_guard(multiwindowsProvider(), RECENT_FILES_RESOURCE_NAME);
+        Ret ret = fileSystem()->writeFile(configuration()->recentFilesJsonPath(), json.toJson());
+        if (!ret) {
+            LOGE() << "Failed to save recent files list: " << ret.toString();
+        }
     }
 }
 
-Promise<QPixmap> RecentFilesController::thumbnail(const io::path_t& filePath) const
+Promise<QPixmap> RecentFilesController::thumbnail(const muse::io::path_t& filePath) const
 {
     return Promise<QPixmap>([this, filePath](auto resolve, auto reject) {
         if (filePath.empty()) {
             return reject(int(Ret::Code::UnknownError), "Invalid file specified");
         }
-
-        QtConcurrent::run([this, filePath, resolve, reject]() {
+#ifdef QT_CONCURRENT_SUPPORTED
+        Concurrent::run([this, filePath, resolve, reject]() {
             std::lock_guard lock(m_thumbnailCacheMutex);
 
             DateTime lastModified = fileSystem()->lastModified(filePath);
@@ -267,31 +273,37 @@ Promise<QPixmap> RecentFilesController::thumbnail(const io::path_t& filePath) co
                 }
             }
 
-            RetVal<ProjectMeta> rv = mscMetaReader()->readMeta(filePath);
-            if (!rv.ret) {
+            RetVal<QPixmap> thumbnail = mscMetaReader()->readThumbnail(filePath);
+            if (!thumbnail.ret) {
                 m_thumbnailCache[filePath] = CachedThumbnail();
-                (void)reject(rv.ret.code(), rv.ret.toString());
+                (void)reject(thumbnail.ret.code(), thumbnail.ret.toString());
             } else {
-                m_thumbnailCache[filePath] = CachedThumbnail { rv.val.thumbnail, lastModified };
-                (void)resolve(rv.val.thumbnail);
+                m_thumbnailCache[filePath] = CachedThumbnail { thumbnail.val, lastModified };
+                (void)resolve(thumbnail.val);
             }
         });
+#else
+        UNUSED(resolve);
+        UNUSED(this);
+        return reject(int(Ret::Code::NotSupported), "NotSupported");
+#endif
 
         return Promise<QPixmap>::Result::unchecked();
-    }, Promise<QPixmap>::AsynchronyType::ProvidedByBody);
+    }, PromiseType::AsyncByBody);
 }
 
-void RecentFilesController::cleanUpThumbnailCache(const ProjectFilesList& files)
+void RecentFilesController::cleanUpThumbnailCache(const RecentFilesList& files)
 {
-    QtConcurrent::run([this, files] {
+#ifdef QT_CONCURRENT_SUPPORTED
+    Concurrent::run([this, files] {
         std::lock_guard lock(m_thumbnailCacheMutex);
 
         if (files.empty()) {
             m_thumbnailCache.clear();
         } else {
-            std::map<io::path_t, CachedThumbnail> cleanedCache;
+            std::map<muse::io::path_t, CachedThumbnail> cleanedCache;
 
-            for (const ProjectFile& file : files) {
+            for (const RecentFile& file : files) {
                 auto it = m_thumbnailCache.find(file.path);
                 if (it != m_thumbnailCache.cend()) {
                     cleanedCache[file.path] = it->second;
@@ -301,4 +313,7 @@ void RecentFilesController::cleanUpThumbnailCache(const ProjectFilesList& files)
             m_thumbnailCache = cleanedCache;
         }
     });
+#else
+    UNUSED(files);
+#endif
 }

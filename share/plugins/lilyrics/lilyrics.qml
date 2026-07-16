@@ -1,13 +1,15 @@
-import QtQuick 2.1
-//import QtQuick.Layouts 1.0
-import QtQuick.Controls 1.0
+import QtQuick
+import QtQuick.Controls
+
 import MuseScore 3.0
-//import FileIO 3.0
+import Muse.Ui
+import Muse.UiComponents
 
 // Inspired by roblyric, by Robbie Matthews
 
 MuseScore {
-    version: "1.2" // 21 - June - 2022
+    // 06 - September - 2025 // Save lirics if the plugin is closed
+    version: "1.2"
     description: qsTr("Apply lyrics in lilypond format.")
     title: "Lilypond Lyrics"
     categoryCode: "lyrics"
@@ -32,6 +34,13 @@ MuseScore {
     property var onScreenVoice: null
     property var onScreenVerse: null
 
+    // Use Settings from MuseScore (Qt6 compatible)
+    Settings {
+        id: lyricsSettings
+        // The lyrics are saved for each score
+        // The key is the path of the file (curScore.filePath)
+    }
+
     onRun: {}
 
     // no funciona en 3.2
@@ -47,7 +56,7 @@ MuseScore {
 
         anchors.fill: parent
 
-        Label {
+        StyledTextLabel {
             id: textLabel
             wrapMode: Text.WordWrap
             text: qsTr("Example: Ky -- _ ri -- e~e -- lei -- son __ _ _")
@@ -57,8 +66,8 @@ MuseScore {
             anchors.topMargin: 10
         }
 
-        TextArea {
-            id:textLily
+        Rectangle {
+
             anchors.top: textLabel.bottom
             anchors.left: window.left
             anchors.right: buttonDump.left
@@ -67,18 +76,50 @@ MuseScore {
             anchors.bottomMargin: 10
             anchors.leftMargin: 10
             anchors.rightMargin: 5
-            width:parent.width
-            wrapMode: TextEdit.WrapAnywhere
-            textFormat: TextEdit.PlainText
-            text: ""
+
+            color: ui.theme.textFieldColor
+            border.color: ui.theme.strokeColor
+            border.width: Math.max(ui.theme.borderWidth, 1)
+            radius: 3
+
+            ScrollView {
+                id: view
+
+                anchors.fill: parent
+                //! Bad work for Mac
+                //ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+
+                TextArea {
+                    id:textLily
+                    width: parent.width
+                    height: Math.max(textLily.implicitHeight, view.height)
+                    anchors.margins: 8
+                    wrapMode: TextEdit.WrapAnywhere
+                    textFormat: TextEdit.PlainText
+                    selectByMouse: true
+
+                    // Restore the lyrics for the current opened score
+                    Component.onCompleted: {
+                        if (curScore && curScore.filePath)
+                            textLily.text = lyricsSettings.value(curScore.filePath, "")
+                        else
+                            textLily.text = ""
+                    }
+
+                    onTextChanged: {
+                        if (curScore && curScore.filePath)
+                            lyricsSettings.setValue(curScore.filePath, text)
+                    }
+                }
+            }
         }
 
-    /******************************************
-    **************** Buttons ******************
-    ******************************************/
+        /******************************************
+        **************** Buttons ******************
+        ******************************************/
 
         // PASTE
-        Button {
+        FlatButton {
             id : buttonPaste
             text: qsTr("Paste")
             anchors.right: window.right
@@ -87,7 +128,7 @@ MuseScore {
             anchors.bottomMargin: 5
             anchors.rightMargin: 10
             height: 50
-            tooltip: qsTr("Copy the text to the score");
+            toolTipTitle: qsTr("Copy the text to the score");
             onClicked: {
                 curScore.startCmd();
                 pasteGlobal();
@@ -96,7 +137,7 @@ MuseScore {
         }
 
         // DUMP
-        Button {
+        FlatButton {
             id : buttonDump
             text: qsTr("Dump")
             anchors.right: window.right
@@ -105,7 +146,7 @@ MuseScore {
             anchors.bottomMargin: 5
             anchors.leftMargin: 10
             anchors.rightMargin: 10
-            tooltip: qsTr("Copy the lyrics of the score to the text area");
+            toolTipTitle: qsTr("Copy the lyrics of the score to the text area");
             onClicked: {
                 //curScore.startCmd();
                 dumpLyrics();
@@ -114,7 +155,7 @@ MuseScore {
         }
 
         // MERGE
-        Button {
+        FlatButton {
             id : buttonMerge
             text: qsTr("Merge")
             anchors.right: window.right
@@ -122,7 +163,7 @@ MuseScore {
             anchors.topMargin: 5
             anchors.bottomMargin: 5
             anchors.rightMargin: 10
-            tooltip: qsTr("Combines several lyrics sections into one");
+            toolTipTitle: qsTr("Combines several lyrics sections into one");
             onClicked: {
                 //curScore.startCmd();
                 mergeLyrics();
@@ -131,7 +172,7 @@ MuseScore {
         }
 
         // CLEAN
-        Button {
+        FlatButton {
             id : buttonClean
             text: qsTr("Clean")
             anchors.right: window.right
@@ -139,7 +180,7 @@ MuseScore {
             anchors.topMargin: 5
             anchors.bottomMargin: 5
             anchors.rightMargin: 10
-            tooltip: qsTr("Delete comments and lilypond commands");
+            toolTipTitle: qsTr("Delete comments and lilypond commands");
             onClicked: {
                 //curScore.startCmd();
                 cleanLyrics();
@@ -148,7 +189,7 @@ MuseScore {
         }
 
         // UNTIE
-        Button {
+        FlatButton {
             id : buttonTies
             text: qsTr("Untie")
             anchors.right: window.right
@@ -156,7 +197,7 @@ MuseScore {
             anchors.topMargin: 20
             anchors.bottomMargin: 5
             anchors.rightMargin: 10
-            tooltip: qsTr("Transform tied notes into dotted notes");
+            toolTipTitle: qsTr("Transform tied notes into dotted notes");
             onClicked: {
                 curScore.startCmd();
                 var track=(spinStaff.value-1)*4+spinVoice.value-1;
@@ -166,7 +207,7 @@ MuseScore {
         }
 
         // UNTIE ALL
-        Button {
+        FlatButton {
             id : buttonTiesAll
             text: qsTr("Untie all")
             anchors.right: window.right
@@ -174,7 +215,7 @@ MuseScore {
             anchors.topMargin: 2
             anchors.bottomMargin: 5
             anchors.rightMargin: 10
-            tooltip: qsTr("Transform tied notes into dotted notes in all the voices");
+            toolTipTitle: qsTr("Transform tied notes into dotted notes in all the voices");
             onClicked: {
                 curScore.startCmd();
                 console.log(curScore.ntracks);
@@ -187,7 +228,7 @@ MuseScore {
         }
 
         // CONDENSE
-        Button {
+        FlatButton {
             id : buttonCondense
             text: qsTr("Condense")
             anchors.right: window.right
@@ -195,7 +236,7 @@ MuseScore {
             anchors.topMargin: 20
             anchors.bottomMargin: 0
             anchors.rightMargin: 10
-            tooltip: qsTr("Convert the text to a more readable format.\n(it is necessary to expand it again in order to paste it into the score)");
+            toolTipTitle: qsTr("Convert the text to a more readable format.\n(it is necessary to expand it again in order to paste it into the score)");
             onClicked: {
                 //curScore.startCmd();
                 var s=textLily.text;
@@ -207,7 +248,7 @@ MuseScore {
         }
 
         // EXPAND
-        Button {
+        FlatButton {
             id : buttonExpand
             text: qsTr("Expand")
             anchors.right: window.right
@@ -215,7 +256,7 @@ MuseScore {
             anchors.topMargin: 2
             anchors.bottomMargin: 5
             anchors.rightMargin: 10
-            tooltip: qsTr("Convert the text back to lilypond format");
+            toolTipTitle: qsTr("Convert the text back to lilypond format");
             onClicked: {
                 //curScore.startCmd();
                 var s=textLily.text;
@@ -225,9 +266,8 @@ MuseScore {
             }
         }
 
-
         // CANCEL
-        Button {
+        FlatButton {
             id : buttonCancel
             text: qsTr("Cancel")
             anchors.bottom: window.bottom
@@ -240,18 +280,17 @@ MuseScore {
             }
         }
 
-
-    /******************************************
-    *********** Bottom bar controls ***********
-    ******************************************/
+        /******************************************
+        *********** Bottom bar controls ***********
+        ******************************************/
 
         Row {
             id: bottomBar
 
             spacing: 10
 
-            anchors.left: textLily.left
-            anchors.right: textLily.right
+            anchors.left: window.left
+            anchors.right: window.right
             anchors.bottom: window.bottom
             anchors.margins: 10
 
@@ -260,7 +299,7 @@ MuseScore {
             Row {
                 height: childrenRect.height
 
-                Label {
+                StyledTextLabel {
                     id: labelStaff
 
                     anchors.verticalCenter: spinStaff.verticalCenter
@@ -271,17 +310,17 @@ MuseScore {
                 SpinBox {
                     id : spinStaff
                     width: 40
-                    minimumValue: 1;
-                    maximumValue: Boolean(curScore) ? curScore.ntracks/4 : 0
+                    from: 1;
+                    to: Boolean(curScore) ? curScore.ntracks/4 : 0
                     value: staffSelection();
-                    horizontalAlignment: Text.AlignHCenter
+                    //horizontalAlignment: Text.AlignHCenter
                 }
             }
 
             Row {
                 height: childrenRect.height
 
-                Label {
+                StyledTextLabel {
                     id: labelVoice
 
                     anchors.verticalCenter: spinVoice.verticalCenter
@@ -292,17 +331,17 @@ MuseScore {
                 SpinBox {
                     id : spinVoice
                     width: 40
-                    minimumValue: 1
-                    maximumValue: 4
+                    from: 1
+                    to: 4
                     value: voiceSelection();
-                    horizontalAlignment: Text.AlignHCenter
+                    //horizontalAlignment: Text.AlignHCenter
                 }
             }
 
             Row {
                 height: childrenRect.height
 
-                Label {
+                StyledTextLabel {
                     id: labelVerse
 
                     anchors.verticalCenter: spinVerse.verticalCenter
@@ -313,10 +352,10 @@ MuseScore {
                 SpinBox {
                     id : spinVerse
                     width: 40
-                    minimumValue: 1
-                    maximumValue: 8 // arbitrary
+                    from: 1
+                    to: 8 // arbitrary
                     value: verseSelection();
-                    horizontalAlignment: Text.AlignHCenter
+                    //horizontalAlignment: Text.AlignHCenter
                 }
             }
 
@@ -337,6 +376,8 @@ MuseScore {
 
                 checked: true
                 text: qsTr("Skip ties")
+
+                onClicked: checked = !checked
             }
 
             CheckBox {
@@ -346,16 +387,18 @@ MuseScore {
 
                 checked: true
                 text: qsTr("Extender")
+
+                onClicked: checked = !checked
             }
 
-            Button {
+            FlatButton {
                 id : buttonElision
 
                 anchors.verticalCenter: comboElision.verticalCenter
 
                 text: qsTr("~")
                 width: 20
-                tooltip: qsTr("Character to use in synalepha:\n1: MuseScore elision\n2: Unicode undertie\n3: ASCII underscore");
+                toolTipTitle: qsTr("Character to use in synalepha:\n1: MuseScore elision\n2: Unicode undertie\n3: ASCII underscore");
 
             }
 
@@ -469,7 +512,6 @@ MuseScore {
         textLily.forceActiveFocus();
     }
 
-
     /***************************************
     ************* Big functions ************
     ****************************************/
@@ -577,7 +619,6 @@ MuseScore {
         onScreenVerse=spinVerse.value;
     }
 
-
     function deleteLyrics() {
         var track=(spinStaff.value-1)*4+spinVoice.value-1;
         var verse=spinVerse.value-1;
@@ -616,7 +657,6 @@ MuseScore {
             cursor.next();
         }
     }
-
 
     function pasteLyrics(s) {
         var skipTies=checkTie.checked;
@@ -768,8 +808,6 @@ MuseScore {
         curScore.selection.clear();
     }
 
-
-
     /********** Functions on condensed format **********/
 
     function condenseLyrics(s) {
@@ -843,5 +881,8 @@ MuseScore {
         return s;
     }
 
+    Component.onCompleted: {
+        // Restore last lyrics
+        textLily.text = lyricsSettings.lastLyrics
+    }
 }
-

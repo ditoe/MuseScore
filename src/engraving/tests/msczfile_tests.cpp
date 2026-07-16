@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,11 +24,12 @@
 #include <QByteArray>
 
 #include "io/buffer.h"
-#include "infrastructure/mscwriter.h"
-#include "infrastructure/mscreader.h"
 
-using namespace mu;
-using namespace mu::io;
+#include "engraving/infrastructure/mscreader.h"
+#include "engraving/infrastructure/mscwriter.h"
+
+using namespace muse;
+using namespace muse::io;
 using namespace mu::engraving;
 
 class Engraving_MsczFileTests : public ::testing::Test

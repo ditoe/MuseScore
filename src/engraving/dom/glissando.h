@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,21 +20,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __GLISSANDO_H__
-#define __GLISSANDO_H__
+#pragma once
 
 #include "engravingitem.h"
 #include "line.h"
 #include "property.h"
-#include "types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
-// the amount of white space to leave before a system-initial chord with glissando
-static const double GLISS_STARTOFSYSTEM_WIDTH = 4;           // in sp
-
 class Glissando;
 class Note;
-enum class GlissandoType;
+enum class GlissandoType : unsigned char;
 
 //---------------------------------------------------------
 //   @@ GlissandoSegment
@@ -52,7 +48,7 @@ public:
 
     GlissandoSegment* clone() const override { return new GlissandoSegment(*this); }
 
-    EngravingItem* propertyDelegate(Pid) override;
+    EngravingObject* propertyDelegate(Pid) const override;
 };
 
 //---------------------------------------------------------
@@ -71,7 +67,6 @@ class Glissando final : public SLine
     M_PROPERTY(String, fontFace, setFontFace)
     M_PROPERTY(double, fontSize, setFontSize)
     M_PROPERTY(bool, showText, setShowText)
-    M_PROPERTY(bool, playGlissando, setPlayGlissando)
     M_PROPERTY(FontStyle, fontStyle, setFontStyle)
     M_PROPERTY(int, easeIn, setEaseIn)
     M_PROPERTY(int, easeOut, setEaseOut)
@@ -84,23 +79,32 @@ public:
     Glissando(const Glissando&);
 
     static Note* guessInitialNote(Chord* chord);
-    static Note* guessFinalNote(Chord* chord, Note* startNote);
 
-    const TranslatableString& glissandoTypeName() const;
+    std::optional<bool> isHarpGliss() const { return m_isHarpGliss; }
+    void setIsHarpGliss(std::optional<bool> v) { m_isHarpGliss = v; }
 
     // overridden inherited methods
     Glissando* clone() const override { return new Glissando(*this); }
 
     LineSegment* createLineSegment(System* parent) override;
 
+    bool allowTimeAnchor() const override { return false; }
+
     // property/style methods
+    Sid getPropertyStyle(Pid id) const override;
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
-    void addLineAttachPoints();
+
+    TranslatableString subtypeUserName() const override;
 
     static bool pitchSteps(const Spanner* spanner, std::vector<int>& pitchOffsets);
+
+protected:
+    bool isInSpannerMap() const override { return false; }
+
+private:
+
+    std::optional<bool> m_isHarpGliss = std::nullopt;
 };
 } // namespace mu::engraving
-
-#endif

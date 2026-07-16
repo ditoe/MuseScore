@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,13 +23,23 @@
 
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QWindow>
+
+#include "draw/painter.h"
+
+#include "notation/inotationpainting.h"
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::print;
-using namespace mu::draw;
+using namespace muse;
+using namespace muse::draw;
 using namespace mu::notation;
+
+namespace mu::print {
+PrintProvider::PrintProvider(const kors::modularity::ContextPtr& iocCtx)
+    : Contextable(iocCtx)
+{
+}
 
 Ret PrintProvider::printNotation(INotationPtr notation)
 {
@@ -37,7 +47,7 @@ Ret PrintProvider::printNotation(INotationPtr notation)
         return make_ret(Ret::Code::InternalError);
     }
 
-    auto painting = notation->painting();
+    INotationPaintingPtr painting = notation->painting();
 
     SizeF pageSizeInch = painting->pageSizeInch();
     QPrinter printerDev(QPrinter::HighResolution);
@@ -45,20 +55,25 @@ Ret PrintProvider::printNotation(INotationPtr notation)
     printerDev.setPageSize(ps);
     printerDev.setPageOrientation(pageSizeInch.width() > pageSizeInch.height() ? QPageLayout::Landscape : QPageLayout::Portrait);
 
-    //printerDev.setCreator("MuseScore Version: " VERSION);
+    //printerDev.setCreator("MuseScore Studio Version: " VERSION);
     printerDev.setFullPage(true);
     if (!printerDev.setPageMargins(QMarginsF())) {
-        LOGD() << "unable to clear printer margins";
+        LOGW() << "unable to clear printer margins";
     }
 
-    printerDev.setColorMode(QPrinter::Color);
     printerDev.setDocName(notation->projectWorkTitleAndPartName());
     printerDev.setOutputFormat(QPrinter::NativeFormat);
     printerDev.setFromTo(1, painting->pageCount());
 
-    QPrintDialog pd(&printerDev, 0);
+    QPrintDialog pd(&printerDev);
+    pd.setMinMax(1, painting->pageCount());
+
+    // HACK: ensure we have a valid windowHandle to which we can set a transient parent to
+    pd.winId();
+    // the print dialog needs a valid parent window to show the modern print dialog on Windows 11
+    pd.windowHandle()->setTransientParent(mainWindow()->qWindow());
     if (!pd.exec()) {
-        return mu::make_ret(Ret::Code::Cancel);
+        return muse::make_ret(Ret::Code::Cancel);
     }
 
     Painter painter(&printerDev, "print");
@@ -75,5 +90,6 @@ Ret PrintProvider::printNotation(INotationPtr notation)
 
     painter.endDraw();
 
-    return mu::make_ret(Ret::Code::Ok);
+    return muse::make_ok();
+}
 }

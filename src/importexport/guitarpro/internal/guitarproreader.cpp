@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,18 +23,28 @@
 
 #include "io/file.h"
 
+#include "engraving/dom/excerpt.h"
 #include "engraving/dom/masterscore.h"
+#include "engraving/editing/editstyle.h"
+#include "engraving/editing/transaction/transaction.h"
 #include "engraving/engravingerrors.h"
 
 namespace mu::iex::guitarpro {
-extern mu::engraving::Err importGTP(mu::engraving::MasterScore*, mu::io::IODevice* io, bool createLinkedTabForce = false,
+extern mu::engraving::Err importGTP(mu::engraving::MasterScore*, muse::io::IODevice* io, const muse::modularity::ContextPtr& iocCtx,
                                     bool experimental = false);
 
-mu::Ret GuitarProReader::read(mu::engraving::MasterScore* score, const io::path_t& path, const Options&)
+muse::Ret GuitarProReader::read(mu::engraving::MasterScore* score, const muse::io::path_t& path, const Options&)
 {
-    mu::io::File file(path);
-    mu::engraving::Err err = importGTP(score, &file, guitarProConfiguration()->linkedTabStaffCreated(),
-                                       guitarProConfiguration()->experimental());
+    muse::io::File file(path);
+    mu::engraving::Err err = importGTP(score, &file, iocContext(), guitarProConfiguration()->experimental());
+
+    if (guitarProConfiguration()->linkedTabStaffCreated()) {
+        engraving::Excerpt::createLinkedTabs(score);
+    }
+
+    muse::io::File styleFile(":/engraving/styles/gp-style.mss");
+    mu::engraving::EditStyle::loadStyle(score->transactionManager()->currentOrDummyTransaction(), score, styleFile);
+
     return mu::engraving::make_ret(err, path);
 }
 } // namespace mu::iex::guitarpro

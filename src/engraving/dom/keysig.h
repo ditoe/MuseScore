@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __KEYSIG_H__
-#define __KEYSIG_H__
+#pragma once
 
 #include "key.h"
 #include "engravingitem.h"
@@ -29,38 +28,31 @@
 namespace mu::engraving {
 class Factory;
 class Segment;
-
-//---------------------------------------------------------------------------------------
-//   @@ KeySig
-///    The KeySig class represents a Key Signature on a staff
-//
-//   @P showCourtesy  bool  show courtesy key signature for this sig if appropriate
-//---------------------------------------------------------------------------------------
+class Transaction;
 
 class KeySig final : public EngravingItem
 {
     OBJECT_ALLOCATOR(engraving, KeySig)
     DECLARE_CLASSOF(ElementType::KEYSIG)
 
+    M_PROPERTY2(bool, isCourtesy, setIsCourtesy, false)
+
 public:
 
     KeySig* clone() const override { return new KeySig(*this); }
 
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     double mag() const override;
 
-    //@ sets the key of the key signature (concert key and transposing key)
-    void setKey(Key cKey, Key tKey);
-    void setKey(Key cKey);
+    void setKey(Key concertKey, Key transposedKey);
+    void setKey(Key concertKey);
 
     Segment* segment() const { return (Segment*)explicitParent(); }
     Measure* measure() const { return explicitParent() ? (Measure*)explicitParent()->explicitParent() : nullptr; }
 
-    //@ returns the key of the actual key signature (from -7 (flats) to +7 (sharps) )
     Key key() const { return m_sig.key(); }
-    //@ returns the key of the concert key signature
     Key concertKey() const { return m_sig.concertKey(); }
     const std::vector<CustDef>& customKeyDefs() const { return m_sig.customKeyDefs(); }
     int degInKey(int degree) const { return m_sig.degInKey(degree); }
@@ -75,11 +67,11 @@ public:
 
     bool showCourtesy() const { return m_showCourtesy; }
     void setShowCourtesy(bool v) { m_showCourtesy = v; }
-    void undoSetShowCourtesy(bool v);
 
     KeyMode mode() const { return m_sig.mode(); }
     void setMode(KeyMode v) { m_sig.setMode(v); }
-    void undoSetMode(KeyMode v);
+
+    PointF staffOffset() const override;
 
     bool hideNaturals() const { return m_hideNaturals; }
     void setHideNaturals(bool hide) { m_hideNaturals = hide; }
@@ -90,15 +82,19 @@ public:
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid id) const override;
+    EngravingObject* propertyDelegate(Pid) const override;
 
     EngravingItem* nextSegmentElement() override;
     EngravingItem* prevSegmentElement() override;
     String accessibleInfo() const override;
 
+    int subtype() const override { return int(key()) + 7; }
+    muse::TranslatableString subtypeUserName() const override;
+
     struct LayoutData : public EngravingItem::LayoutData {
         std::vector<KeySym> keySymbols;
     };
-    DECLARE_LAYOUTDATA_METHODS(KeySig);
+    DECLARE_LAYOUTDATA_METHODS(KeySig)
 
 private:
     friend class Factory;
@@ -112,5 +108,4 @@ private:
     bool m_hideNaturals;       // used in layout to override score style (needed for the Continuous panel)
     KeySigEvent m_sig;
 };
-} // namespace mu::engraving
-#endif
+}

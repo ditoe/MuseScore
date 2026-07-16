@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -18,28 +18,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE iex_audioexport)
+muse_create_module(iex_audioexport)
 
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/audioexportmodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/audioexportmodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/iaudioexportconfiguration.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/audioexportconfiguration.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/audioexportconfiguration.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/abstractaudiowriter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/abstractaudiowriter.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/mp3writer.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/mp3writer.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/wavewriter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/wavewriter.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/oggwriter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/oggwriter.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/flacwriter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/flacwriter.h
-    )
-
-set(MODULE_LINK
-    engraving
-    )
-
-include(SetupModule)
+target_sources(iex_audioexport PRIVATE
+    audioexportmodule.cpp
+    audioexportmodule.h
+    iaudioexportconfiguration.h
+    internal/audioexportconfiguration.cpp
+    internal/audioexportconfiguration.h
+    internal/abstractaudiowriter.cpp
+    internal/abstractaudiowriter.h
+    internal/mp3writer.cpp
+    internal/mp3writer.h
+    internal/wavewriter.cpp
+    internal/wavewriter.h
+    internal/oggwriter.cpp
+    internal/oggwriter.h
+    internal/flacwriter.cpp
+    internal/flacwriter.h
+    internal/aacwriter.cpp
+    internal/aacwriter.h
+)

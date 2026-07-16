@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2024 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -16,25 +16,50 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.16)
+if (APPLE)
+    # Required to prevent issues with incremental builds of MuseScoreQuickLookPreviewExtension
+    # (https://github.com/musescore/MuseScore/pull/33554)
+    cmake_minimum_required(VERSION 3.31)
+else()
+    # Required to use C++20 modules in the future.
+    cmake_minimum_required(VERSION 3.28)
+endif()
 
-cmake_policy(SET CMP0091 OLD) # not set MSVC default args
+project(MuseScoreStudio LANGUAGES C CXX)
 
-project(mscore LANGUAGES C CXX)
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(MUSE_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}/muse" CACHE PATH "Path to muse framework")
+
+set(MUSE_FRAMEWORK_SRC_PATH ${MUSE_FRAMEWORK_PATH}/framework)
 
 set(CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/build
-    ${CMAKE_CURRENT_LIST_DIR}/build/cmake
+    ${CMAKE_CURRENT_LIST_DIR}/buildscripts
+    ${CMAKE_CURRENT_LIST_DIR}/buildscripts/cmake
+    ${MUSE_FRAMEWORK_SRC_PATH}/cmake
+    ${MUSE_FRAMEWORK_PATH}/buildscripts/cmake
     ${CMAKE_MODULE_PATH}
     )
+
+###########################################
+# Check compiler version
+###########################################
+message(STATUS "C:   ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
+message(STATUS "CXX: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+include(CheckCompilerVersion)
+check_compile_version("Clang" 20 "https://github.com/musescore/MuseScore/wiki/Set-up-developer-environment")
+check_compile_version("AppleClang" 21 "https://github.com/musescore/MuseScore/wiki/Set-up-developer-environment")
+check_compile_version("GCC" 14 "https://github.com/musescore/MuseScore/wiki/Set-up-developer-environment")
+check_compile_version("MSVC" 19.40 "https://github.com/musescore/MuseScore/wiki/Set-up-developer-environment")
 
 ###########################################
 # Setup option and build settings
@@ -45,102 +70,134 @@ set(MUSESCORE_BUILD_CONFIGURATION "app" CACHE STRING "Build configuration")
 # Possible MUSESCORE_BUILD_CONFIGURATION values:
 # - app             - for desktop app
 # - app-portable    - for desktop portable app (Windows build for PortableApps.com)
+# - app-web         - for web app (experimental for internal use)
 # - vtest           - for visual tests (for CI)
 # - utest           - for unit tests (for CI)
 
-set(MUSESCORE_BUILD_MODE "dev" CACHE STRING "Build mode")
-# Possible MUSESCORE_BUILD_MODE values:
+set(MUSE_APP_BUILD_MODE "dev" CACHE STRING "Build mode")
+# Possible MUSE_APP_BUILD_MODE values:
 # - dev     - for development/nightly builds
 # - testing - for testing versions (alpha, beta, RC)
 # - release - for stable release builds
 
 set(MUSESCORE_REVISION "" CACHE STRING "Build revision")
 
-# Modules framework (alphabetical order please)
-option(MUE_BUILD_ACCESSIBILITY_MODULE "Build accessibility module" ON)
-option(MUE_BUILD_AUDIO_MODULE "Build audio module" ON)
-option(MUE_ENABLE_AUDIO_JACK "Jack audio support" OFF)
-option(MUE_ENABLE_AUDIO_EXPORT "Enable audio export" ON)
-option(MUE_BUILD_MIDI_MODULE "Build midi module" ON)
-option(MUE_BUILD_MPE_MODULE "Build mpe module" ON)
-option(MUE_BUILD_MUSESAMPLER_MODULE "Build MuseSampler module" ON)
-set(MUSESAMPLER_SRC_PATH "" CACHE PATH "Path to MuseSampler sources")
-option(MUE_BUILD_NETWORK_MODULE "Build network module" ON)
-option(MUE_BUILD_SHORTCUTS_MODULE "Build shortcuts module" ON)
-option(MUE_BUILD_UI_MODULE "Build ui module" ON)
-set(VST3_SDK_VERSION "3.7")
-option(MUE_BUILD_VST_MODULE "Build VST module" OFF)
-set(VST3_SDK_PATH "" CACHE PATH "Path to VST3_SDK. SDK version >= ${VST3_SDK_VERSION} required")
+include(${MUSE_FRAMEWORK_SRC_PATH}/cmake/MuseDeclareOptions.cmake)
 
 # Modules (alphabetical order please)
 option(MUE_BUILD_APPSHELL_MODULE "Build appshell module" ON)
-option(MUE_BUILD_AUTOBOT_MODULE "Build autobot module" ON)
+option(MUE_BUILD_APPSHELL_QML "Build appshell QML" ${MUE_BUILD_APPSHELL_MODULE})
+
 option(MUE_BUILD_BRAILLE_MODULE "Build braille module" ON)
-option(MUE_BUILD_CLOUD_MODULE "Build cloud module" ON)
+option(MUE_BUILD_BRAILLE_QML "Build braille QML" ${MUE_BUILD_BRAILLE_MODULE})
+option(MUE_BUILD_BRAILLE_TESTS "Build braille tests" ${MUE_BUILD_BRAILLE_MODULE})
+
 option(MUE_BUILD_CONVERTER_MODULE "Build converter module" ON)
-option(MUE_BUILD_DIAGNOSTICS_MODULE "Build diagnostic code" ON)
-option(MUE_BUILD_IMPORTEXPORT_MODULE "Build importexport module" ON)
-option(MUE_BUILD_VIDEOEXPORT_MODULE "Build videoexport module" OFF)
-option(MUE_BUILD_IMAGESEXPORT_MODULE "Build imagesexport module" ON)
-option(MUE_BUILD_INSPECTOR_MODULE "Build inspector module" ON)
+option(MUE_BUILD_CONVERTER_TESTS "Build converter tests" ${MUE_BUILD_CONVERTER_MODULE})
+
+option(MUE_BUILD_ENGRAVING_QML "Build engraving QML" ON)
+option(MUE_BUILD_ENGRAVING_TESTS "Build engraving tests" ON)
+option(MUE_BUILD_ENGRAVING_DEVTOOLS "Build engraving devtools" ON)
+option(MUE_BUILD_ENGRAVING_PLAYBACK "Build engraving playback" ON)
+
+# IMPORT EXPORT MODULES
+option(MUE_BUILD_IMPEXP_BB_MODULE "Build importexport bb module" ON)
+option(MUE_BUILD_IMPEXP_BWW_MODULE "Build importexport bww module" ON)
+option(MUE_BUILD_IMPEXP_CAPELLA_MODULE "Build importexport capella module" ON)
+option(MUE_BUILD_IMPEXP_MIDI_MODULE "Build importexport midi module" ON)
+option(MUE_BUILD_IMPEXP_MLSCORE_MODULE "Build importexport mlscore module" OFF)
+option(MUE_BUILD_IMPEXP_MNX_MODULE "Build importexport mnx module" ON)
+option(MUE_BUILD_IMPEXP_MUSEDATA_MODULE "Build importexport musedata module" ON)
+option(MUE_BUILD_IMPEXP_MUSICXML_MODULE "Build importexport musicxml module" ON)
+option(MUE_BUILD_IMPEXP_OVE_MODULE "Build importexport ove module" ON)
+option(MUE_BUILD_IMPEXP_AUDIOEXPORT_MODULE "Build importexport audioexport module" ON)
+option(MUE_BUILD_IMPEXP_IMAGESEXPORT_MODULE "Build importexport imagesexport module" ON)
+option(MUE_BUILD_IMPEXP_GUITARPRO_MODULE "Build importexport guitarpro module" ON)
+option(MUE_BUILD_IMPEXP_MEI_MODULE "Build importexport mei module" ON)
+option(MUE_BUILD_IMPEXP_VIDEOEXPORT_MODULE "Build importexport videoexport module" ON)
+option(MUE_BUILD_IMPEXP_TABLEDIT_MODULE "Build importexport tabledit module" ON)
+option(MUE_BUILD_IMPEXP_LYRICS_MODULE "Build importexport lyrics module" ON)
+
+option(MUE_BUILD_IMPORTEXPORT_TESTS "Build importexport tests" ON)
+
+option(MUE_BUILD_PROPERTIESPANEL_MODULE "Build propertiespanel module" ON)
+option(MUE_BUILD_PROPERTIESPANEL_QML "Build propertiespanel QML" ${MUE_BUILD_PROPERTIESPANEL_MODULE})
+
 option(MUE_BUILD_INSTRUMENTSSCENE_MODULE "Build instruments scene module" ON)
-option(MUE_BUILD_LANGUAGES_MODULE "Build languages module" ON)
-option(MUE_BUILD_LEARN_MODULE "Build learn module" ON)
-set(MUE_LEARN_YOUTUBE_API_KEY "" CACHE STRING "YouTube API key")
-option(MUE_BUILD_MULTIINSTANCES_MODULE "Build multiinstances module" ON)
+option(MUE_BUILD_INSTRUMENTSSCENE_QML "Build instruments scene QML" ${MUE_BUILD_INSTRUMENTSSCENE_MODULE})
+
+option(MUE_BUILD_MUSESOUNDS_MODULE "Build MuseSounds module" ON)
+option(MUE_BUILD_MUSESOUNDS_QML "Build musesounds QML" ${MUE_BUILD_MUSESOUNDS_MODULE})
+
 option(MUE_BUILD_NOTATION_MODULE "Build notation module" ON)
+option(MUE_BUILD_NOTATION_TESTS "Build notation tests" ${MUE_BUILD_NOTATION_MODULE})
+
+option(MUE_BUILD_NOTATIONSCENE_MODULE "Build notation scene module" ON)
+option(MUE_BUILD_NOTATIONSCENE_QML "Build notation scene QML" ${MUE_BUILD_NOTATIONSCENE_MODULE})
+option(MUE_BUILD_NOTATIONSCENE_TESTS "Build notation scene tests" ${MUE_BUILD_NOTATIONSCENE_MODULE})
+
 option(MUE_BUILD_PALETTE_MODULE "Build palette module" ON)
+option(MUE_BUILD_PALETTE_QML "Build palette QML" ${MUE_BUILD_PALETTE_MODULE})
+
 option(MUE_BUILD_PLAYBACK_MODULE "Build playback module" ON)
-option(MUE_BUILD_PLUGINS_MODULE "Build plugins module" ON)
+option(MUE_BUILD_PLAYBACK_QML "Build playback QML" ${MUE_BUILD_PLAYBACK_MODULE})
+option(MUE_BUILD_PLAYBACK_TESTS "Build playback tests" ${MUE_BUILD_PLAYBACK_MODULE})
+
+option(MUE_BUILD_PREFERENCES_MODULE "Build preferences module" ON)
+option(MUE_BUILD_PRINT_MODULE "Build print module" ON)
+
 option(MUE_BUILD_PROJECT_MODULE "Build project module" ON)
-option(MUE_BUILD_UPDATE_MODULE "Build update module" ON)
-option(MUE_BUILD_WORKSPACE_MODULE "Build workspace module" ON)
+option(MUE_BUILD_PROJECT_QML "Build project QML" ${MUE_BUILD_PROJECT_MODULE})
+option(MUE_BUILD_PROJECT_TESTS "Build project tests" ${MUE_BUILD_PROJECT_MODULE})
+
+option(MUE_BUILD_MACOS_INTEGRATION "Build macOS integration module" ON)
 
 # === Setup ===
 option(MUE_DOWNLOAD_SOUNDFONT "Download the latest soundfont version as part of the build process" ON)
 
 # === Pack ===
 option(MUE_RUN_LRELEASE "Generate .qm files" ON)
-option(MUE_ENABLE_FILE_ASSOCIATION "File types association (using for package)" OFF)
 option(MUE_INSTALL_SOUNDFONT "Install sound font" ON)
+option(MUE_RUN_WINDEPLOYQT "Run windeployqt" OFF)
 
 # === Tests ===
-option(MUE_BUILD_UNIT_TESTS "Build unit tests" ON)
 set(MUE_VTEST_MSCORE_REF_BIN "${CMAKE_CURRENT_LIST_DIR}/../MU_ORIGIN/MuseScore/build.debug/install/${INSTALL_SUBDIR}/mscore" CACHE PATH "Path to mscore ref bin")
-option(MUE_BUILD_ASAN "Enable Address Sanitizer" OFF)
-option(MUE_BUILD_CRASHPAD_CLIENT "Build crashpad client" ON)
-set(MUE_CRASH_REPORT_URL "" CACHE STRING "URL where to send crash reports")
-option(MUE_CRASHPAD_HANDLER_PATH "Path to custom crashpad_handler executable (optional)" "")
-
-# === Tools ===
-option(MUE_ENABLE_CUSTOM_ALLOCATOR "Enable custom allocator (used for engraving)" OFF)
+set(APP_WORKSPACE_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/src/app/configs/workspaces.cfg")
+set(APP_BUILTIN_WORKSPACES_DIR "${CMAKE_CURRENT_LIST_DIR}/share/workspaces")
 
 # === Compile ===
-option(MUE_COMPILE_BUILD_64 "Build 64 bit version of editor" ON)
-option(MUE_COMPILE_BUILD_MACOS_APPLE_SILICON "Build for Apple Silicon architecture. Only applicable on Macs with Apple Silicon, and requires suitable Qt version." OFF)
-option(MUE_COMPILE_INSTALL_QTQML_FILES "Whether to bundle qml files along with the installation (relevant on MacOS only)" ON)
-option(MUE_COMPILE_USE_PCH "Use precompiled headers." ON)
-option(MUE_COMPILE_USE_UNITY "Use unity build." ON)
-option(MUE_COMPILE_USE_CCACHE "Try use ccache" ON)
-option(MUE_COMPILE_USE_SHARED_LIBS_IN_DEBUG "Build shared libs if possible in debug" OFF)
-option(MUE_COMPILE_USE_SYSTEM_FREETYPE "Try use system freetype" OFF) # Important for the maintainer of Linux distributions
+option(MUSE_GENERATE_COMPILE_COMMANDS "Generate compile commands" OFF)
+option(MUSE_COMPILE_USE_UNITY "Use unity build" ON)
+option(MUSE_COMPILE_USE_COMPILER_CACHE "Try to use compiler cache: tries ccache, sccache, buildcache in that order. Use COMPILER_CACHE_PROGRAM to specify a specific compiler cache program." ON)
+option(MUSE_COMPILE_USE_SHARED_LIBS_IN_DEBUG "Build shared libs if possible in debug" OFF)
+
+# === System libraries ===
+# Important for the maintainers of Linux distributions
+option(MSS_USE_SYSTEM_MNXDOM "Try use system mnxdom" OFF)
 
 # === Debug ===
-option(MUE_ENABLE_LOGGER_DEBUGLEVEL "Enable logging debug level" ON)
-option(MUE_ENABLE_ACCESSIBILITY_TRACE "Enable accessibility logging" OFF)
-option(MUE_ENABLE_DRAW_TRACE "Trace draw objects" ON)
-option(MUE_DISABLE_UI_MODALITY "Disable dialogs modality for testing purpose" OFF)
-option(MUE_ENABLE_LOAD_QML_FROM_SOURCE "Load qml files from source (not resource)" OFF)
-option(MUE_ENABLE_ENGRAVING_PAINT_DEBUGGER "Enable diagnostic engraving paint debugger" OFF)
+option(MUE_ENABLE_ENGRAVING_RENDER_DEBUG "Enable rendering debug" OFF)
 option(MUE_ENABLE_ENGRAVING_LD_ACCESS "Enable diagnostic engraving check layout data access" OFF)
-option(MUE_ENABLE_STRING_DEBUG_HACK "Enable string debug hack (only clang)" ON)
+option(MUE_ENABLE_ENGRAVING_LD_PASSES "Enable engraving layout by passes" OFF)
 
 ###########################################
 # Setup Configure
 ###########################################
-include(SetupConfigure)
 
-set(THIRDPARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
+# default
+set(QT_ADD_LINGUISTTOOLS ON)
+set(QT_ADD_CONCURRENT ON)
+set(QT_ADD_WEBSOCKET OFF)
+set(QT_QPROCESS_SUPPORTED ON)
+set(QT_CONCURRENT_SUPPORTED ON)
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
+set(MUSE_MODULE_MULTIWINDOWS_SINGLEPROC_MODE ON)
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/SetupConfigure.local.cmake")
+    include(${CMAKE_CURRENT_LIST_DIR}/SetupConfigure.local.cmake)
+else()
+    include(SetupConfigure)
+endif()
 
 ###########################################
 # Setup compiler and build environment
@@ -148,75 +205,65 @@ set(THIRDPARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
 
 include(SetupBuildEnvironment)
 include(GetPlatformInfo)
-if (MUE_COMPILE_USE_CCACHE)
-    include(TryUseCcache)
-endif(MUE_COMPILE_USE_CCACHE)
+
+if (MUSE_COMPILE_USE_COMPILER_CACHE)
+    include(SetupCompilerCache)
+endif(MUSE_COMPILE_USE_COMPILER_CACHE)
 
 
 ###########################################
 # Setup external dependencies
 ###########################################
+set(FETCHCONTENT_QUIET OFF)
+set(FETCHCONTENT_BASE_DIR ${PROJECT_BINARY_DIR}/_deps)
 
-set(QT_MIN_VERSION    "5.15.0")
-include(FindQt5)
-
-if (OS_IS_WIN)
-    set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/dependencies/libx64")
-    link_directories(${DEPENDENCIES_DIR})
-    include_directories(${PROJECT_SOURCE_DIR}/dependencies/include)
-endif(OS_IS_WIN)
-
-include(FindSndFile)
+include(SetupQt6)
 
 if (MUE_DOWNLOAD_SOUNDFONT)
     include(DownloadSoundFont)
 endif(MUE_DOWNLOAD_SOUNDFONT)
 
+set(FETCHCONTENT_BASE_DIR ${PROJECT_BINARY_DIR}/_deps)
+
+include(SetupDependencies)
 
 ###########################################
 # Add source tree
 ###########################################
-
-if (MUE_BUILD_UNIT_TESTS)
+if (MUSE_ENABLE_UNIT_TESTS)
     enable_testing()
     message(STATUS "Enabled testing")
-
-    define_property(TARGET PROPERTY OUTPUT_XML
-        BRIEF_DOCS "List XML files outputted by google test."
-        FULL_DOCS "List XML files outputted by google test."
-    )
-
-    add_subdirectory(thirdparty/googletest)
-endif(MUE_BUILD_UNIT_TESTS)
+endif()
 
 add_subdirectory(share)
-add_subdirectory(src/framework/global) # should be first to work pch
+add_subdirectory(${MUSE_FRAMEWORK_SRC_PATH})
 add_subdirectory(src)
 
-###########################################
-# Setup the KDDockWidgets lib
-###########################################
-if (NOT BUILD_SHARED_LIBS)
-    set(KDDockWidgets_STATIC ON CACHE BOOL "Build static versions of the libraries" FORCE)
-endif(NOT BUILD_SHARED_LIBS)
-
-set(KDDockWidgets_QTQUICK ON CACHE BOOL "Build for QtQuick instead of QtWidgets" FORCE)
-set(KDDockWidgets_EXAMPLES OFF CACHE BOOL "Build the examples" FORCE)
-add_subdirectory(thirdparty/KDDockWidgets)
 
 ###########################################
 # Setup Packaging
 ###########################################
 
 if (OS_IS_LIN)
-    include(SetupAppImagePackaging)
+    include(packaging/Linux+BSD/SetupAppImagePackaging)
 endif(OS_IS_LIN)
 
 if (OS_IS_WIN)
-    include(Packaging)
+    include(packaging/Windows/SetupWindowsPackaging)
 endif(OS_IS_WIN)
 
 ###########################################
 # Add VTest
 ###########################################
 add_subdirectory(vtest)
+
+message(STATUS "Generate compile commands: ${MUSE_GENERATE_COMPILE_COMMANDS}")
+if (MUSE_GENERATE_COMPILE_COMMANDS)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} --preset=compile_commands -DMUSE_GENERATE_COMPILE_COMMANDS=OFF
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build/compile_commands/compile_commands.json
+        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
+endif()

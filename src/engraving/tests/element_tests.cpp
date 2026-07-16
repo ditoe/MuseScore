@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,12 +22,12 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/engravingitem.h"
-#include "dom/factory.h"
-#include "dom/masterscore.h"
+#include "engraving/compat/scoreaccess.h"
+#include "engraving/dom/engravingitem.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/masterscore.h"
 
 #include "utils/scorerw.h"
-#include "engraving/compat/scoreaccess.h"
 
 using namespace mu::engraving;
 
@@ -64,7 +64,6 @@ TEST_F(Engraving_ElementTests, DISABLED_testIds)
         ElementType::INSTRUMENT_CHANGE,
         ElementType::NOTEHEAD,
         ElementType::NOTEDOT,
-        ElementType::TREMOLO,
         ElementType::LAYOUT_BREAK,
         ElementType::MARKER,
         ElementType::JUMP,
@@ -95,7 +94,7 @@ TEST_F(Engraving_ElementTests, DISABLED_testIds)
         ElementType::TAB_DURATION_SYMBOL,
     };
 
-    MasterScore* score = compat::ScoreAccess::createMasterScore();
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
     for (ElementType t : ids) {
         EngravingItem* e = Factory::createItem(t, score->dummy());
         EngravingItem* ee = ScoreRW::writeReadElement(e);

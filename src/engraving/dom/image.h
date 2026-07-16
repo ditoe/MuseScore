@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,15 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __IMAGE_H__
-#define __IMAGE_H__
+#pragma once
 
 #include "bsymbol.h"
 
 #include "modularity/ioc.h"
 #include "draw/iimageprovider.h"
 
-namespace mu::draw {
+namespace muse::draw {
 class Pixmap;
 class SvgRenderer;
 }
@@ -44,30 +43,30 @@ enum class ImageType : char {
 //   @@ Image
 //---------------------------------------------------------
 
-class Image final : public BSymbol
+class Image final : public BSymbol, public muse::Contextable
 {
     OBJECT_ALLOCATOR(engraving, Image)
     DECLARE_CLASSOF(ElementType::IMAGE)
 
-    INJECT(mu::draw::IImageProvider, imageProvider)
+    muse::GlobalInject<muse::draw::IImageProvider> imageProvider;
 
 public:
-    Image(EngravingItem* parent = 0);
+    Image(EngravingItem* parent);
     Image(const Image&);
     ~Image();
 
     Image* clone() const override { return new Image(*this); }
 
-    bool load(); // after set paths
-    bool load(const io::path_t& s);
-    bool loadFromData(const io::path_t& name, const mu::ByteArray&);
+    bool loadFromStore(const std::string& storePath);
+    bool loadFromFile(muse::io::path_t path);
+    bool loadFromData(const std::string& suffix, const muse::ByteArray&);
 
     void init();
 
     bool isImageFramed() const;
     double imageAspectRatio() const;
-    void setSize(const mu::SizeF& s) { m_size = s; }
-    const mu::SizeF& size() const { return m_size; }
+    void setSize(const SizeF& s) { m_size = s; }
+    const SizeF& size() const { return m_size; }
     void updateImageHeight(const double& height);
     void updateImageWidth(const double& width);
     double imageHeight() const;
@@ -80,61 +79,55 @@ public:
     bool sizeIsSpatium() const { return m_sizeIsSpatium; }
     void setSizeIsSpatium(bool val) { m_sizeIsSpatium = val; }
 
-    String storePath() const { return m_storePath; }
-    void setStorePath(const String& p) { m_storePath = p; }
-    String linkPath() const { return m_linkPath; }
-    void setLinkPath(const String& p) { m_linkPath = p; }
-    bool linkIsValid() const { return m_linkIsValid; }
+    const std::string& storePath() const { return m_storePath; }
+    void setStorePath(const std::string& p) { m_storePath = p; }
 
     PropertyValue getProperty(Pid) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid id) const override;
 
-    mu::SizeF imageSize() const;
+    SizeF imageSize() const;
 
     void setImageType(ImageType);
     ImageType imageType() const { return m_imageType; }
     bool isValid() const { return m_rasterDoc || m_svgDoc; }
 
-    mu::draw::SvgRenderer* svgRenderer() const { return m_svgDoc; }
-    const std::shared_ptr<mu::draw::Pixmap>& rasterImage() const { return m_rasterDoc; }
+    muse::draw::SvgRenderer* svgRenderer() const { return m_svgDoc; }
+    const std::shared_ptr<muse::draw::Pixmap>& rasterImage() const { return m_rasterDoc; }
 
     bool needStartEditingAfterSelecting() const override { return true; }
     int gripsCount() const override { return 2; }
     Grip initialEditModeGrip() const override { return Grip(1); }
     Grip defaultGrip() const override { return Grip(1); }
-    std::vector<mu::PointF> gripsPositions(const EditData&) const override;
+    std::vector<PointF> gripsPositions(const EditData&) const override;
 
-    mu::SizeF pixel2size(const mu::SizeF& s) const;
-    mu::SizeF size2pixel(const mu::SizeF& s) const;
+    SizeF pixel2size(const SizeF& s) const;
+    SizeF size2pixel(const SizeF& s) const;
 
-    const mu::draw::Pixmap& buffer() const { return m_buffer; }
-    void setBuffer(const mu::draw::Pixmap& p) const { m_buffer = p; }
+    const muse::draw::Pixmap& buffer() const { return m_buffer; }
+    void setBuffer(const muse::draw::Pixmap& p) const { m_buffer = p; }
     bool dirty() const { return m_dirty; }
     void setDirty(bool val) const { m_dirty = val; }
 
 private:
 
     bool isEditable() const override { return true; }
-    void startEditDrag(EditData&) override;
-    void editDrag(EditData& ed) override;
-    std::vector<mu::LineF> gripAnchorLines(Grip) const override { return std::vector<mu::LineF>(); }
+    void startDragGrip(EditData&) override;
+    void dragGrip(EditData& ed) override;
+    std::vector<LineF> gripAnchorLines(Grip) const override { return std::vector<LineF>(); }
 
     ImageStoreItem* m_storeItem = nullptr;
-    String m_storePath;                 // the path of the img in the ImageStore
-    String m_linkPath;                  // the path of an external linked img
-    bool m_linkIsValid = false;         // whether _linkPath file exists or not
-    mutable mu::draw::Pixmap m_buffer;  // cached rendering
-    mu::SizeF m_size;                   // in mm or spatium units
+    std::string m_storePath; // the path of the img in the ImageStore
+    mutable muse::draw::Pixmap m_buffer; // cached rendering
+    SizeF m_size;                   // in absolute or spatium units
     bool m_lockAspectRatio = false;
     bool m_autoScale = false;           // fill parent frame
     bool m_sizeIsSpatium = false;
     mutable bool m_dirty = false;
 
-    std::shared_ptr<mu::draw::Pixmap> m_rasterDoc;
-    mu::draw::SvgRenderer* m_svgDoc = nullptr;
+    std::shared_ptr<muse::draw::Pixmap> m_rasterDoc;
+    muse::draw::SvgRenderer* m_svgDoc = nullptr;
 
     ImageType m_imageType = ImageType::NONE;
 };
-} // namespace mu::engraving
-#endif
+}

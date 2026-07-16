@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,16 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_ISCORERENDERER_H
-#define MU_ENGRAVING_ISCORERENDERER_H
+#pragma once
 
 #include <variant>
 
 #include "modularity/imoduleinterface.h"
-#include "draw/types/geometry.h"
-#include "types/fraction.h"
 
-namespace mu::draw {
+#include "../types/types.h"
+
+#include "paintoptions.h"
+
+namespace muse::draw {
 class Painter;
 }
 
@@ -55,11 +56,15 @@ class EngravingItem;
 
 class FiguredBassItem;
 
+class FretDiagram;
+
 class Harmony;
 
 class Image;
 
-enum class KerningType;
+class IndicatorIcon;
+
+enum class KerningType : unsigned char;
 class KeySig;
 
 class LedgerLine;
@@ -69,23 +74,28 @@ class Lyrics;
 
 class NoteDot;
 
+class Parenthesis;
+
 class Rest;
 
 class ShadowNote;
 class Spanner;
 class Slur;
+class SlurSegment;
 class SlurTie;
+class Spacer;
 class StaffText;
 class Stem;
 
 class TextBase;
 class Text;
 class TextLineBaseSegment;
+class TieSegment;
 class TimeSig;
 }
 
 namespace mu::engraving::rendering {
-class IScoreRenderer : MODULE_EXPORT_INTERFACE
+class IScoreRenderer : MODULE_GLOBAL_INTERFACE
 {
     INTERFACE_ID(IScoreRenderer)
 
@@ -95,11 +105,11 @@ public:
     // Main interface
 
     virtual void layoutScore(Score* score, const Fraction& st, const Fraction& et) const = 0;
+    virtual void layoutHeadersFooters(Score* score) const = 0;
 
-    struct PaintOptions
+    struct ScorePaintOptions : public PaintOptions
     {
         bool isSetViewport = true;
-        bool isPrinting = false;
         bool isMultiPage = false;
         bool printPageBackground = true;
         RectF frameRect;
@@ -109,14 +119,14 @@ public:
         int trimMarginPixelSize = -1;
         int deviceDpi = -1;
 
-        std::function<void(draw::Painter* painter, const Page* page, const RectF& pageRect)> onPaintPageSheet;
+        std::function<void(muse::draw::Painter* painter, const Page* page, const RectF& pageRect)> onPaintPageSheet;
         std::function<void()> onNewPage;
     };
 
     virtual SizeF pageSizeInch(const Score* score) const = 0;
-    virtual SizeF pageSizeInch(const Score* score, const PaintOptions& opt) const = 0;
-    virtual void paintScore(draw::Painter* painter, Score* score, const IScoreRenderer::PaintOptions& opt) const = 0;
-    virtual void paintItem(draw::Painter& painter, const EngravingItem* item) const = 0;
+    virtual SizeF pageSizeInch(const Score* score, const ScorePaintOptions& opt) const = 0;
+    virtual void paintScore(muse::draw::Painter* painter, Score* score, const ScorePaintOptions& opt) const = 0;
+    virtual void paintItem(muse::draw::Painter& painter, const EngravingItem* item, const PaintOptions& opt) const = 0;
 
     // Temporary compatibility interface
     using Supported = std::variant<std::monostate,
@@ -129,19 +139,23 @@ public:
                                    Clef*,
                                    Dynamic*,
                                    FiguredBassItem*,
+                                   FretDiagram*,
                                    Harmony*,
                                    Image*,
+                                   IndicatorIcon*,
                                    KeySig*,
                                    LedgerLine*,
                                    SLine*,
                                    LineSegment*,
                                    Lyrics*,
                                    NoteDot*,
+                                   Parenthesis*,
                                    Rest*,
                                    ShadowNote*,
                                    Spanner*,
                                    Slur*,
                                    SlurTie*,
+                                   Spacer*,
                                    StaffText*,
                                    Stem*,
                                    TextBase*,
@@ -169,13 +183,6 @@ public:
         doLayoutItem(static_cast<EngravingItem*>(item));
     }
 
-    // Layout Elements on Edit
-    virtual void layoutOnEdit(Arpeggio* item) = 0;
-
-    // Horizontal spacing
-    virtual double computePadding(const EngravingItem* item1, const EngravingItem* item2) = 0;
-    virtual KerningType computeKerning(const EngravingItem* item1, const EngravingItem* item2) = 0;
-
     //! TODO Investigation is required, probably these functions or their calls should not be.
     // Other
     virtual void layoutTextLineBaseSegment(TextLineBaseSegment* item) = 0;
@@ -185,17 +192,20 @@ public:
     // Layout Text 1
     virtual void layoutText1(TextBase* item, bool base = false) = 0;
 
-    void drawItem(const EngravingItem* item, draw::Painter* p)
+    void drawItem(const EngravingItem* item, muse::draw::Painter* p, const PaintOptions& opt)
     {
-        doDrawItem(item, p);
+        doDrawItem(item, p, opt);
     }
+
+    virtual void computeBezier(TieSegment* tieSeg, PointF shoulderOffset = PointF()) = 0;
+    virtual void computeBezier(SlurSegment* slurSeg, PointF shoulderOffser = PointF()) = 0;
+
+    virtual bool scoreHasTimestampHeadersFooters(const Score* score) const = 0;
 
 private:
     // Layout Single Item
     virtual void doLayoutItem(EngravingItem* item) = 0;
 
-    virtual void doDrawItem(const EngravingItem* item, draw::Painter* p) = 0;
+    virtual void doDrawItem(const EngravingItem* item, muse::draw::Painter* p, const PaintOptions& opt) = 0;
 };
 }
-
-#endif // MU_ENGRAVING_ISCORERENDERER_H

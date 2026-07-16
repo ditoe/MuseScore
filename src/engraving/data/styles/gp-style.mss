@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.10">
+<museScore version="4.70">
   <Style>
     <slurShowTabSimple>0</slurShowTabSimple>
     <slurShowTabCommon>1</slurShowTabCommon>
     <fermataShowTabSimple>0</fermataShowTabSimple>
     <fermataShowTabCommon>1</fermataShowTabCommon>
     <dynamicsShowTabSimple>0</dynamicsShowTabSimple>
-    <dymanicsShowTabCommon>1</dymanicsShowTabCommon>
+    <dynamicsShowTabCommon>1</dynamicsShowTabCommon>
     <hairpinShowTabSimple>0</hairpinShowTabSimple>
     <hairpinShowTabCommon>1</hairpinShowTabCommon>
     <accentShowTabSimple>0</accentShowTabSimple>
@@ -22,12 +22,26 @@
     <rasgueadoShowTabSimple>0</rasgueadoShowTabSimple>
     <rasgueadoShowTabCommon>1</rasgueadoShowTabCommon>
     <mordentShowTabSimple>0</mordentShowTabSimple>
-    <mordentShowTabCommon>0</mordentShowTabCommon>
+    <mordentShowTabCommon>1</mordentShowTabCommon>
     <turnShowTabSimple>0</turnShowTabSimple>
-    <turnShowTabCommon>0</turnShowTabCommon>
+    <turnShowTabCommon>1</turnShowTabCommon>
     <wahShowTabSimple>0</wahShowTabSimple>
     <wahShowTabCommon>1</wahShowTabCommon>
     <golpeShowTabSimple>0</golpeShowTabSimple>
     <golpeShowTabCommon>1</golpeShowTabCommon>
-  </Style>
+    <tabShowTiedFret>1</tabShowTiedFret>
+    <tabParenthesizeTiedFret>1</tabParenthesizeTiedFret>
+    <parenthesizeTiedFretIfArticulation>1</parenthesizeTiedFretIfArticulation>
+    <hopoShowOnStandardStaves>0</hopoShowOnStandardStaves>
+    <hopoShowOnTabStaves>1</hopoShowOnTabStaves>
+    <hopoUpperCase>1</hopoUpperCase>
+    <hopoShowAll>0</hopoShowAll>
+    <lhTappingSymbolNormalStave>circledT</lhTappingSymbolNormalStave>
+    <lhTappingSymbolTab>circledT</lhTappingSymbolTab>
+    <lhTappingShowItemsNormalStave>0</lhTappingShowItemsNormalStave>
+    <lhTappingShowItemsTab>2</lhTappingShowItemsTab>
+    <lhTappingSlurTopAndBottomNoteOnTab>1</lhTappingSlurTopAndBottomNoteOnTab>
+    <rhTappingSymbolNormalStave>T</rhTappingSymbolNormalStave>
+    <rhTappingSymbolTab>T</rhTappingSymbolTab>
+    </Style>
 </museScore>

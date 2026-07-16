@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,107 +19,100 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "playbackmodule.h"
 
-#include <QQmlEngine>
-
 #include "modularity/ioc.h"
-#include "ui/iuiengine.h"
 
+#include "rcommand/icommandsregister.h"
+#include "rcommand/icommandsstate.h"
+#include "interactive/iinteractiveuriregister.h"
 #include "ui/iuiactionsregister.h"
-#include "ui/iinteractiveuriregister.h"
 
 #include "internal/playbackcontroller.h"
-#include "internal/playbackuiactions.h"
+#include "internal/playbackcommandsregister.h"
+#include "internal/playbackcommandsstate.h"
 #include "internal/playbackconfiguration.h"
 #include "internal/soundprofilesrepository.h"
-
-#include "view/playbacktoolbarmodel.h"
-#include "view/playbackloadingmodel.h"
-#include "view/mixerpanelmodel.h"
-#include "view/mixerpanelcontextmenumodel.h"
-#include "view/soundprofilesmodel.h"
+#include "internal/knownaudiopluginsconfigurator.h"
+#include "internal/playbackuiactions.h"
 
 using namespace mu::playback;
-using namespace mu::modularity;
-using namespace mu::ui;
-using namespace mu::actions;
+using namespace muse;
+using namespace muse::modularity;
+using namespace muse::actions;
 
-static void playback_init_qrc()
-{
-    Q_INIT_RESOURCE(playback);
-}
+static const std::string mname("playback");
 
 std::string PlaybackModule::moduleName() const
 {
-    return "playback";
+    return mname;
 }
 
 void PlaybackModule::registerExports()
 {
     m_configuration = std::make_shared<PlaybackConfiguration>();
-    m_playbackController = std::make_shared<PlaybackController>();
-    m_playbackUiActions = std::make_shared<PlaybackUiActions>(m_playbackController);
-    m_soundProfileRepo = std::make_shared<SoundProfilesRepository>();
 
-    ioc()->registerExport<IPlaybackController>(moduleName(), m_playbackController);
-    ioc()->registerExport<IPlaybackConfiguration>(moduleName(), m_configuration);
-    ioc()->registerExport<ISoundProfilesRepository>(moduleName(), m_soundProfileRepo);
+    globalIoc()->registerExport<IPlaybackConfiguration>(mname, m_configuration);
 }
 
 void PlaybackModule::resolveImports()
 {
-    auto ar = ioc()->resolve<IUiActionsRegister>(moduleName());
+    auto ir = globalIoc()->resolve<muse::interactive::IInteractiveUriRegister>(mname);
+    if (ir) {
+        ir->registerQmlUri(Uri("musescore://playback/soundprofiles"), "MuseScore.Playback", "SoundProfilesDialog");
+    }
+
+    auto cr = globalIoc()->resolve<muse::rcommand::ICommandsRegister>(mname);
+    if (cr) {
+        cr->reg(std::make_shared<PlaybackCommandsRegister>());
+    }
+
+    // must run before the audioplugins cache loads in onInit
+    KnownAudioPluginsConfigurator().init();
+}
+
+void PlaybackModule::onInit(const IApplication::RunMode&)
+{
+    m_configuration->init();
+}
+
+IContextSetup* PlaybackModule::newContext(const muse::modularity::ContextPtr& ctx) const
+{
+    return new PlaybackContext(ctx);
+}
+
+void PlaybackContext::registerExports()
+{
+    m_playbackController = std::make_shared<PlaybackController>(iocContext());
+    m_soundProfileRepo = std::make_shared<SoundProfilesRepository>(iocContext());
+    m_playbackUiActions = std::make_shared<PlaybackUiActions>(m_playbackController, iocContext());
+
+    ioc()->registerExport<IPlaybackController>(mname, m_playbackController);
+    ioc()->registerExport<ISoundProfilesRepository>(mname, m_soundProfileRepo);
+}
+
+void PlaybackContext::resolveImports()
+{
+    auto cs = ioc()->resolve<muse::rcommand::ICommandsState>(mname);
+    if (cs) {
+        cs->reg(std::make_shared<PlaybackCommandsState>(iocContext()));
+    }
+
+    auto ar = ioc()->resolve<muse::ui::IUiActionsRegister>(mname);
     if (ar) {
         ar->reg(m_playbackUiActions);
     }
-
-    auto ir = ioc()->resolve<IInteractiveUriRegister>(moduleName());
-    if (ir) {
-        ir->registerUri(Uri("musescore://playback/soundprofilesdialog"),
-                        ContainerMeta(ContainerType::QmlDialog, "MuseScore/Playback/SoundProfilesDialog.qml"));
-    }
 }
 
-void PlaybackModule::registerResources()
+void PlaybackContext::onInit(const IApplication::RunMode& mode)
 {
-    playback_init_qrc();
-}
-
-void PlaybackModule::registerUiTypes()
-{
-    qmlRegisterType<PlaybackToolBarModel>("MuseScore.Playback", 1, 0, "PlaybackToolBarModel");
-    qmlRegisterType<PlaybackLoadingModel>("MuseScore.Playback", 1, 0, "PlaybackLoadingModel");
-    qmlRegisterType<MixerPanelModel>("MuseScore.Playback", 1, 0, "MixerPanelModel");
-    qmlRegisterType<MixerPanelContextMenuModel>("MuseScore.Playback", 1, 0, "MixerPanelContextMenuModel");
-    qmlRegisterType<SoundProfilesModel>("MuseScore.Playback", 1, 0, "SoundProfilesModel");
-
-    qmlRegisterUncreatableType<MixerChannelItem>("MuseScore.Playback", 1, 0, "MixerChannelItem", "Cannot create a MixerChannelItem");
-
-    ioc()->resolve<IUiEngine>(moduleName())->addSourceImportPath(playback_QML_IMPORT);
-}
-
-void PlaybackModule::onInit(const framework::IApplication::RunMode& mode)
-{
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
-    m_configuration->init();
     m_playbackController->init();
 
-    if (mode != framework::IApplication::RunMode::GuiApp) {
+    if (mode != IApplication::RunMode::GuiApp) {
         return;
     }
 
     m_playbackUiActions->init();
-}
-
-void PlaybackModule::onAllInited(const framework::IApplication::RunMode& mode)
-{
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
-    m_soundProfileRepo->refresh();
+    m_soundProfileRepo->init();
 }

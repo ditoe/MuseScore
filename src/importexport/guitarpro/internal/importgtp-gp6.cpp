@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,14 +22,11 @@
 
 #include "importgtp.h"
 
-#include <cmath>
-
 #include "serialization/xmldom.h"
 
 #include "gtp/gp6dombuilder.h"
 #include "gtp/gpconverter.h"
 
-#include "engraving/dom/factory.h"
 #include "engraving/dom/arpeggio.h"
 #include "engraving/dom/articulation.h"
 #include "engraving/dom/barline.h"
@@ -40,6 +37,7 @@
 #include "engraving/dom/clef.h"
 #include "engraving/dom/dynamic.h"
 #include "engraving/dom/excerpt.h"
+#include "engraving/dom/factory.h"
 #include "engraving/dom/fingering.h"
 #include "engraving/dom/fret.h"
 #include "engraving/dom/glissando.h"
@@ -65,21 +63,23 @@
 #include "engraving/dom/stafftext.h"
 #include "engraving/dom/stafftype.h"
 #include "engraving/dom/stringdata.h"
-#include "types/symid.h"
 #include "engraving/dom/tempotext.h"
 #include "engraving/dom/text.h"
 #include "engraving/dom/textline.h"
 #include "engraving/dom/tie.h"
 #include "engraving/dom/timesig.h"
-#include "engraving/dom/tremolo.h"
 #include "engraving/dom/tremolobar.h"
 #include "engraving/dom/tuplet.h"
 #include "engraving/dom/volta.h"
+#include "engraving/dom/stringtunings.h"
+
+#include "engraving/types/symid.h"
 
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 using namespace mu::engraving;
 
 namespace mu::iex::guitarpro {
@@ -355,7 +355,7 @@ void GuitarPro6::unhandledNode(String nodeName)
 XmlDomNode GuitarPro6::getNode(const String& id, XmlDomNode currentDomNode)
 {
     while (!(currentDomNode).isNull()) {
-        String currentId = currentDomNode.attribute("id");
+        String currentId = currentDomNode.toElement().attribute("id").value();
         if (currentId == id) {
             return currentDomNode;
         }
@@ -378,7 +378,7 @@ void GuitarPro6::readGpif(ByteArray* data)
     auto builder = createGPDomBuilder();
     builder->buildGPDomModel(&domElem);
 
-    GPConverter scoreBuilder(score, builder->getGPDomModel());
+    GPConverter scoreBuilder(score, builder->getGPDomModel(), iocContext());
     scoreBuilder.convertGP();
 }
 

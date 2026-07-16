@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,63 +19,77 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 StyledListView {
     id: root
 
-    Layout.fillHeight: true
-    Layout.fillWidth: true
+    required property ProjectPropertiesModel propertiesModel
 
-    spacing: 4
+    property int propertyNameWidth: 160
+    property int propertyRowHorizontalSpacing: 8
 
-    property int propertyNameWidth: 110
+    readonly property int propertyRowRightMargin: propertyRowHorizontalSpacing + visualScrollBarInset
 
     property NavigationPanel navigationPanel: null
     property int navigationColumnStart: 0
 
+    spacing: 4
+
+    model: propertiesModel
+
     scrollBarPolicy: ScrollBar.AlwaysOn
 
-    model: projectPropertiesModel
+    Connections {
+        target: root.propertiesModel
 
-    delegate: RowLayout{
+        function onPropertyAdded(index) {
+            root.positionViewAtIndex(index, ListView.Contain)
+            root.currentIndex = index
+        }
+    }
+
+    delegate: PropertyItem {
+        required property var model
+        
         anchors.left: parent ? parent.left : undefined
         anchors.right: parent ? parent.right : undefined
-        spacing: 0
-        PropertyItem {
-            width: root.width - 10
+        anchors.rightMargin: root.propertyRowRightMargin
 
-            index: root.navigationColumnStart + model.index
-            propertyName: model.propertyName
-            propertyValue: model.propertyValue
-            isStandardProperty: model.isStandardProperty
-            isFileInfoPanelProperty: false
-            propertyNameWidth: root.propertyNameWidth
+        spacing: root.propertyRowHorizontalSpacing
 
-            navigationPanel: root.navigationPanel
+        index: root.navigationColumnStart + model.index
+        propertyName: model.propertyName
+        propertyValue: model.propertyValue
+        isStandardProperty: model.isStandardProperty
+        isMultiLineEdit: model.isMultiLineEdit
+        isFileInfoPanelProperty: false
+        propertyNameWidth: root.propertyNameWidth
 
-            onPropertyNameChanged: function() {
-                model.propertyName = propertyName
-            }
+        navigationPanel: root.navigationPanel
 
-            onPropertyValueChanged: function() {
-                model.propertyValue = propertyValue
-            }
-
-            onChangePositionOfListIndex: function() {
-                root.positionViewAtIndex(model.index, ListView.Contain)
-            }
-
-            onDeleteProperty: function() {
-                projectPropertiesModel.deleteProperty(model.index)
-            }
+        onPropertyNameChanged: function() {
+            model.propertyName = propertyName
         }
 
-        Item { Layout.preferredWidth: 16 }
+        onPropertyValueChanged: function() {
+            model.propertyValue = propertyValue
+        }
+
+        onScrollIntoViewRequested: function() {
+            root.positionViewAtIndex(model.index, ListView.Contain)
+        }
+
+        onDeletePropertyRequested: function() {
+            root.propertiesModel.deleteProperty(model.index)
+        }
     }
 }

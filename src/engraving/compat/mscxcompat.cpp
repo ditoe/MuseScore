@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,99 +31,51 @@
 
 #include "log.h"
 
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 using namespace mu::engraving;
 
-mu::Ret mu::engraving::compat::mscxToMscz(const String& mscxFilePath, ByteArray* msczData)
+Ret mu::engraving::compat::loadMsczOrMscx(MasterScore* score, const io::path_t& path, bool ignoreVersionError)
 {
-    File mscxFile(mscxFilePath);
-    if (!mscxFile.open(IODevice::ReadOnly)) {
-        return make_ret(Err::FileOpenError, mscxFilePath);
+    std::string suffix = io::suffix(path);
+
+    MscReader::Params params;
+    params.filePath = path;
+    params.mode = mscIoModeBySuffix(suffix);
+    IF_ASSERT_FAILED(params.mode != MscIoMode::Unknown) {
+        return make_ret(Err::FileUnknownType, path);
     }
 
-    ByteArray mscxData = mscxFile.readAll();
-
-    Buffer buf(msczData);
-    MscWriter::Params params;
-    params.device = &buf;
-    params.filePath = mscxFilePath;
-    params.mode = MscIoMode::Zip;
-    MscWriter writer(params);
-    writer.open();
-    writer.writeScoreFile(mscxData);
-
-    return make_ok();
-}
-
-mu::Ret mu::engraving::compat::loadMsczOrMscx(MasterScore* score, const String& path, bool ignoreVersionError)
-{
-    ByteArray msczData;
-    if (path.endsWith(u".mscx", mu::CaseInsensitive)) {
-        //! NOTE Convert mscx -> mscz
-        Ret ret = mscxToMscz(path, &msczData);
-        if (!ret) {
-            return ret;
-        }
-    } else if (path.endsWith(u".mscz", mu::CaseInsensitive)) {
-        File msczFile(path);
-        if (!msczFile.open(IODevice::ReadOnly)) {
-            return make_ret(Err::FileOpenError, path);
-        }
-
-        msczData = msczFile.readAll();
-    } else {
-        return make_ret(Err::FileUnknownType, path);
+    MscReader reader(params);
+    Ret ret = reader.open();
+    if (!ret) {
+        return ret;
     }
 
     score->setFileInfoProvider(std::make_shared<LocalFileInfoProvider>(path));
 
-    Buffer msczBuf(&msczData);
-    MscReader::Params params;
-    params.device = &msczBuf;
-    params.filePath = path;
-    params.mode = MscIoMode::Zip;
-
-    MscReader reader(params);
-    reader.open();
-
     MscLoader scoreReader;
-    SettingsCompat audioSettings;
-    return scoreReader.loadMscz(score, reader, audioSettings, ignoreVersionError);
+    return scoreReader.loadMscz(score, reader, nullptr, ignoreVersionError);
 }
 
-mu::Ret mu::engraving::compat::loadMsczOrMscx(EngravingProjectPtr project, const String& path, bool ignoreVersionError)
+Ret mu::engraving::compat::loadMsczOrMscx(EngravingProjectPtr project, const io::path_t& path, bool ignoreVersionError)
 {
-    ByteArray msczData;
-    String filePath = path;
-    if (path.endsWith(u".mscx", mu::CaseInsensitive)) {
-        //! NOTE Convert mscx -> mscz
+    std::string suffix = io::suffix(path);
 
-        Ret ret = mscxToMscz(path, &msczData);
-        if (!ret) {
-            return ret;
-        }
-    } else if (path.endsWith(u".mscz", mu::CaseInsensitive)) {
-        File msczFile(path);
-        if (!msczFile.open(IODevice::ReadOnly)) {
-            return make_ret(Err::FileOpenError, path);
-        }
-
-        msczData = msczFile.readAll();
-    } else {
+    MscReader::Params params;
+    params.filePath = path;
+    params.mode = mscIoModeBySuffix(suffix);
+    IF_ASSERT_FAILED(params.mode != MscIoMode::Unknown) {
         return make_ret(Err::FileUnknownType, path);
+    }
+
+    MscReader reader(params);
+    Ret ret = reader.open();
+    if (!ret) {
+        return ret;
     }
 
     project->setFileInfoProvider(std::make_shared<LocalFileInfoProvider>(path));
 
-    Buffer msczBuf(&msczData);
-    MscReader::Params params;
-    params.device = &msczBuf;
-    params.filePath = filePath;
-    params.mode = MscIoMode::Zip;
-
-    MscReader reader(params);
-    reader.open();
-
-    SettingsCompat settingsCompat;
-    return project->loadMscz(reader, settingsCompat, ignoreVersionError);
+    return project->loadMscz(reader, nullptr, ignoreVersionError);
 }

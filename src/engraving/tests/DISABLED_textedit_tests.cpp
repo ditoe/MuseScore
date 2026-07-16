@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -357,7 +357,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">bold</span></p></body></html>");
-    QCOMPARE(text->convertFromHtml(sb), QString("<font face=\"Times New Roman\"/><b>bold</b>"));
+    QCOMPARE(text->HtmlParser::parse(sb), QString("<font face=\"Times New Roman\"/><b>bold</b>"));
 
     //italic
     const QString si(
@@ -365,7 +365,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-style:italic;\">italic</span></p></body></html>");
-    QCOMPARE(text->convertFromHtml(si), QString("<font face=\"Times New Roman\"/><i>italic</i>"));
+    QCOMPARE(text->HtmlParser::parse(si), QString("<font face=\"Times New Roman\"/><i>italic</i>"));
 
     //underline
     const QString su(
@@ -373,7 +373,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" text-decoration: underline;\">underline</span></p></body></html>");
-    QCOMPARE(text->convertFromHtml(su), QString("<font face=\"Times New Roman\"/><u>underline</u>"));
+    QCOMPARE(text->HtmlParser::parse(su), QString("<font face=\"Times New Roman\"/><u>underline</u>"));
 
     //bold italic underline
     const QString sbiu(
@@ -381,7 +381,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600; font-style:italic; text-decoration: underline;\">bolditalicunderline</span></p></body></html>");
-    QCOMPARE(text->convertFromHtml(sbiu),
+    QCOMPARE(text->HtmlParser::parse(sbiu),
              QString("<font face=\"Times New Roman\"/><b><i><u>bolditalicunderline</u></i></b>"));
 
     const QString sbiu2(
@@ -389,7 +389,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">bold</span><span style=\" font-style:italic;\">italic</span><span style=\" text-decoration: underline;\">underline</span></p></body></html>");
-    QCOMPARE(text->convertFromHtml(sbiu2),
+    QCOMPARE(text->HtmlParser::parse(sbiu2),
              QString("<font face=\"Times New Roman\"/><b>bold</b><i>italic</i><u>underline</u>"));
 
     const QString sbi(
@@ -397,7 +397,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">bo</span><span style=\" font-weight:600; font-style:italic; text-decoration: underline;\">ldit</span>alic</p></body></html>");
-    QCOMPARE(text->convertFromHtml(sbi),
+    QCOMPARE(text->HtmlParser::parse(sbi),
              QString("<font face=\"Times New Roman\"/><b>bo</b><b><i><u>ldit</u></i></b>alic"));
 
     const QString sescape(
@@ -405,7 +405,7 @@ void TestText::testCompatibility()
         "p, li { white-space: pre-wrap; }"
         "</style></head><body style=\" font-family:'Times New Roman'; font-size:10.0006pt; font-weight:400; font-style:normal;\">"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">test&amp;&lt;&gt;&quot;'</p></body></html>");
-    QCOMPARE(text->convertFromHtml(sescape), QString("<font face=\"Times New Roman\"/>test&amp;&lt;&gt;&quot;'"));
+    QCOMPARE(text->HtmlParser::parse(sescape), QString("<font face=\"Times New Roman\"/>test&amp;&lt;&gt;&quot;'"));
 }
 
 //---------------------------------------------------------
@@ -500,7 +500,7 @@ void TestText::testSupplementaryUnicodeDeletePreviousChar()
 
 //---------------------------------------------------------
 ///   testMixedTypesDeletePreviousChar
-///    text contains unicode symbols from both Basic and Supplementary Multilingual Plane chars and SMUFL symbols
+///    text contains unicode symbols from both Basic and Supplementary Multilingual Plane chars and SMuFL symbols
 //---------------------------------------------------------
 
 void TestText::testMixedTypesDeletePreviousChar()
@@ -744,7 +744,7 @@ void TestText::testChineseBasicSupplemental()
 
 //---------------------------------------------------------
 ///   testDropUnicodeAfterSMUFLwhenCursorSetToSymbol
-///     Tests dropping unicode after SMUFL as described in https://github.com/musescore/MuseScore/pull/3020#issuecomment-281932322
+///     Tests dropping unicode after SMuFL as described in https://github.com/musescore/MuseScore/pull/3020#issuecomment-281932322
 ///     When appending text after a symbol, TextBlock needs to always (regardless of the state of the cursor) append a new TEXT TextFragment after the SYMBOL TextFragment.
 //---------------------------------------------------------
 
@@ -761,7 +761,7 @@ void TestText::testDropUnicodeAfterSMUFLwhenCursorSetToSymbol()
 
     EditData dropSMUFL;
     dropSMUFL.dropElement = symbolSMUFL;
-    text->drop(dropSMUFL);
+    text->drop(score->transactionManager()->currentOrDummyTransaction(), dropSMUFL);
 
     // the bug happened when cursor is in symbol mode
     CharFormat* cf = text->cursor()->format();
@@ -771,7 +771,7 @@ void TestText::testDropUnicodeAfterSMUFLwhenCursorSetToSymbol()
     FSymbol* fsymbol = new FSymbol(score);
     fsymbol->setCode(0x0001D10E);   // unicode hex code for '𝄎'
     dropFSymbol.dropElement = fsymbol;
-    text->drop(dropFSymbol);
+    text->drop(score->transactionManager()->currentOrDummyTransaction(), dropFSymbol);
 
     text->endEdit(editData);
     QCOMPARE(text->xmlText(), QString("<sym>noteheadWhole</sym>𝄎"));
@@ -793,7 +793,7 @@ void TestText::testDropBasicUnicodeWhenNotInEditMode()
     FSymbol* fsymbol = new FSymbol(score);
     fsymbol->setCode(0x4D);   // Basic Unicode code for 'M'
     dropFSymbol.dropElement = fsymbol;
-    text->drop(dropFSymbol);
+    text->drop(score->transactionManager()->currentOrDummyTransaction(), dropFSymbol);
 
     QCOMPARE(text->xmlText(), QString("M"));
 }
@@ -814,7 +814,7 @@ void TestText::testDropSupplementaryUnicodeWhenNotInEditMode()
     FSymbol* fsymbol = new FSymbol(score);
     fsymbol->setCode(0x0001D10E);   // Supplementary Unicode code for '𝄎'
     dropFSymbol.dropElement = fsymbol;
-    text->drop(dropFSymbol);
+    text->drop(score->transactionManager()->currentOrDummyTransaction(), dropFSymbol);
 
     QCOMPARE(text->xmlText(), QString("𝄎"));
 }

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.74978</Spatium>
+      <spatium>1.75</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -16,21 +17,23 @@
     <metaTag name="meiHead">&lt;meiHead&gt;&lt;fileDesc&gt;&lt;titleStmt&gt;&lt;title&gt;Untitled score&lt;/title&gt;&lt;respStmt&gt;&lt;persName role=&quot;composer&quot;&gt;Composer / arranger&lt;/persName&gt;&lt;/respStmt&gt;&lt;/titleStmt&gt;&lt;pubStmt&gt;&lt;date isodate=&quot;2023-08-11T14:50:54&quot;/&gt;&lt;/pubStmt&gt;&lt;/fileDesc&gt;&lt;/meiHead&gt;</metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">Untitled score</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName></trackName>
       <Instrument id="oboe">
-        <longName>Oboe</longName>
-        <shortName>Ob.</shortName>
+        <InstrumentLabel>
+          <longName>Oboe</longName>
+          <shortName>Ob.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>wind.reed.oboe</instrumentId>
         <Channel>
@@ -40,122 +43,156 @@
     <Staff id="1">
       <VBox>
         <height>10</height>
+        <eid>E_E</eid>
         <Text>
+          <eid>F_F</eid>
           <style>title</style>
           <text>Beam default</text>
           </Text>
         <Text>
+          <eid>G_G</eid>
           <style>subtitle</style>
           <text>Subtitle</text>
           </Text>
         <Text>
+          <eid>H_H</eid>
           <style>composer</style>
           <text>Composer / arranger</text>
           </Text>
         </VBox>
       <Measure>
+        <eid>I_I</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>J_J</eid>
             </Clef>
           <TimeSig>
+            <eid>K_K</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Beam>
+            <eid>L_L</eid>
             <l1>36</l1>
             <l2>38</l2>
             </Beam>
           <Chord>
+            <eid>M_M</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>N_N</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>O_O</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>P_P</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>Q_Q</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>R_R</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>S_S</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>T_T</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Beam>
+            <eid>U_U</eid>
             <l1>38</l1>
             <l2>40</l2>
             </Beam>
           <Chord>
+            <eid>V_V</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>W_W</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>X_X</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>Y_Y</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>Z_Z</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>a_a</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>b_b</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>c_c</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Beam>
+            <eid>d_d</eid>
             <l1>38</l1>
             <l2>40</l2>
             </Beam>
           <Chord>
+            <eid>e_e</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>f_f</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>g_g</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>h_h</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>i_i</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>j_j</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>k_k</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>l_l</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
@@ -163,263 +200,337 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>m_m</eid>
         <voice>
           <Beam>
+            <eid>n_n</eid>
             <l1>46</l1>
             <l2>46</l2>
             </Beam>
           <Chord>
+            <eid>o_o</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>p_p</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>q_q</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>r_r</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>s_s</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>t_t</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>u_u</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>v_v</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>w_w</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>x_x</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>y_y</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>z_z</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>0_0</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>1_1</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>2_2</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>3_3</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Beam>
+            <eid>4_4</eid>
             <l1>52</l1>
             <l2>52</l2>
             </Beam>
           <Chord>
+            <eid>5_5</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>6_6</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>7_7</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>8_8</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>9_9</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>+_+</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>/_/</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>AB_AB</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>BB_BB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>CB_CB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>DB_DB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>EB_EB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>FB_FB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>GB_GB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>HB_HB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>IB_IB</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>JB_JB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>KB_KB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>LB_LB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>MB_MB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>NB_NB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>OB_OB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>PB_PB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>QB_QB</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>RB_RB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>SB_SB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>TB_TB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>UB_UB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>VB_VB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>WB_WB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>XB_XB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>YB_YB</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Beam>
+            <eid>ZB_ZB</eid>
             <l1>34</l1>
             <l2>32</l2>
             </Beam>
           <Chord>
+            <eid>aB_aB</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>bB_bB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>cB_cB</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>dB_dB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Beam>
+            <eid>eB_eB</eid>
             <l1>52</l1>
             <l2>52</l2>
             </Beam>
           <Chord>
+            <eid>fB_fB</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>gB_gB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>hB_hB</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>iB_iB</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>jB_jB</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>kB_kB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>lB_lB</eid>
             <durationType>32nd</durationType>
             <Note>
+              <eid>mB_mB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>nB_nB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>oB_oB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>pB_pB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>qB_qB</eid>
               <pitch>71</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>rB_rB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>sB_sB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>tB_tB</eid>
             <durationType>64th</durationType>
             <Note>
+              <eid>uB_uB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <BarLine>
             <subtype>end</subtype>
+            <eid>vB_vB</eid>
             </BarLine>
           </voice>
         </Measure>

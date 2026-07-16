@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TREMOLOBAR_H__
-#define __TREMOLOBAR_H__
+#ifndef MU_ENGRAVING_TREMOLOBAR_H
+#define MU_ENGRAVING_TREMOLOBAR_H
 
 #include "engravingitem.h"
 
@@ -34,7 +34,7 @@ namespace mu::engraving {
 //   @P play       bool         play tremolo bar
 //---------------------------------------------------------
 
-enum class TremoloBarType {
+enum class TremoloBarType : unsigned char {
     DIP = 0,
     DIVE,
     RELEASE_UP,
@@ -71,9 +71,9 @@ public:
     void setPlay(bool val) { m_play = val; }
 
     struct LayoutData : public EngravingItem::LayoutData {
-        mu::PolygonF polygon;
+        PolygonF polygon;
     };
-    DECLARE_LAYOUTDATA_METHODS(TremoloBar);
+    DECLARE_LAYOUTDATA_METHODS(TremoloBar)
 
 private:
 

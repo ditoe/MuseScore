@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,92 +19,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "instrumentsscenemodule.h"
 
-#include <QQmlEngine>
-
 #include "modularity/ioc.h"
-#include "ui/iuiengine.h"
 
 #include "internal/selectinstrumentscenario.h"
 #include "internal/instrumentsuiactions.h"
 #include "internal/instrumentsactionscontroller.h"
 
-#include "view/instrumentspaneltreemodel.h"
-#include "view/instrumentlistmodel.h"
-#include "view/instrumentsonscorelistmodel.h"
-#include "view/instrumentsettingsmodel.h"
-#include "view/staffsettingsmodel.h"
-#include "view/instrumentspanelcontextmenumodel.h"
-#include "ui/iinteractiveuriregister.h"
+#include "interactive/iinteractiveuriregister.h"
 #include "ui/iuiactionsregister.h"
 
-#include "instrumentsscenetypes.h"
-
 using namespace mu::instrumentsscene;
-using namespace mu::modularity;
-using namespace mu::ui;
-using namespace mu::framework;
+using namespace muse;
+using namespace muse::modularity;
 
-static void instrumentsscene_init_qrc()
-{
-    Q_INIT_RESOURCE(instrumentsscene);
-}
+static const std::string mname("instrumentsscene");
 
 std::string InstrumentsSceneModule::moduleName() const
 {
-    return "instrumentsscene";
-}
-
-void InstrumentsSceneModule::registerExports()
-{
-    m_actionsController = std::make_shared<InstrumentsActionsController>();
-
-    ioc()->registerExport<notation::ISelectInstrumentsScenario>(moduleName(), new SelectInstrumentsScenario());
+    return mname;
 }
 
 void InstrumentsSceneModule::resolveImports()
 {
-    auto ar = ioc()->resolve<IUiActionsRegister>(moduleName());
-    if (ar) {
-        ar->reg(std::make_shared<InstrumentsUiActions>());
-    }
-
-    auto ir = ioc()->resolve<IInteractiveUriRegister>(moduleName());
+    auto ir = globalIoc()->resolve<interactive::IInteractiveUriRegister>(mname);
     if (ir) {
-        ir->registerUri(Uri("musescore://instruments/select"),
-                        ContainerMeta(ContainerType::QmlDialog, "MuseScore/InstrumentsScene/InstrumentsDialog.qml"));
+        ir->registerQmlUri(Uri("musescore://instruments/select"), "MuseScore.InstrumentsScene", "InstrumentsDialog");
     }
 }
 
-void InstrumentsSceneModule::registerResources()
+IContextSetup* InstrumentsSceneModule::newContext(const muse::modularity::ContextPtr& ctx) const
 {
-    instrumentsscene_init_qrc();
+    return new InstrumentsSceneContext(ctx);
 }
 
-void InstrumentsSceneModule::registerUiTypes()
+// Context
+
+void InstrumentsSceneContext::registerExports()
 {
-    qmlRegisterType<InstrumentListModel>("MuseScore.InstrumentsScene", 1, 0, "InstrumentListModel");
-    qmlRegisterType<InstrumentSettingsModel>("MuseScore.InstrumentsScene", 1, 0, "InstrumentSettingsModel");
-    qmlRegisterType<StaffSettingsModel>("MuseScore.InstrumentsScene", 1, 0, "StaffSettingsModel");
-    qmlRegisterType<InstrumentsPanelTreeModel>("MuseScore.InstrumentsScene", 1, 0, "InstrumentsPanelTreeModel");
-    qmlRegisterType<InstrumentsPanelContextMenuModel>("MuseScore.InstrumentsScene", 1, 0, "InstrumentsPanelContextMenuModel");
-    qmlRegisterType<InstrumentsOnScoreListModel>("MuseScore.InstrumentsScene", 1, 0, "InstrumentsOnScoreListModel");
+    m_actionsController = std::make_shared<InstrumentsActionsController>(iocContext());
 
-    qmlRegisterUncreatableType<InstrumentsTreeItemType>("MuseScore.InstrumentsScene", 1, 0, "InstrumentsTreeItemType",
-                                                        "Cannot create a ContainerType");
+    ioc()->registerExport<notation::ISelectInstrumentsScenario>(mname, new SelectInstrumentsScenario(iocContext()));
+}
 
-    auto uiengine = ioc()->resolve<IUiEngine>(moduleName());
-    if (uiengine) {
-        uiengine->addSourceImportPath(instrumentsscene_QML_IMPORT);
+void InstrumentsSceneContext::resolveImports()
+{
+    auto ar = ioc()->resolve<ui::IUiActionsRegister>(mname);
+    if (ar) {
+        ar->reg(std::make_shared<InstrumentsUiActions>(iocContext()));
     }
 }
 
-void InstrumentsSceneModule::onInit(const IApplication::RunMode& mode)
+void InstrumentsSceneContext::onInit(const IApplication::RunMode&)
 {
-    if (mode != IApplication::RunMode::GuiApp) {
-        return;
-    }
-
     m_actionsController->init();
 }

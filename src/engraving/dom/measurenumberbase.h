@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __MEASURENUMBERBASE_H__
-#define __MEASURENUMBERBASE_H__
+#ifndef MU_ENGRAVING_MEASURENUMBERBASE_H
+#define MU_ENGRAVING_MEASURENUMBERBASE_H
 
 #include "textbase.h"
 
@@ -39,19 +39,10 @@ public:
     MeasureNumberBase(const ElementType& type, Measure* parent = nullptr, TextStyleType = TextStyleType::DEFAULT);
     MeasureNumberBase(const MeasureNumberBase& other);
 
-    PropertyValue getProperty(Pid id) const override;
-    bool setProperty(Pid id, const PropertyValue& val) override;
-    PropertyValue propertyDefault(Pid id) const override;
-
     Measure* measure() const { return toMeasure(explicitParent()); }
 
     bool isEditable() const override { return false; }    // The measure numbers' text should not be editable
-
-    PlacementH hPlacement() const { return m_placementH; }
-    void setHPlacement(PlacementH p) { m_placementH = p; }
-
-private:
-    PlacementH m_placementH = PlacementH::LEFT;
+    bool positionRelativeToNoteheadRest() const override { return false; }
 };
 } // namespace mu::engraving
 

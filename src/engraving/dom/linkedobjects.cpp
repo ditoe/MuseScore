@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,29 +29,6 @@
 #include "log.h"
 
 using namespace mu::engraving;
-
-LinkedObjects::LinkedObjects(Score* score)
-{
-    _lid = score->linkId();   // create new unique id
-}
-
-LinkedObjects::LinkedObjects(Score* score, int id)
-{
-    _lid = id;
-    if (_lid != -1) {
-        score->linkId(id);          // remember used id
-    }
-}
-
-//---------------------------------------------------------
-//   setLid
-//---------------------------------------------------------
-
-void LinkedObjects::setLid(Score* score, int id)
-{
-    _lid = id;
-    score->linkId(id);
-}
 
 bool LinkedObjects::contains(const EngravingObject* o) const
 {
@@ -115,7 +92,15 @@ EngravingObject* LinkedObjects::mainElement()
 
                     // MM rests may be generated but not written (e.g. if
                     // saving a file right after disabling MM rests)
-                    const bool mmRestsWritten = e1->style().styleB(Sid::createMultiMeasureRests);
+                    bool mmRestsWritten = e1->style().styleB(Sid::createMultiMeasureRests);
+                    if (m1->tick() == m2->tick()) {
+                        // MM rests may be still enabled but the mmRest may have been removed by editing
+                        // NOTE: the fact that we have linked clones between the original measure and the MMRest
+                        // and we have to decide which one is the "main" one is really bad tech debt. We should not
+                        // use linked clones for that. Needs fix in future. [M.S.]
+                        bool oneIsMMRestCoveringOther = m1->mmRest() == m2 || m2->mmRest() == m1;
+                        mmRestsWritten &= oneIsMMRestCoveringOther;
+                    }
 
                     if (m1->isMMRest()) {
                         // m1 is earlier if m2 is *not* the first MM rest measure

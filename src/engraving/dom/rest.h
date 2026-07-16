@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __REST_H__
-#define __REST_H__
+#pragma once
 
 #include "containers.h"
 
@@ -30,13 +29,9 @@
 
 namespace mu::engraving {
 class TDuration;
+class Transaction;
 
 struct RestVerticalClearance {
-private:
-    int m_above = 0.0; // In space units
-    int m_below = 0.0; // In space units
-    bool m_locked = false;
-
 public:
     void reset()
     {
@@ -52,6 +47,11 @@ public:
 
     bool locked() const { return m_locked; }
     void setLocked(bool v) { m_locked = v; }
+
+private:
+    int m_above = 0.0; // In space units
+    int m_below = 0.0; // In space units
+    bool m_locked = false;
 };
 
 //---------------------------------------------------------
@@ -66,13 +66,9 @@ class Rest : public ChordRest
 
 public:
 
-    ~Rest() { DeleteAll(m_dots); }
+    ~Rest() { muse::DeleteAll(m_dots); }
 
     void hack_toRestType();
-
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
 
     Rest& operator=(const Rest&) = delete;
 
@@ -82,11 +78,11 @@ public:
     double mag() const override;
     double intrinsicMag() const override;
 
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all = true) override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
     void setTrack(track_idx_t val) override;
 
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     bool isGap() const { return m_gap; }
     virtual void setGap(bool v) { m_gap = v; }
@@ -106,15 +102,15 @@ public:
     void setAccent(bool flag);
 
     bool isWholeRest() const;
+    bool isBreveRest() const;
 
     DeadSlapped* deadSlapped() const { return m_deadSlapped; }
 
-    int upLine() const override;
-    int downLine() const override;
-    mu::PointF stemPos() const override;
-    double stemPosX() const override;
-    mu::PointF stemPosBeam() const override;
     double rightEdge() const override;
+    double centerX() const;
+
+    bool alignWithOtherRests() const { return m_alignWithOtherRests; }
+    void setAlignWithOtherRests(bool v) { m_alignWithOtherRests = v; }
 
     void localSpatiumChanged(double oldValue, double newValue) override;
     PropertyValue propertyDefault(Pid) const override;
@@ -127,31 +123,19 @@ public:
     EngravingItem* prevElement() override;
     String accessibleInfo() const override;
     String screenReaderInfo() const override;
-    Shape shape() const override;
-    void editDrag(EditData& editData) override;
 
     bool shouldNotBeDrawn() const;
+    bool debugDrawGap() const;
 
     RestVerticalClearance& verticalClearance() { return m_verticalClearance; }
 
     struct LayoutData : public ChordRest::LayoutData {
         std::vector<Rest*> mergedRests;     // Rests from other voices that may be merged with this
-
-        bool isSetSym() const { return m_sym.has_value(); }
-        SymId sym() const { return m_sym.value(LD_ACCESS::CHECK); }
-        void setSym(SymId v) { m_sym.set_value(v); }
-
-    private:
-        ld_field<SymId> m_sym = { "sym", SymId::restQuarter };
+        ld_field<SymId> sym = { "[Rest] sym", SymId::restQuarter };
     };
-    DECLARE_LAYOUTDATA_METHODS(Rest);
-
-    int computeNaturalLine(int lines) const; // Natural rest vertical position
-    int computeVoiceOffset(int lines, LayoutData* ldata) const; // Vertical displacement in multi-voice cases
-    int computeWholeRestOffset(int voiceOffset, int lines) const;
+    DECLARE_LAYOUTDATA_METHODS(Rest)
 
     SymId getSymbol(DurationType type, int line, int lines) const;
-    void updateSymbol(int line, int lines, LayoutData* ldata) const;
     double symWidthNoLedgerLines(LayoutData* ldata) const;
 
 protected:
@@ -160,7 +144,7 @@ protected:
     Rest(const Rest&, bool link = false);
 
     Sid getPropertyStyle(Pid pid) const override;
-    virtual mu::RectF numberRect() const { return mu::RectF(); } // TODO: add style to show number over 1-measure rests
+    virtual RectF numberRect() const { return RectF(); } // TODO: add style to show number over 1-measure rests
 
 private:
 
@@ -168,10 +152,10 @@ private:
     Rest(Segment* parent);
     Rest(Segment* parent, const TDuration&);
 
-    mu::RectF drag(EditData&) override;
+    RectF drag(EditData&) override;
     double upPos() const override;
     double downPos() const override;
-    void setOffset(const mu::PointF& o) override;
+    void setOffset(const PointF& o) override;
 
     // values calculated by layout:
 
@@ -181,6 +165,7 @@ private:
     DeadSlapped* m_deadSlapped = nullptr;
 
     RestVerticalClearance m_verticalClearance;
+
+    bool m_alignWithOtherRests = true;
 };
-} // namespace mu::engraving
-#endif
+}

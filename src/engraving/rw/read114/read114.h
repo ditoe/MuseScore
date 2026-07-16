@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,10 +20,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_ENGRAVING_READ114_H
-#define MU_ENGRAVING_READ114_H
+#pragma once
 
 #include "../ireader.h"
+
+namespace mu::engraving {
+class Excerpt;
+}
+
+namespace mu::engraving::read400  {
+class ReadContext;
+}
 
 namespace mu::engraving::read114 {
 class Read114 : public rw::IReader
@@ -33,14 +40,18 @@ public:
     //   read114
     //    import old version <= 1.3 files
     //---------------------------------------------------------
-    Err readScore(Score* masterScore, XmlReader& e, rw::ReadInOutData* out) override;
+    muse::Ret readScoreFile(Score* masterScore, XmlReader& e, rw::ReadInOutData* out) override;
 
     bool pasteStaff(XmlReader& e, Segment* dst, staff_idx_t dstStaff, Fraction scale) override;
     void pasteSymbols(XmlReader& e, ChordRest* dst) override;
 
+    void readTremoloCompat(compat::TremoloCompat* item, XmlReader& xml) override;
+
+    static void setBarLineSpanToStaves(Score*, const read400::ReadContext&);
+
 private:
     void doReadItem(EngravingItem* item, XmlReader& xml) override;
+
+    void readExcerpt(Excerpt* ex, XmlReader& e, read400::ReadContext& ctx);
 };
 }
-
-#endif // MU_ENGRAVING_READ114_H

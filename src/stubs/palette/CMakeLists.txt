@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2026 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -12,24 +12,21 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE palette)
+muse_create_module(palette STUB)
 
-set(MODULE_QRC ${CMAKE_CURRENT_LIST_DIR}/palette.qrc)
+target_sources(palette PRIVATE
+    palettestubmodule.cpp
+    palettestubmodule.h
+    paletteconfigurationstub.cpp
+    paletteconfigurationstub.h
+)
 
-set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml)
-
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/palettestubmodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/palettestubmodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/paletteconfigurationstub.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/paletteconfigurationstub.h
-    )
-
-set(MODULE_IS_STUB ON)
-include(SetupModule)
+if(MUE_BUILD_PALETTE_QML)
+    add_subdirectory(qml/MuseScore/Palette)
+endif()

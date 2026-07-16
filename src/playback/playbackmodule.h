@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_PLAYBACK_PLAYBACKMODULE_H
-#define MU_PLAYBACK_PLAYBACKMODULE_H
+
+#pragma once
 
 #include <memory>
 
@@ -29,26 +29,36 @@
 namespace mu::playback {
 class PlaybackConfiguration;
 class PlaybackController;
-class PlaybackUiActions;
 class SoundProfilesRepository;
-class PlaybackModule : public modularity::IModuleSetup
+class PlaybackUiActions;
+class PlaybackModule : public muse::modularity::IModuleSetup
 {
 public:
 
     std::string moduleName() const override;
     void registerExports() override;
     void resolveImports() override;
-    void registerResources() override;
-    void registerUiTypes() override;
-    void onInit(const framework::IApplication::RunMode& mode) override;
-    void onAllInited(const framework::IApplication::RunMode& mode) override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+
+    muse::modularity::IContextSetup* newContext(const muse::modularity::ContextPtr& ctx) const override;
 
 private:
     std::shared_ptr<PlaybackConfiguration> m_configuration;
+};
+
+class PlaybackContext : public muse::modularity::IContextSetup
+{
+public:
+    PlaybackContext(const muse::modularity::ContextPtr& ctx)
+        : muse::modularity::IContextSetup(ctx) {}
+
+    void registerExports() override;
+    void resolveImports() override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+
+private:
     std::shared_ptr<PlaybackController> m_playbackController;
-    std::shared_ptr<PlaybackUiActions> m_playbackUiActions;
     std::shared_ptr<SoundProfilesRepository> m_soundProfileRepo;
+    std::shared_ptr<PlaybackUiActions> m_playbackUiActions;
 };
 }
-
-#endif // MU_PLAYBACK_PLAYBACKMODULE_H

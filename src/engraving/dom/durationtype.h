@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,15 +20,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __DURATIONTYPE_H__
-#define __DURATIONTYPE_H__
+#ifndef MU_ENGRAVING_DURATIONTYPE_H
+#define MU_ENGRAVING_DURATIONTYPE_H
 
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class Measure;
 class TimeSigFrac;
-enum class BeatType : char;
+enum class BeatType : unsigned char;
 
 //---------------------------------------------------------
 //   TDuration
@@ -70,7 +70,7 @@ public:
     int hooks() const;
     bool hasStem() const;
     TDuration shift(int nSteps) const { TDuration d(type()); d.shiftType(nSteps); return d; }                                // dots are not retained
-    TDuration shiftRetainDots(int nSteps, bool stepDotted = false)
+    TDuration shiftRetainDots(int nSteps, bool stepDotted = false) const
     {
         TDuration d(type());
         d.setDots(m_dots);
@@ -94,7 +94,7 @@ private:
 
 std::vector<TDuration> toDurationList(Fraction l, bool useDots, int maxDots = 4, bool printRestRemains = true);
 std::vector<TDuration> toRhythmicDurationList(const Fraction& l, bool isRest, Fraction rtickStart, const TimeSigFrac& nominal, Measure* msr,
-                                              int maxDots);
+                                              int maxDots, const Fraction& timeStretch = Fraction(1, 1));
 
 bool forceRhythmicSplit(bool isRest, BeatType startBeat, BeatType endBeat, int beatsCrossed, BeatType strongestBeatCrossed,
                         const TimeSigFrac& nominal);
@@ -108,7 +108,7 @@ void splitCompoundBeatsForList(std::vector<TDuration>* dList, const Fraction& l,
 } // namespace mu::engraving
 
 #ifndef NO_QT_SUPPORT
-Q_DECLARE_METATYPE(mu::engraving::TDuration);
+Q_DECLARE_METATYPE(mu::engraving::TDuration)
 #endif
 
 #endif

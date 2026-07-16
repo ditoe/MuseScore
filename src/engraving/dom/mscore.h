@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __MSCORE_H__
-#define __MSCORE_H__
+#pragma once
 
 #include "global/containers.h"
 
@@ -32,22 +31,22 @@ static constexpr size_t VOICES = 4;
 
 inline constexpr track_idx_t staff2track(staff_idx_t staffIdx, voice_idx_t voiceIdx = 0)
 {
-    return staffIdx != mu::nidx ? staffIdx * VOICES + voiceIdx : mu::nidx;
+    return staffIdx != muse::nidx ? staffIdx * VOICES + voiceIdx : muse::nidx;
 }
 
 inline constexpr staff_idx_t track2staff(track_idx_t track)
 {
-    return track != mu::nidx ? track / VOICES : mu::nidx;
+    return track != muse::nidx ? track / VOICES : muse::nidx;
 }
 
 inline constexpr voice_idx_t track2voice(track_idx_t track)
 {
-    return track != mu::nidx ? track % VOICES : mu::nidx;
+    return track != muse::nidx ? track % VOICES : muse::nidx;
 }
 
 inline constexpr track_idx_t trackZeroVoice(track_idx_t track)
 {
-    return track != mu::nidx ? (track / VOICES) * VOICES : mu::nidx;
+    return track != muse::nidx ? (track / VOICES) * VOICES : muse::nidx;
 }
 
 inline constexpr bool isUpVoice(voice_idx_t voiceIdx)
@@ -60,21 +59,18 @@ inline constexpr bool isDownVoice(voice_idx_t voiceIdx)
     return voiceIdx & 1;
 }
 
-static constexpr int MAX_TAGS = 32;
-
 static constexpr int MAX_HEADERS = 3;
 static constexpr int MAX_FOOTERS = 3;
 
-static constexpr double INCH      = 25.4;
-static constexpr double PPI       = 72.0; // printer points per inch
-static constexpr double DPI_F     = 5;
-static constexpr double DPI       = 72.0 * DPI_F;
-static constexpr double SPATIUM20 = 5.0 * (DPI / 72.0);
-static constexpr double DPMM      = DPI / INCH;
+// UNIVERSAL UNITS
+static constexpr double INCH      = 25.4; // millimitres per inch
+static constexpr double PPI       = 72.0; // typographical points per inch
 
-// NOTE: the Smufl default is actually 20pt. We use 10 for historical reasons
-// and back-compatibility, but this will be multiplied x2 during dynamic layout.
-static constexpr double DYNAMICS_DEFAULT_FONT_SIZE = 10.0;
+// INTERNAL DRAWING UNITS
+static constexpr double DPI = 1200;
+static constexpr double DPMM = DPI / INCH;
+
+static constexpr double UI_ICONS_DEFAULT_FONT_SIZE = 12.0;
 
 static constexpr int MAX_STAVES = 4;
 
@@ -85,7 +81,7 @@ static constexpr char mimeStaffListFormat[]  = "application/musescore/stafflist"
 static constexpr int INVALID_STRING_INDEX = -1; // no ordinal for a physical string (0 = topmost in instrument)
 static constexpr int INVALID_FRET_INDEX   = -1; // no ordinal for a fret
 
-static constexpr ID INVALID_ID = 0;
+static constexpr muse::ID INVALID_ID = 0;
 
 //---------------------------------------------------------
 //   TransposeDirection
@@ -112,36 +108,29 @@ enum class SelectType : char {
 };
 
 //---------------------------------------------------------
-//    KeySigNaturals (positions of naturals in key sig. changes)
+//   OffsetType
 //---------------------------------------------------------
 
-enum class KeySigNatural : char {
-    NONE   = 0,               // no naturals, except for change to CMaj/Amin
-    BEFORE = 1,               // naturals before accidentals
-    AFTER  = 2                // naturals after accidentals (but always before if going sharps <=> flats)
-};
-
-//---------------------------------------------------------
-//   UpDownMode
-//---------------------------------------------------------
-
-enum class UpDownMode : char {
-    CHROMATIC, OCTAVE, DIATONIC
+enum class OffsetType : unsigned char {
+    ABS,         ///< offset in point units
+    SPATIUM      ///< offset in staff space units
 };
 
 //---------------------------------------------------------
 //   MScoreError
 //---------------------------------------------------------
 
-enum class MsError {
+enum class MsError : unsigned char {
     MS_NO_ERROR,
     NO_NOTE_SELECTED,
     NO_CHORD_REST_SELECTED,
     NO_LYRICS_SELECTED,
     NO_NOTE_REST_SELECTED,
     NO_FLIPPABLE_SELECTED,
+    NO_MEASURE_SELECTED,
     NO_STAFF_SELECTED,
     NO_NOTE_FIGUREDBASS_SELECTED,
+    NO_NOTE_REST_HARMONY_SELECTED,
     CANNOT_INSERT_TUPLET,
     CANNOT_SPLIT_TUPLET,
     CANNOT_SPLIT_MEASURE_FIRST_BEAT,
@@ -152,9 +141,11 @@ enum class MsError {
     CANNOT_REMOVE_TIME_TUPLET,
     CANNOT_REMOVE_TIME_MEASURE_REPEAT,
     NO_DEST,
+    SOURCE_PARTIAL_TUPLET,
     DEST_TUPLET,
     TUPLET_CROSSES_BAR,
     DEST_LOCAL_TIME_SIGNATURE,
+    SOURCE_PARTIAL_TREMOLO,
     DEST_TREMOLO,
     NO_MIME,
     DEST_NO_CR,
@@ -162,6 +153,10 @@ enum class MsError {
     CANNOT_CHANGE_LOCAL_TIMESIG_HAS_EXCERPTS,
     CORRUPTED_MEASURE,
     CANNOT_REMOVE_KEY_SIG,
+    CANNOT_JOIN_MEASURE_STAFFTYPE_CHANGE,
+    CANNOT_REPEAT_SELECTION,
+    TRANSPOSE_NO_FRET_DIAGRAM,
+    CANNOT_EXPLODE_IMPLODE_LOCAL_TIMESIG,
 };
 
 /// \cond PLUGIN_API \private \endcond
@@ -184,8 +179,8 @@ class MScore
 public:
 
     static MsError _error;
+    static bool _errorIsWarning;
 
-    static void init();
     static void registerUiTypes();
 
     static double hRaster() { return _hRaster; }
@@ -200,12 +195,12 @@ public:
     static void setVerticalOrientation(bool val) { _verticalOrientation = val; }
 
     static bool warnPitchRange;
+    static bool warnGuitarBends;
     static int pedalEventsMinTicks;
 
     static double nudgeStep;
     static double nudgeStep10;
     static double nudgeStep50;
-    static int defaultPlayDuration;
 
 // #ifndef NDEBUG
     static bool noHorizontalStretch;
@@ -216,27 +211,20 @@ public:
     static bool testMode;
     static bool testWriteStyleToScore;
 
-    static int sampleRate;
-    static int mtcType;
-
     static bool saveTemplateMode;
     static bool noGui;
 
-    static bool noExcerpts;
     static bool noImages;
 
     static bool pdfPrinting;
     static bool svgPrinting;
-    static double pixelRatio;
 
     static double verticalPageGap;
     static double horizontalPageGapEven;
     static double horizontalPageGapOdd;
 
-    static void setError(MsError e) { _error = e; }
+    static void setError(MsError e, bool warning = false) { _error = e; _errorIsWarning = warning; }
 
     static std::string errorToString(MsError err);
 };
 } // namespace mu::engraving
-
-#endif

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SEGMENTLIST_H__
-#define __SEGMENTLIST_H__
+#pragma once
 
 #include "segment.h"
 
@@ -34,27 +33,27 @@ class Segment;
 
 class SegmentList
 {
-    Segment* _first;          ///< First item of segment list
-    Segment* _last;           ///< Last item of segment list
-    int _size;                ///< Number of items in segment list
-
 public:
     SegmentList() { clear(); }
-    void clear() { _first = _last = 0; _size = 0; }
+    void clear() { m_first = m_last = 0; m_size = 0; }
 #ifndef NDEBUG
     void check();
 #else
     void check() {}
 #endif
     SegmentList clone() const;
-    int size() const { return _size; }
+    int size() const { return m_size; }
 
-    Segment* first() const { return _first; }
+    Segment* at(int index) const;
+
+    Segment* first() const { return m_first; }
+    Segment* firstActive() const;
     Segment* first(SegmentType) const;
     Segment* first(ElementFlag) const;
 
-    Segment* last() const { return _last; }
+    Segment* last() const { return m_last; }
     Segment* last(ElementFlag) const;
+    Segment* last(SegmentType) const;
     Segment* firstCRSegment() const;
     void remove(Segment*);
     void push_back(Segment*);
@@ -80,13 +79,18 @@ public:
         const Segment& operator*() const { return *p; }
     };
 
-    iterator begin() { return _first; }
+    iterator begin() { return m_first; }
     iterator end() { return 0; }
-    const_iterator begin() const { return _first; }
+    const_iterator begin() const { return m_first; }
     const_iterator end() const { return 0; }
+
+private:
+
+    Segment* m_first = nullptr;          // First item of segment list
+    Segment* m_last = nullptr;           // Last item of segment list
+    int m_size = 0;                      // Number of items in segment list
 };
 
 // Segment* begin(SegmentList& l) { return l.first(); }
 // Segment* end(SegmentList&) { return 0; }
 } // namespace mu::engraving
-#endif

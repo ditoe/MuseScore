@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,11 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
+import QtQuick
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Palette 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Palette
+
+import "internal"
 
 StyledDialogView {
     id: root
@@ -44,6 +46,19 @@ StyledDialogView {
         propertiesModel.load(root.properties)
     }
 
+    NavigationPanel {
+        id: navPanel
+        name: "PaletteCellPropertiesDialog"
+        section: root.navigationSection
+        enabled: contentColumn.enabled && contentColumn.visible
+        order: 1
+        direction: NavigationPanel.Horizontal
+    }
+
+    onNavigationActivateRequested: {
+        nameField.navigation.requestActive()
+    }
+
     Column {
         id: contentColumn
         anchors.fill: parent
@@ -55,14 +70,18 @@ StyledDialogView {
         }
 
         TextInputField {
+            id: nameField
             currentText: propertiesModel.name
 
             onTextChanged: function(newTextValue) {
                 propertiesModel.name = newTextValue
             }
+
+            navigation.panel: navPanel
+            navigation.order: 1
         }
 
-        SeparatorLine { anchors.margins: -parent.margins }
+        SeparatorLine { anchors.margins: -root.margins }
 
         StyledTextLabel {
             text: qsTrc("palette", "Content offset")
@@ -76,67 +95,52 @@ StyledDialogView {
             columns: 2
             spacing: 12
 
-            Repeater {
-                id: repeater
+            PalettePropertyItem {
+                title: qsTrc("palette", "X")
+                value: propertiesModel.xOffset
+                incrementStep: 1
+                minValue: -10
+                maxValue: 10
+                //: Abbreviation of "spatium"
+                measureUnit: qsTrc("global", "sp")
 
-                model: [
-                    {
-                        title: qsTrc("palette", "X"),
-                        value: propertiesModel.xOffset,
-                        incrementStep: 1,
-                        minValue: -10,
-                        maxValue: 10,
-                        //: Abbreviation of "spatium"
-                        measureUnit: qsTrc("global", "sp")
-                    },
-                    {
-                        title: qsTrc("palette", "Y"),
-                        value: propertiesModel.yOffset,
-                        incrementStep: 1,
-                        minValue: -10,
-                        maxValue: 10,
-                        measureUnit: qsTrc("global", "sp")
-                    },
-                    {
-                        title: qsTrc("palette", "Content scale"),
-                        value: propertiesModel.scaleFactor,
-                        incrementStep: 0.1,
-                        minValue: 0.1,
-                        maxValue: 10
-                    }
-                ]
-
-                function setValue(index, value) {
-                    if (index === 0) {
-                        propertiesModel.xOffset = value
-                    } else if (index === 1) {
-                        propertiesModel.yOffset = value
-                    } else if (index === 2) {
-                        propertiesModel.scaleFactor = value
-                    }
+                onValueEdited: function (newValue) {
+                    propertiesModel.xOffset = newValue
                 }
 
-                Column {
-                    width: (grid.width - grid.spacing * (grid.columns - 1)) / grid.columns
+                navigation.panel: navPanel
+                navigation.order: 2
+            }
 
-                    spacing: 8
+            PalettePropertyItem {
+                title: qsTrc("palette", "Y")
+                value: propertiesModel.yOffset
+                incrementStep: 1
+                minValue: -10
+                maxValue: 10
+                measureUnit: qsTrc("global", "sp")
 
-                    StyledTextLabel {
-                        text: modelData["title"]
-                    }
-
-                    IncrementalPropertyControl {
-                        currentValue: modelData["value"]
-                        measureUnitsSymbol: Boolean(modelData["measureUnit"]) ? modelData["measureUnit"] : ""
-                        step: modelData["incrementStep"]
-                        minValue: modelData["minValue"]
-                        maxValue: modelData["maxValue"]
-
-                        onValueEdited: function(newValue) {
-                            repeater.setValue(model.index, newValue)
-                        }
-                    }
+                onValueEdited: function (newValue) {
+                    propertiesModel.yOffset = newValue
                 }
+
+                navigation.panel: navPanel
+                navigation.order: 3
+            }
+
+            PalettePropertyItem {
+                title: qsTrc("palette", "Content scale")
+                value: propertiesModel.scaleFactor
+                incrementStep: 0.1
+                minValue: 0.1
+                maxValue: 10
+
+                onValueEdited: function (newValue) {
+                    propertiesModel.scaleFactor = newValue
+                }
+
+                navigation.panel: navPanel
+                navigation.order: 4
             }
         }
 
@@ -149,31 +153,24 @@ StyledDialogView {
             onClicked: {
                 propertiesModel.drawStaff = !checked
             }
+
+            navigation.panel: navPanel
+            navigation.order: 5
         }
 
-        Row {
+        ButtonBox {
             width: parent.width
-            height: childrenRect.height
 
-            spacing: 12
+            buttons: [ ButtonBoxModel.Cancel, ButtonBoxModel.Ok ]
 
-            FlatButton {
-                text: qsTrc("global", "Cancel")
+            navigationPanel.section: root.navigationSection
+            navigationPanel.order: 2
 
-                width: (parent.width - parent.spacing) / 2
-
-                onClicked: {
+            onStandardButtonClicked: function(buttonId) {
+                if (buttonId === ButtonBoxModel.Cancel) {
                     propertiesModel.reject()
                     root.hide()
-                }
-            }
-
-            FlatButton {
-                text: qsTrc("global", "OK")
-
-                width: (parent.width - parent.spacing) / 2
-
-                onClicked: {
+                } else if (buttonId === ButtonBoxModel.Ok) {
                     root.hide()
                 }
             }

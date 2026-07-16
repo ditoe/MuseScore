@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,11 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
 
 MixerPanelSection {
     id: root
@@ -33,6 +35,8 @@ MixerPanelSection {
 
     Column {
         id: content
+
+        required property MixerChannelItem channelItem
 
         y: 0
 
@@ -47,17 +51,20 @@ MixerPanelSection {
             id: repeater
             anchors.horizontalCenter: parent.horizontalCenter
 
-            model: channelItem.auxSendItemList
+            model: content.channelItem.auxSendItemList
 
             delegate: AuxSendControl {
                 id: auxSendControl
+
+                required property AuxSendItem modelData
+                required property int index
 
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 auxSendItemModel: modelData
 
-                navigationPanel: channelItem.panel
-                navigationRowStart: root.navigationRowStart + (model.index * 2) // NOTE: 2 - because AuxSendControl has 2 controls
+                navigationPanel: content.channelItem.panel
+                navigationRowStart: root.navigationRowStart + index * 2 // NOTE: 2 - because AuxSendControl has 2 controls
                 navigationName: content.accessibleName
                 accessibleName: content.accessibleName
 

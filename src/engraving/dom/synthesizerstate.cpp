@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -43,7 +43,7 @@ void SynthesizerState::write(XmlWriter& xml, bool force /* = false */) const
     xml.startElement("Synthesizer");
     for (const SynthesizerGroup& g : *this) {
         if (!g.name().isEmpty()) {
-            ByteArray ba = g.name().toAscii();
+            muse::ByteArray ba = g.name().toAscii();
             xml.startElement(ba.constChar());
             for (const IdValue& v : g) {
                 xml.tag("val", { { "id", v.id } }, v.data);

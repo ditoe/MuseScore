@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,17 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+pragma ComponentBehavior: Bound    
+
+import QtQuick
+import QtQuick.Layouts
+
+import Muse.Ui
+import Muse.UiComponents
 
 RowLayout {
     id: root
-
-    width: 100
-    spacing: 8
 
     property int propertyNameWidth: -1
     property NavigationPanel navigationPanel: null
@@ -42,8 +42,12 @@ RowLayout {
     property bool isFileInfoPanelProperty: false
     property bool valueFillWidth: false
 
-    signal changePositionOfListIndex()
-    signal deleteProperty()
+    property bool isMultiLineEdit: false
+
+    signal scrollIntoViewRequested()
+    signal deletePropertyRequested()
+
+    spacing: 8
 
     QtObject {
         id: prv
@@ -53,6 +57,8 @@ RowLayout {
 
     StyledTextLabel {
         Layout.preferredWidth: root.propertyNameWidth
+        Layout.topMargin: root.isMultiLineEdit ? propertyNameField.textSidePadding : 0;
+        Layout.alignment: root.isMultiLineEdit ? Qt.AlignTop : Qt.AlignHCenter
 
         text: root.propertyName ? root.propertyName : ""
         font: ui.theme.bodyBoldFont
@@ -61,18 +67,22 @@ RowLayout {
     }
 
     TextInputField {
+        id: propertyNameField
+
         Layout.preferredWidth: root.propertyNameWidth
 
         currentText: root.propertyName ? root.propertyName : ""
         visible: !root.isStandardProperty
         hint: qsTrc("project/properties", "Property")
 
+        inputField.font: ui.theme.bodyBoldFont
+
         navigation.name: root.propertyName + "PropertyName"
         navigation.panel: root.navigationPanel
         navigation.column: prv.navigationStartIndex
         navigation.onActiveChanged: {
             if (navigation.active) {
-                root.changePositionOfListIndex()
+                root.scrollIntoViewRequested()
             }
         }
 
@@ -81,25 +91,59 @@ RowLayout {
         }
     }
 
-    TextInputField {
+    Loader {
         Layout.fillWidth: true
 
-        currentText: root.propertyValue ? root.propertyValue : ""
-        hint: root.isStandardProperty ? "" : qsTrc("project/properties", "Value")
         visible: !root.isFileInfoPanelProperty
 
-        navigation.name: root.propertyName + "PropertyValue"
-        navigation.panel: root.navigationPanel
-        navigation.column: prv.navigationStartIndex + 1
-        accessible.name: root.propertyName + " " + currentText
-        navigation.onActiveChanged: {
-            if (navigation.active && !root.isFileInfoPanelProperty) {
-                root.changePositionOfListIndex()
+        sourceComponent: root.isMultiLineEdit ? textAreaComponent : textFieldComponent
+
+        Component {
+            id: textAreaComponent
+
+            TextInputArea {
+                currentText: root.propertyValue ? root.propertyValue : ""
+                hint: root.isStandardProperty ? "" : qsTrc("project/properties", "Value")
+
+                resizeVerticallyWithText: true
+
+                navigation.name: root.propertyName + "PropertyValue"
+                navigation.panel: root.navigationPanel
+                navigation.column: prv.navigationStartIndex + 1
+                accessible.name: root.propertyName + " " + currentText
+                navigation.onActiveChanged: {
+                    if (navigation.active && !root.isFileInfoPanelProperty) {
+                        root.scrollIntoViewRequested()
+                    }
+                }
+
+                onTextChanged: function(newValue) {
+                    root.propertyValue = newValue
+                }
             }
         }
 
-        onTextChanged: function(newValue) {
-            root.propertyValue = newValue
+        Component {
+            id: textFieldComponent
+
+            TextInputField {
+                currentText: root.propertyValue ? root.propertyValue : ""
+                hint: root.isStandardProperty ? "" : qsTrc("project/properties", "Value")
+
+                navigation.name: root.propertyName + "PropertyValue"
+                navigation.panel: root.navigationPanel
+                navigation.column: prv.navigationStartIndex + 1
+                accessible.name: root.propertyName + " " + currentText
+                navigation.onActiveChanged: {
+                    if (navigation.active && !root.isFileInfoPanelProperty) {
+                        root.scrollIntoViewRequested()
+                    }
+                }
+
+                onTextChanged: function(newValue) {
+                    root.propertyValue = newValue
+                }
+            }
         }
     }
 
@@ -107,7 +151,7 @@ RowLayout {
         Layout.fillWidth: root.valueFillWidth
 
         text: root.propertyValue ? root.propertyValue : ""
-        font: ui.theme.bodyBoldFont
+        font: ui.theme.bodyFont
         horizontalAlignment: Qt.AlignLeft
         visible: root.isFileInfoPanelProperty
     }
@@ -125,6 +169,6 @@ RowLayout {
         navigation.column: prv.navigationStartIndex + 2
         accessible.name: "Delete"
 
-        onClicked: root.deleteProperty()
+        onClicked: root.deletePropertyRequested()
     }
 }

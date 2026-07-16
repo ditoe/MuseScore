@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -54,12 +54,12 @@ const std::vector<JumpTypeTableItem> jumpTypeTable {
     { JumpType::DS_AL_FINE, "D.S. al Fine", "segno", "fine", "" },
     { JumpType::DS,         "D.S.",         "segno", "end",  "" },
 
-    { JumpType::DC_AL_DBLCODA,  "D.C. al Double Coda",   "start", "varcoda",  "codab" },
-    { JumpType::DS_AL_DBLCODA,  "D.S. al Double Coda",   "segno", "varcoda",  "codab" },
-    { JumpType::DSS,            "Dal Segno Segno",       "varsegno", "end",  "" },
-    { JumpType::DSS_AL_CODA,    "D.S.S. al Coda",        "varsegno", "coda",  "codab" },
-    { JumpType::DSS_AL_DBLCODA, "D.S.S. al Double Coda", "varsegno", "varcoda", "codab" },
-    { JumpType::DSS_AL_FINE,    "D.S.S. al Fine",        "varsegno", "fine",  "" },
+    { JumpType::DC_AL_DBLCODA,  "D.C. al Doppia Coda",   "start",    "varcoda", "codab" },
+    { JumpType::DS_AL_DBLCODA,  "D.S. al Doppia Coda",   "segno",    "varcoda", "codab" },
+    { JumpType::DSS,            "Dal Doppio Segno",      "varsegno", "end",     "" },
+    { JumpType::DSS_AL_CODA,    "D.D.S. al Coda",        "varsegno", "coda",    "codab" },
+    { JumpType::DSS_AL_DBLCODA, "D.D.S. al Doppia Coda", "varsegno", "varcoda", "codab" },
+    { JumpType::DSS_AL_FINE,    "D.D.S. al Fine",        "varsegno", "fine",    "" },
 };
 
 //---------------------------------------------------------
@@ -70,8 +70,7 @@ Jump::Jump(Measure* parent)
     : TextBase(ElementType::JUMP, parent, TextStyleType::REPEAT_RIGHT, ElementFlag::MOVABLE | ElementFlag::SYSTEM | ElementFlag::ON_STAFF)
 {
     initElementStyle(&jumpStyle);
-    setLayoutToParentWidth(true);
-    _playRepeats = false;
+    m_playRepeats = false;
 }
 
 //---------------------------------------------------------
@@ -99,7 +98,7 @@ void Jump::setJumpType(JumpType t)
 JumpType Jump::jumpType() const
 {
     for (const JumpTypeTableItem& t : jumpTypeTable) {
-        if (_jumpTo == t.jumpTo && _playUntil == t.playUntil && _continueAt == t.continueAt) {
+        if (m_jumpTo == t.jumpTo && m_playUntil == t.playUntil && m_continueAt == t.continueAt) {
             return t.type;
         }
     }
@@ -109,33 +108,6 @@ JumpType Jump::jumpType() const
 String Jump::jumpTypeUserName() const
 {
     return TConv::translatedUserName(jumpType());
-}
-
-//---------------------------------------------------------
-//   undoSetJumpTo
-//---------------------------------------------------------
-
-void Jump::undoSetJumpTo(const String& s)
-{
-    undoChangeProperty(Pid::JUMP_TO, s);
-}
-
-//---------------------------------------------------------
-//   undoSetPlayUntil
-//---------------------------------------------------------
-
-void Jump::undoSetPlayUntil(const String& s)
-{
-    undoChangeProperty(Pid::PLAY_UNTIL, s);
-}
-
-//---------------------------------------------------------
-//   undoSetContinueAt
-//---------------------------------------------------------
-
-void Jump::undoSetContinueAt(const String& s)
-{
-    undoChangeProperty(Pid::CONTINUE_AT, s);
 }
 
 //---------------------------------------------------------
@@ -176,7 +148,7 @@ bool Jump::setProperty(Pid propertyId, const PropertyValue& v)
         setContinueAt(v.value<String>());
         break;
     case Pid::PLAY_REPEATS:
-        setPlayRepeats(v.toInt());
+        setPlayRepeats(v.toBool());
         break;
     default:
         if (!TextBase::setProperty(propertyId, v)) {
@@ -185,7 +157,7 @@ bool Jump::setProperty(Pid propertyId, const PropertyValue& v)
         break;
     }
     triggerLayout();
-    score()->setPlaylistDirty();
+    score()->invalidateRepeatList();
     return true;
 }
 
@@ -199,7 +171,7 @@ PropertyValue Jump::propertyDefault(Pid propertyId) const
     case Pid::JUMP_TO:
     case Pid::PLAY_UNTIL:
     case Pid::CONTINUE_AT:
-        return String(u"");
+        return String();
     case Pid::PLAY_REPEATS:
         return false;
     case Pid::PLACEMENT:
@@ -217,7 +189,7 @@ PropertyValue Jump::propertyDefault(Pid propertyId) const
 EngravingItem* Jump::nextSegmentElement()
 {
     Segment* seg = measure()->last();
-    return seg->firstElement(staffIdx());
+    return seg->firstElementForNavigation(staffIdx());
 }
 
 //---------------------------------------------------------
@@ -236,5 +208,14 @@ EngravingItem* Jump::prevSegmentElement()
 String Jump::accessibleInfo() const
 {
     return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), this->jumpTypeUserName());
+}
+
+//---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString Jump::subtypeUserName() const
+{
+    return TConv::userName(jumpType());
 }
 }

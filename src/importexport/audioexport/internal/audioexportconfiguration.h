@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,6 +38,18 @@ public:
     int exportSampleRate() const override;
     void setExportSampleRate(int rate) override;
     const std::vector<int>& availableSampleRates() const override;
+
+    muse::audio::samples_t exportBufferSize() const override;
+
+    muse::audio::AudioSampleFormat exportWavSampleFormat() const override;
+    void setExportWavSampleFormat(muse::audio::AudioSampleFormat format) override;
+
+    muse::audio::AudioSampleFormat exportFlacSampleFormat() const override;
+    void setExportFlacSampleFormat(muse::audio::AudioSampleFormat format) override;
+
+    const std::vector<muse::audio::AudioSampleFormat>& availableWavSampleFormats() const override;
+    const std::vector<muse::audio::AudioSampleFormat>& availableFlacSampleFormats() const override;
+    QString sampleFormatToString(muse::audio::AudioSampleFormat format) const override;
 
 private:
     std::optional<int> m_exportMp3BitrateOverride = std::nullopt;

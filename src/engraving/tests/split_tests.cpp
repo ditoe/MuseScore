@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,17 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/chordrest.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/segment.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/segment.h"
+#include "engraving/editing/splitjoinmeasure.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String SPLIT_DATA_DIR("split_data/");
@@ -50,11 +52,10 @@ void Engraving_SplitTests::split(const char* f1, const char* ref, int index)
     for (int i = 0; i < index; ++i) {
         s = s->next1(SegmentType::ChordRest);
     }
-    ChordRest* cr = toChordRest(s->element(0));
 
-    score->startCmd();
-    score->cmdSplitMeasure(cr);
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving split tests"), [&](auto& tx) {
+        SplitJoinMeasure::splitMeasure(tx, score, s->tick());
+    });
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String::fromUtf8(f1), SPLIT_DATA_DIR + String::fromUtf8(ref)));
     delete score;
@@ -100,7 +101,7 @@ TEST_F(Engraving_SplitTests, split08)
     split("split08.mscx", "split08-ref.mscx");
 }
 
-TEST_F(Engraving_SplitTests, DISABLED_split183846) //  determine why pageWidth/pageHeight are missing!
+TEST_F(Engraving_SplitTests, split183846)
 {
     split("split183846-irregular-qn-qn-wn.mscx",          "split183846-irregular-qn-qn-wn-ref.mscx", 1);
     split("split183846-irregular-wn-wn.mscx",             "split183846-irregular-wn-wn-ref.mscx", 1);
@@ -122,4 +123,48 @@ TEST_F(Engraving_SplitTests, split184061)
 TEST_F(Engraving_SplitTests, split295207)
 {
     split("split295207.mscx", "split295207-ref.mscx", 5);
+}
+
+TEST_F(Engraving_SplitTests, splitTieAtStart) {
+    // Test splitting a measure when there is a tie ending on the first chord on the split range
+    MasterScore* score = ScoreRW::readScore(SPLIT_DATA_DIR + u"splitTieAtStart.mscx");
+    EXPECT_TRUE(score);
+
+    Measure* m1 = score->firstMeasure();
+    EXPECT_TRUE(m1);
+
+    Segment* s1 = m1->last(SegmentType::ChordRest);
+    ChordRest* cr1 = toChordRest(s1->element(0));
+    EXPECT_TRUE(cr1 && cr1->isChord());
+    Chord* c1 = toChord(cr1);
+    Note* n1 = c1->upNote();
+    EXPECT_TRUE(n1);
+
+    auto checkTie = [&]() -> Tie* {
+        Tie* t = n1->tieFor();
+        EXPECT_TRUE(t);
+
+        Note* n2 = t->endNote();
+        EXPECT_TRUE(n2);
+        EXPECT_EQ(n2->tick(), Fraction(1, 1));
+        EXPECT_EQ(n2->chord()->measure(), m1->nextMeasure());
+
+        return t;
+    };
+
+    Tie* tie1 = checkTie();
+
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving split tests"), [&](auto& tx) {
+        SplitJoinMeasure::splitMeasure(tx, score, Fraction(3, 2));
+    });
+
+    Tie* tie2 = checkTie();
+    EXPECT_NE(tie2, tie1);
+
+    score->undoRedo(true, nullptr);
+
+    Tie* tie3 = checkTie();
+    EXPECT_EQ(tie3, tie1);
+
+    delete score;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,21 +19,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
-import MuseScore.CommonScene 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.UiComponents
+import Muse.Ui
+
+import MuseScore.NotationScene
+import MuseScore.Playback
 
 Item {
     id: root
 
-    property var playbackModel: null
-    property var navPanel: null
+    property PlaybackToolBarModel playbackModel: null
+
+    property NavigationPanel navPanel: null
+    readonly property int navigationOrderEnd: tempoLoader.navigationOrderEnd
+
     property bool floating: false
 
-    width: childrenRect.width
+    // Not `+ endSeparator.width`: this way, the separator itself is outside the view,
+    // which means that it will be exactly at the position of the KDDockWidgets separator
+    // between this toolbar and the undo/redo toolbar.
+    width: endSeparator.visible ? endSeparator.x
+                                : tempoLoader.x + tempoLoader.width
     height: 30
 
     ListView {
@@ -52,13 +63,16 @@ Item {
         orientation: Qt.Horizontal
         interactive: false
 
+        readonly property int navigationOrderEnd: count
+
         delegate: FlatButton {
             id: btn
 
+            required property MenuItem item
+            required property int index
+
             width: 30
             height: width
-
-            property var item: Boolean(model) ? model.itemRole : null
 
             icon: Boolean(item) ? item.icon : IconCode.NONE
 
@@ -73,7 +87,9 @@ Item {
 
             navigation.panel: root.navPanel
             navigation.name: toolTipTitle
-            navigation.order: model.index
+            navigation.order: index
+            accessible.name: (item.checkable ? (item.checked ? item.title + "  " + qsTrc("global", "On") :
+                                                               item.title + "  " + qsTrc("global", "Off")) : item.title)
 
             onClicked: {
                 if (menuLoader.isMenuOpened || item.subitems.length) {
@@ -123,6 +139,9 @@ Item {
         maxMillisecondsNumber: 9
         time: root.playbackModel.playTime
 
+        navigationPanel: root.navPanel
+        navigationOrderStart: buttonsListView.navigationOrderEnd + 1
+
         onTimeEdited: function(newTime) {
             root.playbackModel.playTime = newTime
         }
@@ -143,6 +162,9 @@ Item {
 
         font: timeField.font
 
+        navigationPanel: root.navPanel
+        navigationOrderStart: timeField.navigationOrderEnd + 1
+
         onMeasureNumberEdited: function(newValue) {
             root.playbackModel.measureNumber = newValue
         }
@@ -152,35 +174,82 @@ Item {
         }
     }
 
-    Item {
-        id: tempoViewContainer
+    Loader {
+        id: tempoLoader
 
         anchors.left: measureAndBeatFields.right
         anchors.leftMargin: 6
 
-        //! NOTE: explicit width prevents the content from jumping around
-        // when a score is being played
-        // See: https://github.com/musescore/MuseScore/issues/9633
-        width: 48
-        height: parent.height
+        readonly property int navigationOrderEnd: item?.navigation?.order ?? measureAndBeatFields.navigationOrderEnd
 
-        TempoView {
-            id: tempoView
+        // Fixed width prevents items from jumping around; but we
+        // scale it according to the font size to prevent clipping
+        readonly property real tempoViewWidth: 5 * ui.theme.bodyFont.pixelSize
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
+        sourceComponent: root.floating ? tempoViewComponent : tempoButtonComponent
 
-            noteSymbol: root.playbackModel.tempo.noteSymbol
-            tempoValue: root.playbackModel.tempo.value
+        Component {
+            id: tempoViewComponent
 
-            noteSymbolFont.pixelSize: ui.theme.iconsFont.pixelSize
-            tempoValueFont: timeField.font
+            Item {
+                implicitWidth: tempoLoader.tempoViewWidth
+                implicitHeight: root.height
+
+                TempoView {
+                    id: tempoView
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: 1 // for nicer visual alignment
+
+                    noteSymbol: root.playbackModel.tempo.noteSymbol
+                    tempoValue: root.playbackModel.tempo.value
+
+                    noteSymbolFont.pixelSize: ui.theme.iconsFont.pixelSize
+                    tempoValueFont: timeField.font
+                }
+            }
+        }
+
+        Component {
+            id: tempoButtonComponent
+
+            PopupButton {
+                id: playbackSpeedButton
+
+                implicitWidth: tempoLoader.tempoViewWidth
+                implicitHeight: root.height
+
+                transparent: !root.isPopupOpened
+
+                toolTipTitle: qsTrc("playback", "Speed")
+
+                navigation.panel: root.navPanel
+                navigation.order: measureAndBeatFields.navigationOrderEnd + 1
+
+                contentItem: TempoView {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: 1 // for nicer visual alignment
+
+                    noteSymbol: root.playbackModel.tempo.noteSymbol
+                    tempoValue: root.playbackModel.tempo.value
+
+                    noteSymbolFont.pixelSize: ui.theme.iconsFont.pixelSize
+                    tempoValueFont: timeField.font
+                }
+
+                property PlaybackToolBarModel playbackModel: root.playbackModel
+
+                popupComponent: PlaybackSpeedPopup {
+                    playbackModel: playbackSpeedButton.playbackModel
+                }
+            }
         }
     }
 
     SeparatorLine {
-        anchors.left: tempoViewContainer.right
-        anchors.leftMargin: 12
+        id: endSeparator
+        anchors.left: tempoLoader.right
+        anchors.leftMargin: 6
         anchors.topMargin: 2
         anchors.bottomMargin: 2
 

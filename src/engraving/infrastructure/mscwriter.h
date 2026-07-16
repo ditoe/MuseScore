@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_MSCWRITER_H
-#define MU_ENGRAVING_MSCWRITER_H
+#pragma once
 
 #include "types/string.h"
 #include "types/ret.h"
@@ -28,7 +27,7 @@
 #include "io/iodevice.h"
 #include "mscio.h"
 
-namespace mu {
+namespace muse {
 class ZipWriter;
 class TextStream;
 }
@@ -40,9 +39,9 @@ public:
 
     struct Params
     {
-        io::IODevice* device = nullptr;
-        io::path_t filePath;
-        String mainFileName;
+        muse::io::IODevice* device = nullptr;
+        muse::io::path_t filePath;
+        muse::String mainFileName;
         MscIoMode mode = MscIoMode::Zip;
     };
 
@@ -53,91 +52,89 @@ public:
     void setParams(const Params& params);
     const Params& params() const;
 
-    Ret open();
+    muse::Ret open();
     void close();
     bool isOpened() const;
     bool hasError() const;
 
-    void writeStyleFile(const ByteArray& data);
-    void writeScoreFile(const ByteArray& data);
-    void addExcerptStyleFile(const String& name, const ByteArray& data);
-    void addExcerptFile(const String& name, const ByteArray& data);
-    void writeChordListFile(const ByteArray& data);
-    void writeThumbnailFile(const ByteArray& data);
-    void addImageFile(const String& fileName, const ByteArray& data);
-    void writeAudioFile(const ByteArray& data);
-    void writeAudioSettingsJsonFile(const ByteArray& data);
-    void writeViewSettingsJsonFile(const ByteArray& data, const io::path_t& pathPrefix = "");
+    void writeStyleFile(const muse::ByteArray& data);
+    void writeScoreFile(const muse::ByteArray& data);
+    void addExcerptStyleFile(const muse::String& excerptFileName, const muse::ByteArray& data);
+    void addExcerptFile(const muse::String& excerptFileName, const muse::ByteArray& data);
+    void writeChordListFile(const muse::ByteArray& data);
+    void writeThumbnailFile(const muse::ByteArray& data);
+    void addImageFile(const muse::String& fileName, const muse::ByteArray& data);
+    void writeAudioSettingsJsonFile(const muse::ByteArray& data, const muse::io::path_t& pathPrefix = "");
+    void writeViewSettingsJsonFile(const muse::ByteArray& data, const muse::io::path_t& pathPrefix = "");
+    void writeAutomationJsonFile(const muse::ByteArray& data);
 
 private:
 
     struct IWriter {
         virtual ~IWriter() = default;
 
-        virtual Ret open(io::IODevice* device, const io::path_t& filePath) = 0;
+        virtual muse::Ret open(muse::io::IODevice* device, const muse::io::path_t& filePath) = 0;
         virtual void close() = 0;
         virtual bool isOpened() const = 0;
         virtual bool hasError() const = 0;
-        virtual bool addFileData(const String& fileName, const ByteArray& data) = 0;
+        virtual bool addFileData(const muse::String& fileName, const muse::ByteArray& data) = 0;
     };
 
     struct ZipFileWriter : public IWriter
     {
         ~ZipFileWriter() override;
-        Ret open(io::IODevice* device, const io::path_t& filePath) override;
+        muse::Ret open(muse::io::IODevice* device, const muse::io::path_t& filePath) override;
         void close() override;
         bool isOpened() const override;
         bool hasError() const override;
-        bool addFileData(const String& fileName, const ByteArray& data) override;
+        bool addFileData(const muse::String& fileName, const muse::ByteArray& data) override;
 
     private:
-        io::IODevice* m_device = nullptr;
-        bool m_selfDeviceOwner = false;
-        ZipWriter* m_zip = nullptr;
+        muse::io::IODevice* m_device = nullptr;
+        muse::ZipWriter* m_zip = nullptr;
     };
 
     struct DirWriter : public IWriter
     {
-        Ret open(io::IODevice* device, const io::path_t& filePath) override;
+        muse::Ret open(muse::io::IODevice* device, const muse::io::path_t& filePath) override;
         void close() override;
         bool isOpened() const override;
         bool hasError() const override;
-        bool addFileData(const String& fileName, const ByteArray& data) override;
+        bool addFileData(const muse::String& fileName, const muse::ByteArray& data) override;
     private:
-        io::path_t m_rootPath;
+        muse::io::path_t m_rootPath;
         bool m_hasError = false;
     };
 
     struct XmlFileWriter : public IWriter
     {
         ~XmlFileWriter() override;
-        Ret open(io::IODevice* device, const io::path_t& filePath) override;
+        muse::Ret open(muse::io::IODevice* device, const muse::io::path_t& filePath) override;
         void close() override;
         bool isOpened() const override;
         bool hasError() const override;
-        bool addFileData(const String& fileName, const ByteArray& data) override;
+        bool addFileData(const muse::String& fileName, const muse::ByteArray& data) override;
     private:
-        io::IODevice* m_device = nullptr;
-        bool m_selfDeviceOwner = false;
-        TextStream* m_stream = nullptr;
+        muse::io::IODevice* m_device = nullptr;
+        muse::TextStream* m_stream = nullptr;
     };
 
     struct Meta {
-        std::vector<String> files;
+        std::vector<muse::String> files;
         bool isWritten = false;
 
-        bool contains(const String& file) const;
-        void addFile(const String& file);
+        bool contains(const muse::String& file) const;
+        void addFile(const muse::String& file);
     };
 
     IWriter* writer() const;
 
-    bool addFileData(const String& fileName, const ByteArray& data);
+    bool addFileData(const muse::String& fileName, const muse::ByteArray& data);
 
     void writeMeta();
-    void writeContainer(const std::vector<String>& paths);
+    void writeContainer(const std::vector<muse::String>& paths);
 
-    String mainFileName() const;
+    muse::String mainFileName() const;
 
     Params m_params;
     mutable IWriter* m_writer = nullptr;
@@ -145,5 +142,3 @@ private:
     bool m_hadError = false;
 };
 }
-
-#endif // MU_ENGRAVING_MSCWRITER_H

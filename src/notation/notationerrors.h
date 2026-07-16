@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,50 +27,35 @@
 
 namespace mu::notation {
 enum class Err {
-    Undefined       = int(Ret::Code::Undefined),
-    NoError         = int(Ret::Code::Ok),
-    UnknownError    = int(Ret::Code::NotationFirst),
+    Undefined       = int(muse::Ret::Code::Undefined),
+    NoError         = int(muse::Ret::Code::Ok),
+    UnknownError    = int(muse::Ret::Code::NotationFirst),
 
     // selection
-    NoteOrRestIsNotSelected = 1050,
-    NoteOrFiguredBassIsNotSelected,
-    MeasureIsNotSelected,
-    SelectCompleteTupletOrTremolo,
+    SelectCompleteTupletOrTremolo = 1050,
     EmptySelection,
 };
 
-inline Ret make_ret(Err err)
+inline muse::Ret make_ret(Err err)
 {
     std::string text;
 
     switch (err) {
     case Err::UnknownError:
-        text = trc("notation", "Unknown error");
-        break;
-    case Err::NoteOrRestIsNotSelected:
-        text = trc("notation", "No note or rest selected")
-               + "\n" + trc("notation", "Please select a note or rest and retry");
-        break;
-    case Err::NoteOrFiguredBassIsNotSelected:
-        text = trc("notation", "No note or figured bass selected")
-               + "\n" + trc("notation", "Please select a note or figured bass and retry");
-        break;
-    case Err::MeasureIsNotSelected:
-        text = trc("notation", "No measure selected")
-               + "\n" + trc("notation", "Please select a measure and retry");
+        text = muse::trc("notation", "Unknown error");
         break;
     case Err::SelectCompleteTupletOrTremolo:
-        text = trc("notation", "Please select the complete tuplet or tremolo and retry");
+        text = muse::trc("notation", "Please select the complete tuplet or tremolo and retry");
         break;
     case Err::EmptySelection:
-        text = trc("notation", "The selection is empty");
+        text = muse::trc("notation", "The selection is empty");
         break;
     case Err::Undefined:
     case Err::NoError:
         break;
     }
 
-    return mu::Ret(static_cast<int>(err), text);
+    return muse::Ret(static_cast<int>(err), text);
 }
 }
 

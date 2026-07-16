@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,7 +33,7 @@ static const ElementStyle tripletFeelStyle {
     { Sid::tempoFontStyle, Pid::FONT_STYLE }
 };
 
-static std::map<TripletFeelType, String> tupletSymbols =
+static const std::map<TripletFeelType, String> tupletSymbols =
 {
     { TripletFeelType::TRIPLET_8TH,     String(u"%1textBlackNoteShortStem%2"
                                                "%1textCont8thBeamShortStem%2"
@@ -50,9 +50,11 @@ static std::map<TripletFeelType, String> tupletSymbols =
                                                "%1textBlackNoteFrac16thShortStem%2"
                                                " = "
                                                "%1textBlackNoteShortStem%2"
+                                               "%1textTupletBracketStartShortStem%2"
                                                "%1textCont8thBeamShortStem%2"
                                                "%1textTuplet3ShortStem%2"
-                                               "%1textBlackNoteFrac16thShortStem%2") },
+                                               "%1textBlackNoteFrac16thShortStem%2"
+                                               "%1textTupletBracketEndShortStem%2") },
 
     { TripletFeelType::DOTTED_8TH,      String(u"%1textBlackNoteShortStem%2"
                                                "%1textCont8thBeamShortStem%2"
@@ -101,7 +103,7 @@ static std::map<TripletFeelType, String> tupletSymbols =
                                                "%1textBlackNoteFrac8thShortStem%2") }
 };
 
-static std::map<TripletFeelType, TranslatableString> tripletFeelNames =
+static const std::map<TripletFeelType, TranslatableString> tripletFeelNames =
 {
     { TripletFeelType::TRIPLET_8TH,     TranslatableString("engraving/tripletfeel", "Triplet 8th") },
     { TripletFeelType::TRIPLET_16TH,    TranslatableString("engraving/tripletfeel", "Triplet 16th") },
@@ -154,7 +156,7 @@ void TripletFeel::setTripletProperty()
         break;
     }
 
-    setXmlText(tupletSymbols[m_tripletFeelType].arg(String(u"<sym>staffPosLower3</sym><sym>"), String(u"</sym>")));
+    setXmlText(tupletSymbols.at(m_tripletFeelType).arg(String(u"<sym>staffPosLower3</sym><sym>"), String(u"</sym>")));
 }
 
 //---------------------------------------------------------

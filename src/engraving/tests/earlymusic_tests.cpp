@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,15 +24,15 @@
 
 #include "engraving/style/style.h"
 
-#include "dom/chord.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/undo.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/editing/editstyle.h"
+#include "engraving/editing/transaction/undostack.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String EARLYMUSIC_DATA_DIR("earlymusic_data/");
@@ -69,7 +69,7 @@ TEST_F(Engraving_EarlymusicTests, earlymusic01)
     // set crossMeasureValue flag ON: score should not change
     MStyle newStyle = score->style();
     newStyle.set(Sid::crossMeasureValues, true);
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Early music tests"));
     score->deselectAll();
     score->undo(new ChangeStyle(score, newStyle));
     score->update();

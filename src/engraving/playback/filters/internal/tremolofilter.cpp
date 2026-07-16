@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,7 +23,8 @@
 #include "tremolofilter.h"
 
 #include "dom/chord.h"
-#include "dom/tremolo.h"
+#include "dom/tremolosinglechord.h"
+#include "dom/tremolotwochord.h"
 
 using namespace mu::engraving;
 
@@ -34,18 +35,19 @@ bool TremoloFilter::isPlayable(const EngravingItem* item, const RenderingContext
     }
 
     if (item->isChord()) {
-        const Chord* chord = toChord(item);
-        Tremolo* tremolo = chord->tremolo();
+        const Chord* chord = item_cast<const Chord*>(item);
+        TremoloSingleChord* tremoloSingle = chord->tremoloSingleChord();
+        TremoloTwoChord* tremoloTwo = chord->tremoloTwoChord();
 
-        if (!tremolo) {
+        if (!tremoloSingle && !tremoloTwo) {
             return true;
         }
 
-        if (!tremolo->twoNotes()) {
+        if (!tremoloTwo) {
             return true;
         }
 
-        return tremolo->chord1() == chord;
+        return tremoloTwo->chord1() == chord;
     }
 
     return true;

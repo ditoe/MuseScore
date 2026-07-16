@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -46,7 +46,6 @@ namespace mu::engraving {
 //---------------------------------------------------------
 
 static const ElementStyle fermataStyle {
-    { Sid::fermataPosAbove, Pid::OFFSET },
     { Sid::fermataMinDistance, Pid::MIN_DISTANCE },
 };
 
@@ -78,24 +77,12 @@ int Fermata::subtype() const
 }
 
 //---------------------------------------------------------
-//   typeUserName
+//   subtypeUserName
 //---------------------------------------------------------
 
-TranslatableString Fermata::typeUserName() const
+muse::TranslatableString Fermata::subtypeUserName() const
 {
-    return TranslatableString("engraving/sym", SymNames::userNameForSymId(symId()));
-}
-
-//---------------------------------------------------------
-//   chordRest
-//---------------------------------------------------------
-
-ChordRest* Fermata::chordRest() const
-{
-    if (explicitParent() && explicitParent()->isChordRest()) {
-        return toChordRest(explicitParent());
-    }
-    return 0;
+    return SymNames::userNameForSymId(symId());
 }
 
 //---------------------------------------------------------
@@ -246,24 +233,16 @@ void Fermata::resetProperty(Pid id)
 }
 
 //---------------------------------------------------------
-//   getPropertyStyle
-//---------------------------------------------------------
-
-Sid Fermata::getPropertyStyle(Pid pid) const
-{
-    if (pid == Pid::OFFSET) {
-        return placeAbove() ? Sid::fermataPosAbove : Sid::fermataPosBelow;
-    }
-    return EngravingObject::getPropertyStyle(pid);
-}
-
-//---------------------------------------------------------
 //   mag
 //---------------------------------------------------------
 
 double Fermata::mag() const
 {
-    return staff() ? staff()->staffMag(tick()) * style().styleD(Sid::articulationMag) : 1.0;
+    double m = staff() ? staff()->staffMag(tick()) * style().styleD(Sid::articulationMag) : 1.0;
+    if (segment() && segment()->isChordRestType() && segment()->element(track())) {
+        m *= toChordRest(segment()->element(track()))->intrinsicMag();
+    }
+    return m;
 }
 
 void Fermata::setSymIdAndTimeStretch(SymId id)
@@ -306,7 +285,12 @@ FermataType Fermata::fermataType() const
 
 String Fermata::accessibleInfo() const
 {
-    return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), translatedTypeUserName());
+    return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), SymNames::translatedUserNameForSymId(symId()));
+}
+
+Sid Fermata::defaultPosSid() const
+{
+    return placeAbove() ? Sid::fermataPosAbove : Sid::fermataPosBelow;
 }
 
 void Fermata::added()

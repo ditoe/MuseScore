@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,17 +23,24 @@
 #include "audioexportconfiguration.h"
 
 #include "settings.h"
+#include "translation.h"
 
+using namespace muse;
+using namespace mu;
 using namespace mu::iex::audioexport;
-using namespace mu::framework;
+using namespace muse::audio;
 
 static const Settings::Key EXPORT_SAMPLE_RATE_KEY("iex_audioexport", "export/audio/sampleRate");
 static const Settings::Key EXPORT_MP3_BITRATE("iex_audioexport", "export/audio/mp3Bitrate");
+static const Settings::Key EXPORT_WAV_SAMPLE_FORMAT_KEY("iex_audioexport", "export/audio/wavSampleFormat");
+static const Settings::Key EXPORT_FLAC_SAMPLE_FORMAT_KEY("iex_audioexport", "export/audio/flacSampleFormat");
 
 void AudioExportConfiguration::init()
 {
     settings()->setDefaultValue(EXPORT_SAMPLE_RATE_KEY, Val(44100));
     settings()->setDefaultValue(EXPORT_MP3_BITRATE, Val(128));
+    settings()->setDefaultValue(EXPORT_WAV_SAMPLE_FORMAT_KEY, Val(static_cast<int>(AudioSampleFormat::Float32)));
+    settings()->setDefaultValue(EXPORT_FLAC_SAMPLE_FORMAT_KEY, Val(static_cast<int>(AudioSampleFormat::Int16)));
 }
 
 int AudioExportConfiguration::exportMp3Bitrate() const
@@ -71,4 +78,62 @@ const std::vector<int>& AudioExportConfiguration::availableSampleRates() const
 {
     static const std::vector<int> rates { 32000, 44100, 48000 };
     return rates;
+}
+
+samples_t AudioExportConfiguration::exportBufferSize() const
+{
+    return 4096;
+}
+
+AudioSampleFormat AudioExportConfiguration::exportWavSampleFormat() const
+{
+    return static_cast<AudioSampleFormat>(settings()->value(EXPORT_WAV_SAMPLE_FORMAT_KEY).toInt());
+}
+
+void AudioExportConfiguration::setExportWavSampleFormat(AudioSampleFormat format)
+{
+    settings()->setSharedValue(EXPORT_WAV_SAMPLE_FORMAT_KEY, Val(static_cast<int>(format)));
+}
+
+AudioSampleFormat AudioExportConfiguration::exportFlacSampleFormat() const
+{
+    return static_cast<AudioSampleFormat>(settings()->value(EXPORT_FLAC_SAMPLE_FORMAT_KEY).toInt());
+}
+
+void AudioExportConfiguration::setExportFlacSampleFormat(AudioSampleFormat format)
+{
+    settings()->setSharedValue(EXPORT_FLAC_SAMPLE_FORMAT_KEY, Val(static_cast<int>(format)));
+}
+
+const std::vector<AudioSampleFormat>& AudioExportConfiguration::availableWavSampleFormats() const
+{
+    static const std::vector<AudioSampleFormat> formats {
+        AudioSampleFormat::Int16,
+        AudioSampleFormat::Int24,
+        AudioSampleFormat::Float32,
+    };
+    return formats;
+}
+
+const std::vector<AudioSampleFormat>& AudioExportConfiguration::availableFlacSampleFormats() const
+{
+    static const std::vector<AudioSampleFormat> formats {
+        AudioSampleFormat::Int16,
+        AudioSampleFormat::Int24,
+    };
+    return formats;
+}
+
+QString AudioExportConfiguration::sampleFormatToString(AudioSampleFormat format) const
+{
+    switch (format) {
+    case AudioSampleFormat::Int16:
+        return muse::qtrc("project/export", "16-bit integer");
+    case AudioSampleFormat::Int24:
+        return muse::qtrc("project/export", "24-bit integer");
+    case AudioSampleFormat::Float32:
+        return muse::qtrc("project/export", "32-bit float");
+    default:
+        return QString();
+    }
 }

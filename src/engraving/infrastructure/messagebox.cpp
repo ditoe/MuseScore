@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,7 +28,8 @@ using namespace mu::engraving;
 MessageBox::Button MessageBox::warning(const std::string& title, const std::string& text, const std::set<Button>& buttons)
 {
 #ifndef ENGRAVING_NO_INTERACTIVE
-    using namespace mu::framework;
+
+    using namespace muse;
 
     std::vector<IInteractive::Button> realButtons;
     if (buttons.find(Cancel) != buttons.cend()) {
@@ -38,7 +39,7 @@ MessageBox::Button MessageBox::warning(const std::string& title, const std::stri
         realButtons.push_back(IInteractive::Button::Ok);
     }
 
-    IInteractive::Result res = interactive()->warning(title, text, realButtons);
+    IInteractive::Result res = interactive()->warningSync(title, text, realButtons);
     if (res.standardButton() == IInteractive::Button::Ok) {
         return MessageBox::Button::Ok;
     }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,19 +22,24 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/chordrest.h"
-#include "dom/durationtype.h"
-#include "dom/excerpt.h"
-#include "dom/harmony.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/part.h"
-#include "dom/segment.h"
+#include "engraving/compat/scoreaccess.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/durationtype.h"
+#include "engraving/dom/excerpt.h"
+#include "engraving/dom/fret.h"
+#include "engraving/dom/harmony.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/score.h"
+#include "engraving/dom/segment.h"
+#include "engraving/editing/realizechordsymbols.h"
+#include "engraving/editing/transaction/transaction.h"
+#include "engraving/editing/transpose.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String CHORDSYMBOL_DATA_DIR("chordsymbol_data/");
@@ -97,8 +102,8 @@ void Engraving_ChordSymbolTests::realizeSelectionVoiced(MasterScore* score, Voic
             e->setProperty(Pid::HARMONY_VOICING, int(voicing));
         }
     }
-    score->startCmd();
-    score->cmdRealizeChordSymbols();
+    score->startCmd(TranslatableString::untranslatable("Realize selection voiced"));
+    RealizeChordSymbols::realizeChordSymbols(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
 }
 
@@ -199,20 +204,20 @@ TEST_F(Engraving_ChordSymbolTests, testNoSystem)
 TEST_F(Engraving_ChordSymbolTests, testTranspose)
 {
     MasterScore* score = test_pre(u"transpose");
-    score->startCmd();
-    score->cmdSelectAll();
-    score->transpose(TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4, false, true, true);
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving chord symbol tests"), [&](auto& tx) {
+        score->cmdSelectAll();
+        Transpose::transpose(tx, score, TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4, false, true, true);
+    });
     test_post(score, u"transpose");
 }
 
 TEST_F(Engraving_ChordSymbolTests, testTransposePart)
 {
     MasterScore* score = test_pre(u"transpose-part");
-    score->startCmd();
-    score->cmdSelectAll();
-    score->transpose(TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4, false, true, true);
-    score->endCmd(false, /*layoutAllParts = */ true);
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving chord symbol tests"), [&](auto& tx) {
+        score->cmdSelectAll();
+        Transpose::transpose(tx, score, TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4, false, true, true);
+    });
     test_post(score, u"transpose-part");
 }
 
@@ -279,14 +284,14 @@ TEST_F(Engraving_ChordSymbolTests, testRealizeConcertPitch)
 {
     MasterScore* score = test_pre(u"realize-concert-pitch");
     //concert pitch off
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
     score->cmdConcertPitchChanged(false);
     score->endCmd();
 
     //realize all chord symbols
     selectAllChordSymbols(score);
-    score->startCmd();
-    score->cmdRealizeChordSymbols();
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
+    RealizeChordSymbols::realizeChordSymbols(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
     test_post(score, u"realize-concert-pitch");
 }
@@ -299,13 +304,15 @@ TEST_F(Engraving_ChordSymbolTests, testRealizeTransposed)
 {
     MasterScore* score = test_pre(u"transpose");
     //transpose
-    score->cmdSelectAll();
-    score->transpose(TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4, false, true, true);
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving chord symbol tests"), [&](auto& tx) {
+        score->cmdSelectAll();
+        Transpose::transpose(tx, score, TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4, false, true, true);
+    });
 
     //realize all chord symbols
     selectAllChordSymbols(score);
-    score->startCmd();
-    score->cmdRealizeChordSymbols();
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
+    RealizeChordSymbols::realizeChordSymbols(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
     test_post(score, u"realize-transpose");
 }
@@ -319,8 +326,9 @@ TEST_F(Engraving_ChordSymbolTests, testRealizeOverrides)
     MasterScore* score = test_pre(u"realize-override");
     //realize all chord symbols
     selectAllChordSymbols(score);
-    score->startCmd();
-    score->cmdRealizeChordSymbols(true, Voicing::ROOT_ONLY, HDuration::SEGMENT_DURATION);
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
+    RealizeChordSymbols::realizeChordSymbols(
+        score->transactionManager()->currentOrDummyTransaction(), score, true, Voicing::ROOT_ONLY, HDuration::SEGMENT_DURATION);
     score->endCmd();
     test_post(score, u"realize-override");
 }
@@ -333,8 +341,8 @@ TEST_F(Engraving_ChordSymbolTests, testRealizeTriplet)
     MasterScore* score = test_pre(u"realize-triplet");
     //realize all chord symbols
     selectAllChordSymbols(score);
-    score->startCmd();
-    score->cmdRealizeChordSymbols();
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
+    RealizeChordSymbols::realizeChordSymbols(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
     test_post(score, u"realize-triplet");
 }
@@ -348,8 +356,8 @@ TEST_F(Engraving_ChordSymbolTests, testRealizeDuration)
     MasterScore* score = test_pre(u"realize-duration");
     //realize all chord symbols
     selectAllChordSymbols(score);
-    score->startCmd();
-    score->cmdRealizeChordSymbols();
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
+    RealizeChordSymbols::realizeChordSymbols(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
     test_post(score, u"realize-duration");
 }
@@ -363,8 +371,92 @@ TEST_F(Engraving_ChordSymbolTests, testRealizeJazz)
     MasterScore* score = test_pre(u"realize-jazz");
     //realize all chord symbols
     selectAllChordSymbols(score);
-    score->startCmd();
-    score->cmdRealizeChordSymbols();
+    score->startCmd(TranslatableString::untranslatable("Engraving chord symbol tests"));
+    RealizeChordSymbols::realizeChordSymbols(score->transactionManager()->currentOrDummyTransaction(), score);
     score->endCmd();
     test_post(score, u"realize-jazz");
+}
+
+TEST_F(Engraving_ChordSymbolTests, testNashvilleNumbers) {
+    MasterScore* score = test_pre(u"nashville-numbers");
+    selectAllChordSymbols(score);
+
+    static const std::array<std::pair<int, String>, 23> tpcAndExtension { {
+        { 14, u"" },
+        { 16, u"" },
+        { 18, u"" },
+        { 13, u"" },
+        { 16, u"" },
+        { 18, u"" },
+        { 20, u"" },
+        { 15, u"" },
+        { 10, u"" },
+        { 12, u"" },
+        { 14, u"" },
+        { 9, u"" },
+        { 5, u"" },
+        { 7, u"" },
+        { 9, u"" },
+        { 4, u"" },
+        { 12, u"m" },
+        { 14, u"o" },
+        { 16, u"o7#11" },
+        { 14, u"6" },
+        { 14, u"69" },
+        { 18, u"sus" },
+        { 13, u"6" }
+    } };
+
+    size_t idx = 0;
+
+    std::vector<EngravingItem*> els = score->selection().elements(ElementType::HARMONY);
+
+    ASSERT_EQ(els.size(), tpcAndExtension.size());
+
+    for (EngravingItem* e : els) {
+        Harmony* h = toHarmony(e);
+        EXPECT_FALSE(h->chords().empty());
+        HarmonyInfo* info = h->chords().front();
+
+        int tpc = tpcAndExtension.at(idx).first;
+        String ext = tpcAndExtension.at(idx).second;
+
+        EXPECT_EQ(tpc, info->rootTpc());
+        EXPECT_EQ(ext, info->textName());
+
+        idx++;
+    }
+}
+
+TEST_F(Engraving_ChordSymbolTests, testParserSuffix)
+{
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
+    StringList symbols = { u"Cno3rd", u"Domit1st", u"Cadd9th", u"Ebsus2nd" };
+
+    // Expect these symbols to parse successfully
+    ParsedChord* pc = new ParsedChord();
+    for (const String& chord : symbols) {
+        EXPECT_TRUE(pc->parse(chord, score->chordList()));
+    }
+
+    delete pc;
+    delete score;
+}
+
+TEST_F(Engraving_ChordSymbolTests, testAddHarmonyToFretDiagram)
+{
+    MasterScore* score = ScoreRW::readScore(CHORDSYMBOL_DATA_DIR + u"add-to-fret" + ".mscz");
+    EXPECT_TRUE(score);
+    score->doLayout();
+
+    Measure* firstMeasure = score->firstMeasure();
+    Segment* firstSeg = firstMeasure->findFirstR(SegmentType::ChordRest, Fraction(0, 1));
+    FretDiagram* fretDiag = toFretDiagram(firstSeg->findAnnotation(ElementType::FRET_DIAGRAM, 0, 0));
+    EXPECT_TRUE(fretDiag);
+
+    score->addText(TextStyleType::HARMONY_A, fretDiag);
+
+    EXPECT_TRUE(fretDiag->harmony());
+
+    delete score;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,11 +24,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "engraving/infrastructure/mscreader.h"
+#include "engraving/infrastructure/mscwriter.h"
+
 #include "notation.h"
 
 using namespace mu;
-using namespace mu::draw;
 using namespace mu::notation;
+using namespace muse;
+using namespace muse::draw;
 
 static ViewMode viewModeFromString(const QString& str)
 {
@@ -67,7 +71,8 @@ static QString viewModeToString(ViewMode m)
     return "";
 }
 
-NotationViewState::NotationViewState(Notation* notation)
+NotationViewState::NotationViewState(Notation* notation, const modularity::ContextPtr& ctx)
+    : muse::Contextable(ctx)
 {
     notation->openChanged().onNotify(this, [this, notation]() {
         if (!notation->isOpen()) {
@@ -77,7 +82,7 @@ NotationViewState::NotationViewState(Notation* notation)
     });
 }
 
-Ret NotationViewState::read(const engraving::MscReader& reader, const io::path_t& pathPrefix)
+Ret NotationViewState::read(const engraving::MscReader& reader, const muse::io::path_t& pathPrefix)
 {
     ByteArray json = reader.readViewSettingsJsonFile(pathPrefix);
     QJsonObject rootObj = QJsonDocument::fromJson(json.toQByteArrayNoCopy()).object();
@@ -88,7 +93,7 @@ Ret NotationViewState::read(const engraving::MscReader& reader, const io::path_t
     return make_ret(Ret::Code::Ok);
 }
 
-Ret NotationViewState::write(engraving::MscWriter& writer, const io::path_t& pathPrefix)
+Ret NotationViewState::write(engraving::MscWriter& writer, const muse::io::path_t& pathPrefix)
 {
     QJsonObject notationObj;
     notationObj["viewMode"] = viewModeToString(m_viewMode);
@@ -112,26 +117,29 @@ void NotationViewState::setMatrixInited(bool inited)
     m_isMatrixInited = inited;
 }
 
-Transform NotationViewState::matrix() const
+const Transform& NotationViewState::matrix() const
 {
     return m_matrix;
 }
 
-async::Channel<Transform, NotationPaintView*> NotationViewState::matrixChanged() const
+muse::async::Channel<Transform, NotationPaintView*> NotationViewState::matrixChanged() const
 {
     return m_matrixChanged;
 }
 
 void NotationViewState::setMatrix(const Transform& matrix, NotationPaintView* sender)
 {
-    int newZoomPercentage = configuration()->zoomPercentageFromScaling(matrix.m11());
-    if (m_matrix == matrix && m_zoomPercentage.val == newZoomPercentage) {
+    if (m_matrix == matrix) {
         return;
     }
 
     m_matrix = matrix;
     m_matrixChanged.send(matrix, sender);
-    m_zoomPercentage.set(newZoomPercentage);
+
+    int newZoomPercentage = configuration()->zoomPercentageFromScaling(matrix.m11());
+    if (m_zoomPercentage.val != newZoomPercentage) {
+        m_zoomPercentage.set(newZoomPercentage);
+    }
 }
 
 ValCh<int> NotationViewState::zoomPercentage() const
@@ -166,12 +174,43 @@ void NotationViewState::setViewMode(const ViewMode& mode)
     m_stateChanged.notify();
 }
 
+int NotationViewState::styleDialogLastPageIndex() const
+{
+    return m_styleDialogLastPageIndex;
+}
+
+void NotationViewState::setStyleDialogLastPageIndex(int value)
+{
+    if (m_styleDialogLastPageIndex == value) {
+        return;
+    }
+    m_styleDialogLastPageIndex = value;
+    m_stateChanged.notify();
+}
+
+int NotationViewState::styleDialogLastSubPageIndex() const
+{
+    return m_styleDialogLastSubPageIndex;
+}
+
+void NotationViewState::setStyleDialogLastSubPageIndex(int value)
+{
+    if (m_styleDialogLastSubPageIndex == value) {
+        return;
+    }
+    m_styleDialogLastSubPageIndex = value;
+    m_stateChanged.notify();
+}
+
 void NotationViewState::makeDefault()
 {
     m_viewMode = ViewMode::PAGE;
+    m_styleDialogLastPageIndex = 0;
+    m_styleDialogLastSubPageIndex = 0;
+    m_stateChanged.notify();
 }
 
-async::Notification NotationViewState::stateChanged() const
+muse::async::Notification NotationViewState::stateChanged() const
 {
     return m_stateChanged;
 }

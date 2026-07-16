@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,12 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __BRACKET_ITEM_H__
-#define __BRACKET_ITEM_H__
+#ifndef MU_ENGRAVING_BRACKET_ITEM_H
+#define MU_ENGRAVING_BRACKET_ITEM_H
 
 #include "engravingitem.h"
+#include "stafflabel.h"
 
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class Factory;
@@ -45,14 +46,25 @@ public:
     bool setProperty(Pid, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid id) const override;
 
-    size_t bracketSpan() const { return _bracketSpan; }
-    BracketType bracketType() const { return _bracketType; }
-    void setBracketSpan(size_t v) { _bracketSpan = v; }
-    void setBracketType(BracketType v) { _bracketType = v; }
-    Staff* staff() const { return _staff; }
-    void setStaff(Staff* s) { _staff = s; }
-    size_t column() const { return _column; }
-    void setColumn(size_t v) { _column = v; }
+    size_t bracketSpan() const { return m_bracketSpan; }
+    BracketType bracketType() const { return m_bracketType; }
+    void setBracketSpan(size_t v) { m_bracketSpan = v; }
+    void setBracketType(BracketType v) { m_bracketType = v; }
+    Staff* staff() const { return m_staff; }
+    void setStaff(Staff* s) { m_staff = s; }
+    size_t column() const { return m_column; }
+    void setColumn(size_t v) { m_column = v; }
+
+    StaffLabel& label() { return m_name; }
+    const StaffLabel& label() const { return m_name; }
+    const String& longName() const { return m_name.longName(); }
+    const String& shortName() const { return m_name.shortName(); }
+
+    bool showText() const { return m_showText; }
+    bool showBracket() const { return m_showBracket; }
+
+    bool intersects(const BracketItem* other) const;
+    bool intersects(staff_idx_t first, staff_idx_t last) const;
 
 private:
 
@@ -61,10 +73,14 @@ private:
     BracketItem(EngravingItem* parent);
     BracketItem(EngravingItem* parent, BracketType a, int b);
 
-    BracketType _bracketType { BracketType::NO_BRACKET };
-    size_t _column = 0;
-    size_t _bracketSpan = 0;
-    Staff* _staff = nullptr;
+    BracketType m_bracketType = BracketType::NO_BRACKET;
+    size_t m_column = 0;
+    size_t m_bracketSpan = 0;
+    Staff* m_staff = nullptr;
+
+    StaffLabel m_name = StaffLabel(muse::mtrc("systemBrackets", "GROUP"), muse::mtrc("systemBrackets", "GR.", "Short for GROUP"));
+    bool m_showText = true;
+    bool m_showBracket = true;
 };
 }
 #endif

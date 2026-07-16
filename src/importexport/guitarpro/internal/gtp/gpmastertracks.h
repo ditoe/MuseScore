@@ -18,9 +18,9 @@ public:
         Type type{ Type::tempo };
         float position{ 0 };
         bool linear{ false };
-        int value{ 0 };
+        double value{ 0 };
         int tempoUnit{ 0 };
-        String text;
+        muse::String text;
         friend bool operator<(const Automation& l, const Automation& r) { return l.bar < r.bar; }
     };
 

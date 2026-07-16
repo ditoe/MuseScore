@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,11 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
 
 MixerPanelSection {
     id: root
@@ -32,6 +34,8 @@ MixerPanelSection {
 
     Item {
         id: content
+
+        required property MixerChannelItem channelItem
 
         height: childrenRect.height
         width: root.channelItemWidth
@@ -51,7 +55,7 @@ MixerPanelSection {
             background.radius: 2
 
             navigation.name: "VolumeInputField"
-            navigation.panel: channelItem.panel
+            navigation.panel: content.channelItem.panel
             navigation.row: root.navigationRowStart
             navigation.accessible.name: content.accessibleName + " " + currentText
             navigation.onActiveChanged: {
@@ -67,11 +71,11 @@ MixerPanelSection {
                 decimal: 1
             }
 
-            currentText: Math.round(channelItem.volumeLevel * 10) / 10
+            currentText: Math.round(content.channelItem.volumeLevel * 10) / 10
 
             onTextChanged: function(newTextValue) {
-                if (channelItem.volumeLevel !== Number(newTextValue)) {
-                    channelItem.volumeLevel = Number(newTextValue)
+                if (content.channelItem.volumeLevel !== Number(newTextValue)) {
+                    content.channelItem.volumeLevel = Number(newTextValue)
                 }
             }
         }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,7 +24,7 @@
 #define MU_ENGRAVING_PLAYINGTECHNIQUEANNOTATION_H
 
 #include "stafftextbase.h"
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class PlayTechAnnotation final : public StaffTextBase
@@ -38,16 +38,22 @@ public:
 
     PlayingTechniqueType techniqueType() const;
     void setTechniqueType(const PlayingTechniqueType techniqueType);
+    bool playPlayTechAnnotation() const { return m_playPlayTechAnnotation; }
+    void setPlayPlayTechAnnotation(bool play) { m_playPlayTechAnnotation = play; }
 
     PlayTechAnnotation* clone() const override;
+    TranslatableString subtypeUserName() const override;
 
-private:
+    bool isHandbellsSymbol() const;
+    bool isEditable() const override { return !isHandbellsSymbol(); }
 
     PropertyValue getProperty(Pid id) const override;
     bool setProperty(Pid propertyId, const PropertyValue& val) override;
     PropertyValue propertyDefault(Pid id) const override;
 
+private:
     PlayingTechniqueType m_techniqueType = PlayingTechniqueType::Undefined;
+    bool m_playPlayTechAnnotation = true;
 };
 }
 

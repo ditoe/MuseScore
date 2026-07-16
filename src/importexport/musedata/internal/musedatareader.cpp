@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,7 +32,7 @@
 using namespace mu::iex::musedata;
 using namespace mu::engraving;
 
-mu::Ret MuseDataReader::read(MasterScore* score, const io::path_t& path, const Options&)
+muse::Ret MuseDataReader::read(MasterScore* score, const muse::io::path_t& path, const Options&)
 {
     if (!QFileInfo::exists(path.toQString())) {
         return make_ret(Err::FileNotFound, path);
@@ -44,5 +44,5 @@ mu::Ret MuseDataReader::read(MasterScore* score, const io::path_t& path, const O
     }
 
     md.convert();
-    return make_ok();
+    return muse::make_ok();
 }

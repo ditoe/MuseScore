@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,6 +26,7 @@
 #include "log.h"
 
 using namespace mu;
+using namespace muse::draw;
 using namespace mu::engraving;
 
 QMimeDataAdapter::QMimeDataAdapter(const QMimeData* d)
@@ -48,9 +49,9 @@ bool QMimeDataAdapter::hasFormat(const std::string& mimeType) const
     return m_data->hasFormat(QString::fromStdString(mimeType));
 }
 
-ByteArray QMimeDataAdapter::data(const std::string& mimeType) const
+muse::ByteArray QMimeDataAdapter::data(const std::string& mimeType) const
 {
-    return ByteArray::fromQByteArray(m_data->data(QString::fromStdString(mimeType)));
+    return muse::ByteArray::fromQByteArray(m_data->data(QString::fromStdString(mimeType)));
 }
 
 bool QMimeDataAdapter::hasImage() const
@@ -58,9 +59,9 @@ bool QMimeDataAdapter::hasImage() const
     return m_data->hasImage();
 }
 
-static std::shared_ptr<draw::Pixmap> pixmapFromQVariant(const QVariant& val)
+static std::shared_ptr<Pixmap> pixmapFromQVariant(const QVariant& val)
 {
-    using namespace mu::draw;
+    using namespace muse::draw;
     IF_ASSERT_FAILED(val.canConvert<Pixmap>() || val.canConvert<QImage>()) {
     }
 
@@ -72,7 +73,7 @@ static std::shared_ptr<draw::Pixmap> pixmapFromQVariant(const QVariant& val)
     return nullptr;
 }
 
-std::shared_ptr<draw::Pixmap> QMimeDataAdapter::imageData() const
+std::shared_ptr<Pixmap> QMimeDataAdapter::imageData() const
 {
     return pixmapFromQVariant(m_data->imageData());
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -130,10 +130,10 @@ void TestMidiMapping::testReadChangeWrite2(const char* f1, const char* ref)
     QVERIFY(score);
     score->rebuildMidiMapping();
     MeasureBase* mb = score->measures()->last();
-    while (mb && mb->type() != ElementType::MEASURE) {
+    while (mb && !mb->isMeasure()) {
         mb = mb->prev();
     }
-    score->deleteItem(static_cast<Measure*>(mb));
+    score->deleteItem(toMeasure(mb));
     score->rebuildMidiMapping();
     QVERIFY(saveCompareScore(score, f1 + QString("_changed.mscx"), MIDIMAPPING_DATA_DIR + ref));
     delete score;
@@ -153,7 +153,7 @@ void TestMidiMapping::testReadChangeOrderWrite(const char* f1, const char* ref, 
 
     std::vector<int> dl;
     for (Staff* staff : score->staves()) {
-        int idx = mu::indexOf(score->staves(), staff);
+        int idx = muse::indexOf(score->staves(), staff);
         if ((idx == p1 || idx == p2)
             && ((idx != 0 && staff->part() == score->staves()[idx - 1]->part())
                 || (idx != score->nstaves() && staff->part() == score->staves()[idx + 1]->part()))) {

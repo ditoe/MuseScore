@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,12 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __FERMATA_H__
-#define __FERMATA_H__
+#ifndef MU_ENGRAVING_FERMATA_H
+#define MU_ENGRAVING_FERMATA_H
+
+#include "../types/types.h"
 
 #include "engravingitem.h"
-
-#include "types/types.h"
 
 namespace mu::engraving {
 class ChordRest;
@@ -58,16 +58,15 @@ public:
     void setSymIdAndTimeStretch(SymId id);
     FermataType fermataType() const;
     int subtype() const override;
-    TranslatableString typeUserName() const override;
+    TranslatableString subtypeUserName() const override;
 
-    std::vector<mu::LineF> dragAnchorLines() const override;
+    std::vector<LineF> dragAnchorLines() const override;
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
     void resetProperty(Pid id) override;
 
-    ChordRest* chordRest() const;
     Segment* segment() const { return toSegment(explicitParent()); }
     Measure* measure() const;
     System* system() const;
@@ -81,6 +80,8 @@ public:
 
     String accessibleInfo() const override;
 
+    Sid defaultPosSid() const override;
+
 protected:
     void added() override;
     void removed() override;
@@ -89,8 +90,6 @@ private:
 
     friend class Factory;
     Fermata(EngravingItem* parent);
-
-    Sid getPropertyStyle(Pid) const override;
 
     SymId m_symId = SymId::noSym;
     double m_timeStretch = -1.0;

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<museScore version="5.00">
+  <Score>
+    <eid>B_B</eid>
+    <Division>480</Division>
+    <Style>
+      <spatium>1.75</spatium>
+      </Style>
+    <showInvisible>1</showInvisible>
+    <showUnprintable>1</showUnprintable>
+    <showFrames>1</showFrames>
+    <showMargins>0</showMargins>
+    <metaTag name="arranger"></metaTag>
+    <metaTag name="composer">Klaus Rettinghaus</metaTag>
+    <metaTag name="copyright"></metaTag>
+    <metaTag name="lyricist"></metaTag>
+    <metaTag name="meiHead">&lt;meiHead&gt;&lt;fileDesc&gt;&lt;titleStmt&gt;&lt;title type=&quot;main&quot;&gt;Laissez vibrer test&lt;/title&gt;&lt;respStmt&gt;&lt;persName role=&quot;composer&quot;&gt;Klaus Rettinghaus&lt;/persName&gt;&lt;/respStmt&gt;&lt;/titleStmt&gt;&lt;pubStmt&gt;&lt;date isodate=&quot;2024-05-21T12:00:00&quot;/&gt;&lt;/pubStmt&gt;&lt;/fileDesc&gt;&lt;/meiHead&gt;</metaTag>
+    <metaTag name="movementNumber"></metaTag>
+    <metaTag name="movementTitle"></metaTag>
+    <metaTag name="source"></metaTag>
+    <metaTag name="translator"></metaTag>
+    <metaTag name="workNumber"></metaTag>
+    <metaTag name="workTitle">Laissez vibrer test</metaTag>
+    <Part id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
+        <StaffType group="pitched">
+          <name>stdNormal</name>
+          </StaffType>
+        </Staff>
+      <Instrument id="oboe">
+        <InstrumentLabel>
+          <longName>Oboe</longName>
+          <shortName>Ob.</shortName>
+          </InstrumentLabel>
+        <trackName></trackName>
+        <instrumentId>wind.reed.oboe</instrumentId>
+        <Channel>
+          </Channel>
+        </Instrument>
+      </Part>
+    <Staff id="1">
+      <VBox>
+        <height>10</height>
+        <eid>E_E</eid>
+        <Text>
+          <eid>F_F</eid>
+          <style>title</style>
+          <text>Laissez vibrer test</text>
+          </Text>
+        <Text>
+          <eid>G_G</eid>
+          <style>composer</style>
+          <text>Klaus Rettinghaus</text>
+          </Text>
+        </VBox>
+      <Measure>
+        <eid>H_H</eid>
+        <voice>
+          <Clef>
+            <concertClefType>G</concertClefType>
+            <transposingClefType>G</transposingClefType>
+            <isHeader>1</isHeader>
+            <eid>I_I</eid>
+            </Clef>
+          <TimeSig>
+            <eid>J_J</eid>
+            <sigN>2</sigN>
+            <sigD>4</sigD>
+            </TimeSig>
+          <Chord>
+            <eid>K_K</eid>
+            <durationType>half</durationType>
+            <Note>
+              <eid>L_L</eid>
+              <LaissezVib>
+                <eid>M_M</eid>
+                </LaissezVib>
+              <pitch>72</pitch>
+              <tpc>14</tpc>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <Measure>
+        <eid>N_N</eid>
+        <voice>
+          <Chord>
+            <eid>O_O</eid>
+            <durationType>half</durationType>
+            <Note>
+              <eid>P_P</eid>
+              <LaissezVib>
+                <eid>Q_Q</eid>
+                <up>up</up>
+                </LaissezVib>
+              <pitch>72</pitch>
+              <tpc>14</tpc>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <Measure>
+        <eid>R_R</eid>
+        <voice>
+          <Chord>
+            <eid>S_S</eid>
+            <durationType>half</durationType>
+            <Note>
+              <eid>T_T</eid>
+              <LaissezVib>
+                <eid>U_U</eid>
+                <up>down</up>
+                </LaissezVib>
+              <pitch>72</pitch>
+              <tpc>14</tpc>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <Measure>
+        <eid>V_V</eid>
+        <voice>
+          <Chord>
+            <eid>W_W</eid>
+            <durationType>half</durationType>
+            <Note>
+              <eid>X_X</eid>
+              <LaissezVib>
+                <eid>Y_Y</eid>
+                <lineType>2</lineType>
+                </LaissezVib>
+              <pitch>72</pitch>
+              <tpc>14</tpc>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <Measure>
+        <eid>Z_Z</eid>
+        <voice>
+          <Chord>
+            <eid>a_a</eid>
+            <durationType>half</durationType>
+            <Note>
+              <eid>b_b</eid>
+              <LaissezVib>
+                <eid>c_c</eid>
+                <lineType>1</lineType>
+                </LaissezVib>
+              <pitch>72</pitch>
+              <tpc>14</tpc>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <Measure>
+        <eid>d_d</eid>
+        <voice>
+          <Chord>
+            <eid>e_e</eid>
+            <durationType>half</durationType>
+            <Note>
+              <eid>f_f</eid>
+              <LaissezVib>
+                <eid>g_g</eid>
+                <color r="255" g="38" b="0" a="255"/>
+                </LaissezVib>
+              <pitch>72</pitch>
+              <tpc>14</tpc>
+              </Note>
+            </Chord>
+          <BarLine>
+            <subtype>end</subtype>
+            <eid>h_h</eid>
+            </BarLine>
+          </voice>
+        </Measure>
+      </Staff>
+    </Score>
+  </museScore>

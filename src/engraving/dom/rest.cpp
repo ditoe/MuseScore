@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,6 +28,12 @@
 #include "containers.h"
 #include "translation.h"
 
+#include "../editing/addremoveelement.h"
+#include "../editing/editchord.h"
+#include "../editing/editmeasurerepeat.h"
+#include "../editing/noteinput.h"
+#include "../editing/transaction/transaction.h"
+
 #include "actionicon.h"
 #include "articulation.h"
 #include "chord.h"
@@ -40,7 +46,7 @@
 #include "segment.h"
 #include "staff.h"
 #include "stafftype.h"
-#include "undo.h"
+#include "parenthesis.h"
 
 #include "log.h"
 
@@ -112,7 +118,7 @@ void Rest::hack_toRestType()
 //      replaced by special symbols with ledger lines
 //---------------------------------------------------------
 
-void Rest::setOffset(const mu::PointF& o)
+void Rest::setOffset(const PointF& o)
 {
     double _spatium = spatium();
     int line = lrint(o.y() / _spatium);
@@ -120,16 +126,16 @@ void Rest::setOffset(const mu::PointF& o)
     //! NOTE We need to find out why this is being done here.
     //! We rewrite sym in the layout (we get from the Rest::getSymbol method )
 
-    LayoutData* ldata = mutLayoutData();
+    LayoutData* ldata = mutldata();
 
-    if (ldata->sym() == SymId::restWhole && (line <= -2 || line >= 3)) {
-        ldata->setSym(SymId::restWholeLegerLine);
-    } else if (ldata->sym() == SymId::restWholeLegerLine && (line > -2 && line < 4)) {
-        ldata->setSym(SymId::restWhole);
-    } else if (ldata->sym() == SymId::restHalf && (line <= -3 || line >= 3)) {
-        ldata->setSym(SymId::restHalfLegerLine);
-    } else if (ldata->sym() == SymId::restHalfLegerLine && (line > -3 && line < 3)) {
-        ldata->setSym(SymId::restHalf);
+    if (ldata->sym == SymId::restWhole && (line <= -2 || line >= 3)) {
+        ldata->sym = SymId::restWholeLegerLine;
+    } else if (ldata->sym == SymId::restWholeLegerLine && (line > -2 && line < 4)) {
+        ldata->sym = SymId::restWhole;
+    } else if (ldata->sym == SymId::restHalf && (line <= -3 || line >= 3)) {
+        ldata->sym = SymId::restHalfLegerLine;
+    } else if (ldata->sym == SymId::restHalfLegerLine && (line > -3 && line < 3)) {
+        ldata->sym = SymId::restHalf;
     }
 
     EngravingItem::setOffset(o);
@@ -139,27 +145,17 @@ void Rest::setOffset(const mu::PointF& o)
 //   drag
 //---------------------------------------------------------
 
-mu::RectF Rest::drag(EditData& ed)
+RectF Rest::drag(EditData& ed)
 {
-    // don't allow drag for Measure Rests, because they can't be easily laid out in correct position while dragging
-    if (measure() && durationType().type() == DurationType::V_MEASURE) {
-        return RectF();
+    if (ed.modifiers & ShiftModifier) {
+        Segment* seg = segment();
+        const Spatium deltaSp = Spatium(ed.evtDelta.x() / spatium());
+        seg->undoChangeProperty(Pid::LEADING_SPACE, seg->extraLeadingSpace() + deltaSp);
+    } else {
+        setOffset(offset() + ed.evtDelta);
     }
-
-    PointF s(ed.delta);
-    RectF r(abbox());
-
-    // Limit horizontal drag range
-    static const double xDragRange = spatium() * 5;
-    if (fabs(s.x()) > xDragRange) {
-        s.rx() = xDragRange * (s.x() < 0 ? -1.0 : 1.0);
-    }
-    setOffset(PointF(s.x(), s.y()));
-
-    renderer()->layoutItem(this);
-
-    score()->rebuildBspTree();
-    return abbox().united(r);
+    triggerLayout();
+    return RectF();
 }
 
 //---------------------------------------------------------
@@ -169,67 +165,45 @@ mu::RectF Rest::drag(EditData& ed)
 bool Rest::acceptDrop(EditData& data) const
 {
     EngravingItem* e = data.dropElement;
-    ElementType type = e->type();
-    if ((type == ElementType::ACTION_ICON && toActionIcon(e)->actionType() == ActionIconType::BEAM_AUTO)
-        || (type == ElementType::ACTION_ICON && toActionIcon(e)->actionType() == ActionIconType::BEAM_NONE)
-        || (type == ElementType::ACTION_ICON && toActionIcon(e)->actionType() == ActionIconType::BEAM_BREAK_LEFT)
-        || (type == ElementType::ACTION_ICON && toActionIcon(e)->actionType() == ActionIconType::BEAM_BREAK_INNER_8TH)
-        || (type == ElementType::ACTION_ICON && toActionIcon(e)->actionType() == ActionIconType::BEAM_BREAK_INNER_16TH)
-        || (type == ElementType::ACTION_ICON && toActionIcon(e)->actionType() == ActionIconType::BEAM_JOIN)
-        || (type == ElementType::FERMATA)
-        || (type == ElementType::CLEF)
-        || (type == ElementType::KEYSIG)
-        || (type == ElementType::TIMESIG)
-        || (type == ElementType::SYSTEM_TEXT)
-        || (type == ElementType::TRIPLET_FEEL)
-        || (type == ElementType::STAFF_TEXT)
-        || (type == ElementType::PLAYTECH_ANNOTATION)
-        || (type == ElementType::CAPO)
-        || (type == ElementType::BAR_LINE)
-        || (type == ElementType::BREATH)
-        || (type == ElementType::CHORD)
-        || (type == ElementType::NOTE)
-        || (type == ElementType::STAFF_STATE)
-        || (type == ElementType::INSTRUMENT_CHANGE)
-        || (type == ElementType::DYNAMIC)
-        || (type == ElementType::EXPRESSION)
-        || (type == ElementType::HARMONY)
-        || (type == ElementType::TEMPO_TEXT)
-        || (type == ElementType::REHEARSAL_MARK)
-        || (type == ElementType::FRET_DIAGRAM)
-        || (type == ElementType::TREMOLOBAR)
-        || (type == ElementType::IMAGE)
-        || (type == ElementType::SYMBOL)
-        || (type == ElementType::HARP_DIAGRAM)
-        || (type == ElementType::MEASURE_REPEAT && durationType().type() == DurationType::V_MEASURE)
-        ) {
+
+    switch (e->type()) {
+    case ElementType::CHORD:
+    case ElementType::NOTE:
+    case ElementType::IMAGE:
+    case ElementType::SYMBOL:
         return true;
+    case ElementType::MEASURE_REPEAT:
+        return durationType().type() == DurationType::V_MEASURE;
+    default:
+        // prevent 'hanging' slurs, avoid crash on tie
+        if (e->isSpanner()) {
+            static const std::set<ElementType> ignoredTypes {
+                ElementType::SLUR,
+                ElementType::HAMMER_ON_PULL_OFF,
+                ElementType::TIE,
+                ElementType::GLISSANDO
+            };
+            return !muse::contains(ignoredTypes, e->type());
+        }
+        break;
     }
-
-    // prevent 'hanging' slurs, avoid crash on tie
-    static const std::set<ElementType> ignoredTypes {
-        ElementType::SLUR,
-        ElementType::TIE,
-        ElementType::GLISSANDO
-    };
-
-    return e->isSpanner() && !mu::contains(ignoredTypes, type);
+    return ChordRest::acceptDrop(data);
 }
 
 //---------------------------------------------------------
 //   drop
 //---------------------------------------------------------
 
-EngravingItem* Rest::drop(EditData& data)
+EngravingItem* Rest::drop(Transaction& tx, EditData& data)
 {
     EngravingItem* e = data.dropElement;
     switch (e->type()) {
     case ElementType::ARTICULATION:
     {
         Articulation* a = toArticulation(e);
-        if (!a->isFermata() || !score()->toggleArticulation(this, a)) {
+        if (!a->isFermata() || !EditChord::toggleArticulation(score(), this, a)) {
             delete e;
-            e = 0;
+            e = nullptr;
         }
     }
         return e;
@@ -245,9 +219,9 @@ EngravingItem* Rest::drop(EditData& data)
         if (!d.isZero()) {
             Segment* seg = score()->setNoteRest(segment(), track(), nval, d, dir);
             if (seg) {
-                ChordRest* cr = toChordRest(seg->element(track()));
+                const ChordRest* cr = toChordRest(seg->element(track()));
                 if (cr) {
-                    score()->nextInputPos(cr, false);
+                    NoteInput::nextInputPos(tx, score(), cr, false);
                 }
             }
         }
@@ -258,18 +232,13 @@ EngravingItem* Rest::drop(EditData& data)
         int numMeasures = toMeasureRepeat(e)->numMeasures();
         delete e;
         if (durationType().type() == DurationType::V_MEASURE) {
-            score()->cmdAddMeasureRepeat(measure(), numMeasures, staffIdx());
+            EditMeasureRepeat::addMeasureRepeat(tx, score(), measure(), numMeasures, staffIdx());
         }
         break;
     }
-    case ElementType::SYMBOL:
-    case ElementType::IMAGE:
-        e->setParent(this);
-        score()->undoAddElement(e);
-        return e;
 
     default:
-        return ChordRest::drop(data);
+        return ChordRest::drop(tx, data);
     }
     return 0;
 }
@@ -284,10 +253,10 @@ SymId Rest::getSymbol(DurationType type, int line, int lines) const
     case DurationType::V_LONG:
         return SymId::restLonga;
     case DurationType::V_BREVE:
-        return SymId::restDoubleWhole;
+        return (line < 0 || line >= lines) ? SymId::restDoubleWholeLegerLine : SymId::restDoubleWhole;
     case DurationType::V_MEASURE:
         if (ticks() >= Fraction(2, 1)) {
-            return SymId::restDoubleWhole;
+            return (line < 0 || line >= lines) ? SymId::restDoubleWholeLegerLine : SymId::restDoubleWhole;
         }
     // fall through
     case DurationType::V_WHOLE:
@@ -318,23 +287,18 @@ SymId Rest::getSymbol(DurationType type, int line, int lines) const
     }
 }
 
-void Rest::updateSymbol(int line, int lines, LayoutData* ldata) const
-{
-    ldata->setSym(getSymbol(durationType().type(), line, lines));
-}
-
 double Rest::symWidthNoLedgerLines(LayoutData* ldata) const
 {
-    if (ldata->sym() == SymId::restHalfLegerLine) {
+    if (ldata->sym == SymId::restHalfLegerLine) {
         return symWidth(SymId::restHalf);
     }
-    if (ldata->sym() == SymId::restWholeLegerLine) {
+    if (ldata->sym == SymId::restWholeLegerLine) {
         return symWidth(SymId::restWhole);
     }
-    if (ldata->sym() == SymId::restDoubleWholeLegerLine) {
+    if (ldata->sym == SymId::restDoubleWholeLegerLine) {
         return symWidth(SymId::restDoubleWhole);
     }
-    return symWidth(ldata->sym());
+    return symWidth(ldata->sym);
 }
 
 //---------------------------------------------------------
@@ -401,147 +365,6 @@ int Rest::getDotline(DurationType durationType)
     return dl;
 }
 
-//---------------------------------------------------------
-//   computeLineOffset
-//---------------------------------------------------------
-
-int Rest::computeVoiceOffset(int lines, LayoutData* ldata) const
-{
-    UNUSED(lines);
-    ldata->mergedRests.clear();
-    Segment* s = segment();
-    bool offsetVoices = s && measure() && (voice() > 0 || measure()->hasVoices(staffIdx(), tick(), actualTicks()));
-    if (offsetVoices && voice() == 0) {
-        // do not offset voice 1 rest if there exists a matching invisible rest in voice 2;
-        EngravingItem* e = s->element(track() + 1);
-        if (e && e->isRest() && !e->visible() && !toRest(e)->isGap()) {
-            Rest* r = toRest(e);
-            if (r->globalTicks() == globalTicks()) {
-                offsetVoices = false;
-            }
-        }
-    }
-
-    if (offsetVoices && voice() < 2) {
-        // in slash notation voices 1 and 2 are not offset outside the staff
-        // if the staff contains slash notation then only offset rests in voices 3 and 4
-        track_idx_t baseTrack = staffIdx() * VOICES;
-        for (voice_idx_t v = 0; v < VOICES; ++v) {
-            EngravingItem* e = s->element(baseTrack + v);
-            if (e && e->isChord() && toChord(e)->slash()) {
-                offsetVoices = false;
-                break;
-            }
-        }
-    }
-
-    if (offsetVoices && staff()->mergeMatchingRests()) {
-        // automatically merge matching rests if nothing in any other voice
-        // this is not always the right thing to do do, but is useful in choral music
-        // and can be enabled via a staff property
-        bool matchFound = false;
-        track_idx_t baseTrack = staffIdx() * VOICES;
-        for (voice_idx_t v = 0; v < VOICES; ++v) {
-            if (v == voice()) {
-                continue;
-            }
-            EngravingItem* e = s->element(baseTrack + v);
-            // try to find match in any other voice
-            if (e) {
-                if (e->type() == ElementType::REST) {
-                    Rest* r = toRest(e);
-                    if (r->globalTicks() == globalTicks()) {
-                        matchFound = true;
-                        ldata->mergedRests.push_back(r);
-                        continue;
-                    }
-                }
-                // no match found; no sense looking for anything else
-                matchFound = false;
-                break;
-            }
-        }
-        if (matchFound) {
-            offsetVoices = false;
-        }
-    }
-
-    if (!offsetVoices) {
-        return 0;
-    }
-
-    bool up = voice() == 0 || voice() == 2;
-    int upSign = up ? -1 : 1;
-    int voiceLineOffset = style().styleB(Sid::multiVoiceRestTwoSpaceOffset) ? 2 : 1;
-
-    return voiceLineOffset * upSign;
-}
-
-int Rest::computeWholeRestOffset(int voiceOffset, int lines) const
-{
-    if (!isWholeRest()) {
-        return 0;
-    }
-    int lineMove = 0;
-    bool moveToLineAbove = (lines > 5)
-                           || ((lines > 1 || voiceOffset == -1 || voiceOffset == 2) && !(voiceOffset == -2 || voiceOffset == 1));
-    if (moveToLineAbove) {
-        lineMove = -1;
-    }
-
-    if (!isFullMeasureRest()) {
-        return lineMove;
-    }
-
-    track_idx_t startTrack = staffIdx() * VOICES;
-    track_idx_t endTrack = startTrack + VOICES;
-    track_idx_t thisTrack = track();
-    bool hasNotesAbove = false;
-    bool hasNotesBelow = false;
-    double topY = 10000.0;
-    double bottomY = -10000.0;
-    for (Segment& segment : measure()->segments()) {
-        for (track_idx_t track = startTrack; track < endTrack; ++track) {
-            EngravingItem* item = segment.elementAt(track);
-            if (!item || !item->isChord()) {
-                continue;
-            }
-            Chord* chord = toChord(item);
-            Shape chordShape = chord->shape().translated(chord->pos());
-            chordShape.removeInvisibles();
-            if (chordShape.empty()) {
-                continue;
-            }
-            if (track < thisTrack) {
-                hasNotesAbove = true;
-                bottomY = std::max(bottomY, chordShape.bottom());
-            } else if (track > thisTrack) {
-                hasNotesBelow = true;
-                topY = std::min(topY, chordShape.top());
-            }
-        }
-    }
-
-    if (hasNotesAbove && hasNotesBelow) {
-        return lineMove; // Don't do anything
-    }
-
-    double lineDistance = staff()->lineDistance(tick()) * spatium();
-    int centerLine = floor(double(lines) / 2);
-
-    if (hasNotesAbove) {
-        int bottomLine = floor(bottomY / lineDistance);
-        lineMove = std::max(lineMove, bottomLine - centerLine);
-    }
-
-    if (hasNotesBelow) {
-        int topLine = floor(topY / lineDistance);
-        lineMove = std::min(lineMove, topLine - centerLine);
-    }
-
-    return lineMove;
-}
-
 bool Rest::isWholeRest() const
 {
     TDuration durType = durationType();
@@ -549,10 +372,11 @@ bool Rest::isWholeRest() const
            || (durType == DurationType::V_MEASURE && measure() && measure()->ticks() < Fraction(2, 1));
 }
 
-int Rest::computeNaturalLine(int lines) const
+bool Rest::isBreveRest() const
 {
-    int line = (lines % 2) ? floor(double(lines) / 2) : ceil(double(lines) / 2);
-    return line;
+    TDuration durType = durationType();
+    return durType == DurationType::V_BREVE
+           || (durType == DurationType::V_MEASURE && measure() && measure()->ticks() >= Fraction(2, 1));
 }
 
 //---------------------------------------------------------
@@ -561,7 +385,7 @@ int Rest::computeNaturalLine(int lines) const
 
 double Rest::upPos() const
 {
-    return symBbox(layoutData()->sym()).y();
+    return symBbox(ldata()->sym()).y();
 }
 
 //---------------------------------------------------------
@@ -570,24 +394,30 @@ double Rest::upPos() const
 
 double Rest::downPos() const
 {
-    return symBbox(layoutData()->sym()).y() + symHeight(layoutData()->sym());
+    return symBbox(ldata()->sym()).y() + symHeight(ldata()->sym());
 }
 
 //---------------------------------------------------------
 //   scanElements
 //---------------------------------------------------------
 
-void Rest::scanElements(void* data, void (* func)(void*, EngravingItem*), bool all)
+void Rest::scanElements(std::function<void(EngravingItem*)> func)
 {
-    ChordRest::scanElements(data, func, all);
+    ChordRest::scanElements(func);
     for (EngravingItem* e : el()) {
-        e->scanElements(data, func, all);
+        e->scanElements(func);
     }
     for (NoteDot* dot : m_dots) {
-        dot->scanElements(data, func, all);
+        dot->scanElements(func);
     }
-    if (!isGap()) {
-        func(data, this);
+    if (!isGap() || debugDrawGap()) {
+        func(this);
+    }
+    if (leftParen()) {
+        func(leftParen());
+    }
+    if (rightParen()) {
+        func(rightParen());
     }
 }
 
@@ -629,72 +459,19 @@ double Rest::intrinsicMag() const
 }
 
 //---------------------------------------------------------
-//   upLine
-//---------------------------------------------------------
-
-int Rest::upLine() const
-{
-    double _spatium = spatium();
-    return lrint((pos().y() + layoutData()->bbox().top() + _spatium) * 2 / _spatium);
-}
-
-//---------------------------------------------------------
-//   downLine
-//---------------------------------------------------------
-
-int Rest::downLine() const
-{
-    double _spatium = spatium();
-    return lrint((pos().y() + layoutData()->bbox().top() + _spatium) * 2 / _spatium);
-}
-
-//---------------------------------------------------------
-//   stemPos
-//    point to connect stem
-//---------------------------------------------------------
-
-PointF Rest::stemPos() const
-{
-    return pagePos();
-}
-
-//---------------------------------------------------------
-//   stemPosBeam
-//    return stem position of note on beam side
-//    return canvas coordinates
-//---------------------------------------------------------
-
-PointF Rest::stemPosBeam() const
-{
-    PointF p(pagePos());
-    if (m_up) {
-        p.ry() += layoutData()->bbox().top() + spatium() * 1.5;
-    } else {
-        p.ry() += layoutData()->bbox().bottom() - spatium() * 1.5;
-    }
-    return p;
-}
-
-//---------------------------------------------------------
-//   stemPosX
-//---------------------------------------------------------
-
-double Rest::stemPosX() const
-{
-    if (m_up) {
-        return layoutData()->bbox().right();
-    } else {
-        return layoutData()->bbox().left();
-    }
-}
-
-//---------------------------------------------------------
 //   rightEdge
 //---------------------------------------------------------
 
 double Rest::rightEdge() const
 {
     return x() + width();
+}
+
+double Rest::centerX() const
+{
+    SymId sym = ldata()->sym();
+    RectF bbox = symBbox(sym);
+    return bbox.left() + bbox.width() / 2;
 }
 
 //---------------------------------------------------------
@@ -715,11 +492,11 @@ void Rest::setAccent(bool flag)
     undoChangeProperty(Pid::SMALL, flag);
     if (voice() % 2 == 0) {
         if (flag) {
-            double yOffset = -(layoutData()->bbox().bottom());
+            double yOffset = -(ldata()->bbox().bottom());
             if (durationType() >= DurationType::V_HALF) {
                 yOffset -= staff()->spatium(tick()) * 0.5;
             }
-            mutLayoutData()->moveY(yOffset);
+            mutldata()->moveY(yOffset);
         }
     }
 }
@@ -730,8 +507,8 @@ void Rest::setAccent(bool flag)
 
 String Rest::accessibleInfo() const
 {
-    String voice = mtrc("engraving", "Voice: %1").arg(track() % VOICES + 1);
-    return mtrc("engraving", "%1; Duration: %2; %3").arg(EngravingItem::accessibleInfo(), durationUserName(), voice);
+    String voice = muse::mtrc("engraving", "Voice: %1").arg(track() % VOICES + 1);
+    return muse::mtrc("engraving", "%1; Duration: %2; %3").arg(EngravingItem::accessibleInfo(), durationUserName(), voice);
 }
 
 //---------------------------------------------------------
@@ -742,12 +519,12 @@ String Rest::screenReaderInfo() const
 {
     Measure* m = measure();
     bool voices = m ? m->hasVoices(staffIdx()) : false;
-    String voice = voices ? (u"; " + mtrc("engraving", "Voice: %1").arg(track() % VOICES + 1)) : u"";
+    String voice = voices ? (u"; " + muse::mtrc("engraving", "Voice: %1").arg(track() % VOICES + 1)) : u"";
     String crossStaff;
     if (staffMove() < 0) {
-        crossStaff = u"; " + mtrc("engraving", "Cross-staff above");
+        crossStaff = u"; " + muse::mtrc("engraving", "Cross-staff above");
     } else if (staffMove() > 0) {
-        crossStaff = u"; " + mtrc("engraving", "Cross-staff below");
+        crossStaff = u"; " + muse::mtrc("engraving", "Cross-staff below");
     }
     return String(u"%1 %2%3%4").arg(EngravingItem::accessibleInfo(), durationUserName(), crossStaff, voice);
 }
@@ -770,10 +547,6 @@ void Rest::add(EngravingItem* e)
         break;
     case ElementType::DEAD_SLAPPED:
         m_deadSlapped = toDeadSlapped(e);
-    // fallthrough
-    case ElementType::SYMBOL:
-    case ElementType::IMAGE:
-        addEl(e);
         e->added();
         break;
     default:
@@ -834,6 +607,8 @@ PropertyValue Rest::propertyDefault(Pid propertyId) const
     switch (propertyId) {
     case Pid::GAP:
         return false;
+    case Pid::ALIGN_WITH_OTHER_RESTS:
+        return true;
     default:
         return ChordRest::propertyDefault(propertyId);
     }
@@ -858,6 +633,8 @@ PropertyValue Rest::getProperty(Pid propertyId) const
     switch (propertyId) {
     case Pid::GAP:
         return m_gap;
+    case Pid::ALIGN_WITH_OTHER_RESTS:
+        return alignWithOtherRests();
     default:
         return ChordRest::getProperty(propertyId);
     }
@@ -872,27 +649,23 @@ bool Rest::setProperty(Pid propertyId, const PropertyValue& v)
     switch (propertyId) {
     case Pid::GAP:
         m_gap = v.toBool();
-        triggerLayout();
         break;
     case Pid::VISIBLE:
         setVisible(v.toBool());
-        triggerLayout();
         break;
     case Pid::OFFSET:
-        score()->addRefresh(canvasBoundingRect());
         setOffset(v.value<PointF>());
-
-        renderer()->layoutItem(this);
-
-        score()->addRefresh(canvasBoundingRect());
         if (measure() && durationType().type() == DurationType::V_MEASURE) {
             measure()->triggerLayout();
         }
-        triggerLayout();
+        break;
+    case Pid::ALIGN_WITH_OTHER_RESTS:
+        setAlignWithOtherRests(v.toBool());
         break;
     default:
         return ChordRest::setProperty(propertyId, v);
     }
+    triggerLayout();
     return true;
 }
 
@@ -926,45 +699,6 @@ EngravingItem* Rest::prevElement()
 }
 
 //---------------------------------------------------------
-//   shape
-//---------------------------------------------------------
-
-Shape Rest::shape() const
-{
-    Shape shape;
-    if (!m_gap) {
-        shape.add(ChordRest::shape());
-        shape.add(symBbox(layoutData()->sym()), this);
-        for (NoteDot* dot : m_dots) {
-            shape.add(symBbox(SymId::augmentationDot).translated(dot->pos()), dot);
-        }
-    }
-    for (EngravingItem* e : el()) {
-        if (e->addToSkyline()) {
-            shape.add(e->shape().translate(e->pos()));
-        }
-    }
-    return shape;
-}
-
-//---------------------------------------------------------
-//   editDrag
-//---------------------------------------------------------
-
-void Rest::editDrag(EditData& editData)
-{
-    Segment* seg = segment();
-
-    if (editData.modifiers & ShiftModifier) {
-        const Spatium deltaSp = Spatium(editData.delta.x() / spatium());
-        seg->undoChangeProperty(Pid::LEADING_SPACE, seg->extraLeadingSpace() + deltaSp);
-    } else {
-        setOffset(offset() + editData.evtDelta);
-    }
-    triggerLayout();
-}
-
-//---------------------------------------------------------
 //   Rest::shouldNotBeDrawn
 //    in tab staff, do not draw rests (except mmrests)
 //    if rests are off OR if dur. symbols are on
@@ -988,6 +722,11 @@ bool Rest::shouldNotBeDrawn() const
     }
 
     return false;
+}
+
+bool Rest::debugDrawGap() const
+{
+    return configuration()->debuggingOptions().showGapRests;
 }
 
 //---------------------------------------------------------

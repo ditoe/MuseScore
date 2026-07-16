@@ -1,32 +1,31 @@
-#ifndef MU_IMPORTEXPORT_GPCONVERTER_H
-#define MU_IMPORTEXPORT_GPCONVERTER_H
+#pragma once
 
 #include <unordered_map>
 
-#include "gpmasterbar.h"
+#include "modularity/ioc.h"
+#include "engraving/iengravingconfiguration.h"
+#include "engraving/types/fraction.h"
+
+#include "../continiouselementsbuilder.h"
+#include "../guitarbendimport/guitarbendimporter.h"
 #include "gpbar.h"
 #include "gpbeat.h"
 #include "gpdrumsetresolver.h"
+#include "gpmasterbar.h"
 #include "gpmastertracks.h"
-#include "../continiouselementsbuilder.h"
-#include "types/fraction.h"
-
-#include "engraving/dom/vibrato.h"
-#include "engraving/dom/ottava.h"
-
-#include "iengravingconfiguration.h"
+#include "engraving/dom/stringdata.h"
 
 namespace mu::iex::guitarpro {
 class GPScore;
 class GPTrack;
 class GPDomModel;
 
-class GPConverter
+class GPConverter : public muse::Contextable
 {
-    INJECT(mu::engraving::IEngravingConfiguration, engravingConfiguration);
+    muse::GlobalInject<mu::engraving::IEngravingConfiguration> engravingConfiguration;
 
 public:
-    GPConverter(mu::engraving::Score* score, std::unique_ptr<GPDomModel>&& gpDom);
+    GPConverter(mu::engraving::Score* score, std::unique_ptr<GPDomModel>&& gpDom, const muse::modularity::ContextPtr& iocCtx);
 
     void convertGP();
 
@@ -94,9 +93,10 @@ private:
     Note* addHarmonic(const GPNote* gpnote, Note* note);
     void addFingering(const GPNote* gpnote, Note* note);
     void addAccent(const GPNote* gpnote, Note* note);
-    void addLeftHandTapping(const GPNote* gpnote, Note* note);
     void addStringNumber(const GPNote* gpnote, Note* note);
-    void addTapping(const GPNote* gpnote, Note* note);
+    void addTapping(const GPNote* gpnote, Note* note, engraving::TappingHand hand);
+    void addLeftHandTapping(const GPNote* gpnote);
+    void addRightHandTapping(const GPNote* gpnote);
     void addSlide(const GPNote* gpnote, Note* note);
     void addSingleSlide(const GPNote* gpnote, Note* note);
     void addPickScrape(const GPNote* gpnote, Note* note);
@@ -107,12 +107,13 @@ private:
     void addBend(const GPNote* gpnote, Note* note);
     void setPitch(Note* note, const GPNote::MidiPitch& midiPitch);
     void setTpc(Note* note, int accidental);
-    int calculateDrumPitch(int element, int variation, const String& instrumentName);
-    void addTextToNote(String string, Note* note);
+    int calculateDrumPitch(int element, int variation, const muse::String& instrumentName);
+    void addTextToNote(muse::String string, Note* note);
 
     void addLegato(const GPBeat* beat, ChordRest* cr);
     void addOttava(const GPBeat* gpb, ChordRest* cr);
     void addDynamic(const GPBeat* beat, ChordRest* cr);
+    void addTapping(const GPBeat* beat, ChordRest* cr);
     void addSlapped(const GPBeat* beat, ChordRest* cr);
     void addPopped(const GPBeat* beat, ChordRest* cr);
     void addBrush(const GPBeat* beat, ChordRest* cr);
@@ -150,6 +151,8 @@ private:
     void fillTuplet();
     bool tupletParamsChanged(const GPBeat* beat, const ChordRest* cr);
     void setBeamMode(const GPBeat* beat, ChordRest* cr, Measure* measure, Fraction tick);
+    void addTuning();
+    void addCapos();
 
     mu::engraving::Score* _score;
     std::unique_ptr<GPDomModel> _gpDom;
@@ -172,6 +175,7 @@ private:
     std::unordered_map<Note*, int> m_originalPitches; // info of changed pitches for keeping track of ties
     std::unordered_map<mu::engraving::Chord*, mu::engraving::TremoloType> m_tremolosInChords;
     std::unordered_map<track_idx_t, mu::engraving::Slur*> _slurs; // map(track, slur)
+    std::map<uint64_t /* part ID */, int /* fret position */> m_capoParams;
 
     mutable GPBeat* m_currentGPBeat = nullptr; // used for passing info from notes
 
@@ -195,8 +199,6 @@ private:
     // Index is the number of sharps. Using sharp keysigs for signatures with double flats
     std::vector<int> m_sharpsToFlatKeysConverter{ 0, 1, 2, 3, 4, -7, -6, -5, -4, -3, -2, -1 };
 
-    std::vector<mu::engraving::StretchedBend*> m_stretchedBends;
-
     static constexpr mu::engraving::voice_idx_t VOICES = 4;
 
     bool m_showCapo = true; // TODO-gp : settings
@@ -208,6 +210,6 @@ private:
 
     std::unique_ptr<GPDrumSetResolver> _drumResolver;
     std::unique_ptr<ContiniousElementsBuilder> m_continiousElementsBuilder;
+    std::unique_ptr<GuitarBendImporter> m_guitarBendImporter;
 };
-} // namespace mu::iex::guitarpro
-#endif // MU_IMPORTEXPORT_GPCONVERTER_H
+}

@@ -18,10 +18,9 @@
     </identification>
   <part-list>
     <score-part id="P1">
-      <part-name> </part-name>
-      <part-abbreviation> </part-abbreviation>
+      <part-name></part-name>
       <score-instrument id="P1-I1">
-        <instrument-name> </instrument-name>
+        <instrument-name></instrument-name>
         </score-instrument>
       <midi-device id="P1-I1" port="1"></midi-device>
       <midi-instrument id="P1-I1">
@@ -71,7 +70,7 @@
       </measure>
     <measure number="2">
       <attributes>
-        <measure-style number="1">
+        <measure-style>
           <measure-repeat type="start">1</measure-repeat>
           </measure-style>
         </attributes>
@@ -120,7 +119,7 @@
       </measure>
     <measure number="4">
       <attributes>
-        <measure-style number="1">
+        <measure-style>
           <measure-repeat type="stop"></measure-repeat>
           </measure-style>
         </attributes>
@@ -159,7 +158,7 @@
       </measure>
     <measure number="6">
       <attributes>
-        <measure-style number="1">
+        <measure-style>
           <measure-repeat slashes="2" type="start">2</measure-repeat>
           </measure-style>
         </attributes>
@@ -232,7 +231,7 @@
       </measure>
     <measure number="10">
       <attributes>
-        <measure-style number="1">
+        <measure-style>
           <measure-repeat type="stop"></measure-repeat>
           </measure-style>
         </attributes>
@@ -247,7 +246,7 @@
         <type>half</type>
         <stem>down</stem>
         <notations>
-          <tied type="start"/>
+          <tied type="start" orientation="over" placement="above"/>
           </notations>
         </note>
       </measure>
@@ -278,7 +277,7 @@
         <type>quarter</type>
         <stem>down</stem>
         <notations>
-          <tied type="start"/>
+          <tied type="start" orientation="over" placement="above"/>
           </notations>
         </note>
       </measure>
@@ -312,7 +311,7 @@
       </measure>
     <measure number="14">
       <attributes>
-        <measure-style number="1">
+        <measure-style>
           <measure-repeat slashes="4" type="start">4</measure-repeat>
           </measure-style>
         </attributes>
@@ -327,7 +326,7 @@
         <type>half</type>
         <stem>down</stem>
         <notations>
-          <tied type="start"/>
+          <tied type="start" orientation="over" placement="above"/>
           </notations>
         </note>
       </measure>
@@ -357,7 +356,7 @@
         <type>quarter</type>
         <stem>down</stem>
         <notations>
-          <tied type="start"/>
+          <tied type="start" orientation="over" placement="above"/>
           </notations>
         </note>
       </measure>
@@ -401,7 +400,7 @@
         <type>half</type>
         <stem>down</stem>
         <notations>
-          <tied type="start"/>
+          <tied type="start" orientation="over" placement="above"/>
           </notations>
         </note>
       </measure>
@@ -431,7 +430,7 @@
         <type>quarter</type>
         <stem>down</stem>
         <notations>
-          <tied type="start"/>
+          <tied type="start" orientation="over" placement="above"/>
           </notations>
         </note>
       </measure>

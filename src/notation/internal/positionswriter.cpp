@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,6 +23,10 @@
 #include "positionswriter.h"
 
 #include <cmath>
+#include <QBuffer>
+
+#include "global/io/buffer.h"
+#include "global/serialization/xmlstreamwriter.h"
 
 #include "engraving/dom/masterscore.h"
 #include "engraving/dom/repeatlist.h"
@@ -30,43 +34,48 @@
 
 #include "engraving/types/types.h"
 
+#include "inotationelements.h" // IWYU pragma: keep
+
 #include "log.h"
-#include "global/deprecated/xmlwriter.h"
 
 using namespace mu::project;
 using namespace mu::notation;
 using namespace mu::engraving;
-using namespace mu::io;
-using namespace mu::framework;
+using namespace muse;
+using namespace muse::io;
 
-constexpr std::string_view SCORE_TAG("score");
-constexpr std::string_view ELEMENTS_TAG("elements");
-constexpr std::string_view ELEMENT_TAG("element");
-constexpr std::string_view EVENTS_TAG("events");
-constexpr std::string_view EVENT_TAG("event");
+static constexpr std::string_view SCORE_TAG("score");
+static constexpr std::string_view ELEMENTS_TAG("elements");
+static constexpr std::string_view ELEMENT_TAG("element");
+static constexpr std::string_view EVENTS_TAG("events");
+static constexpr std::string_view EVENT_TAG("event");
 
-static void writeElementPosition(mu::framework::XmlWriter& writer, const std::string& id, const mu::PointF& pos, const mu::PointF& sPos,
+static void writeElementPosition(XmlStreamWriter& writer, const std::string& id, const muse::PointF& pos, const muse::PointF& sPos,
                                  page_idx_t pageIndex)
 {
-    writer.writeStartElement(ELEMENT_TAG);
-    writer.writeAttribute("id", id);
-    writer.writeAttribute("x", std::to_string(pos.x()));
-    writer.writeAttribute("y", std::to_string(pos.y()));
-    writer.writeAttribute("sx", std::to_string(sPos.x()));
-    writer.writeAttribute("sy", std::to_string(sPos.y()));
-    writer.writeAttribute("page", std::to_string(pageIndex));
-    writer.writeEndElement();
+    XmlStreamWriter::Attributes attributes;
+    attributes.emplace_back("id", id);
+    attributes.emplace_back("x", pos.x());
+    attributes.emplace_back("y", pos.y());
+    attributes.emplace_back("sx", sPos.x());
+    attributes.emplace_back("sy", sPos.y());
+    attributes.emplace_back("page", pageIndex);
+
+    writer.startElement(ELEMENT_TAG, attributes);
+    writer.endElement();
 }
 
-static void writeEventPosition(mu::framework::XmlWriter& writer, const std::string& id, int time)
+static void writeEventPosition(XmlStreamWriter& writer, const std::string& id, int time)
 {
-    writer.writeStartElement(EVENT_TAG);
-    writer.writeAttribute("elid", id);
-    writer.writeAttribute("position", std::to_string(time));
-    writer.writeEndElement();
+    XmlStreamWriter::Attributes attributes;
+    attributes.emplace_back("elid", id);
+    attributes.emplace_back("position", time);
+
+    writer.startElement(EVENT_TAG, attributes);
+    writer.endElement();
 }
 
-static void writeMeasureEvents(mu::framework::XmlWriter& writer, Measure* m, int offset, const QHash<void*, int>& segments)
+static void writeMeasureEvents(XmlStreamWriter& writer, Measure* m, int offset, const QHash<void*, int>& segments)
 {
     for (mu::engraving::Segment* s = m->first(mu::engraving::SegmentType::ChordRest); s;
          s = s->next(mu::engraving::SegmentType::ChordRest)) {
@@ -94,7 +103,7 @@ bool PositionsWriter::supportsUnitType(UnitType unitType) const
     return std::find(unitTypes.cbegin(), unitTypes.cend(), unitType) != unitTypes.cend();
 }
 
-mu::Ret PositionsWriter::write(INotationPtr notation, QIODevice& destinationDevice, const Options&)
+Ret PositionsWriter::write(INotationPtr notation, io::IODevice& destinationDevice, const Options&)
 {
     IF_ASSERT_FAILED(notation) {
         return make_ret(Ret::Code::UnknownError);
@@ -106,21 +115,24 @@ mu::Ret PositionsWriter::write(INotationPtr notation, QIODevice& destinationDevi
         return make_ret(Ret::Code::UnknownError);
     }
 
-    mu::framework::XmlWriter writer(&destinationDevice);
+    auto buf = Buffer::opened(IODevice::WriteOnly);
+    XmlStreamWriter writer(&buf);
 
-    writer.writeStartDocument();
-    writer.writeStartElement(SCORE_TAG);
+    writer.startDocument();
+    writer.startElement(SCORE_TAG);
 
     writeElementsPositions(writer, score);
     writeEventsPositions(writer, score);
 
-    writer.writeEndElement();
-    writer.writeEndDocument();
+    writer.endElement();
+    writer.flush();
+
+    destinationDevice.write(buf.data());
 
     return true;
 }
 
-mu::Ret PositionsWriter::writeList(const INotationPtrList&, QIODevice&, const Options&)
+Ret PositionsWriter::writeList(const INotationPtrList&, io::IODevice&, const Options&)
 {
     NOT_SUPPORTED;
     return Ret(Ret::Code::NotSupported);
@@ -151,9 +163,9 @@ QHash<void*, int> PositionsWriter::elementIds(const mu::engraving::Score* score)
     return elementIds;
 }
 
-void PositionsWriter::writeElementsPositions(mu::framework::XmlWriter& writer, const mu::engraving::Score* score) const
+void PositionsWriter::writeElementsPositions(XmlStreamWriter& writer, const mu::engraving::Score* score) const
 {
-    writer.writeStartElement(ELEMENTS_TAG);
+    writer.startElement(ELEMENTS_TAG);
 
     switch (m_elementType) {
     case ElementType::SEGMENT:
@@ -164,10 +176,10 @@ void PositionsWriter::writeElementsPositions(mu::framework::XmlWriter& writer, c
         break;
     }
 
-    writer.writeEndElement();
+    writer.endElement();
 }
 
-void PositionsWriter::writeSegmentsPositions(mu::framework::XmlWriter& writer, const mu::engraving::Score* score) const
+void PositionsWriter::writeSegmentsPositions(XmlStreamWriter& writer, const mu::engraving::Score* score) const
 {
     int id = 0;
     qreal ndpi = pngDpiResolution();
@@ -199,13 +211,13 @@ void PositionsWriter::writeSegmentsPositions(mu::framework::XmlWriter& writer, c
     }
 }
 
-void PositionsWriter::writeMeasuresPositions(mu::framework::XmlWriter& writer, const mu::engraving::Score* score) const
+void PositionsWriter::writeMeasuresPositions(XmlStreamWriter& writer, const mu::engraving::Score* score) const
 {
     int id = 0;
     qreal ndpi = pngDpiResolution();
 
     for (Measure* measure = score->firstMeasureMM(); measure; measure = measure->nextMeasureMM()) {
-        qreal sx = measure->layoutData()->bbox().width() * ndpi;
+        qreal sx = measure->ldata()->bbox().width() * ndpi;
         qreal sy = measure->system()->height() * ndpi;
         qreal x = measure->pagePos().x() * ndpi;
         qreal y = measure->system()->pagePos().y() * ndpi;
@@ -219,17 +231,17 @@ void PositionsWriter::writeMeasuresPositions(mu::framework::XmlWriter& writer, c
     }
 }
 
-void PositionsWriter::writeEventsPositions(mu::framework::XmlWriter& writer, const mu::engraving::Score* score) const
+void PositionsWriter::writeEventsPositions(XmlStreamWriter& writer, const mu::engraving::Score* score) const
 {
     QHash<void*, int> elementIds = this->elementIds(score);
 
-    writer.writeStartElement(EVENTS_TAG);
+    writer.startElement(EVENTS_TAG);
 
     score->masterScore()->setExpandRepeats(true);
 
     for (const mu::engraving::RepeatSegment* repeatSegment : score->repeatList()) {
         int startTick = repeatSegment->tick;
-        int endTick = startTick + repeatSegment->len();
+        int endTick = repeatSegment->endTick();
         int tickOffset = repeatSegment->utick - repeatSegment->tick;
         for (Measure* measure = score->tick2measureMM(Fraction::fromTicks(startTick)); measure; measure = measure->nextMeasureMM()) {
             if (m_elementType == ElementType::SEGMENT) {
@@ -248,5 +260,5 @@ void PositionsWriter::writeEventsPositions(mu::framework::XmlWriter& writer, con
         }
     }
 
-    writer.writeEndElement();
+    writer.endElement();
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,6 +21,7 @@
  */
 #include "dummyelement.h"
 
+#include "dom/barline.h"
 #include "dom/factory.h"
 #include "dom/score.h"
 #include "dom/page.h"
@@ -138,7 +139,8 @@ EngravingItem* DummyElement::clone() const
 #ifndef ENGRAVING_NO_ACCESSIBILITY
 AccessibleItemPtr DummyElement::createAccessible()
 {
-    return std::make_shared<AccessibleItem>(this, accessibility::IAccessible::Panel);
+    using namespace muse::accessibility;
+    return std::make_shared<AccessibleItem>(this, IAccessible::Group);
 }
 
 #endif

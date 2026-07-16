@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
       <pagePrintableWidth>7.4826</pagePrintableWidth>
@@ -79,9 +80,11 @@
       <rhGuitarFingeringFrameWidth>0</rhGuitarFingeringFrameWidth>
       <stringNumberFontFace>MuseJazz Text</stringNumberFontFace>
       <longInstrumentFontFace>MuseJazz Text</longInstrumentFontFace>
+      <longInstrumentAlign>right,center</longInstrumentAlign>
       <longInstrumentFramePadding>0</longInstrumentFramePadding>
       <longInstrumentFrameWidth>0</longInstrumentFrameWidth>
       <shortInstrumentFontFace>MuseJazz Text</shortInstrumentFontFace>
+      <shortInstrumentAlign>right,center</shortInstrumentAlign>
       <shortInstrumentFramePadding>0</shortInstrumentFramePadding>
       <shortInstrumentFrameWidth>0</shortInstrumentFrameWidth>
       <partInstrumentFontFace>MuseJazz Text</partInstrumentFontFace>
@@ -89,7 +92,7 @@
       <partInstrumentFrameWidth>0</partInstrumentFrameWidth>
       <expressionFontFace>MuseJazz Text</expressionFontFace>
       <expressionFontSize>12</expressionFontSize>
-      <expressionFontSpatiumDependent>0</expressionFontSpatiumDependent>
+      <expressionFontStyle>0</expressionFontStyle>
       <expressionFramePadding>0</expressionFramePadding>
       <expressionFrameWidth>0</expressionFrameWidth>
       <tempoFontFace>MuseJazz Text</tempoFontFace>
@@ -107,19 +110,21 @@
       <translatorAlign>center,top</translatorAlign>
       <translatorFramePadding>0</translatorFramePadding>
       <translatorFrameWidth>0</translatorFrameWidth>
-      <systemFontFace>MuseJazz Text</systemFontFace>
-      <systemFontSize>11</systemFontSize>
-      <systemFramePadding>0</systemFramePadding>
-      <systemFrameWidth>0</systemFrameWidth>
-      <staffFontFace>MuseJazz Text</staffFontFace>
-      <staffFontSize>11</staffFontSize>
-      <staffAlign>left,top</staffAlign>
-      <staffFramePadding>0</staffFramePadding>
-      <staffFrameWidth>0</staffFrameWidth>
+      <translatorPosition>center</translatorPosition>
+      <systemTextFontFace>MuseJazz Text</systemTextFontFace>
+      <systemTextFontSize>11</systemTextFontSize>
+      <systemTextFramePadding>0</systemTextFramePadding>
+      <systemTextFrameWidth>0</systemTextFrameWidth>
+      <staffTextFontFace>MuseJazz Text</staffTextFontFace>
+      <staffTextFontSize>11</staffTextFontSize>
+      <staffTextAlign>left,top</staffTextAlign>
+      <staffTextFramePadding>0</staffTextFramePadding>
+      <staffTextFrameWidth>0</staffTextFrameWidth>
       <rehearsalMarkFontFace>MuseJazz Text</rehearsalMarkFontFace>
       <rehearsalMarkFontStyle>0</rehearsalMarkFontStyle>
       <rehearsalMarkAlign>right,baseline</rehearsalMarkAlign>
       <rehearsalMarkFramePadding>0.2</rehearsalMarkFramePadding>
+      <rehearsalMarkPosition>right</rehearsalMarkPosition>
       <repeatLeftFontFace>MuseJazz Text</repeatLeftFontFace>
       <repeatLeftFramePadding>0</repeatLeftFramePadding>
       <repeatLeftFrameWidth>0</repeatLeftFrameWidth>
@@ -136,22 +141,30 @@
       <glissandoAlign>center,baseline</glissandoAlign>
       <glissandoFramePadding>0</glissandoFramePadding>
       <glissandoFrameWidth>0</glissandoFrameWidth>
+      <glissandoPosition>center</glissandoPosition>
       <bendFontFace>MuseJazz Text</bendFontFace>
       <bendAlign>center,center</bendAlign>
       <bendFramePadding>0</bendFramePadding>
       <bendFrameWidth>0</bendFrameWidth>
+      <bendPosition>center</bendPosition>
       <headerFontFace>MuseJazz Text</headerFontFace>
       <headerFramePadding>0</headerFramePadding>
       <headerFrameWidth>0</headerFrameWidth>
       <footerFontFace>MuseJazz Text</footerFontFace>
       <footerFramePadding>0</footerFramePadding>
       <footerFrameWidth>0</footerFrameWidth>
+      <copyrightFontFace>MuseJazz Text</copyrightFontFace>
+      <copyrightFramePadding>0</copyrightFramePadding>
+      <copyrightFrameWidth>0</copyrightFrameWidth>
+      <pageNumberFontFace>MuseJazz Text</pageNumberFontFace>
+      <pageNumberFramePadding>0</pageNumberFramePadding>
+      <pageNumberFrameWidth>0</pageNumberFrameWidth>
       <instrumentChangeFontFace>MuseJazz Text</instrumentChangeFontFace>
       <instrumentChangeAlign>left,bottom</instrumentChangeAlign>
       <instrumentChangeFramePadding>0</instrumentChangeFramePadding>
       <instrumentChangeFrameWidth>0</instrumentChangeFrameWidth>
       <defaultsVersion>206</defaultsVersion>
-      <Spatium>1.85</Spatium>
+      <spatium>1.85</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -163,21 +176,23 @@
     <metaTag name="lyricist">Lyricist</metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">Title</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Piano</trackName>
       <Instrument id="piano">
-        <longName>Piano</longName>
-        <shortName>Pno.</shortName>
+        <InstrumentLabel>
+          <longName>Piano</longName>
+          <shortName>Pno.</shortName>
+          </InstrumentLabel>
         <trackName>Piano</trackName>
         <minPitchP>21</minPitchP>
         <maxPitchP>108</maxPitchP>
@@ -226,108 +241,137 @@
         <height>7</height>
         <bottomGap>8.33333</bottomGap>
         <boxAutoSize>0</boxAutoSize>
-        <excludeFromParts>0</excludeFromParts>
+        <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+        <eid>E_E</eid>
         <Text>
+          <eid>F_F</eid>
           <style>title</style>
           <text>Title</text>
           </Text>
         <Text>
+          <eid>G_G</eid>
           <style>subtitle</style>
           <text>Subtitle</text>
           </Text>
         <Text>
+          <eid>H_H</eid>
           <style>composer</style>
           <text>Composer</text>
           </Text>
         <Text>
+          <eid>I_I</eid>
           <style>poet</style>
           <text>Lyricist</text>
           </Text>
         <Text>
+          <eid>J_J</eid>
           <style>instrument_excerpt</style>
           <text>Partname</text>
           </Text>
         </VBox>
       <Measure>
+        <eid>K_K</eid>
         <voice>
           <TimeSig>
+            <eid>L_L</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <StaffText>
+            <eid>M_M</eid>
             <text>staff</text>
             </StaffText>
           <Tempo>
             <tempo>1.33333</tempo>
             <followText>1</followText>
+            <eid>N_N</eid>
             <text><sym>metNoteQuarterUp</sym> = 80</text>
             </Tempo>
           <Rest>
+            <eid>O_O</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>P_P</eid>
         <voice>
           <Rest>
+            <eid>Q_Q</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>R_R</eid>
         <voice>
           <SystemText>
+            <eid>S_S</eid>
             <text>System</text>
             </SystemText>
           <Rest>
+            <eid>T_T</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>U_U</eid>
         <LayoutBreak>
+          <eid>V_V</eid>
           <subtype>line</subtype>
           </LayoutBreak>
         <voice>
           <Rest>
+            <eid>W_W</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>X_X</eid>
         <voice>
           <Dynamic>
             <subtype>f</subtype>
             <velocity>96</velocity>
+            <eid>Y_Y</eid>
             <text>dyn <sym>dynamicForte</sym></text>
             </Dynamic>
           <Rest>
+            <eid>Z_Z</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>a_a</eid>
         <voice>
           <Rest>
+            <eid>b_b</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>c_c</eid>
         <voice>
           <Chord>
+            <eid>d_d</eid>
             <durationType>quarter</durationType>
             <Lyrics>
+              <eid>e_e</eid>
               <text>lyrics</text>
               </Lyrics>
             <Note>
+              <eid>f_f</eid>
               <Fingering>
+                <eid>g_g</eid>
                 <offset x="0.658281" y="-1.50188"/>
                 <text>0</text>
                 </Fingering>
@@ -336,39 +380,51 @@
               </Note>
             </Chord>
           <Rest>
+            <eid>h_h</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>i_i</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>j_j</eid>
         <LayoutBreak>
+          <eid>k_k</eid>
           <subtype>line</subtype>
           </LayoutBreak>
         <voice>
           <RehearsalMark>
+            <eid>l_l</eid>
             <text>A</text>
             </RehearsalMark>
           <Rest>
+            <eid>m_m</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>n_n</eid>
         <voice>
           <Harmony>
-            <root>14</root>
+            <harmonyInfo>
+              <root>14</root>
+              </harmonyInfo>
+            <eid>o_o</eid>
             </Harmony>
           <Rest>
+            <eid>p_p</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>q_q</eid>
         <voice>
           <FiguredBass>
             <ticks>1/4</ticks>
@@ -376,13 +432,17 @@
               <brackets b0="0" b1="0" b2="0" b3="0" b4="0"/>
               <digit>5</digit>
               </FiguredBassItem>
+            <eid>r_r</eid>
             </FiguredBass>
           <Chord>
+            <eid>s_s</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>t_t</eid>
               <Fingering>
-                <style>guitar_fingering_rh</style>
+                <eid>u_u</eid>
                 <offset x="0.658281" y="-1.50188"/>
+                <style>guitar_fingering_rh</style>
                 <text>p</text>
                 </Fingering>
               <pitch>72</pitch>
@@ -390,38 +450,45 @@
               </Note>
             </Chord>
           <Rest>
+            <eid>v_v</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>w_w</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>x_x</eid>
         <voice>
           <Expression>
-            <placement>above</placement>
-            <snapToDynamics>0</snapToDynamics>
-            <offset x="0" y="3.5"/>
+            <eid>y_y</eid>
             <text>technique</text>
             </Expression>
           <Rest>
+            <eid>z_z</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>0_0</eid>
         <voice>
           <Chord>
+            <eid>1_1</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>2_2</eid>
               <Fingering>
-                <style>string_number</style>
+                <eid>3_3</eid>
                 <offset x="0.658281" y="-6.50188"/>
+                <style>string_number</style>
                 <text>0</text>
                 </Fingering>
               <Fingering>
+                <eid>4_4</eid>
                 <style>guitar_fingering_lh</style>
                 <text>1</text>
                 </Fingering>
@@ -430,34 +497,43 @@
               </Note>
             </Chord>
           <Rest>
+            <eid>5_5</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>6_6</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>7_7</eid>
         <LayoutBreak>
+          <eid>8_8</eid>
           <subtype>line</subtype>
           </LayoutBreak>
         <voice>
           <StaffText>
+            <eid>9_9</eid>
             <style>metronome</style>
             <text>metronome</text>
             </StaffText>
           <Rest>
+            <eid>+_+</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>/_/</eid>
         <voice>
           <InstrumentChange>
             <Instrument id="piano">
-              <longName>Piano</longName>
-              <shortName>Pno.</shortName>
+              <InstrumentLabel>
+                <longName>Piano</longName>
+                <shortName>Pno.</shortName>
+                </InstrumentLabel>
               <trackName>Piano</trackName>
               <minPitchP>21</minPitchP>
               <maxPitchP>108</maxPitchP>
@@ -497,14 +573,14 @@
                 <program value="0"/>
                 </Channel>
               </Instrument>
+            <eid>AB_AB</eid>
             <autoplace>0</autoplace>
             <text>Instrument</text>
             </InstrumentChange>
           <Spanner type="Pedal">
             <Pedal>
               <endHookType>1</endHookType>
-              <beginText>&lt;sym&gt;keyboardPedalPed&lt;/sym&gt;</beginText>
-              <continueText>(&lt;sym&gt;keyboardPedalPed&lt;/sym&gt;)</continueText>
+              <eid>BB_BB</eid>
               </Pedal>
             <next>
               <location>
@@ -513,24 +589,30 @@
               </next>
             </Spanner>
           <Chord>
+            <eid>CB_CB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>DB_DB</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>EB_EB</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>FB_FB</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>GB_GB</eid>
         <voice>
           <SystemText>
             <swing unit="eighth" ratio="60"/>
+            <eid>HB_HB</eid>
             <style>tempo</style>
             <text>Swing</text>
             </SystemText>
@@ -544,6 +626,7 @@
           <Spanner type="Ottava">
             <Ottava>
               <subtype>8vb</subtype>
+              <eid>IB_IB</eid>
               </Ottava>
             <next>
               <location>
@@ -552,21 +635,26 @@
               </next>
             </Spanner>
           <Chord>
+            <eid>JB_JB</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>KB_KB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>LB_LB</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>MB_MB</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>NB_NB</eid>
         <voice>
           <Spanner type="Ottava">
             <prev>
@@ -579,6 +667,7 @@
             <Volta>
               <endHookType>1</endHookType>
               <beginText>1.</beginText>
+              <eid>OB_OB</eid>
               <endings>1</endings>
               </Volta>
             <next>
@@ -588,12 +677,14 @@
               </next>
             </Spanner>
           <Rest>
+            <eid>PB_PB</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>QB_QB</eid>
         <voice>
           <Spanner type="Volta">
             <prev>
@@ -606,6 +697,7 @@
             <TextLine>
               <endHookType>1</endHookType>
               <beginText>VII</beginText>
+              <eid>RB_RB</eid>
               </TextLine>
             <next>
               <location>
@@ -614,12 +706,10 @@
               </next>
             </Spanner>
           <Rest>
+            <eid>SB_SB</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
-          <BarLine>
-            <subtype>end</subtype>
-            </BarLine>
           <Spanner type="TextLine">
             <prev>
               <location>
@@ -627,6 +717,17 @@
                 </location>
               </prev>
             </Spanner>
+          <Spanner type="TextLine">
+            <prev>
+              <location>
+                <fractions>-1/1</fractions>
+                </location>
+              </prev>
+            </Spanner>
+          <BarLine>
+            <subtype>end</subtype>
+            <eid>TB_TB</eid>
+            </BarLine>
           </voice>
         </Measure>
       </Staff>

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,30 +19,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_IMPORTEXPORT_MEIREADER_H
-#define MU_IMPORTEXPORT_MEIREADER_H
+#pragma once
 
 #include "project/inotationreader.h"
 
 #include "modularity/ioc.h"
-#include "iinteractive.h"
+#include "interactive/iinteractive.h"
 #include "io/ifilesystem.h"
 
-#include "engravingerrors.h"
+#include "engraving/engravingerrors.h"
 
 namespace mu::iex::mei {
-class MeiReader : public project::INotationReader
+class MeiReader : public project::INotationReader, public muse::Contextable
 {
-    INJECT(framework::IInteractive, interactive)
-    INJECT(io::IFileSystem, fileSystem)
+    muse::ContextInject<muse::IInteractive> interactive = { this };
+    muse::GlobalInject<muse::io::IFileSystem> fileSystem;
 
 public:
-    Ret read(mu::engraving::MasterScore* score, const io::path_t& path, const Options& options = Options()) override;
-    mu::engraving::Err import(mu::engraving::MasterScore* score, const io::path_t& path, const Options& options = Options());
+
+    MeiReader(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
+
+    muse::Ret read(mu::engraving::MasterScore* score, const muse::io::path_t& path, const Options& options = Options()) override;
+    mu::engraving::Err import(mu::engraving::MasterScore* score, const muse::io::path_t& path, const Options& options = Options());
 
 private:
-    bool askToLoadDespiteWarnings(const String& text, const String& detailedText);
+    bool askToLoadDespiteWarnings(const muse::String& text, const muse::String& detailedText);
 };
-} // namespace
-
-#endif // MU_IMPORTEXPORT_MEIREADER_H
+}

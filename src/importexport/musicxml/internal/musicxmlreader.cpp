@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,23 +23,24 @@
 
 #include "io/path.h"
 #include "engraving/engravingerrors.h"
-
-namespace mu::engraving {
-extern Err importMusicXml(MasterScore*, const QString&);
-extern Err importCompressedMusicXml(MasterScore*, const QString&);
-}
+#include "import/importmusicxml.h"
 
 using namespace mu::iex::musicxml;
 using namespace mu::engraving;
 
-mu::Ret MusicXmlReader::read(MasterScore* score, const io::path_t& path, const Options&)
+muse::Ret MusicXmlReader::read(MasterScore* score, const muse::io::path_t& path, const Options& options)
 {
     Err err = Err::FileUnknownType;
-    std::string suffix = mu::io::suffix(path);
+    std::string suffix = muse::io::suffix(path);
+    bool forceMode = false;
+    if (options.find(INotationReader::OptionKey::ForceMode) != options.end()) {
+        forceMode = options.at(INotationReader::OptionKey::ForceMode).toBool();
+    }
+
     if (suffix == "xml" || suffix == "musicxml") {
-        err = importMusicXml(score, path.toQString());
+        err = importMusicXml(score, path.toString(), forceMode);
     } else if (suffix == "mxl") {
-        err = importCompressedMusicXml(score, path.toQString());
+        err = importCompressedMusicXml(score, path.toString(), forceMode);
     }
     return make_ret(err, path);
 }

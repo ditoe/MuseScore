@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2026 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -12,76 +12,76 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE palette)
+muse_create_module(palette)
 
-set(MODULE_QRC
-    ${CMAKE_CURRENT_LIST_DIR}/palette.qrc
-    )
+target_sources(palette PRIVATE
+    palettemodule.cpp
+    palettemodule.h
+    ipaletteconfiguration.h
+    palettetypes.h
 
-set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml)
+    internal/paletteconfiguration.cpp
+    internal/paletteconfiguration.h
+    internal/paletteworkspacesetup.cpp
+    internal/paletteworkspacesetup.h
+    internal/paletteuiactions.cpp
+    internal/paletteuiactions.h
+    internal/paletteactionscontroller.cpp
+    internal/paletteactionscontroller.h
 
-include(${CMAKE_CURRENT_LIST_DIR}/view/widgets/widgets.cmake)
+    internal/ipaletteprovider.h
+    internal/paletteprovider.cpp
+    internal/paletteprovider.h
+    internal/palettemodel.cpp
+    internal/palettemodel.h
+    internal/palettecreator.cpp
+    internal/palettecreator.h
+    internal/palettetree.cpp
+    internal/palettetree.h
+    internal/palette.cpp
+    internal/palette.h
+    internal/palettecell.cpp
+    internal/palettecell.h
+    internal/palettecelliconengine.cpp
+    internal/palettecelliconengine.h
+    internal/mimedatautils.h
+    internal/palettecompat.h
+    internal/palettecompat.cpp
 
-set(MODULE_SRC
-    ${WIDGETS_SRC}
-    ${CMAKE_CURRENT_LIST_DIR}/palettemodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/palettemodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/ipaletteconfiguration.h
-    ${CMAKE_CURRENT_LIST_DIR}/palettetypes.h
+    widgets/palettewidget.h
+    widgets/palettewidget.cpp
+    widgets/masterpalette.h
+    widgets/masterpalette.cpp
+    widgets/timedialog.h
+    widgets/timedialog.cpp
+    widgets/timesignaturepropertiesdialog.h
+    widgets/timesignaturepropertiesdialog.cpp
+    widgets/keyedit.h
+    widgets/keyedit.cpp
+    widgets/keycanvas.h
+    widgets/noteGroups.h
+    widgets/noteGroups.cpp
+    widgets/notegroupsexampleview.cpp
+    widgets/notegroupsexampleview.h
+    widgets/symboldialog.h
+    widgets/symboldialog.cpp
+    widgets/specialcharactersdialog.cpp
+    widgets/specialcharactersdialog.h
+    widgets/customizekitdialog.h
+    widgets/customizekitdialog.cpp
+)
 
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteconfiguration.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteconfiguration.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteworkspacesetup.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteworkspacesetup.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteuiactions.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteuiactions.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteactionscontroller.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteactionscontroller.h
-
-    ${CMAKE_CURRENT_LIST_DIR}/internal/ipaletteprovider.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteprovider.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteprovider.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecreator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecreator.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettetree.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettetree.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palette.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palette.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecell.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecell.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecelliconengine.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecelliconengine.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/mimedatautils.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecompat.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/palettecompat.cpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/view/paletterootmodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/paletterootmodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettemodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettemodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettepropertiesmodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettepropertiesmodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettecellpropertiesmodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettecellpropertiesmodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettespanelcontextmenumodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/palettespanelcontextmenumodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/drumsetpanelview.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/drumsetpanelview.cpp
-    )
-
-set(MODULE_UI
-    ${WIDGETS_UI}
-    )
-
-set(MODULE_LINK
+target_link_libraries(palette PRIVATE
     engraving
-    commonscene
-    )
+    Qt::Widgets
+)
 
-include(${PROJECT_SOURCE_DIR}/build/module.cmake)
+if (MUE_BUILD_PALETTE_QML)
+    add_subdirectory(qml/MuseScore/Palette)
+endif()

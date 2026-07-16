@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -22,22 +22,33 @@
 # Main goal - determine what need to do and call necessary functions.
 # Usually use from command line.
 
-set(MODULE converter)
+muse_create_module(converter)
 
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/convertermodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/convertermodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/convertercodes.h
-    ${CMAKE_CURRENT_LIST_DIR}/iconvertercontroller.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/convertercontroller.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/convertercontroller.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/compat/backendapi.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/compat/backendapi.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/compat/backendjsonwriter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/compat/backendjsonwriter.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/compat/notationmeta.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/compat/notationmeta.h
-    )
+target_sources(converter PRIVATE
+    convertermodule.cpp
+    convertermodule.h
+    convertercodes.h
+    convertertypes.h
+    iconvertercontroller.h
 
-include(${PROJECT_SOURCE_DIR}/build/module.cmake)
+    api/converterapi.cpp
+    api/converterapi.h
 
+    internal/convertercontroller.cpp
+    internal/convertercontroller.h
+    internal/converterutils.cpp
+    internal/converterutils.h
+    internal/compat/backendapi.cpp
+    internal/compat/backendapi.h
+    internal/compat/backendjsonwriter.cpp
+    internal/compat/backendjsonwriter.h
+    internal/compat/backendtypes.h
+    internal/compat/notationmeta.cpp
+    internal/compat/notationmeta.h
+    internal/compat/scoreelementsscanner.cpp
+    internal/compat/scoreelementsscanner.h
+)
+
+if (MUE_BUILD_CONVERTER_TESTS)
+    add_subdirectory(tests)
+endif()

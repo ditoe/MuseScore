@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,26 +19,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
-import MuseScore.CommonScene 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
+import MuseScore.NotationScene
 
-FlatButton {
+PopupButton {
     id: root
 
-    property var model: null
+    property AdditionalInfoModel model: null
     property string currentValueAccessibleName: model.tempoAccessibleName(root.model.tempo.noteIcon,
                                                                           root.model.tempo.withDot) + " " + root.model.tempo.value
 
-    property alias popupAnchorItem: popup.anchorItem
-
     height: 96
-    accentButton: popup.isOpened
 
     TempoView {
         anchors.centerIn: parent
@@ -52,15 +49,7 @@ FlatButton {
         noteSymbolTopPadding: 22
     }
 
-    onClicked: {
-        if (!popup.isOpened) {
-            popup.open()
-        } else {
-            popup.close()
-        }
-    }
-
-    StyledPopupView {
+    popupComponent: StyledPopupView {
         id: popup
 
         margins: 0
@@ -75,7 +64,7 @@ FlatButton {
         ColumnLayout {
             id: content
 
-            spacing: 0
+            spacing: 26
 
             property NavigationPanel navigationPanel: NavigationPanel {
                 name: "TempoSettingsPanel"
@@ -89,6 +78,7 @@ FlatButton {
 
                 Layout.topMargin: 26
                 Layout.leftMargin: 32
+                Layout.rightMargin: 32
 
                 checked: root.model.withTempo
 
@@ -107,18 +97,13 @@ FlatButton {
                 }
             }
 
-            SeparatorLine {
-                Layout.topMargin: 26
-            }
+            SeparatorLine {}
 
             RadioButtonGroup {
                 id: tempoMarkingView
 
-                Layout.topMargin: 26
                 Layout.leftMargin: 32
                 Layout.rightMargin: 32
-
-                height: 48
 
                 model: root.model.tempoNotes()
 
@@ -129,56 +114,60 @@ FlatButton {
                 }
 
                 delegate: FlatRadioButton {
-                    width: 48
+                    id: delegateButton
+
+                    required property string noteSymbol
+                    required property int noteIcon
+                    required property bool withDot
+                    required property int index
+
+                    width: 36
                     height: width
 
                     enabled: withTempo.checked
-                    checked: model.index === root.model.currentTempoNoteIndex
+                    checked: index === root.model.currentTempoNoteIndex
 
-                    navigation.name: modelData.noteSymbol
+                    navigation.name: noteSymbol
                     navigation.panel: tempoMarkingView.navigationPanel
                     navigation.row: 1
-                    navigation.column: model.index
+                    navigation.column: index
 
-                    navigation.accessible.name: root.model.tempoAccessibleName(modelData.noteIcon, modelData.withDot)
+                    navigation.accessible.name: root.model.tempoAccessibleName(noteIcon, withDot)
 
                     onToggled: {
                         var tempo = root.model.tempo
-                        tempo.noteIcon = modelData.noteIcon
-                        tempo.withDot = modelData.withDot
+                        tempo.noteIcon = noteIcon
+                        tempo.withDot = withDot
                         root.model.tempo = tempo
                     }
 
                     StyledTextLabel {
-                        topPadding: 24
+                        anchors.centerIn: parent
+                        anchors.verticalCenterOffset: 10
                         font.family: ui.theme.musicalFont.family
                         font.pixelSize: 24
-                        font.letterSpacing: 1
-                        lineHeightMode: Text.FixedHeight
-                        lineHeight: 10
-                        text: modelData.noteSymbol
+                        font.letterSpacing: 2
+                        text: delegateButton.noteSymbol
                     }
                 }
             }
 
             Row {
-                Layout.topMargin: 26
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 22
+                Layout.bottomMargin: 26
 
-                spacing: 20
+                spacing: 6
                 enabled: withTempo.checked
 
                 StyledTextLabel {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "="
-                    font: ui.theme.headerFont
                 }
 
                 IncrementalPropertyControl {
                     id: control
 
-                    implicitWidth: 126
+                    implicitWidth: 76
 
                     currentValue: root.model.tempo.value
                     step: 1

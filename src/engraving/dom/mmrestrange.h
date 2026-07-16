@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,17 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __MMRESTRANGE_H__
-#define __MMRESTRANGE_H__
+#pragma once
 
 #include "measurenumberbase.h"
 #include "property.h"
 
 namespace mu::engraving {
-//---------------------------------------------------------
-//   MMRestRange
-//---------------------------------------------------------
+enum class MMRestRangeBracketType : unsigned char {
+    BRACKETS,
+    PARENTHESES,
+    NONE
+};
 
 class MMRestRange : public MeasureNumberBase
 {
@@ -47,10 +47,7 @@ public:
 
     PropertyValue getProperty(Pid id) const override;
     bool setProperty(Pid id, const PropertyValue& val) override;
-    PropertyValue propertyDefault(Pid id) const override;
 
     void setXmlText(const String&) override;
 };
-} // namespace mu::engraving
-
-#endif
+}

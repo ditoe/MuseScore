@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,6 +21,8 @@
  */
 
 #include "capo.h"
+
+#include "score.h"
 
 #include "translation.h"
 
@@ -53,13 +55,15 @@ PropertyValue Capo::getProperty(Pid id) const
         return m_params.fretPosition;
     } else if (id == Pid::CAPO_IGNORED_STRINGS) {
         std::vector<int> ignoredStrings;
+        ignoredStrings.reserve(m_params.ignoredStrings.size());
         for (string_idx_t string : m_params.ignoredStrings) {
             ignoredStrings.push_back(static_cast<int>(string));
         }
-
         return ignoredStrings;
     } else if (id == Pid::CAPO_GENERATE_TEXT) {
         return m_shouldAutomaticallyGenerateText;
+    } else if (id == Pid::CAPO_TRANSPOSE_MODE) {
+        return m_params.transposeMode;
     }
 
     return StaffTextBase::getProperty(id);
@@ -75,6 +79,8 @@ PropertyValue Capo::propertyDefault(Pid id) const
         return std::vector<int>();
     } else if (id == Pid::CAPO_GENERATE_TEXT) {
         return true;
+    } else if (id == Pid::CAPO_TRANSPOSE_MODE) {
+        return CapoParams::TransposeMode::PLAYBACK_ONLY;
     }
 
     return StaffTextBase::propertyDefault(id);
@@ -88,7 +94,7 @@ bool Capo::setProperty(Pid id, const PropertyValue& val)
         m_params.fretPosition = val.toInt();
     } else if (id == Pid::CAPO_IGNORED_STRINGS) {
         m_params.ignoredStrings.clear();
-        std::vector<int> ignoredStrings = val.value<std::vector<int> >();
+        auto ignoredStrings = val.value<std::vector<int> >();
         for (int string : ignoredStrings) {
             m_params.ignoredStrings.insert(static_cast<string_idx_t>(string));
         }
@@ -98,11 +104,18 @@ bool Capo::setProperty(Pid id, const PropertyValue& val)
         if (!m_shouldAutomaticallyGenerateText) {
             setXmlText(m_customText);
         }
+    } else if (id == Pid::CAPO_TRANSPOSE_MODE) {
+        m_params.transposeMode = val.value<CapoParams::TransposeMode>();
     } else {
         return StaffTextBase::setProperty(id, val);
     }
 
     triggerLayout();
+
+    if (Score* s = score()) {
+        s->updateCapo();
+    }
+
     return true;
 }
 
@@ -135,20 +148,20 @@ bool Capo::shouldAutomaticallyGenerateText() const
     return m_shouldAutomaticallyGenerateText;
 }
 
-mu::String Capo::generateText(size_t stringCount) const
+muse::String Capo::generateText(size_t stringCount) const
 {
     if (!m_params.active || m_params.fretPosition == 0) {
-        return mtrc("engraving", "No capo");
+        return muse::mtrc("engraving", "No capo");
     }
 
     if (m_params.ignoredStrings.empty()) {
-        return mtrc("engraving", "Capo %1").arg(m_params.fretPosition);
+        return muse::mtrc("engraving", "Capo %1").arg(m_params.fretPosition);
     }
 
     StringList stringsToApply;
 
     for (string_idx_t idx = 0; idx < stringCount; ++idx) {
-        if (mu::contains(m_params.ignoredStrings, idx)) {
+        if (muse::contains(m_params.ignoredStrings, idx)) {
             continue;
         }
 
@@ -156,12 +169,30 @@ mu::String Capo::generateText(size_t stringCount) const
     }
 
     if (stringsToApply.empty()) {
-        return mtrc("engraving", "No capo");
+        return muse::mtrc("engraving", "No capo");
     }
 
-    String text = mtrc("engraving", "Partial capo:\nFret %1 on strings %2")
+    String text = muse::mtrc("engraving", "Partial capo:\nFret %1 on strings %2")
                   .arg(m_params.fretPosition)
                   .arg(stringsToApply.join(u", "));
 
     return text;
+}
+
+void Capo::added()
+{
+    StaffTextBase::added();
+
+    if (Score* s = score()) {
+        s->updateCapo();
+    }
+}
+
+void Capo::removed()
+{
+    StaffTextBase::removed();
+
+    if (Score* s = score()) {
+        s->updateCapo();
+    }
 }

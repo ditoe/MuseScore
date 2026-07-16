@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,16 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.8
-import QtQuick.Controls 2.1
-import QtQuick.Layouts 1.12
-import QtQml.Models 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQml.Models
 
-import MuseScore.Palette 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
-
-import "utils.js" as Utils
+import MuseScore.Palette
+import Muse.UiComponents
+import Muse.Ui
 
 StyledPopupView {
     id: root
@@ -51,6 +49,8 @@ StyledPopupView {
 
     property size cellSize
     property bool drawGrid
+
+    readonly property bool isDragInProgress: masterPalette.state == "drag" || customPalette.state == "drag"
 
     property int maxHeight: 400
     contentHeight: column.implicitHeight
@@ -84,7 +84,7 @@ StyledPopupView {
             id: addToPaletteButton
             width: parent.width
 
-            text: qsTrc("palette", "Add to %1").arg(paletteName)
+            text: qsTrc("palette", "Add to %1").arg(root.paletteName)
             enabled: root.paletteEditingEnabled && (masterPaletteSelectionModel.hasSelection || customPaletteSelectionModel.hasSelection)
 
             navigation.panel: root.navigationPanel
@@ -109,18 +109,22 @@ StyledPopupView {
                 masterPaletteSelectionModel.clear();
                 customPaletteSelectionModel.clear();
 
-                if (mimeMasterPalette.length)
-                    addElementsRequested(mimeMasterPalette);
-                if (mimeCustomPalette.length)
-                    addElementsRequested(mimeCustomPalette);
+                if (mimeMasterPalette.length) {
+                    root.addElementsRequested(mimeMasterPalette)
+                }
+
+                if (mimeCustomPalette.length) {
+                    root.addElementsRequested(mimeCustomPalette)
+                }
             }
         }
 
         RowLayout {
             id: masterIndexControls
-            enabled: root.paletteIsCustom && poolPalette && poolPaletteRootIndex
+            enabled: root.paletteIsCustom && root.poolPalette && root.poolPaletteRootIndex
             visible: enabled
-            anchors { left: parent.left; right: parent.right }
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             FlatButton {
                 id: prevButton
@@ -140,16 +144,16 @@ StyledPopupView {
                     if (!masterIndexControls.enabled)
                         return null;
 
-                    var idx = poolPalette.sibling(poolPaletteRootIndex.row - 1, 0, poolPaletteRootIndex);
+                    var idx = root.poolPalette.sibling(root.poolPaletteRootIndex.row - 1, 0, root.poolPaletteRootIndex);
                     if (!idx.valid) {
-                        const nrows = poolPalette.rowCount(poolPaletteRootIndex.parent);
-                        idx = poolPalette.sibling(nrows - 1, 0, poolPaletteRootIndex)
+                        const nrows = root.poolPalette.rowCount(root.poolPaletteRootIndex.parent);
+                        idx = root.poolPalette.sibling(nrows - 1, 0, root.poolPaletteRootIndex)
                     }
                     return idx;
                 }
 
                 onClicked: {
-                    poolPaletteRootIndex = prevIndex
+                    root.poolPaletteRootIndex = prevIndex
                 }
             }
 
@@ -169,9 +173,9 @@ StyledPopupView {
                     if (!masterIndexControls.enabled)
                         return null;
 
-                    var idx = poolPalette.sibling(poolPaletteRootIndex.row + 1, 0, poolPaletteRootIndex);
+                    var idx = root.poolPalette.sibling(root.poolPaletteRootIndex.row + 1, 0, root.poolPaletteRootIndex);
                     if (!idx.valid)
-                        idx = poolPalette.sibling(0, 0, poolPaletteRootIndex)
+                        idx = root.poolPalette.sibling(0, 0, root.poolPaletteRootIndex)
                     return idx;
                 }
 
@@ -182,7 +186,9 @@ StyledPopupView {
                 navigation.column: 1
                 navigation.row: 3
 
-                onClicked: poolPaletteRootIndex = nextIndex
+                onClicked: {
+                    root.poolPaletteRootIndex = nextIndex
+                }
             }
         }
 
@@ -190,10 +196,17 @@ StyledPopupView {
             id: paletteContainer
             width: parent.width
             height: childrenRect.height
-            border { width: 1; color: ui.theme.strokeColor }
-            color: ui.theme.backgroundPrimaryColor
 
-            readonly property int availableHeight: root.maxHeight - addToPaletteButton.height - (masterIndexControls ? masterIndexControls.height : 0) - bottomText.height - (elementEditorButton.visible ? elementEditorButton.height : 0) - 40
+            color: ui.theme.backgroundPrimaryColor
+            border.color: ui.theme.strokeColor
+            border.width: 1
+
+            readonly property int availableHeight: root.maxHeight
+                                                   - addToPaletteButton.height
+                                                   - (masterIndexControls ? masterIndexControls.height : 0)
+                                                   - bottomText.height
+                                                   - (elementEditorButton.visible ? elementEditorButton.height : 0)
+                                                   - 40
 
             Column {
                 padding: 1
@@ -206,7 +219,7 @@ StyledPopupView {
                     model: masterPalette.paletteModel
                 }
 
-                Palette {
+                PaletteGridView {
                     id: masterPalette
                     height: Math.max(
                                 cellSize.height,
@@ -217,7 +230,7 @@ StyledPopupView {
                                 )
                     width: parent.contentWidth
 
-                    ScrollBar.vertical: ScrollBar { enabled: masterPalette.height < masterPalette.implicitHeight }
+                    ScrollBar.vertical: StyledScrollBar {}
 
                     // TODO: change settings to "hidden" model?
                     cellSize: root.cellSize
@@ -264,7 +277,7 @@ StyledPopupView {
                         navigation.row: 100 // Should be more than palette cells
 
                         onClicked: {
-                            Utils.removeSelectedItems(root.customPaletteController, customPaletteSelectionModel, root.customPaletteRootIndex)
+                            PaletteUtils.removeSelectedItems(root.customPaletteController, customPaletteSelectionModel, root.customPaletteRootIndex)
                         }
                     }
                 }
@@ -274,7 +287,7 @@ StyledPopupView {
                     model: customPalette.paletteModel
                 }
 
-                Palette {
+                PaletteGridView {
                     id: customPalette
                     visible: !empty
                     width: parent.contentWidth
@@ -308,7 +321,7 @@ StyledPopupView {
             visible: root.elementEditor && root.elementEditor.valid
             enabled: root.paletteEditingEnabled
             width: parent.width
-            text: root.elementEditor ? root.elementEditor.actionName : ""
+            text: root.elementEditor?.actionName ?? ""
             navigation.panel: root.navigationPanel
             navigation.name: "elementEditorButton"
             navigation.column: 1

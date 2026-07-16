@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
+      <windsNameByGroup>0</windsNameByGroup>
+      <vocalsNameByGroup>0</vocalsNameByGroup>
+      <maskBarlinesForText>0</maskBarlinesForText>
+      <dividerLeftAlignToSystemBarline>0</dividerLeftAlignToSystemBarline>
+      <dividerRightAlignToSystemBarline>0</dividerRightAlignToSystemBarline>
+      <scaleRythmicSpacingForSmallNotes>0</scaleRythmicSpacingForSmallNotes>
+      <verticallyAlignChordSymbols>0</verticallyAlignChordSymbols>
       <concertPitch>1</concertPitch>
-      <Spatium>1.76389</Spatium>
+      <changesBeforeBarlineRepeats>0</changesBeforeBarlineRepeats>
+      <changesBeforeBarlineOtherJumps>0</changesBeforeBarlineOtherJumps>
+      <showCourtesiesRepeats>0</showCourtesiesRepeats>
+      <showCourtesiesOtherJumps>0</showCourtesiesOtherJumps>
+      <showCourtesiesAfterCancellingRepeats>0</showCourtesiesAfterCancellingRepeats>
+      <showCourtesiesAfterCancellingOtherJumps>0</showCourtesiesAfterCancellingOtherJumps>
+      <repeatPlayCountShow>0</repeatPlayCountShow>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -16,21 +31,23 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">Pickup-bug</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>g_g</eid>
+      <Staff>
+        <eid>C_C</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>B♭ Trumpet</trackName>
       <Instrument id="bb-trumpet">
-        <longName>B♭ Trumpet</longName>
-        <shortName>B♭ Tpt.</shortName>
+        <InstrumentLabel>
+          <longName>B♭ Trumpet</longName>
+          <shortName>B♭ Tpt.</shortName>
+          </InstrumentLabel>
         <trackName>B♭ Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
@@ -76,15 +93,18 @@
         </Instrument>
       </Part>
     <Part id="2">
-      <Staff id="2">
+      <eid>h_h</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>C Trumpet</trackName>
       <Instrument id="c-trumpet">
-        <longName>C Trumpet</longName>
-        <shortName>C Tpt.</shortName>
+        <InstrumentLabel>
+          <longName>C Trumpet</longName>
+          <shortName>C Tpt.</shortName>
+          </InstrumentLabel>
         <trackName>C Trumpet</trackName>
         <minPitchP>54</minPitchP>
         <maxPitchP>85</maxPitchP>
@@ -130,38 +150,42 @@
     <Staff id="1">
       <VBox>
         <height>10</height>
+        <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+        <eid>E_E</eid>
         <Text>
+          <eid>F_F</eid>
           <style>title</style>
           <text>Test</text>
           </Text>
         </VBox>
       <Measure len="1/4">
+        <eid>G_G</eid>
         <irregular>1</irregular>
         <voice>
           <KeySig>
-            <linkedMain/>
+            <eid>H_H</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
-            <linkedMain/>
+            <eid>I_I</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
-            <linkedMain/>
+            <eid>J_J</eid>
             <durationType>eighth</durationType>
             </Rest>
           <SystemText>
             <swing unit="eighth" ratio="60"/>
-            <linkedMain/>
+            <eid>K_K</eid>
             <style>tempo</style>
             <text>Swing</text>
             </SystemText>
           <Chord>
-            <linkedMain/>
+            <eid>L_L</eid>
             <durationType>eighth</durationType>
             <Note>
-              <linkedMain/>
+              <eid>M_M</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
@@ -170,42 +194,43 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>N_N</eid>
         <voice>
           <Chord>
-            <linkedMain/>
+            <eid>O_O</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>P_P</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>Q_Q</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>R_R</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>S_S</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>T_T</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>U_U</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>V_V</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
@@ -218,12 +243,12 @@
       <Measure len="1/4">
         <voice>
           <TimeSig>
-            <linkedMain/>
+            <eid>W_W</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
-            <linkedMain/>
+            <eid>X_X</eid>
             <durationType>quarter</durationType>
             </Rest>
           </voice>
@@ -231,37 +256,37 @@
       <Measure>
         <voice>
           <Chord>
-            <linkedMain/>
+            <eid>Y_Y</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>Z_Z</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>a_a</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>b_b</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>c_c</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>d_d</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>e_e</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>f_f</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -270,9 +295,11 @@
         </Measure>
       </Staff>
     <Score>
+      <eid>i_i</eid>
+      <name>B♭ Trumpet</name>
       <Division>480</Division>
       <Style>
-        <Spatium>1.74978</Spatium>
+        <spatium>1.75</spatium>
         </Style>
       <showInvisible>1</showInvisible>
       <showUnprintable>1</showUnprintable>
@@ -280,16 +307,19 @@
       <showMargins>0</showMargins>
       <metaTag name="partName">B♭ Trumpet</metaTag>
       <Part id="1">
-        <Staff id="1">
-          <linkedTo>1</linkedTo>
+        <eid>j_j</eid>
+        <Staff>
+          <eid>k_k</eid>
+          <linkedTo>C_C</linkedTo>
           <StaffType group="pitched">
             <name>stdNormal</name>
             </StaffType>
           </Staff>
-        <trackName>B♭ Trumpet</trackName>
         <Instrument id="bb-trumpet">
-          <longName>B♭ Trumpet</longName>
-          <shortName>B♭ Tpt.</shortName>
+          <InstrumentLabel>
+            <longName>B♭ Trumpet</longName>
+            <shortName>B♭ Tpt.</shortName>
+            </InstrumentLabel>
           <trackName>B♭ Trumpet</trackName>
           <minPitchP>52</minPitchP>
           <maxPitchP>85</maxPitchP>
@@ -335,40 +365,58 @@
           </Instrument>
         </Part>
       <Staff id="1">
+        <VBox>
+          <height>10</height>
+          <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+          <eid>l_l</eid>
+          <linkedTo>E_E</linkedTo>
+          <Text>
+            <eid>m_m</eid>
+            <linkedTo>F_F</linkedTo>
+            <style>title</style>
+            <text>Test</text>
+            </Text>
+          <Text>
+            <eid>n_n</eid>
+            <style>instrument_excerpt</style>
+            <text>B♭ Trumpet</text>
+            </Text>
+          </VBox>
         <Measure len="1/4">
+          <eid>o_o</eid>
           <irregular>1</irregular>
           <voice>
             <KeySig>
-              <linked>
-                </linked>
+              <eid>p_p</eid>
+              <linkedTo>H_H</linkedTo>
               <concertKey>0</concertKey>
               <actualKey>2</actualKey>
               </KeySig>
             <TimeSig>
-              <linked>
-                </linked>
+              <eid>q_q</eid>
+              <linkedTo>I_I</linkedTo>
               <sigN>4</sigN>
               <sigD>4</sigD>
               </TimeSig>
             <Rest>
-              <linked>
-                </linked>
+              <eid>r_r</eid>
+              <linkedTo>J_J</linkedTo>
               <durationType>eighth</durationType>
               </Rest>
             <SystemText>
               <swing unit="eighth" ratio="60"/>
-              <linked>
-                </linked>
+              <eid>s_s</eid>
+              <linkedTo>K_K</linkedTo>
               <style>tempo</style>
               <text>Swing</text>
               </SystemText>
             <Chord>
-              <linked>
-                </linked>
+              <eid>t_t</eid>
+              <linkedTo>L_L</linkedTo>
               <durationType>eighth</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>u_u</eid>
+                <linkedTo>M_M</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 <tpc2>16</tpc2>
@@ -377,50 +425,51 @@
             </voice>
           </Measure>
         <Measure>
+          <eid>v_v</eid>
           <voice>
             <Chord>
-              <linked>
-                </linked>
+              <eid>w_w</eid>
+              <linkedTo>O_O</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>x_x</eid>
+                <linkedTo>P_P</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 <tpc2>16</tpc2>
                 </Note>
               </Chord>
             <Chord>
-              <linked>
-                </linked>
+              <eid>y_y</eid>
+              <linkedTo>Q_Q</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>z_z</eid>
+                <linkedTo>R_R</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 <tpc2>16</tpc2>
                 </Note>
               </Chord>
             <Chord>
-              <linked>
-                </linked>
+              <eid>0_0</eid>
+              <linkedTo>S_S</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>1_1</eid>
+                <linkedTo>T_T</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 <tpc2>16</tpc2>
                 </Note>
               </Chord>
             <Chord>
-              <linked>
-                </linked>
+              <eid>2_2</eid>
+              <linkedTo>U_U</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>3_3</eid>
+                <linkedTo>V_V</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 <tpc2>16</tpc2>
@@ -429,12 +478,13 @@
             </voice>
           </Measure>
         </Staff>
-      <name>B♭ Trumpet</name>
       </Score>
     <Score>
+      <eid>4_4</eid>
+      <name>C Trumpet</name>
       <Division>480</Division>
       <Style>
-        <Spatium>1.74978</Spatium>
+        <spatium>1.75</spatium>
         </Style>
       <showInvisible>1</showInvisible>
       <showUnprintable>1</showUnprintable>
@@ -442,16 +492,19 @@
       <showMargins>0</showMargins>
       <metaTag name="partName">C Trumpet</metaTag>
       <Part id="2">
-        <Staff id="1">
-          <linkedTo>2</linkedTo>
+        <eid>5_5</eid>
+        <Staff>
+          <eid>6_6</eid>
+          <linkedTo>D_D</linkedTo>
           <StaffType group="pitched">
             <name>stdNormal</name>
             </StaffType>
           </Staff>
-        <trackName>C Trumpet</trackName>
         <Instrument id="c-trumpet">
-          <longName>C Trumpet</longName>
-          <shortName>C Tpt.</shortName>
+          <InstrumentLabel>
+            <longName>C Trumpet</longName>
+            <shortName>C Tpt.</shortName>
+            </InstrumentLabel>
           <trackName>C Trumpet</trackName>
           <minPitchP>54</minPitchP>
           <maxPitchP>85</maxPitchP>
@@ -495,18 +548,36 @@
           </Instrument>
         </Part>
       <Staff id="1">
+        <VBox>
+          <height>10</height>
+          <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+          <eid>7_7</eid>
+          <linkedTo>E_E</linkedTo>
+          <Text>
+            <eid>8_8</eid>
+            <linkedTo>F_F</linkedTo>
+            <style>title</style>
+            <text>Test</text>
+            </Text>
+          <Text>
+            <eid>9_9</eid>
+            <style>instrument_excerpt</style>
+            <text>C Trumpet</text>
+            </Text>
+          </VBox>
         <Measure len="1/4">
+          <eid>+_+</eid>
           <irregular>1</irregular>
           <voice>
             <TimeSig>
-              <linked>
-                </linked>
+              <eid>/_/</eid>
+              <linkedTo>W_W</linkedTo>
               <sigN>4</sigN>
               <sigD>4</sigD>
               </TimeSig>
             <Rest>
-              <linked>
-                </linked>
+              <eid>AB_AB</eid>
+              <linkedTo>X_X</linkedTo>
               <durationType>quarter</durationType>
               </Rest>
             <location>
@@ -514,58 +585,56 @@
               </location>
             <SystemText>
               <swing unit="eighth" ratio="60"/>
-              <linked>
-                <location>
-                  <staves>-1</staves>
-                  </location>
-                </linked>
+              <eid>BB_BB</eid>
+              <linkedTo>K_K</linkedTo>
               <style>tempo</style>
               <text>Swing</text>
               </SystemText>
             </voice>
           </Measure>
         <Measure>
+          <eid>CB_CB</eid>
           <voice>
             <Chord>
-              <linked>
-                </linked>
+              <eid>DB_DB</eid>
+              <linkedTo>Y_Y</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>EB_EB</eid>
+                <linkedTo>Z_Z</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 </Note>
               </Chord>
             <Chord>
-              <linked>
-                </linked>
+              <eid>FB_FB</eid>
+              <linkedTo>a_a</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>GB_GB</eid>
+                <linkedTo>b_b</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 </Note>
               </Chord>
             <Chord>
-              <linked>
-                </linked>
+              <eid>HB_HB</eid>
+              <linkedTo>c_c</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>IB_IB</eid>
+                <linkedTo>d_d</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 </Note>
               </Chord>
             <Chord>
-              <linked>
-                </linked>
+              <eid>JB_JB</eid>
+              <linkedTo>e_e</linkedTo>
               <durationType>quarter</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>KB_KB</eid>
+                <linkedTo>f_f</linkedTo>
                 <pitch>72</pitch>
                 <tpc>14</tpc>
                 </Note>
@@ -573,7 +642,6 @@
             </voice>
           </Measure>
         </Staff>
-      <name>C Trumpet</name>
       </Score>
     </Score>
   </museScore>

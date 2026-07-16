@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -86,7 +86,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Import");
+            return muse::qtrc("iex_midi", "Import");
         }
 
         QVariant value(int trackIndex) const override
@@ -108,7 +108,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
             : Column(opers) {}
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Channel");
+            return muse::qtrc("iex_midi", "Channel");
         }
 
         bool isEditable(int /*trackIndex*/) const override { return false; }
@@ -140,7 +140,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
             int width() const override { return 180; }
             QString headerName() const override
             {
-                return qtrc("iex_midi", "Staff name");
+                return muse::qtrc("iex_midi", "Staff name");
             }
 
             bool isEditable(int /*trackIndex*/) const override { return false; }
@@ -171,7 +171,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
         int width() const override { return 130; }
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Sound");
+            return muse::qtrc("iex_midi", "Sound");
         }
 
         bool isEditable(int /*trackIndex*/) const override { return false; }
@@ -203,7 +203,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
             int width() const override { return 220; }
             QString headerName() const override
             {
-                return qtrc("iex_midi", "MuseScore instrument");
+                return muse::qtrc("iex_midi", "MuseScore Studio instrument");
             }
 
             bool isEditable(int trackIndex) const override
@@ -244,10 +244,10 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
                 if (!instr->trackName.isEmpty()) {
                     return instr->trackName;
                 }
-                if (instr->longNames.empty()) {
+                if (instr->instrumentName.longName().empty()) {
                     return instr->id;
                 }
-                return instr->longNames.front().name();
+                return instr->instrumentName.longName();
             }
         };
         _columns.push_back(std::unique_ptr<Column>(new MsInstrument(_trackOpers)));
@@ -266,7 +266,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
             int width() const override { return 185; }
             QString headerName() const override
             {
-                return qtrc("iex_midi", "Lyrics");
+                return muse::qtrc("iex_midi", "Lyrics");
             }
 
             QVariant value(int trackIndex) const override
@@ -311,17 +311,17 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
         QuantValue(MidiOperations::Opers& opers)
             : Column(opers)
         {
-            _values.push_back(qtrc("iex_midi", "Quarter"));
-            _values.push_back(qtrc("iex_midi", "Eighth"));
-            _values.push_back(qtrc("iex_midi", "16th"));
-            _values.push_back(qtrc("iex_midi", "32nd"));
-            _values.push_back(qtrc("iex_midi", "64th"));
-            _values.push_back(qtrc("iex_midi", "128th"));
+            _values.push_back(muse::qtrc("iex_midi", "Quarter"));
+            _values.push_back(muse::qtrc("iex_midi", "Eighth"));
+            _values.push_back(muse::qtrc("iex_midi", "16th"));
+            _values.push_back(muse::qtrc("iex_midi", "32nd"));
+            _values.push_back(muse::qtrc("iex_midi", "64th"));
+            _values.push_back(muse::qtrc("iex_midi", "128th"));
         }
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Max. quantization");
+            return muse::qtrc("iex_midi", "Max. quantization");
         }
 
         QVariant value(int trackIndex) const override
@@ -349,7 +349,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Max. voices");
+            return muse::qtrc("iex_midi", "Max. voices");
         }
 
         QVariant value(int trackIndex) const override
@@ -377,18 +377,18 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
         Tuplets(MidiOperations::Opers& opers, int trackCount)
             : Column(opers), _trackCount(trackCount)
         {
-            _values.push_back(qtrc("iex_midi", "2-plets"));
-            _values.push_back(qtrc("iex_midi", "3-plets"));
-            _values.push_back(qtrc("iex_midi", "4-plets"));
-            _values.push_back(qtrc("iex_midi", "5-plets"));
-            _values.push_back(qtrc("iex_midi", "7-plets"));
-            _values.push_back(qtrc("iex_midi", "9-plets"));
+            _values.push_back(muse::qtrc("iex_midi", "2-plets"));
+            _values.push_back(muse::qtrc("iex_midi", "3-plets"));
+            _values.push_back(muse::qtrc("iex_midi", "4-plets"));
+            _values.push_back(muse::qtrc("iex_midi", "5-plets"));
+            _values.push_back(muse::qtrc("iex_midi", "7-plets"));
+            _values.push_back(muse::qtrc("iex_midi", "9-plets"));
         }
 
         int width() const override { return 140; }
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Tuplets");
+            return muse::qtrc("iex_midi", "Tuplets");
         }
 
         QVariant value(int trackIndex) const override
@@ -553,7 +553,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
             QString headerName() const override
             {
-                return qtrc("iex_midi", "Time signature");
+                return muse::qtrc("iex_midi", "Time signature");
             }
 
             bool isForAllTracksOnly() const override { return true; }
@@ -613,7 +613,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
             QString headerName() const override
             {
-                return qtrc("iex_midi", "Halving the\nmeasure count");
+                return muse::qtrc("iex_midi", "Halving the\nmeasure count");
             }
 
             bool isForAllTracksOnly() const override { return true; }
@@ -639,7 +639,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Is human\nperformance");
+            return muse::qtrc("iex_midi", "Is human\nperformance");
         }
 
         bool isForAllTracksOnly() const override { return true; }
@@ -664,7 +664,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Split staff");
+            return muse::qtrc("iex_midi", "Split staff");
         }
 
         QVariant value(int trackIndex) const override
@@ -688,7 +688,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Clef\nchanges");
+            return muse::qtrc("iex_midi", "Clef\nchanges");
         }
 
         bool isEditable(int trackIndex) const override
@@ -732,7 +732,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Simplify\ndurations");
+            return muse::qtrc("iex_midi", "Simplify\ndurations");
         }
 
         QVariant value(int trackIndex) const override
@@ -756,7 +756,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Show\nstaccato");
+            return muse::qtrc("iex_midi", "Show\nstaccato");
         }
 
         QVariant value(int trackIndex) const override
@@ -780,7 +780,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Dotted\nnotes");
+            return muse::qtrc("iex_midi", "Dotted\nnotes");
         }
 
         QVariant value(int trackIndex) const override
@@ -805,7 +805,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
             QString headerName() const override
             {
-                return qtrc("iex_midi", "Show\ntempo text");
+                return muse::qtrc("iex_midi", "Show\ntempo text");
             }
 
             bool isForAllTracksOnly() const override { return true; }
@@ -832,7 +832,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
             QString headerName() const override
             {
-                return qtrc("iex_midi", "Show\nchord symbols");
+                return muse::qtrc("iex_midi", "Show\nchord symbols");
             }
 
             bool isForAllTracksOnly() const override { return true; }
@@ -858,7 +858,7 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Recognize\npickup measure");
+            return muse::qtrc("iex_midi", "Recognize\npickup measure");
         }
 
         bool isForAllTracksOnly() const override { return true; }
@@ -879,14 +879,14 @@ void TracksModel::reset(const MidiOperations::Opers& opers,
         Swing(MidiOperations::Opers& opers)
             : Column(opers)
         {
-            _values.push_back(qtrc("iex_midi", "None (1:1)"));
-            _values.push_back(qtrc("iex_midi", "Swing (2:1)"));
-            _values.push_back(qtrc("iex_midi", "Shuffle (3:1)"));
+            _values.push_back(muse::qtrc("iex_midi", "None (1:1)"));
+            _values.push_back(muse::qtrc("iex_midi", "Swing (2:1)"));
+            _values.push_back(muse::qtrc("iex_midi", "Shuffle (3:1)"));
         }
 
         QString headerName() const override
         {
-            return qtrc("iex_midi", "Detect swing");
+            return muse::qtrc("iex_midi", "Detect swing");
         }
 
         int width() const override { return 130; }
@@ -999,7 +999,7 @@ QVariant TracksModel::data(const QModelIndex& index, int role) const
         if (trackIndex == -1) {                 // all tracks
             if (_columns[index.column()]->isEditable(-1)) {
                 QVariant value = _columns[index.column()]->value(0);
-                if (value.type() == QVariant::String) {
+                if (value.typeId() == QMetaType::QString) {
                     value = QVariant();
                     if (!_columns[index.column()]->isForAllTracksOnly()) {
                         for (int i = 0; i < _trackCount; ++i) {
@@ -1027,7 +1027,7 @@ QVariant TracksModel::data(const QModelIndex& index, int role) const
         } else if (editableSingleTrack(trackIndex, index.column())
                    && _columns[index.column()]->isVisible(trackIndex)) {
             QVariant value = _columns[index.column()]->value(trackIndex);
-            if (value.type() == QVariant::String) {
+            if (value.typeId() == QMetaType::QString) {
                 return value.toString();
             }
         }
@@ -1045,15 +1045,14 @@ QVariant TracksModel::data(const QModelIndex& index, int role) const
     case Qt::CheckStateRole:
         if (trackIndex == -1) {
             QVariant value = _columns[index.column()]->value(0);
-            if (value.type() == QVariant::Bool) {
+            if (value.typeId() == QMetaType::Bool) {
                 value = QVariant();
                 if (!_columns[index.column()]->isForAllTracksOnly()) {
                     for (int i = 0; i < _trackCount; ++i) {
                         if (!_columns[index.column()]->isVisible(i)) {
                             continue;
                         }
-                        const auto newValue
-                            = _columns[index.column()]->value(i);
+                        const auto newValue = _columns[index.column()]->value(i);
                         if (!value.isValid()) {                         // value to compare with
                             value = newValue;
                             continue;
@@ -1072,7 +1071,7 @@ QVariant TracksModel::data(const QModelIndex& index, int role) const
         } else if (editableSingleTrack(trackIndex, index.column())
                    && _columns[index.column()]->isVisible(trackIndex)) {
             QVariant value = _columns[index.column()]->value(trackIndex);
-            if (value.type() == QVariant::Bool) {
+            if (value.typeId() == QMetaType::Bool) {
                 return (value.toBool()) ? Qt::Checked : Qt::Unchecked;
             }
         }
@@ -1083,7 +1082,7 @@ QVariant TracksModel::data(const QModelIndex& index, int role) const
     case Qt::ToolTipRole:
         if (trackIndex != -1 && _columns[index.column()]->isVisible(trackIndex)) {
             QVariant value = _columns[index.column()]->value(trackIndex);
-            if (value.type() == QVariant::String
+            if (value.typeId() == QMetaType::QString
                 && _columns[index.column()]->valueList(trackIndex).empty()) {
                 MidiOperations::Data& opers = midiImportOperations;
                 MidiOperations::CurrentMidiFileSetter setCurrentMidiFile(opers, _midiFile);
@@ -1107,14 +1106,14 @@ Qt::ItemFlags TracksModel::editableFlags(int row, int col) const
     const int trackIndex = trackIndexFromRow(row);
 
     if (_columns[col]->isVisible(trackIndex)) {
-        if (_columns[col]->value(0).type() == QVariant::Bool) {
+        if (_columns[col]->value(0).typeId() == QMetaType::Bool) {
             flags |= Qt::ItemIsUserCheckable;
         } else if (_columns[col]->isEditable(trackIndex)) {
             if (trackIndex == -1) {
                 flags |= Qt::ItemIsEditable;
             } else if (editableSingleTrack(trackIndex, col)) {
                 QVariant value = _columns[col]->value(0);
-                if (value.type() != QVariant::Bool) {             // not checkboxes
+                if (value.typeId() != QMetaType::Bool) { // not checkboxes
                     flags |= Qt::ItemIsEditable;
                 }
             }
@@ -1218,7 +1217,7 @@ QVariant TracksModel::headerData(int section, Qt::Orientation orientation, int r
     } else if (orientation == Qt::Vertical && role == Qt::DisplayRole) {
         if (_trackCount > 1) {
             if (section == 0) {
-                return qtrc("iex_midi", "All");
+                return muse::qtrc("iex_midi", "All");
             }
             return section;
         }

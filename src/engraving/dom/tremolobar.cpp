@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -78,7 +78,7 @@ PropertyValue TremoloBar::getProperty(Pid propertyId) const
 {
     switch (propertyId) {
     case Pid::LINE_WIDTH:
-        return lineWidth().val();
+        return lineWidth();
     case Pid::MAG:
         return userMag();
     case Pid::PLAY:
@@ -100,14 +100,13 @@ bool TremoloBar::setProperty(Pid propertyId, const PropertyValue& v)
 {
     switch (propertyId) {
     case Pid::LINE_WIDTH:
-        setLineWidth(Spatium(v.value<double>()));
+        setLineWidth(v.value<Spatium>());
         break;
     case Pid::MAG:
         setUserMag(v.toDouble());
         break;
     case Pid::PLAY:
         setPlay(v.toBool());
-        score()->setPlaylistDirty();
         break;
     case Pid::TREMOLOBAR_TYPE:
         updatePointsByTremoloBarType(static_cast<TremoloBarType>(v.toInt()));
@@ -140,8 +139,8 @@ PropertyValue TremoloBar::propertyDefault(Pid pid) const
     default:
         for (const StyledProperty& p : *styledProperties()) {
             if (p.pid == pid) {
-                if (propertyType(pid) == P_TYPE::MILLIMETRE) {
-                    return style().styleMM(p.sid);
+                if (propertyType(pid) == P_TYPE::ABSOLUTE) {
+                    return style().styleAbsolute(p.sid);
                 }
                 return style().styleV(p.sid);
             }

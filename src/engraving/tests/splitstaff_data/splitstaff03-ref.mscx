@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.76389</Spatium>
+      <defaultsVersion>301</defaultsVersion>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -15,21 +17,23 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
-        <longName>Flute</longName>
-        <shortName>Fl.</shortName>
+        <InstrumentLabel>
+          <longName>Flute</longName>
+          <shortName>Fl.</shortName>
+          </InstrumentLabel>
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
         <maxPitchP>98</maxPitchP>
@@ -70,20 +74,24 @@
         </Instrument>
       </Part>
     <Part id="2">
-      <Staff id="2">
+      <eid>E_E</eid>
+      <Staff>
+        <eid>F_F</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <Staff id="3">
+      <Staff>
+        <eid>G_G</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Harp</trackName>
       <Instrument id="harp">
-        <longName>Harp</longName>
-        <shortName>Hrp.</shortName>
+        <InstrumentLabel>
+          <longName>Harp</longName>
+          <shortName>Hrp.</shortName>
+          </InstrumentLabel>
         <trackName>Harp</trackName>
         <minPitchP>23</minPitchP>
         <maxPitchP>104</maxPitchP>
@@ -125,16 +133,19 @@
         </Instrument>
       </Part>
     <Part id="3">
-      <Staff id="4">
+      <eid>H_H</eid>
+      <Staff>
+        <eid>I_I</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         <defaultClef>F</defaultClef>
         </Staff>
-      <trackName>Violoncello</trackName>
       <Instrument id="violoncello">
-        <longName>Violoncello</longName>
-        <shortName>Vlc.</shortName>
+        <InstrumentLabel>
+          <longName>Violoncello</longName>
+          <shortName>Vlc.</shortName>
+          </InstrumentLabel>
         <trackName>Violoncello</trackName>
         <minPitchP>36</minPitchP>
         <maxPitchP>90</maxPitchP>
@@ -190,22 +201,27 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>J_J</eid>
         <voice>
           <Rest>
+            <eid>K_K</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>L_L</eid>
         <voice>
           <Rest>
+            <eid>M_M</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
             <span>1</span>
+            <eid>N_N</eid>
             </BarLine>
           </voice>
         </Measure>
@@ -214,6 +230,7 @@
       <Measure>
         <voice>
           <Rest>
+            <eid>O_O</eid>
             <durationType>whole</durationType>
             </Rest>
           </voice>
@@ -221,8 +238,10 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>P_P</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
@@ -230,6 +249,7 @@
           <BarLine>
             <subtype>end</subtype>
             <span>1</span>
+            <eid>R_R</eid>
             </BarLine>
           </voice>
         </Measure>
@@ -241,13 +261,17 @@
             <concertClefType>F</concertClefType>
             <transposingClefType>F</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>S_S</eid>
             </Clef>
           <KeySig>
+            <eid>T_T</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <Chord>
+            <eid>U_U</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>V_V</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               </Note>
@@ -257,6 +281,7 @@
       <Measure>
         <voice>
           <Rest>
+            <eid>W_W</eid>
             <durationType>whole</durationType>
             </Rest>
           </voice>
@@ -266,6 +291,7 @@
       <Measure>
         <voice>
           <Rest>
+            <eid>X_X</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
@@ -274,12 +300,14 @@
       <Measure>
         <voice>
           <Rest>
+            <eid>Y_Y</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
             <span>1</span>
+            <eid>Z_Z</eid>
             </BarLine>
           </voice>
         </Measure>

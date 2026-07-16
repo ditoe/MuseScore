@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,18 +19,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 Item {
     id: root
 
     property AbstractScoresModel model
     property string searchText
+
+    property bool isNoResultsMessageAllowed: true
 
     property color backgroundColor: ui.theme.backgroundSecondaryColor
     property real sideMargin: 46
@@ -185,8 +187,7 @@ Item {
         id: noResultsMessage
         anchors.fill: parent
 
-        // This will become visible if a "No results found" item is not provided by the model.
-        visible: Boolean(root.searchText) && itemTypeFilterModel.rowCount === 0
+        visible: Boolean(root.searchText) && view.count === 0 && root.isNoResultsMessageAllowed
 
         Message {
             anchors.top: parent.top

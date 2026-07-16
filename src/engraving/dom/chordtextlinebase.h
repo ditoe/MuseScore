@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHORDTEXTLINEBASE_H__
-#define __CHORDTEXTLINEBASE_H__
+#ifndef MU_ENGRAVING_CHORDTEXTLINEBASE_H
+#define MU_ENGRAVING_CHORDTEXTLINEBASE_H
 
 #include "textlinebase.h"
 
@@ -33,13 +33,13 @@ namespace mu::engraving {
 class ChordTextLineBase : public TextLineBase
 {
     OBJECT_ALLOCATOR(engraving, ChordTextLineBase)
+public:
+    ChordTextLineBase(const ElementType& type, EngravingItem* parent, ElementFlags = ElementFlag::NOTHING);
+
 protected:
     friend class TextLineBaseSegment;
 
-    mu::PointF linePos(Grip, System**) const override;
-
-public:
-    ChordTextLineBase(const ElementType& type, EngravingItem* parent, ElementFlags = ElementFlag::NOTHING);
+    void doComputeEndElement() override;
 };
 } // namespace mu::engraving
 

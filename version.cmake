@@ -1,43 +1,55 @@
-#=============================================================================
-#  MuseScore
-#  Linux Music Score Editor
+# SPDX-License-Identifier: GPL-3.0-only
+# MuseScore-Studio-CLA-applies
 #
-#  Copyright (C) 2002-2020 MuseScore BVBA and others
+# MuseScore Studio
+# Music Composition & Notation
 #
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License version 2.
+# Copyright (C) 2024 MuseScore Limited and others
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
 #
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#=============================================================================
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. 
 
-set(MUSESCORE_NAME "MuseScore")
-set(MUSESCORE_VERSION_MAJOR  "4")
-set(MUSESCORE_VERSION_MINOR  "2")
-set(MUSESCORE_VERSION_PATCH  "0")
-set(MUSESCORE_VERSION        "${MUSESCORE_VERSION_MAJOR}.${MUSESCORE_VERSION_MINOR}")
-set(MUSESCORE_VERSION_FULL   "${MUSESCORE_VERSION}.${MUSESCORE_VERSION_PATCH}")
-set(MUSESCORE_VERSION_LABEL  "")
+set(MUSE_APP_NAME_HUMAN_READABLE "MuseScore Studio")
+set(MUSE_APP_NAME_MACHINE_READABLE "MuseScoreStudio")
 
-if(MUSESCORE_BUILD_MODE MATCHES "dev")
-    set(MUSESCORE_RELEASE_CHANNEL "devel")
+set(MUSE_APP_VERSION_MAJOR "5")
+set(MUSE_APP_VERSION_MINOR "0")
+set(MUSE_APP_VERSION_PATCH "0")
+set(MUSE_APP_VERSION_MAJ_MIN "${MUSE_APP_VERSION_MAJOR}.${MUSE_APP_VERSION_MINOR}")
+set(MUSE_APP_VERSION "${MUSE_APP_VERSION_MAJ_MIN}.${MUSE_APP_VERSION_PATCH}")
+
+set(MUSE_APP_VERSION_LABEL "")
+
+if (NOT CMAKE_BUILD_NUMBER)
+    set(CMAKE_BUILD_NUMBER "0")
 endif()
 
-if(MUSESCORE_BUILD_MODE MATCHES "testing")
-    set(MUSESCORE_RELEASE_CHANNEL "testing")
+set(MUSE_APP_GUI_IDENTIFIER org.musescore.${MUSE_APP_NAME_MACHINE_READABLE}${MUSE_APP_VERSION_MAJOR})
+
+set(MUSE_APP_UNSTABLE ON)
+set(MUSE_APP_IS_PRERELEASE ON)
+
+if(MUSE_APP_BUILD_MODE MATCHES "dev")
+    set(MUSE_APP_RELEASE_CHANNEL "devel")
 endif()
 
-if(MUSESCORE_BUILD_MODE MATCHES "release")
-    set(MUSESCORE_RELEASE_CHANNEL "stable")
+if(MUSE_APP_BUILD_MODE MATCHES "testing")
+    set(MUSE_APP_RELEASE_CHANNEL "testing")
+endif()
+
+if(MUSE_APP_BUILD_MODE MATCHES "release")
+    set(MUSE_APP_RELEASE_CHANNEL "stable")
 endif()
 
 # Print variables which are needed by CI build scripts.
-message(STATUS "MUSESCORE_RELEASE_CHANNEL ${MUSESCORE_RELEASE_CHANNEL}")
-message(STATUS "MUSESCORE_VERSION_FULL ${MUSESCORE_VERSION_FULL}")
-
+message(STATUS "MUSE_APP_RELEASE_CHANNEL ${MUSE_APP_RELEASE_CHANNEL}")
+message(STATUS "MUSE_APP_VERSION ${MUSE_APP_VERSION}")

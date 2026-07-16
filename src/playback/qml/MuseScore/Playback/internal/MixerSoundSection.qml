@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,21 +19,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
 
 MixerPanelSection {
     id: root
+
+    property bool resourcePickingActive: false
 
     headerTitle: qsTrc("playback", "Sound")
 
     Item {
         id: content
 
-        height: inputResourceControl.height
+        required property MixerChannelItem channelItem
+
+        height: resourceControl.height
         width: root.channelItemWidth
 
         property string accessibleName: (Boolean(root.needReadChannelName) ? channelItem.title + " " : "") + root.headerTitle
@@ -41,26 +47,30 @@ MixerPanelSection {
         visible: !channelItem.outputOnly
 
         AudioResourceControl {
-            id: inputResourceControl
+            id: resourceControl
 
             anchors.horizontalCenter: parent.horizontalCenter
             height: 26
 
             supportsByPassing: false
-            resourceItemModel: channelItem.inputResourceItem ?? null
+            resourceItemModel: content.channelItem.inputResourceItem ?? null
 
-            navigationPanel: channelItem.panel
+            navigationPanel: content.channelItem.panel
             navigationRowStart: root.navigationRowStart
             accessibleName: content.accessibleName
 
             onTitleClicked: {
-                if (channelItem.inputResourceItem) {
-                    channelItem.inputResourceItem.requestToLaunchNativeEditorView()
+                if (content.channelItem.inputResourceItem) {
+                    content.channelItem.inputResourceItem.requestToLaunchNativeEditorView()
                 }
             }
 
             onNavigateControlIndexChanged: function(index) {
                 root.navigateControlIndexChanged(index)
+            }
+
+            onResourcePickingActiveChanged: {
+                root.resourcePickingActive = resourceControl.resourcePickingActive
             }
         }
     }

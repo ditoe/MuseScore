@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,73 +23,69 @@
 #include <set>
 
 #include <QFile>
+#include <QFileInfo>
 
 #include "translation.h"
 
 #include "engraving/engravingerrors.h"
 #include "engraving/rw/xmlwriter.h"
 
-#include "infrastructure/messagebox.h"
+#include "engraving/infrastructure/messagebox.h"
 
-#include "engraving/dom/factory.h"
-#include "engraving/dom/masterscore.h"
-#include "engraving/dom/key.h"
-#include "engraving/dom/clef.h"
-#include "engraving/dom/sig.h"
-#include "engraving/dom/tempo.h"
-#include "engraving/dom/note.h"
+#include "engraving/dom/articulation.h"
+#include "engraving/dom/barline.h"
+#include "engraving/dom/box.h"
+#include "engraving/dom/bracket.h"
 #include "engraving/dom/chord.h"
+#include "engraving/dom/clef.h"
+#include "engraving/dom/drumset.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/key.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/pitchspelling.h"
 #include "engraving/dom/rest.h"
 #include "engraving/dom/segment.h"
-#include "engraving/dom/utils.h"
-#include "engraving/dom/text.h"
-#include "engraving/dom/slur.h"
-#include "engraving/dom/tie.h"
+#include "engraving/dom/sig.h"
 #include "engraving/dom/staff.h"
-#include "engraving/dom/measure.h"
-#include "engraving/dom/part.h"
+#include "engraving/dom/text.h"
+#include "engraving/dom/tie.h"
 #include "engraving/dom/timesig.h"
-#include "engraving/dom/barline.h"
-#include "engraving/dom/pedal.h"
-#include "engraving/dom/ottava.h"
-#include "engraving/dom/lyrics.h"
-#include "engraving/dom/bracket.h"
-#include "engraving/dom/drumset.h"
-#include "engraving/dom/box.h"
-#include "engraving/dom/pitchspelling.h"
 #include "engraving/dom/tuplet.h"
-#include "engraving/dom/articulation.h"
+#include "engraving/dom/utils.h"
+#include "engraving/editing/transpose.h"
 
-#include "importmidi_meter.h"
+#include "internal/midishared/generalmidi.h"
+#include "../midishared/midifile.h"
+#include "importmidi_beat.h"
 #include "importmidi_chord.h"
-#include "importmidi_quant.h"
-#include "importmidi_tuplet.h"
-#include "importmidi_tuplet_tonotes.h"
-#include "importmidi_swing.h"
-#include "importmidi_fraction.h"
-#include "importmidi_drum.h"
-#include "importmidi_inner.h"
+#include "importmidi_chordname.h"
 #include "importmidi_clef.h"
+#include "importmidi_drum.h"
+#include "importmidi_fraction.h"
+#include "importmidi_inner.h"
+#include "importmidi_instrument.h"
+#include "importmidi_key.h"
 #include "importmidi_lrhand.h"
 #include "importmidi_lyrics.h"
-#include "importmidi_tie.h"
-#include "importmidi_beat.h"
-#include "importmidi_tempo.h"
-#include "importmidi_simplify.h"
-#include "importmidi_voice.h"
+#include "importmidi_meter.h"
 #include "importmidi_operations.h"
-#include "importmidi_key.h"
-#include "importmidi_instrument.h"
-#include "importmidi_chordname.h"
-#include "../midishared/midifile.h"
+#include "importmidi_quant.h"
+#include "importmidi_simplify.h"
+#include "importmidi_swing.h"
+#include "importmidi_tempo.h"
+#include "importmidi_tie.h"
+#include "importmidi_tuplet.h"
+#include "importmidi_tuplet_tonotes.h"
+#include "importmidi_voice.h"
 
 #include "log.h"
 
 using namespace mu::engraving;
 
 namespace mu::iex::midi {
-extern void updateNoteLines(Segment*, int track);
-
 void lengthenTooShortNotes(std::multimap<int, MTrack>& tracks)
 {
     for (auto& track: tracks) {
@@ -333,7 +329,7 @@ void MTrack::processMeta(int tick, const MidiEvent& mm)
         Fraction t = Fraction::fromTicks(tick);
         Interval v = staff->part()->instrument(t)->transpose();
         if (!v.isZero() && !cs->style().styleB(Sid::concertPitch)) {
-            cKey = transposeKey(tKey, v);
+            cKey = Transpose::transposeKey(tKey, v);
             // if there are more than 6 accidentals in transposing key, it cannot be PreferSharpFlat::AUTO
             if ((tKey > 6 || tKey < -6) && staff->part()->preferSharpFlat() == PreferSharpFlat::AUTO) {
                 staff->part()->setPreferSharpFlat(PreferSharpFlat::NONE);
@@ -360,7 +356,7 @@ void MTrack::processMeta(int tick, const MidiEvent& mm)
             ssid = TextStyleType::TRANSLATOR;
             break;
         case META_POET:
-            ssid = TextStyleType::POET;
+            ssid = TextStyleType::LYRICIST;
             break;
         case META_SUBTITLE:
             ssid = TextStyleType::SUBTITLE;
@@ -378,7 +374,7 @@ void MTrack::processMeta(int tick, const MidiEvent& mm)
             measure = Factory::createVBox(cs->dummy()->system());
             measure->setTick(Fraction(0, 1));
             measure->setNext(cs->first());
-            cs->measures()->add(measure);
+            cs->measures()->append(measure);
         }
         measure->add(text);
     }
@@ -630,7 +626,7 @@ void MTrack::createKeys(Key defaultKey, const KeyList& allKeyList)
             ke.setConcertKey(defaultKey);
             if (!v.isZero() && !staff->score()->style().styleB(Sid::concertPitch)) {
                 v.flip();
-                Key tKey = transposeKey(defaultKey, v);
+                Key tKey = Transpose::transposeKey(defaultKey, v);
                 ke.setKey(tKey);
             }
             staffKeyList[0] = ke;
@@ -757,7 +753,8 @@ std::multimap<int, MTrack> createMTrackList(TimeSigMap* sigmap, const MidiFile* 
 
                 track.chords.insert({ tick, c });
             } else if (e.type() == ME_PROGRAM) {
-                track.program = e.dataB();
+                track.program = toGm1Program(e.dataB())
+                                .value_or(GM1Program::AcousticGrandPiano);
             } else if (e.type() == ME_CONTROLLER && e.controller() == CTRL_VOLUME) {
                 track.volumes.insert({ tick, e.value() });
             }
@@ -838,11 +835,11 @@ void tryCreatePickupMeasure(
     if (isPickupWithLessTimeSig(firstTimeSig, secondTimeSig)) {
         Measure* pickup = Factory::createMeasure(score->dummy()->system());
         pickup->setTick(Fraction::fromTicks(firstBarTick));
-        pickup->setNo(0);
-        pickup->setIrregular(true);
+        pickup->setMeasureNumber(0);
+        pickup->setExcludeFromNumbering(true);
         pickup->setTimesig(secondTimeSig);           // nominal time signature
         pickup->setTicks(firstTimeSig);                // actual length
-        score->measures()->add(pickup);
+        score->measures()->append(pickup);
         *begBarIndex = 1;
     } else if (isPickupWithGreaterTimeSig(firstTimeSig, secondTimeSig, firstTick)) {
         // split measure into 2 equal measures
@@ -854,17 +851,17 @@ void tryCreatePickupMeasure(
 
         Measure* firstBar = Factory::createMeasure(score->dummy()->system());
         firstBar->setTick(Fraction::fromTicks(firstBarTick));
-        firstBar->setNo(0);
+        firstBar->setMeasureNumber(0);
         firstBar->setTimesig(secondTimeSig);
         firstBar->setTicks(secondTimeSig);
-        score->measures()->add(firstBar);
+        score->measures()->append(firstBar);
 
         Measure* secondBar = Factory::createMeasure(score->dummy()->system());
         secondBar->setTick(Fraction::fromTicks(firstBarTick + secondTimeSig.ticks()));
-        secondBar->setNo(1);
+        secondBar->setMeasureNumber(1);
         secondBar->setTimesig(secondTimeSig);
         secondBar->setTicks(secondTimeSig);
-        score->measures()->add(secondBar);
+        score->measures()->append(secondBar);
 
         *begBarIndex = 2;
     }
@@ -895,11 +892,11 @@ void createMeasures(const ReducedFraction& firstTick, ReducedFraction& lastTick,
         Measure* m = Factory::createMeasure(score->dummy()->system());
         const int t = score->sigmap()->bar2tick(i, 0);
         m->setTick(Fraction::fromTicks(tick));
-        m->setNo(i);
+        m->setMeasureNumber(i);
         const Fraction timeSig = score->sigmap()->timesig(t).timesig();
         m->setTimesig(timeSig);
         m->setTicks(timeSig);
-        score->measures()->add(m);
+        score->measures()->append(m);
     }
 
     const Measure* m = score->lastMeasure();
@@ -909,13 +906,12 @@ void createMeasures(const ReducedFraction& firstTick, ReducedFraction& lastTick,
     }
 }
 
-void setTrackInfo(MidiType midiType, MTrack& mt)
+void setTrackInfo(MTrack& mt)
 {
     auto& opers = midiImportOperations;
 
     const int currentTrack = mt.indexOfOperation;
-    const QString instrName = MidiInstr::instrumentName(midiType, mt.program,
-                                                        mt.mtrack->drumTrack());
+    const QString instrName = MidiInstr::instrumentName(mt.program, mt.mtrack->drumTrack());
     if (opers.data()->processingsOfOpenedFile == 0) {
         opers.data()->trackOpers.midiInstrName.setValue(currentTrack, instrName);
         // set channel number (from 1): number = index + 1
@@ -928,13 +924,12 @@ void setTrackInfo(MidiType midiType, MTrack& mt)
     if (mt.staff->isTop()) {
         Part* part  = mt.staff->part();
         part->setLongName(XmlWriter::xmlString(MidiInstr::concatenateWithComma(trackInstrName, mt.name)));
-        part->setPartName(part->longName());
         part->setMidiChannel(mt.mtrack->outChannel());
         int bank = 0;
         if (mt.mtrack->drumTrack()) {
             bank = 128;
         }
-        part->setMidiProgram(mt.program & 0x7f, bank);      // only GM
+        part->setMidiProgram(toMidiData(mt.program), bank);
     }
 
     if (mt.name.isEmpty() && !trackInstrName.isEmpty()) {
@@ -1026,14 +1021,11 @@ void processNonLyricMeta(QList<MTrack>& tracks)
     }
 }
 
-void setTrackInfo(QList<MTrack>& tracks, MidiType midiType)
+void setTrackInfo(QList<MTrack>& tracks)
 {
     for (int i = 0; i < tracks.size(); ++i) {
         MTrack& mt = tracks[i];
-        if (midiType == MidiType::UNKNOWN) {
-            midiType = MidiType::GM;
-        }
-        setTrackInfo(midiType, mt);
+        setTrackInfo(mt);
     }
 }
 
@@ -1221,7 +1213,7 @@ QList<MTrack> convertMidi(Score* score, const MidiFile* mf)
 
     createMeasures(firstTick, lastTick, score);
     processNonLyricMeta(trackList);
-    setTrackInfo(trackList, mf->midiType());
+    setTrackInfo(trackList);
     createKeys(trackList);
     MidiKey::recognizeMainKeySig(trackList);
     createNotes(lastTick, trackList);
@@ -1241,11 +1233,9 @@ QList<MTrack> convertMidi(Score* score, const MidiFile* mf)
 void loadMidiData(MidiFile& mf)
 {
     mf.separateChannel();
-    MidiType mt = MidiType::UNKNOWN;
     for (auto& track: mf.tracks()) {
-        track.mergeNoteOnOffAndFindMidiType(&mt);
+        track.mergeNoteOnOff();
     }
-    mf.setMidiType(mt);
 }
 
 Err importMidi(MasterScore* score, const QString& name)
@@ -1261,7 +1251,13 @@ Err importMidi(MasterScore* score, const QString& name)
         opers.addNewMidiFile(name);
     }
 
-    if (opers.data()->processingsOfOpenedFile == 0) {
+    // Check if file has been modified on disk since last import
+    QFileInfo fileInfo(name);
+    qint64 currentModTime = fileInfo.lastModified().toSecsSinceEpoch();
+    bool needsReload = (opers.data()->processingsOfOpenedFile == 0)
+                       || (opers.data()->fileModificationTime != currentModTime);
+
+    if (needsReload) {
         QFile fp(name);
         if (!fp.open(QIODevice::ReadOnly)) {
             LOGD("importMidi: file open error <%s>", qPrintable(name));
@@ -1273,9 +1269,9 @@ Err importMidi(MasterScore* score, const QString& name)
         }
         catch (QString errorText) {
             if (!MScore::noGui) {
-                MessageBox::warning(mu::trc("iex_midi", "Import MIDI"),
-                                    mu::qtrc("iex_midi", "Import failed: %1").arg(errorText).toStdString(),
-                                    { MessageBox::Ok });
+                MessageBox(score->iocContext()).warning(muse::trc("iex_midi", "Import MIDI"),
+                                                        muse::qtrc("iex_midi", "Import failed: %1").arg(errorText).toStdString(),
+                                                        { MessageBox::Ok });
             }
             fp.close();
             LOGD("importMidi: bad file format");
@@ -1285,6 +1281,7 @@ Err importMidi(MasterScore* score, const QString& name)
 
         loadMidiData(mf);
         opers.setMidiFileData(name, mf);
+        opers.data()->fileModificationTime = currentModTime;
     }
 
     opers.data()->tracks = convertMidi(score, opers.midiFile(name));

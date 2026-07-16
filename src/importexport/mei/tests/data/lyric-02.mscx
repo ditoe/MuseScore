@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.74978</Spatium>
+      <spatium>1.75</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -16,210 +17,263 @@
     <metaTag name="meiHead">&lt;meiHead&gt;&lt;fileDesc&gt;&lt;titleStmt&gt;&lt;title&gt;Untitled score&lt;/title&gt;&lt;respStmt&gt;&lt;persName role=&quot;composer&quot;&gt;Composer / arranger&lt;/persName&gt;&lt;/respStmt&gt;&lt;/titleStmt&gt;&lt;pubStmt&gt;&lt;date isodate=&quot;2023-08-30T09:09:38&quot;/&gt;&lt;/pubStmt&gt;&lt;/fileDesc&gt;&lt;/meiHead&gt;</metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">Untitled score</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
-        <bracket type="0" span="3" col="0" visible="1"/>
+        <BracketItem>
+          <type>Normal</type>
+          <bracketSpan>3</bracketSpan>
+          <level>0</level>
+          </BracketItem>
         </Staff>
-      <trackName></trackName>
       <Instrument id="soprano">
-        <longName>Soprano</longName>
-        <shortName>S.</shortName>
+        <InstrumentLabel>
+          <longName>Soprano</longName>
+          <shortName>S.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>voice.soprano</instrumentId>
         <Channel>
+          <program value="52"/>
           </Channel>
         </Instrument>
       </Part>
     <Part id="2">
-      <Staff id="2">
+      <eid>E_E</eid>
+      <Staff>
+        <eid>F_F</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName></trackName>
       <Instrument id="alto">
-        <longName>Alto</longName>
-        <shortName>A.</shortName>
+        <InstrumentLabel>
+          <longName>Alto</longName>
+          <shortName>A.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>voice.alto</instrumentId>
         <Channel>
+          <program value="52"/>
           </Channel>
         </Instrument>
       </Part>
     <Part id="3">
-      <Staff id="3">
+      <eid>G_G</eid>
+      <Staff>
+        <eid>H_H</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName></trackName>
       <Instrument id="bass">
-        <longName>Bass</longName>
-        <shortName>B.</shortName>
+        <InstrumentLabel>
+          <longName>Bass</longName>
+          <shortName>B.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>voice.bass</instrumentId>
         <Channel>
+          <program value="52"/>
           </Channel>
         </Instrument>
       </Part>
     <Staff id="1">
       <VBox>
         <height>10</height>
+        <eid>I_I</eid>
         <Text>
+          <eid>J_J</eid>
           <style>title</style>
           <text>Untitled score</text>
           </Text>
         <Text>
+          <eid>K_K</eid>
           <style>subtitle</style>
           <text>Subtitle</text>
           </Text>
         <Text>
+          <eid>L_L</eid>
           <style>composer</style>
           <text>Composer / arranger</text>
           </Text>
         </VBox>
       <Measure>
+        <eid>M_M</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>N_N</eid>
             </Clef>
           <TimeSig>
+            <eid>O_O</eid>
             <sigN>4</sigN>
             <sigD>2</sigD>
             </TimeSig>
           <Chord>
+            <eid>P_P</eid>
             <durationType>half</durationType>
             <Lyrics>
+              <eid>Q_Q</eid>
               <text>1. In</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>R_R</eid>
               <text>2. Di</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>S_S</eid>
               <text>3. Dis</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>T_T</eid>
               <text>4. Al'</text>
               </Lyrics>
             <Note>
+              <eid>U_U</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>V_V</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Lyrics>
+              <eid>W_W</eid>
               <text>un</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>X_X</eid>
               <text>cea</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>Y_Y</eid>
               <text>se<sym>lyricsElision</sym>al'</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>Z_Z</eid>
               <text>hor</text>
               </Lyrics>
             <Note>
+              <eid>a_a</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>b_b</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
+              <eid>c_c</eid>
               <text>bos</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
+              <eid>d_d</eid>
               <text>la</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>e_e</eid>
               <text>hor</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>f_f</eid>
               <text>la</text>
               </Lyrics>
             <Note>
+              <eid>g_g</eid>
               <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>h_h</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>i_i</eid>
               <text>chet</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>j_j</eid>
               <text>Nin</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>k_k</eid>
               <text>il</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>l_l</eid>
               <text>va</text>
               </Lyrics>
             <Note>
+              <eid>m_m</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>n_n</eid>
                 </Accidental>
               <pitch>70</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>o_o</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
+              <eid>p_p</eid>
               <text>to</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>q_q</eid>
               <text>fa</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>r_r</eid>
               <text>pas</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>s_s</eid>
               <text>ga</text>
               </Lyrics>
             <Note>
+              <eid>t_t</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -227,127 +281,158 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>u_u</eid>
         <voice>
           <Chord>
+            <eid>v_v</eid>
             <dots>1</dots>
             <durationType>quarter</durationType>
             <Lyrics>
+              <eid>w_w</eid>
               <text>de</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
+              <eid>x_x</eid>
               <text>con</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>y_y</eid>
               <text>tor</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>z_z</eid>
               <text>Nin</text>
               </Lyrics>
             <Note>
+              <eid>0_0</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>1_1</eid>
             <durationType>eighth</durationType>
             <Lyrics>
+              <eid>2_2</eid>
               <text>bei</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>3_3</eid>
               <text>gra</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>4_4</eid>
               <text>con</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>5_5</eid>
               <text>fa</text>
               </Lyrics>
             <Note>
+              <eid>6_6</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>7_7</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
+              <eid>8_8</eid>
               <text>Mir</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>9_9</eid>
               <text>te</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>+_+</eid>
               <text>un</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>/_/</eid>
               <text>con</text>
               </Lyrics>
             <Note>
+              <eid>AB_AB</eid>
               <pitch>77</pitch>
               <tpc>13</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>BB_BB</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>CB_CB</eid>
               <text>ti<sym>lyricsElision</sym>e<sym>lyricsElision</sym>Al</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>DB_DB</eid>
               <text>pa</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>EB_EB</eid>
               <text>so</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>FB_FB</eid>
               <text>un</text>
               </Lyrics>
             <Note>
+              <eid>GB_GB</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>HB_HB</eid>
             <durationType>whole</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>IB_IB</eid>
               <text>lo</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>middle</syllabic>
+              <eid>JB_JB</eid>
               <text>ro</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>middle</syllabic>
+              <eid>KB_KB</eid>
               <text>spi</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>LB_LB</eid>
               <text>ri</text>
               </Lyrics>
             <Note>
+              <eid>MB_MB</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -355,43 +440,53 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>NB_NB</eid>
         <voice>
           <Chord>
+            <eid>OB_OB</eid>
             <durationType>whole</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
+              <eid>PB_PB</eid>
               <text>ri</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>QB_QB</eid>
               <text>le,</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>RB_RB</eid>
               <text>ro,</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>SB_SB</eid>
               <text>so.</text>
               </Lyrics>
             <Note>
+              <eid>TB_TB</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>UB_UB</eid>
                 </Accidental>
               <pitch>70</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>VB_VB</eid>
             <BeamMode>auto</BeamMode>
             <durationType>whole</durationType>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>WB_WB</eid>
             </BarLine>
           </voice>
         </Measure>
@@ -403,130 +498,162 @@
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>XB_XB</eid>
             </Clef>
           <TimeSig>
+            <eid>YB_YB</eid>
             <sigN>4</sigN>
             <sigD>2</sigD>
             </TimeSig>
           <Chord>
+            <eid>ZB_ZB</eid>
             <durationType>half</durationType>
             <Lyrics>
+              <eid>aB_aB</eid>
               <text>1. In</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>bB_bB</eid>
               <text>2. Di</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>cB_cB</eid>
               <text>3. Dis</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>dB_dB</eid>
               <text>4. Al'</text>
               </Lyrics>
             <Note>
+              <eid>eB_eB</eid>
               <pitch>62</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>fB_fB</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Lyrics>
+              <eid>gB_gB</eid>
               <text>un</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>hB_hB</eid>
               <text>cea</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>iB_iB</eid>
               <text>se<sym>lyricsElision</sym>al'</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>jB_jB</eid>
               <text>hor</text>
               </Lyrics>
             <Note>
+              <eid>kB_kB</eid>
               <pitch>62</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>lB_lB</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
+              <eid>mB_mB</eid>
               <text>bos</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
+              <eid>nB_nB</eid>
               <text>la</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>oB_oB</eid>
               <text>hor</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>pB_pB</eid>
               <text>la</text>
               </Lyrics>
             <Note>
+              <eid>qB_qB</eid>
               <pitch>62</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>rB_rB</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>sB_sB</eid>
               <text>chet</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>tB_tB</eid>
               <text>Nin</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>uB_uB</eid>
               <text>il</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>vB_vB</eid>
               <text>va</text>
               </Lyrics>
             <Note>
+              <eid>wB_wB</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>xB_xB</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
+              <eid>yB_yB</eid>
               <text>to</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>zB_zB</eid>
               <text>fa</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>0B_0B</eid>
               <text>pas</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>1B_1B</eid>
               <text>ga</text>
               </Lyrics>
             <Note>
+              <eid>2B_2B</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
@@ -536,126 +663,156 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>3B_3B</eid>
             <dots>1</dots>
             <durationType>quarter</durationType>
             <Lyrics>
+              <eid>4B_4B</eid>
               <text>de</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
+              <eid>5B_5B</eid>
               <text>con</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>6B_6B</eid>
               <text>tor</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>7B_7B</eid>
               <text>Nin</text>
               </Lyrics>
             <Note>
+              <eid>8B_8B</eid>
               <pitch>65</pitch>
               <tpc>13</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>9B_9B</eid>
             <durationType>eighth</durationType>
             <Lyrics>
+              <eid>+B_+B</eid>
               <text>bei</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>/B_/B</eid>
               <text>gra</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>AC_AC</eid>
               <text>con</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>BC_BC</eid>
               <text>fa</text>
               </Lyrics>
             <Note>
+              <eid>CC_CC</eid>
               <pitch>64</pitch>
               <tpc>18</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>DC_DC</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
+              <eid>EC_EC</eid>
               <text>Mir</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>FC_FC</eid>
               <text>te</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>GC_GC</eid>
               <text>un</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>HC_HC</eid>
               <text>con</text>
               </Lyrics>
             <Note>
+              <eid>IC_IC</eid>
               <pitch>62</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>JC_JC</eid>
             <durationType>half</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>KC_KC</eid>
               <text>ti<sym>lyricsElision</sym>e<sym>lyricsElision</sym>Al</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>LC_LC</eid>
               <text>pa</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>MC_MC</eid>
               <text>so</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>NC_NC</eid>
               <text>un</text>
               </Lyrics>
             <Note>
+              <eid>OC_OC</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>PC_PC</eid>
                 </Accidental>
               <pitch>70</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Beam>
+            <eid>QC_QC</eid>
             <l1>-2</l1>
             <l2>0</l2>
             </Beam>
           <Chord>
+            <eid>RC_RC</eid>
             <BeamMode>begin</BeamMode>
             <durationType>eighth</durationType>
             <Lyrics>
               <no>1</no>
               <syllabic>middle</syllabic>
+              <eid>SC_SC</eid>
               <text>ro</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>TC_TC</eid>
               <text>ri</text>
               </Lyrics>
             <Spanner type="Slur">
               <Slur>
+                <eid>UC_UC</eid>
                 <up>up</up>
                 </Slur>
               <next>
@@ -666,6 +823,7 @@
               </Spanner>
             <Spanner type="Slur">
               <Slur>
+                <eid>VC_VC</eid>
                 </Slur>
               <next>
                 <location>
@@ -674,11 +832,13 @@
                 </next>
               </Spanner>
             <Note>
+              <eid>WC_WC</eid>
               <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>XC_XC</eid>
             <durationType>eighth</durationType>
             <Spanner type="Slur">
               <prev>
@@ -688,19 +848,23 @@
                 </prev>
               </Spanner>
             <Note>
+              <eid>YC_YC</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>ZC_ZC</eid>
             <durationType>half</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>aC_aC</eid>
               <text>lo</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>middle</syllabic>
+              <eid>bC_bC</eid>
               <text>spi</text>
               </Lyrics>
             <Spanner type="Slur">
@@ -711,6 +875,7 @@
                 </prev>
               </Spanner>
             <Note>
+              <eid>cC_cC</eid>
               <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
@@ -720,41 +885,50 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>dC_dC</eid>
             <durationType>whole</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
+              <eid>eC_eC</eid>
               <text>ri</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>fC_fC</eid>
               <text>le,</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>gC_gC</eid>
               <text>ro,</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>hC_hC</eid>
               <text>so.</text>
               </Lyrics>
             <Note>
+              <eid>iC_iC</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>jC_jC</eid>
                 </Accidental>
               <pitch>70</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>kC_kC</eid>
             <BeamMode>auto</BeamMode>
             <durationType>whole</durationType>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>lC_lC</eid>
             </BarLine>
           </voice>
         </Measure>
@@ -766,134 +940,167 @@
             <concertClefType>F</concertClefType>
             <transposingClefType>F</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>mC_mC</eid>
             </Clef>
           <TimeSig>
+            <eid>nC_nC</eid>
             <sigN>4</sigN>
             <sigD>2</sigD>
             </TimeSig>
           <Chord>
+            <eid>oC_oC</eid>
             <durationType>half</durationType>
             <Lyrics>
+              <eid>pC_pC</eid>
               <text>1. In</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>qC_qC</eid>
               <text>2. Di</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>rC_rC</eid>
               <text>3. Dis</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>sC_sC</eid>
               <text>4. Al'</text>
               </Lyrics>
             <Note>
+              <eid>tC_tC</eid>
               <pitch>43</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>uC_uC</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Lyrics>
+              <eid>vC_vC</eid>
               <text>un</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>wC_wC</eid>
               <text>cea</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>xC_xC</eid>
               <text>se<sym>lyricsElision</sym>al'</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>yC_yC</eid>
               <text>hor</text>
               </Lyrics>
             <Note>
+              <eid>zC_zC</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>0C_0C</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
+              <eid>1C_1C</eid>
               <text>bos</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
+              <eid>2C_2C</eid>
               <text>la</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>3C_3C</eid>
               <text>hor</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>4C_4C</eid>
               <text>la</text>
               </Lyrics>
             <Note>
+              <eid>5C_5C</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>6C_6C</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>7C_7C</eid>
               <text>chet</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>8C_8C</eid>
               <text>Nin</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>9C_9C</eid>
               <text>il</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>+C_+C</eid>
               <text>va</text>
               </Lyrics>
             <Note>
+              <eid>/C_/C</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>AD_AD</eid>
                 </Accidental>
               <pitch>51</pitch>
               <tpc>11</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>BD_BD</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
+              <eid>CD_CD</eid>
               <text>to</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>DD_DD</eid>
               <text>fa</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>ED_ED</eid>
               <text>pas</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>FD_FD</eid>
               <text>ga</text>
               </Lyrics>
             <Note>
+              <eid>GD_GD</eid>
               <pitch>51</pitch>
               <tpc>11</tpc>
               </Note>
@@ -903,129 +1110,160 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>HD_HD</eid>
             <dots>1</dots>
             <durationType>quarter</durationType>
             <Lyrics>
+              <eid>ID_ID</eid>
               <text>de</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
+              <eid>JD_JD</eid>
               <text>con</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>KD_KD</eid>
               <text>tor</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>LD_LD</eid>
               <text>Nin</text>
               </Lyrics>
             <Note>
+              <eid>MD_MD</eid>
               <pitch>50</pitch>
               <tpc>16</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>ND_ND</eid>
             <durationType>eighth</durationType>
             <Lyrics>
+              <eid>OD_OD</eid>
               <text>bei</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>PD_PD</eid>
               <text>gra</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>QD_QD</eid>
               <text>con</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>RD_RD</eid>
               <text>fa</text>
               </Lyrics>
             <Note>
+              <eid>SD_SD</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>TD_TD</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
+              <eid>UD_UD</eid>
               <text>Mir</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>VD_VD</eid>
               <text>te</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
+              <eid>WD_WD</eid>
               <text>un</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>XD_XD</eid>
               <text>con</text>
               </Lyrics>
             <Note>
+              <eid>YD_YD</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>ZD_ZD</eid>
                 </Accidental>
               <pitch>46</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>aD_aD</eid>
             <durationType>quarter</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>bD_bD</eid>
               <text>ti<sym>lyricsElision</sym>e<sym>lyricsElision</sym>Al</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>begin</syllabic>
+              <eid>cD_cD</eid>
               <text>pa</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>begin</syllabic>
+              <eid>dD_dD</eid>
               <text>so</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
+              <eid>eD_eD</eid>
               <text>un</text>
               </Lyrics>
             <Note>
+              <eid>fD_fD</eid>
               <pitch>46</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Chord>
+            <eid>gD_gD</eid>
             <durationType>whole</durationType>
             <Lyrics>
               <syllabic>middle</syllabic>
+              <eid>hD_hD</eid>
               <text>lo</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>middle</syllabic>
+              <eid>iD_iD</eid>
               <text>ro</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>middle</syllabic>
+              <eid>jD_jD</eid>
               <text>spi</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>begin</syllabic>
+              <eid>kD_kD</eid>
               <text>ri</text>
               </Lyrics>
             <Note>
+              <eid>lD_lD</eid>
               <pitch>53</pitch>
               <tpc>13</tpc>
               </Note>
@@ -1035,41 +1273,50 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>mD_mD</eid>
             <durationType>whole</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
+              <eid>nD_nD</eid>
               <text>ri</text>
               </Lyrics>
             <Lyrics>
               <no>1</no>
               <syllabic>end</syllabic>
+              <eid>oD_oD</eid>
               <text>le,</text>
               </Lyrics>
             <Lyrics>
               <no>2</no>
               <syllabic>end</syllabic>
+              <eid>pD_pD</eid>
               <text>ro,</text>
               </Lyrics>
             <Lyrics>
               <no>3</no>
               <syllabic>end</syllabic>
+              <eid>qD_qD</eid>
               <text>so.</text>
               </Lyrics>
             <Note>
+              <eid>rD_rD</eid>
               <Accidental>
                 <role>1</role>
                 <subtype>accidentalFlat</subtype>
+                <eid>sD_sD</eid>
                 </Accidental>
               <pitch>46</pitch>
               <tpc>12</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>tD_tD</eid>
             <BeamMode>auto</BeamMode>
             <durationType>whole</durationType>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>uD_uD</eid>
             </BarLine>
           </voice>
         </Measure>

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,7 +34,7 @@ template<class T>
 class SetupDataResolverBase
 {
 public:
-    static bool resolve(const Instrument* instrument, mpe::PlaybackSetupData& result)
+    static bool resolve(const Instrument* instrument, muse::mpe::PlaybackSetupData& result)
     {
         assert(instrument);
         if (!instrument) {
@@ -42,6 +42,7 @@ public:
         }
 
         result = T::doResolve(instrument);
+        result.supportsSingleNoteDynamics = instrument->singleNoteDynamics();
         result.musicXmlSoundId = std::make_optional(instrument->musicXmlId().toStdString());
 
         return result.isValid();

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
       <maxSystemDistance>20</maxSystemDistance>
@@ -13,13 +14,17 @@
       <measureNumberSystem>0</measureNumberSystem>
       <genCourtesyTimesig>0</genCourtesyTimesig>
       <sectionPause>2</sectionPause>
+      <showHeader>1</showHeader>
+      <evenHeaderL>$p</evenHeaderL>
       <evenHeaderR>$:workTitle:</evenHeaderR>
       <oddHeaderL>$:workTitle:</oddHeaderL>
+      <oddHeaderR>$p</oddHeaderR>
       <footerOddEven>0</footerOddEven>
       <evenFooterL>$:copyright:</evenFooterL>
       <evenFooterC>$:plate:</evenFooterC>
       <evenFooterR>Version $:version:</evenFooterR>
-      <Spatium>1.76389</Spatium>
+      <defaultsVersion>301</defaultsVersion>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -31,18 +36,18 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
@@ -74,12 +79,13 @@
         </Instrument>
       </Part>
     <Part id="2">
-      <Staff id="2">
+      <eid>E_E</eid>
+      <Staff>
+        <eid>F_F</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
@@ -136,19 +142,24 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>G_G</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>H_H</eid>
             </Clef>
           <TimeSig>
+            <eid>I_I</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
+            <eid>J_J</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>K_K</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -156,10 +167,13 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>L_L</eid>
         <voice>
           <Chord>
+            <eid>M_M</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>N_N</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -167,13 +181,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>O_O</eid>
         <LayoutBreak>
+          <eid>P_P</eid>
           <subtype>line</subtype>
           </LayoutBreak>
         <voice>
           <Chord>
+            <eid>Q_Q</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>R_R</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -182,14 +200,18 @@
             <concertClefType>G8va</concertClefType>
             <transposingClefType>G8va</transposingClefType>
             <showCourtesyClef>0</showCourtesyClef>
+            <eid>S_S</eid>
             </Clef>
           </voice>
         </Measure>
       <Measure>
+        <eid>T_T</eid>
         <voice>
           <Chord>
+            <eid>U_U</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>V_V</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -197,10 +219,13 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>W_W</eid>
         <voice>
           <Chord>
+            <eid>X_X</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>Y_Y</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -208,13 +233,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>Z_Z</eid>
         <LayoutBreak>
+          <eid>a_a</eid>
           <subtype>section</subtype>
           </LayoutBreak>
         <voice>
           <Chord>
+            <eid>b_b</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>c_c</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -222,10 +251,13 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>d_d</eid>
         <voice>
           <Chord>
+            <eid>e_e</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>f_f</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -233,18 +265,23 @@
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
+            <eid>g_g</eid>
             </Clef>
           </voice>
         </Measure>
       <HBox>
         <width>5</width>
-        <excludeFromParts>0</excludeFromParts>
+        <boxAutoSize>0</boxAutoSize>
+        <eid>h_h</eid>
         </HBox>
       <Measure>
+        <eid>i_i</eid>
         <voice>
           <Chord>
+            <eid>j_j</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>k_k</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -253,14 +290,18 @@
             <concertClefType>G8va</concertClefType>
             <transposingClefType>G8va</transposingClefType>
             <showCourtesyClef>0</showCourtesyClef>
+            <eid>l_l</eid>
             </Clef>
           </voice>
         </Measure>
       <Measure>
+        <eid>m_m</eid>
         <voice>
           <Chord>
+            <eid>n_n</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>o_o</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -272,15 +313,19 @@
       <Measure>
         <voice>
           <KeySig>
+            <eid>p_p</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>q_q</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
+            <eid>r_r</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>s_s</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -290,8 +335,10 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>t_t</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>u_u</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -301,8 +348,10 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>v_v</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>w_w</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -310,14 +359,17 @@
           <Clef>
             <concertClefType>G8va</concertClefType>
             <transposingClefType>G8va</transposingClefType>
+            <eid>x_x</eid>
             </Clef>
           </voice>
         </Measure>
       <Measure>
         <voice>
           <Chord>
+            <eid>y_y</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>z_z</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -327,8 +379,10 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>0_0</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>1_1</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -338,8 +392,10 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>2_2</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>3_3</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -347,14 +403,17 @@
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
+            <eid>4_4</eid>
             </Clef>
           </voice>
         </Measure>
       <Measure>
         <voice>
           <Chord>
+            <eid>5_5</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>6_6</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -363,14 +422,17 @@
             <concertClefType>G8va</concertClefType>
             <transposingClefType>G8va</transposingClefType>
             <showCourtesyClef>0</showCourtesyClef>
+            <eid>7_7</eid>
             </Clef>
           </voice>
         </Measure>
       <Measure>
         <voice>
           <Chord>
+            <eid>8_8</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>9_9</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -380,8 +442,10 @@
       <Measure>
         <voice>
           <Chord>
+            <eid>+_+</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>/_/</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>

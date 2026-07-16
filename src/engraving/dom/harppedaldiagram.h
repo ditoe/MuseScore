@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,17 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __HARPPEDALDIAGRAM_H__
-#define __HARPPEDALDIAGRAM_H__
+#pragma once
 
-#include "pitchspelling.h"
 #include "textbase.h"
-#include "pitchspelling.h"
 
 using namespace mu;
 
 namespace mu::engraving {
-enum class PedalPosition : char {
+enum class PedalPosition : unsigned char {
     FLAT,
     NATURAL,
     SHARP,
@@ -39,7 +36,7 @@ enum class PedalPosition : char {
 };
 
 // Use for indexes of _pedalState
-enum HarpStringType : char {
+enum HarpStringType : unsigned char {
     D, C, B, E, F, G, A
 };
 
@@ -69,7 +66,7 @@ public:
     String screenReaderInfo() const override;
 
     void setIsDiagram(bool diagram);
-    bool isDiagram() { return m_isDiagram; }
+    bool isDiagram() const { return m_isDiagram; }
 
     std::array<PedalPosition, HARP_STRING_NO> getPedalState() const { return m_pedalState; }
     void setPedalState(std::array<PedalPosition, HARP_STRING_NO> state);
@@ -81,7 +78,12 @@ public:
     String createDiagramText();
     void updateDiagramText();
 
+    void undoChangePedalState(std::array<PedalPosition, HARP_STRING_NO> _pedalState);
+
     bool isTpcPlayable(int tpc);
+    const std::set<int>& playableTpcs() const { return m_playableTpcs; }
+
+    bool positionRelativeToNoteheadRest() const override { return true; }
 
 private:
 
@@ -91,6 +93,4 @@ private:
 
     bool m_isDiagram = true;
 };
-} // namespace mu::engraving
-
-#endif // __HARPPEDALDIAGRAM_H__
+}

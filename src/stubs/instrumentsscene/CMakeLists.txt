@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2026 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -12,24 +12,17 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE instrumentsscene)
+muse_create_module(instrumentsscene STUB)
 
-set(MODULE_QRC instrumentsscene.qrc)
-
-set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml )
-
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/instrumentsscenestubmodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/instrumentsscenestubmodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/selectinstrumentscenariostub.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/selectinstrumentscenariostub.h
-    )
-
-set(MODULE_IS_STUB ON)
-include(SetupModule)
+target_sources(instrumentsscene PRIVATE
+    instrumentsscenestubmodule.cpp
+    instrumentsscenestubmodule.h
+    selectinstrumentscenariostub.cpp
+    selectinstrumentscenariostub.h
+)

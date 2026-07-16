@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,23 +27,27 @@
 #include "context/iuicontextresolver.h"
 
 namespace mu::instrumentsscene {
-class InstrumentsUiActions : public ui::IUiActionsModule
+class InstrumentsUiActions : public muse::ui::IUiActionsModule, public muse::Contextable
 {
-    INJECT(context::IUiContextResolver, uicontextResolver)
+    muse::ContextInject<context::IUiContextResolver> uicontextResolver = { this };
 public:
 
-    const ui::UiActionList& actionsList() const override;
+    InstrumentsUiActions(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx)
+    {}
 
-    bool actionEnabled(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionEnabledChanged() const override;
+    const muse::ui::UiActionList& actionsList() const override;
 
-    bool actionChecked(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionCheckedChanged() const override;
+    bool actionEnabled(const muse::ui::UiAction& act) const override;
+    muse::async::Channel<muse::actions::ActionCodeList> actionEnabledChanged() const override;
+
+    bool actionChecked(const muse::ui::UiAction& act) const override;
+    muse::async::Channel<muse::actions::ActionCodeList> actionCheckedChanged() const override;
 
 private:
-    const static ui::UiActionList m_actions;
-    async::Channel<actions::ActionCodeList> m_actionEnabledChanged;
-    async::Channel<actions::ActionCodeList> m_actionCheckedChanged;
+    const static muse::ui::UiActionList m_actions;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionEnabledChanged;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionCheckedChanged;
 };
 }
 

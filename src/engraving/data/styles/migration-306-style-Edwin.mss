@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.10">
+<museScore version="3.02">
   <Style>
     <lyricsMinDistance>0.25</lyricsMinDistance>
     <lyricsDashLineThickness>0.1</lyricsDashLineThickness>
@@ -97,5 +97,8 @@
     <user12FontFace>Edwin</user12FontFace>
     <letRingFontFace>Edwin</letRingFontFace>
     <palmMuteFontFace>Edwin</palmMuteFontFace>
+    <lyricsEvenMusicalSymbolSize>11.0</lyricsEvenMusicalSymbolSize>
+    <lyricsOddMusicalSymbolSize>11.0</lyricsOddMusicalSymbolSize>
+    <pageNumberMusicalSymbolSize>9.0</pageNumberMusicalSymbolSize>
     </Style>
   </museScore>

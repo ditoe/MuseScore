@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SYNTHESIZERSTATE_H__
-#define __SYNTHESIZERSTATE_H__
+#ifndef MU_ENGRAVING_SYNTHESIZERSTATE_H
+#define MU_ENGRAVING_SYNTHESIZERSTATE_H
 
 #include <list>
 
@@ -40,10 +40,10 @@ class XmlReader;
 
 struct IdValue {
     int id = 0;
-    String data;
+    muse::String data;
 
     IdValue() {}
-    IdValue(int _id, const String& _data)
+    IdValue(int _id, const muse::String& _data)
         : id(_id), data(_data) {}
 };
 
@@ -55,16 +55,17 @@ class SynthesizerGroup : public std::list<IdValue>
 {
     OBJECT_ALLOCATOR(engraving, SynthesizerGroup)
 
-    String _name;
-
 public:
-    const String& name() const { return _name; }
-    void setName(const String& s) { _name = s; }
+    const muse::String& name() const { return m_name; }
+    void setName(const muse::String& s) { m_name = s; }
 
     SynthesizerGroup()
         : std::list<IdValue>() {}
     SynthesizerGroup(const char* n, std::list<IdValue> l)
-        : std::list<IdValue>(l), _name(String::fromUtf8(n)) {}
+        : std::list<IdValue>(l), m_name(muse::String::fromUtf8(n)) {}
+
+private:
+    muse::String m_name;
 };
 
 //---------------------------------------------------------
@@ -74,8 +75,6 @@ public:
 class SynthesizerState : public std::list<SynthesizerGroup>
 {
     OBJECT_ALLOCATOR(engraving, SynthesizerState)
-
-    bool _isDefault        { true };
 
 public:
     SynthesizerState(std::initializer_list<SynthesizerGroup> l)
@@ -88,12 +87,16 @@ public:
 
     void write(XmlWriter&, bool force = false) const;
     void read(XmlReader&);
-    SynthesizerGroup group(const String& name) const;
+    SynthesizerGroup group(const muse::String& name) const;
     bool isDefaultSynthSoundfont();
     int ccToUse() const;
     int method() const;
-    bool isDefault() const { return _isDefault; }
-    void setIsDefault(bool val) { _isDefault = val; }
+    bool isDefault() const { return m_isDefault; }
+    void setIsDefault(bool val) { m_isDefault = val; }
+
+private:
+
+    bool m_isDefault = true;
 };
 } // namespace mu::engraving
 #endif

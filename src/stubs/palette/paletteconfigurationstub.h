@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,28 +33,31 @@ public:
     double paletteScaling() const override;
     void setPaletteScaling(double scale) override;
 
-    ValCh<bool> isSinglePalette() const override;
+    muse::ValCh<bool> isSinglePalette() const override;
     void setIsSinglePalette(bool isSingle) override;
 
-    ValCh<bool> isSingleClickToOpenPalette() const override;
+    muse::ValCh<bool> isSingleClickToOpenPalette() const override;
     void setIsSingleClickToOpenPalette(bool isSingleClick) override;
+
+    muse::ValCh<bool> isPaletteDragEnabled() const override;
+    void setIsPaletteDragEnabled(bool isSingleClick) override;
 
     QColor elementsBackgroundColor() const override;
     QColor elementsColor() const override;
     QColor gridColor() const override;
     QColor accentColor() const override;
-    async::Notification colorsChanged() const override;
+    muse::async::Notification colorsChanged() const override;
 
-    io::path_t keySignaturesDirPath() const override;
-    io::path_t timeSignaturesDirPath() const override;
+    muse::io::path_t keySignaturesDirPath() const override;
+    muse::io::path_t timeSignaturesDirPath() const override;
 
     bool useFactorySettings() const override;
     bool enableExperimental() const override;
 
-    ValCh<PaletteConfig> paletteConfig(const QString& paletteId) const override;
+    muse::ValCh<PaletteConfig> paletteConfig(const QString& paletteId) const override;
     void setPaletteConfig(const QString& paletteId, const PaletteConfig& config) override;
 
-    ValCh<PaletteCellConfig> paletteCellConfig(const QString& cellId) const override;
+    muse::ValCh<PaletteCellConfig> paletteCellConfig(const QString& cellId) const override;
     void setPaletteCellConfig(const QString& cellId, const PaletteCellConfig& config) override;
 };
 }

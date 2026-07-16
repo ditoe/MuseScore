@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __FIGUREDBASS_H__
-#define __FIGUREDBASS_H__
+#ifndef MU_ENGRAVING_FIGUREDBASS_H
+#define MU_ENGRAVING_FIGUREDBASS_H
 
 #include "textbase.h"
 
@@ -91,6 +91,7 @@ class FiguredBass;
 class FiguredBassItem final : public EngravingItem
 {
     OBJECT_ALLOCATOR(engraving, FiguredBassItem)
+    DECLARE_CLASSOF(ElementType::FIGURED_BASS_ITEM)
 
 public:
     enum class Modifier : char {
@@ -225,8 +226,8 @@ private:
 struct FiguredBassFont {
     String family;
     String displayName;
-    double defPitch;
-    double defLineHeight;
+    double defPitch = 0.0;
+    double defLineHeight = 0.0;
     Char displayAccidental[int(FiguredBassItem::Modifier::NUMOF)];
     Char displayParenthesis[int(FiguredBassItem::Parenthesis::NUMOF)];
     Char displayDigit[int(FiguredBassItem::Style::NUMOF)][10][int(FiguredBassItem::Combination::NUMOF)];
@@ -251,9 +252,9 @@ public:
 
     static constexpr double FB_CONTLINE_HEIGHT            = 0.875;         // the % of font EM to raise the cont. line at
                                                                            // (0 = top of font; 1 = bottom of font)
-    static constexpr double FB_CONTLINE_LEFT_PADDING      = 0.1875;        // (3/16sp) the blank space at the left of a cont. line (in sp)
-    static constexpr double FB_CONTLINE_OVERLAP           = 0.125;         // (1/8sp)  the overlap of an extended cont. line (in sp)
-    static constexpr double FB_CONTLINE_THICKNESS         = 0.09375;       // (3/32sp) the thickness of a cont. line (in sp)
+    static constexpr Spatium FB_CONTLINE_LEFT_PADDING      = 0.1875_sp;        // (3/16sp) the blank space at the left of a cont. line (in sp)
+    static constexpr Spatium FB_CONTLINE_OVERLAP           = 0.125_sp;         // (1/8sp)  the overlap of an extended cont. line (in sp)
+    static constexpr Spatium FB_CONTLINE_THICKNESS         = 0.09375_sp;       // (3/32sp) the thickness of a cont. line (in sp)
 
     ~FiguredBass();
 
@@ -262,7 +263,7 @@ public:
 
     // static functions for font config files
     static bool readConfigFile(const String& fileName);
-    static std::list<String> fontNames();
+    static std::vector<String> fontNames();
     static bool fontData(int nIdx, String* pFamily, String* pDisplayName, double* pSize, double* pLineHeight);
 
     // standard re-implemented virtual functions
@@ -272,9 +273,10 @@ public:
 
     void setSelected(bool f) override;
     void setVisible(bool f) override;
-    void startEdit(EditData&) override;
+    void startEdit(EditData& ed) override;
     bool isEditAllowed(EditData&) const override;
     void endEdit(EditData&) override;
+    void regenerateText();
 
     bool onNote() const { return m_onNote; }
     void setOnNote(bool val) { m_onNote = val; }
@@ -289,14 +291,18 @@ public:
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
 
+    bool positionRelativeToNoteheadRest() const override { return true; }
+
     size_t itemsCount() const { return m_items.size(); }
     void appendItem(FiguredBassItem* item) { m_items.push_back(item); }
     const std::vector<FiguredBassItem*>& items() const { return m_items; }
+    void clearItems();
+    void addItemToLinked(FiguredBassItem* item);
 
     // the array of configured fonts
     static const std::vector<FiguredBassFont>& FBFonts();
 
-    bool hasParentheses() const;       // read / write MusicXML support
+    bool parenthesesMode() const;       // read / write MusicXML support
 
     struct LayoutData : public TextBase::LayoutData {
         std::vector<double> lineLengths;               // lengths of duration indicator lines (in raster units)
@@ -310,7 +316,7 @@ public:
             return 0.0;
         }
     };
-    DECLARE_LAYOUTDATA_METHODS(FiguredBass);
+    DECLARE_LAYOUTDATA_METHODS(FiguredBass)
 
 private:
 
@@ -329,9 +335,9 @@ private:
 } // namespace mu::engraving
 
 #ifndef NO_QT_SUPPORT
-Q_DECLARE_METATYPE(mu::engraving::FiguredBassItem::Modifier);
-Q_DECLARE_METATYPE(mu::engraving::FiguredBassItem::Parenthesis);
-Q_DECLARE_METATYPE(mu::engraving::FiguredBassItem::ContLine);
+Q_DECLARE_METATYPE(mu::engraving::FiguredBassItem::Modifier)
+Q_DECLARE_METATYPE(mu::engraving::FiguredBassItem::Parenthesis)
+Q_DECLARE_METATYPE(mu::engraving::FiguredBassItem::ContLine)
 #endif
 
 #endif

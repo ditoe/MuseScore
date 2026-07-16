@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,18 +23,26 @@
 #define MU_IMPORTEXPORT_MEICONFIGURATION_H
 
 #include "../imeiconfiguration.h"
+#include "async/asyncable.h"
 
 namespace mu::iex::mei {
-class MeiConfiguration : public IMeiConfiguration
+class MeiConfiguration : public IMeiConfiguration, public muse::async::Asyncable
 {
 public:
     void init();
 
     bool meiImportLayout() const override;
     void setMeiImportLayout(bool value) override;
+    muse::async::Channel<bool> meiImportLayoutChanged() const override;
 
     bool meiExportLayout() const override;
     void setMeiExportLayout(bool value) override;
+
+    bool meiUseMuseScoreIds() const override;
+    void setMeiUseMuseScoreIds(bool value) override;
+
+private:
+    muse::async::Channel<bool> m_meiImportLayoutChanged;
 };
 }
 

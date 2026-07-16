@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,6 @@
 #include "engraving/dom/masterscore.h"
 #include "../internal/braille.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String BRAILLE_DIR(u"data/");
@@ -40,17 +39,6 @@ class Braille_Tests : public ::testing::Test
 public:
     void brailleSaveTest(const char* file);
 };
-
-//---------------------------------------------------------
-//   fixupScore -- do required fixups after reading/importing score
-//---------------------------------------------------------
-
-static void fixupScore(MasterScore* score)
-{
-    score->connectTies();
-    score->masterScore()->rebuildMidiMapping();
-    score->setSaved(false);
-}
 
 static bool saveBraille(MasterScore* score, const String& saveName)
 {
@@ -75,7 +63,6 @@ void Braille_Tests::brailleSaveTest(const char* file)
     String fileName = String::fromUtf8(file);
     MasterScore* score = ScoreRW::readScore(BRAILLE_DIR + fileName + u".mscx", false);
     EXPECT_TRUE(score);
-    fixupScore(score);
     score->doLayout();
     EXPECT_TRUE(saveCompareBrailleScore(score, fileName + ".brf", BRAILLE_DIR + fileName + "_ref.brf"));
     delete score;
@@ -124,6 +111,12 @@ TEST_F(Braille_Tests, keySigs) {
 }
 TEST_F(Braille_Tests, timeSignature) {
     brailleSaveTest("testTimeSig_Example_7.1_MBC2015");
+}
+TEST_F(Braille_Tests, triplets) {
+    brailleSaveTest("testTriplets_Example_8.4_MBC2015");
+}
+TEST_F(Braille_Tests, tuplets) {
+    brailleSaveTest("testTuplets_Example_8.5_MBC2015");
 }
 TEST_F(Braille_Tests, chords1) {
     brailleSaveTest("testChords_Example_9.1.MBC2015");

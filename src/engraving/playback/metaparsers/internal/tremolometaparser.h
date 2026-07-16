@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,12 +26,20 @@
 #include "playback/metaparsers/metaparserbase.h"
 
 namespace mu::engraving {
-class TremoloMetaParser : public MetaParserBase<TremoloMetaParser>
+class TremoloSingleMetaParser : public MetaParserBase<TremoloSingleMetaParser>
 {
 protected:
     friend MetaParserBase;
 
-    static void doParse(const EngravingItem* item, const RenderingContext& ctx, mpe::ArticulationMap& result);
+    static void doParse(const EngravingItem* item, const RenderingContext& ctx, muse::mpe::ArticulationMap& result);
+};
+
+class TremoloTwoMetaParser : public MetaParserBase<TremoloTwoMetaParser>
+{
+protected:
+    friend MetaParserBase;
+
+    static void doParse(const EngravingItem* item, const RenderingContext& ctx, muse::mpe::ArticulationMap& result);
 };
 }
 

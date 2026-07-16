@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -12,20 +13,22 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Track 1</trackName>
       <Instrument id="electric-bass">
-        <longName>Track 1</longName>
+        <InstrumentLabel>
+          <longName>Track 1</longName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>pluck.bass.electric</instrumentId>
         <singleNoteDynamics>0</singleNoteDynamics>
@@ -36,34 +39,6 @@
           <string>38</string>
           <string>43</string>
           </StringData>
-        <Articulation name="staccatissimo">
-          <velocity>100</velocity>
-          <gateTime>30</gateTime>
-          </Articulation>
-        <Articulation name="staccato">
-          <velocity>100</velocity>
-          <gateTime>50</gateTime>
-          </Articulation>
-        <Articulation name="portato">
-          <velocity>100</velocity>
-          <gateTime>67</gateTime>
-          </Articulation>
-        <Articulation name="tenuto">
-          <velocity>100</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
-        <Articulation name="accent">
-          <velocity>120</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
-        <Articulation name="marcato">
-          <velocity>144</velocity>
-          <gateTime>67</gateTime>
-          </Articulation>
-        <Articulation name="sforzato">
-          <velocity>169</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
         <Channel>
           <program value="33"/>
           <controller ctrl="7" value="127"/>
@@ -75,23 +50,29 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>E_E</eid>
         <voice>
           <Clef>
             <concertClefType>F8vb</concertClefType>
             <transposingClefType>F8vb</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>F_F</eid>
             </Clef>
           <TimeSig>
+            <eid>G_G</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Dynamic>
             <subtype>f</subtype>
             <velocity>96</velocity>
+            <eid>H_H</eid>
             </Dynamic>
           <Chord>
+            <eid>I_I</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>J_J</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <fret>0</fret>
@@ -99,12 +80,15 @@
               </Note>
             </Chord>
           <Beam>
+            <eid>K_K</eid>
             <l1>52</l1>
             <l2>52</l2>
             </Beam>
           <Chord>
+            <eid>L_L</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>M_M</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <head>cross</head>
@@ -114,8 +98,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>N_N</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>O_O</eid>
               <pitch>45</pitch>
               <tpc>17</tpc>
               <fret>2</fret>
@@ -123,8 +109,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>P_P</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <head>cross</head>
@@ -134,12 +122,15 @@
               </Note>
             </Chord>
           <Beam>
+            <eid>R_R</eid>
             <l1>52</l1>
             <l2>52</l2>
             </Beam>
           <Chord>
+            <eid>S_S</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>T_T</eid>
               <pitch>43</pitch>
               <tpc>15</tpc>
               <fret>0</fret>
@@ -147,8 +138,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>U_U</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>V_V</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <fret>0</fret>
@@ -156,8 +149,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>W_W</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>X_X</eid>
               <pitch>41</pitch>
               <tpc>13</tpc>
               <head>cross</head>
@@ -167,8 +162,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>Y_Y</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>Z_Z</eid>
               <pitch>40</pitch>
               <tpc>18</tpc>
               <fret>2</fret>
@@ -176,8 +173,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>a_a</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>b_b</eid>
               <pitch>38</pitch>
               <tpc>16</tpc>
               <fret>0</fret>
@@ -185,6 +184,7 @@
               </Note>
             </Chord>
           <Rest>
+            <eid>c_c</eid>
             <durationType>16th</durationType>
             </Rest>
           </voice>

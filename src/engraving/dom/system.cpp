@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,27 +29,28 @@
 
 #include "style/style.h"
 
+#include "../editing/navigation.h"
+
 #include "beam.h"
 #include "box.h"
 #include "bracket.h"
 #include "bracketItem.h"
-#include "chord.h"
 #include "chordrest.h"
 #include "factory.h"
-#include "instrumentname.h"
 #include "measure.h"
 #include "mscore.h"
 #include "page.h"
+#include "pagelockindicator.h"
 #include "part.h"
 #include "score.h"
 #include "segment.h"
-#include "sig.h"
 #include "spacer.h"
 #include "spanner.h"
 #include "staff.h"
+#include "staffvisibilityindicator.h"
 #include "system.h"
 #include "systemdivider.h"
-#include "tremolo.h"
+#include "systemlockindicator.h"
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
 #include "accessibility/accessibleitem.h"
@@ -59,7 +60,6 @@
 
 using namespace mu;
 using namespace mu::engraving;
-using namespace mu::engraving::rendering::dev;
 
 namespace mu::engraving {
 //---------------------------------------------------------
@@ -68,7 +68,11 @@ namespace mu::engraving {
 
 SysStaff::~SysStaff()
 {
-    DeleteAll(instrumentNames);
+    for (auto& pair : m_instrumentNames) {
+        if (InstrumentName* n = pair.second) {
+            delete n;
+        }
+    }
 }
 
 //---------------------------------------------------------
@@ -100,6 +104,34 @@ void SysStaff::restoreLayout()
     bbox().setHeight(m_height);
 }
 
+InstrumentName* SysStaff::name(InstrumentNameRole role) const
+{
+    if (muse::contains(m_instrumentNames, role)) {
+        return m_instrumentNames.at(role);
+    }
+
+    return nullptr;
+}
+
+void SysStaff::addInstrumentName(InstrumentName* n)
+{
+    InstrumentNameRole role = n->instrumentNameRole();
+    if (InstrumentName* curName = name(role)) {
+        delete curName;
+    }
+
+    m_instrumentNames[role] = n;
+}
+
+void SysStaff::removeInstrumentName(InstrumentNameRole role)
+{
+    if (InstrumentName* n = name(role)) {
+        delete n;
+    }
+
+    m_instrumentNames[role] = nullptr;
+}
+
 //---------------------------------------------------------
 //   System
 //---------------------------------------------------------
@@ -125,10 +157,15 @@ System::~System()
             mb->resetExplicitParent();
         }
     }
-    DeleteAll(m_staves);
-    DeleteAll(m_brackets);
-    delete m_systemDividerLeft;
-    delete m_systemDividerRight;
+    muse::DeleteAll(m_staves);
+    muse::DeleteAll(m_brackets);
+    muse::DeleteAll(m_lockIndicators);
+    if (m_staffVisibilityIndicator) {
+        delete m_staffVisibilityIndicator;
+    }
+    if (m_pageLockIndicator) {
+        delete m_pageLockIndicator;
+    }
 }
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
@@ -212,12 +249,10 @@ void System::removeLastMeasure()
 
 Box* System::vbox() const
 {
-    if (!m_ml.empty()) {
-        if (m_ml[0]->isVBox() || m_ml[0]->isTBox()) {
-            return toBox(m_ml[0]);
-        }
+    if (!m_ml.empty() && m_ml.front()->isVBoxBase()) {
+        return toBox(m_ml.front());
     }
-    return 0;
+    return nullptr;
 }
 
 //---------------------------------------------------------
@@ -270,32 +305,48 @@ size_t System::getBracketsColumnsCount()
     return columns;
 }
 
-void System::setBracketsXPosition(const double xPosition)
+void System::setHasStaffVisibilityIndicator(bool has)
 {
-    for (Bracket* b1 : m_brackets) {
-        BracketType bracketType = b1->bracketType();
-        // For brackets that are drawn, we must correct for half line width
-        double lineWidthCorrection = 0.0;
-        if (bracketType == BracketType::NORMAL || bracketType == BracketType::LINE) {
-            lineWidthCorrection = style().styleMM(Sid::bracketWidth) / 2;
-        }
-        // Compute offset cause by other stacked brackets
-        double xOffset = 0;
-        for (const Bracket* b2 : m_brackets) {
-            if (!b2->bracketItem()->visible()) {
-                continue;
-            }
-            bool b1FirstStaffInB2 = (b1->firstStaff() >= b2->firstStaff() && b1->firstStaff() <= b2->lastStaff());
-            bool b1LastStaffInB2 = (b1->lastStaff() >= b2->firstStaff() && b1->lastStaff() <= b2->lastStaff());
-            if (b1->column() > b2->column()
-                && (b1FirstStaffInB2 || b1LastStaffInB2)) {
-                xOffset += b2->layoutData()->bracketWidth();
-            }
-        }
-        // Set position
-        double x = xPosition - xOffset - b1->layoutData()->bracketWidth() + lineWidthCorrection;
-        b1->mutLayoutData()->setPosX(x);
+    if (has && !m_staffVisibilityIndicator) {
+        m_staffVisibilityIndicator = Factory::createStaffVisibilityIndicator(this);
+        m_staffVisibilityIndicator->setParent(this);
+    } else if (!has && m_staffVisibilityIndicator) {
+        delete m_staffVisibilityIndicator;
+        m_staffVisibilityIndicator = nullptr;
     }
+}
+
+bool System::isLocked() const
+{
+    return m_ml.front()->isStartOfSystemLock();
+}
+
+const RangeLock* System::systemLock() const
+{
+    return m_ml.front()->systemLock();
+}
+
+void System::addLockIndicator(SystemLockIndicator* sli)
+{
+    assert(sli);
+    m_lockIndicators.push_back(sli);
+}
+
+void System::deleteLockIndicators()
+{
+    muse::DeleteAll(m_lockIndicators);
+    m_lockIndicators.clear();
+}
+
+void System::setPageLockIndicator(PageLockIndicator* pli)
+{
+    m_pageLockIndicator = pli;
+}
+
+void System::deletePageLockIndicator()
+{
+    delete m_pageLockIndicator;
+    m_pageLockIndicator = nullptr;
 }
 
 //---------------------------------------------------------
@@ -313,12 +364,55 @@ staff_idx_t System::firstVisibleStaffFrom(staff_idx_t startStaffIdx) const
         }
     }
 
-    return mu::nidx;
+    return muse::nidx;
 }
 
 staff_idx_t System::nextVisibleStaff(staff_idx_t staffIdx) const
 {
     return firstVisibleStaffFrom(staffIdx + 1);
+}
+
+staff_idx_t System::prevVisibleStaff(staff_idx_t startStaffIdx) const
+{
+    if (startStaffIdx == 0) {
+        return muse::nidx;
+    }
+
+    for (staff_idx_t i = startStaffIdx - 1;; --i) {
+        Staff* s  = score()->staff(i);
+        SysStaff* ss = m_staves[i];
+
+        if (s->show() && ss->show()) {
+            return i;
+        }
+
+        if (i == 0) {
+            break;
+        }
+    }
+
+    return muse::nidx;
+}
+
+staff_idx_t System::lastVisibleStaff() const
+{
+    size_t nstaves = score()->nstaves();
+    if (nstaves < 1) {
+        return muse::nidx;
+    }
+
+    for (staff_idx_t i = nstaves - 1; ; --i) {
+        Staff* staff = score()->staff(i);
+        SysStaff* sysStaff = m_staves[i];
+        if (staff->show() && sysStaff->show()) {
+            return i;
+        }
+        if (i == 0) {
+            break;
+        }
+    }
+
+    return muse::nidx;
 }
 
 //---------------------------------------------------------
@@ -328,34 +422,6 @@ staff_idx_t System::nextVisibleStaff(staff_idx_t staffIdx) const
 staff_idx_t System::firstVisibleStaff() const
 {
     return firstVisibleStaffFrom(0);
-}
-
-//---------------------------------------------------------
-//   y2staff
-//---------------------------------------------------------
-
-/**
- Return staff number for canvas relative y position \a y
- or -1 if not found.
-
- To allow drag and drop above and below the staff, the actual y range
- considered "inside" the staff is increased by "margin".
-*/
-
-int System::y2staff(double y) const
-{
-    y -= pos().y();
-    int idx = 0;
-    double margin = spatium() * 2;
-    for (SysStaff* s : m_staves) {
-        double y1 = s->bbox().top() - margin;
-        double y2 = s->bbox().bottom() + margin;
-        if (y >= y1 && y < y2) {
-            return idx;
-        }
-        ++idx;
-    }
-    return -1;
 }
 
 //---------------------------------------------------------
@@ -425,11 +491,13 @@ void System::add(EngravingItem* el)
 
     switch (el->type()) {
     case ElementType::INSTRUMENT_NAME:
-// LOGD("  staffIdx %d, staves %d", el->staffIdx(), _staves.size());
-        m_staves[el->staffIdx()]->instrumentNames.push_back(toInstrumentName(el));
-        toInstrumentName(el)->setSysStaff(m_staves[el->staffIdx()]);
+    {
+        InstrumentName* n = toInstrumentName(el);
+        SysStaff* sysStaff = m_staves[n->staffIdx()];
+        sysStaff->addInstrumentName(n);
+        n->setSysStaff(sysStaff);
         break;
-
+    }
     case ElementType::BEAM:
         score()->addElement(el);
         break;
@@ -455,9 +523,13 @@ void System::add(EngravingItem* el)
     case ElementType::VOLTA_SEGMENT:
     case ElementType::SLUR_SEGMENT:
     case ElementType::TIE_SEGMENT:
+    case ElementType::LAISSEZ_VIB_SEGMENT:
+    case ElementType::PARTIAL_TIE_SEGMENT:
     case ElementType::PEDAL_SEGMENT:
     case ElementType::LYRICSLINE_SEGMENT:
+    case ElementType::PARTIAL_LYRICSLINE_SEGMENT:
     case ElementType::GLISSANDO_SEGMENT:
+    case ElementType::NOTELINE_SEGMENT:
     case ElementType::LET_RING_SEGMENT:
     case ElementType::GRADUAL_TEMPO_CHANGE_SEGMENT:
     case ElementType::PALM_MUTE_SEGMENT:
@@ -465,10 +537,14 @@ void System::add(EngravingItem* el)
     case ElementType::RASGUEADO_SEGMENT:
     case ElementType::HARMONIC_MARK_SEGMENT:
     case ElementType::PICK_SCRAPE_SEGMENT:
+    case ElementType::GUITAR_BEND_SEGMENT:
+    case ElementType::GUITAR_BEND_HOLD_SEGMENT:
+    case ElementType::HAMMER_ON_PULL_OFF_SEGMENT:
+    case ElementType::TAPPING_HALF_SLUR_SEGMENT:
     {
         SpannerSegment* ss = toSpannerSegment(el);
 #ifndef NDEBUG
-        if (mu::contains(m_spannerSegments, ss)) {
+        if (muse::contains(m_spannerSegments, ss)) {
             LOGD("System::add() %s %p already there", ss->typeName(), ss);
         } else
 #endif
@@ -479,7 +555,7 @@ void System::add(EngravingItem* el)
     case ElementType::SYSTEM_DIVIDER:
     {
         SystemDivider* sd = toSystemDivider(el);
-        if (sd->dividerType() == SystemDivider::Type::LEFT) {
+        if (sd->dividerType() == SystemDividerType::LEFT) {
             m_systemDividerLeft = sd;
         } else {
             m_systemDividerRight = sd;
@@ -503,16 +579,20 @@ void System::remove(EngravingItem* el)
 {
     switch (el->type()) {
     case ElementType::INSTRUMENT_NAME:
-        mu::remove(m_staves[el->staffIdx()]->instrumentNames, toInstrumentName(el));
-        toInstrumentName(el)->setSysStaff(0);
-        break;
+    {
+        // NOTE: el gets deleted here
+        InstrumentName* n = toInstrumentName(el);
+        SysStaff* sysStaff = m_staves[n->staffIdx()];
+        sysStaff->removeInstrumentName(n->instrumentNameRole());
+        return;
+    }
     case ElementType::BEAM:
         score()->removeElement(el);
         break;
     case ElementType::BRACKET:
     {
         Bracket* b = toBracket(el);
-        if (!mu::remove(m_brackets, b)) {
+        if (!muse::remove(m_brackets, b)) {
             LOGD("System::remove: bracket not found");
         }
     }
@@ -532,11 +612,17 @@ void System::remove(EngravingItem* el)
     case ElementType::VOLTA_SEGMENT:
     case ElementType::SLUR_SEGMENT:
     case ElementType::TIE_SEGMENT:
+    case ElementType::LAISSEZ_VIB_SEGMENT:
+    case ElementType::PARTIAL_TIE_SEGMENT:
     case ElementType::PEDAL_SEGMENT:
     case ElementType::LYRICSLINE_SEGMENT:
+    case ElementType::PARTIAL_LYRICSLINE_SEGMENT:
     case ElementType::GRADUAL_TEMPO_CHANGE_SEGMENT:
     case ElementType::GLISSANDO_SEGMENT:
-        if (!mu::remove(m_spannerSegments, toSpannerSegment(el))) {
+    case ElementType::NOTELINE_SEGMENT:
+    case ElementType::GUITAR_BEND_SEGMENT:
+    case ElementType::GUITAR_BEND_HOLD_SEGMENT:
+        if (!muse::remove(m_spannerSegments, toSpannerSegment(el))) {
             LOGD("System::remove: %p(%s) not found, score %p", el, el->typeName(), score());
             assert(score() == el->score());
         }
@@ -636,32 +722,54 @@ MeasureBase* System::nextMeasure(const MeasureBase* m) const
 //   scanElements
 //---------------------------------------------------------
 
-void System::scanElements(void* data, void (* func)(void*, EngravingItem*), bool all)
+void System::scanElements(std::function<void(EngravingItem*)> func)
 {
     if (vbox()) {
         return;
     }
     for (Bracket* b : m_brackets) {
-        func(data, b);
+        b->scanElements(func);
     }
 
     if (m_systemDividerLeft) {
-        func(data, m_systemDividerLeft);
+        func(m_systemDividerLeft);
     }
     if (m_systemDividerRight) {
-        func(data, m_systemDividerRight);
+        func(m_systemDividerRight);
+    }
+
+    if (m_staffVisibilityIndicator) {
+        func(m_staffVisibilityIndicator);
+    }
+
+    if (m_pageLockIndicator) {
+        func(m_pageLockIndicator);
+    }
+
+    for (auto i : m_lockIndicators) {
+        func(i);
     }
 
     for (const SysStaff* st : m_staves) {
-        if (all || st->show()) {
-            for (InstrumentName* t : st->instrumentNames) {
-                func(data, t);
+        if (st->show()) {
+            for (auto& pair : st->instrumentNames()) {
+                if (InstrumentName* n = pair.second) {
+                    func(n);
+                }
+            }
+        } else {
+            if (InstrumentName* n = st->name(InstrumentNameRole::GROUP); n && n->effectiveStaffIdx() != muse::nidx) {
+                func(n);
+            }
+            if (InstrumentName* n = st->name(InstrumentNameRole::PART); n && n->effectiveStaffIdx() != muse::nidx) {
+                func(n);
             }
         }
     }
+
     for (SpannerSegment* ss : m_spannerSegments) {
         staff_idx_t staffIdx = ss->spanner()->staffIdx();
-        if (staffIdx == mu::nidx) {
+        if (staffIdx == muse::nidx) {
             LOGD("System::scanElements: staffIDx == -1: %s %p", ss->spanner()->typeName(), ss->spanner());
             staffIdx = 0;
         }
@@ -684,8 +792,9 @@ void System::scanElements(void* data, void (* func)(void*, EngravingItem*), bool
             }
             v = v1 || v2;       // hide spanner if both chords are hidden
         }
-        if (all || (score()->staff(staffIdx)->show() && m_staves[staffIdx]->show() && v) || spanner->isVolta() || spanner->systemFlag()) {
-            ss->scanElements(data, func, all);
+        if ((score()->staff(staffIdx)->show() && m_staves[staffIdx]->show() && v) || spanner->isVolta()
+            || spanner->systemFlag()) {
+            ss->scanElements(func);
         }
     }
 }
@@ -736,7 +845,7 @@ EngravingItem* System::nextSegmentElement()
             return firstSeg->element(0);
         }
     }
-    return score()->lastElement();
+    return Navigation::lastElement(score());
 }
 
 //---------------------------------------------------------
@@ -752,13 +861,13 @@ EngravingItem* System::prevSegmentElement()
         while (!re) {
             seg = seg->prev1MM();
             if (!seg) {
-                return score()->firstElement();
+                return Navigation::firstElement(score());
             }
 
             if (seg->segmentType() == SegmentType::EndBarLine) {
                 score()->inputState().setTrack((score()->staves().size() - 1) * VOICES);       //correction
             }
-            re = seg->lastElement(score()->staves().size() - 1);
+            re = seg->lastElementForNavigation(score()->staves().size() - 1);
         }
     }
     return re;
@@ -777,7 +886,7 @@ double System::topDistance(staff_idx_t staffIdx, const SkylineLine& s) const
     // this means we cannot expect the minDistance calculation to produce meaningful results
     // so just give up on autoplace for spanners in continuous view
     // (or any other calculations that rely on this value)
-    if (score()->lineMode() && !engravingConfiguration()->minDistanceForPartialSkylineCalculated()) {
+    if (score()->lineMode() && !configuration()->minDistanceForPartialSkylineCalculated()) {
         return 0.0;
     }
     return s.minDistance(staff(staffIdx)->skyline().north());
@@ -792,7 +901,7 @@ double System::bottomDistance(staff_idx_t staffIdx, const SkylineLine& s) const
     assert(!vbox());
     assert(s.isNorth());
     // see note on topDistance() above
-    if (score()->lineMode() && !engravingConfiguration()->minDistanceForPartialSkylineCalculated()) {
+    if (score()->lineMode() && !configuration()->minDistanceForPartialSkylineCalculated()) {
         return 0.0;
     }
     return staff(staffIdx)->skyline().south().minDistance(s);
@@ -810,7 +919,7 @@ staff_idx_t System::firstVisibleSysStaff() const
             return i;
         }
     }
-    return mu::nidx;
+    return muse::nidx;
 }
 
 //---------------------------------------------------------
@@ -825,7 +934,7 @@ staff_idx_t System::lastVisibleSysStaff() const
             return static_cast<staff_idx_t>(i);
         }
     }
-    return mu::nidx;
+    return muse::nidx;
 }
 
 //---------------------------------------------------------
@@ -836,7 +945,7 @@ staff_idx_t System::lastVisibleSysStaff() const
 double System::minTop() const
 {
     staff_idx_t si = firstVisibleSysStaff();
-    SysStaff* s = si == mu::nidx ? nullptr : staff(si);
+    SysStaff* s = si == muse::nidx ? nullptr : staff(si);
     if (s) {
         return -s->skyline().north().max();
     }
@@ -850,11 +959,11 @@ double System::minTop() const
 
 double System::minBottom() const
 {
-    if (vbox()) {
-        return vbox()->bottomGap();
+    if (const Box* vb = vbox()) {
+        return vb->absoluteFromSpatium(vb->bottomGap());
     }
     staff_idx_t si = lastVisibleSysStaff();
-    SysStaff* s = si == mu::nidx ? nullptr : staff(si);
+    SysStaff* s = si == muse::nidx ? nullptr : staff(si);
     if (s) {
         return s->skyline().south().max() - s->bbox().height();
     }
@@ -869,7 +978,7 @@ double System::minBottom() const
 double System::spacerDistance(bool up) const
 {
     staff_idx_t staff = up ? firstVisibleSysStaff() : lastVisibleSysStaff();
-    if (staff == mu::nidx) {
+    if (staff == muse::nidx) {
         return 0.0;
     }
     double dist = 0.0;
@@ -879,10 +988,10 @@ double System::spacerDistance(bool up) const
             Spacer* sp = up ? m->vspacerUp(staff) : m->vspacerDown(staff);
             if (sp) {
                 if (sp->spacerType() == SpacerType::FIXED) {
-                    dist = sp->gap();
+                    dist = sp->absoluteGap();
                     break;
                 } else {
-                    dist = std::max(dist, sp->gap().val());
+                    dist = std::max(dist, sp->absoluteGap());
                 }
             }
         }
@@ -898,7 +1007,7 @@ double System::spacerDistance(bool up) const
 
 Spacer* System::upSpacer(staff_idx_t staffIdx, Spacer* prevDownSpacer) const
 {
-    if (staffIdx == mu::nidx) {
+    if (staffIdx == muse::nidx) {
         return nullptr;
     }
 
@@ -929,7 +1038,7 @@ Spacer* System::upSpacer(staff_idx_t staffIdx, Spacer* prevDownSpacer) const
 
 Spacer* System::downSpacer(staff_idx_t staffIdx) const
 {
-    if (staffIdx == mu::nidx) {
+    if (staffIdx == muse::nidx) {
         return nullptr;
     }
 
@@ -959,46 +1068,17 @@ Spacer* System::downSpacer(staff_idx_t staffIdx) const
 //    or the position just after the last non-chordrest segment
 //---------------------------------------------------------
 
-double System::firstNoteRestSegmentX(bool leading)
+double System::firstNoteRestSegmentX(bool leading) const
 {
-    double margin = style().styleMM(Sid::HeaderToLineStartDistance);
+    double margin = style().styleAbsolute(Sid::headerToLineStartDistance);
     for (const MeasureBase* mb : measures()) {
         if (mb->isMeasure()) {
-            const Measure* measure = static_cast<const Measure*>(mb);
-            for (const Segment* seg = measure->first(); seg; seg = seg->next()) {
-                if (seg->isChordRestType()) {
-                    double noteRestPos = seg->measure()->pos().x() + seg->pos().x();
-                    if (!leading) {
-                        return noteRestPos;
-                    }
-
-                    // first CR found; back up to previous segment
-                    seg = seg->prevActive();
-                    while (seg && seg->allElementsInvisible()) {
-                        seg = seg->prevActive();
-                    }
-                    if (seg) {
-                        // find maximum width
-                        double width = 0.0;
-                        size_t n = score()->nstaves();
-                        for (staff_idx_t i = 0; i < n; ++i) {
-                            if (!staff(i)->show()) {
-                                continue;
-                            }
-                            EngravingItem* e = seg->element(i * VOICES);
-                            if (e && e->addToSkyline()) {
-                                width = std::max(width, e->pos().x() + e->layoutData()->bbox().right());
-                            }
-                        }
-                        return std::min(seg->measure()->pos().x() + seg->pos().x() + width + margin, noteRestPos);
-                    } else {
-                        return margin;
-                    }
-                }
-            }
+            const Measure* measure = toMeasure(mb);
+            margin = measure->firstNoteRestSegmentX(leading);
+            break;
         }
     }
-    LOGD("firstNoteRestSegmentX: did not find segment");
+
     return margin;
 }
 
@@ -1010,23 +1090,15 @@ double System::firstNoteRestSegmentX(bool leading)
 
 double System::endingXForOpenEndedLines() const
 {
-    double margin = style().spatium() / 4;  // TODO: this can be parameterizable
-    double systemEndX = layoutData()->bbox().width();
+    double margin = style().styleAbsolute(Sid::lineEndToBarlineDistance);
+    double systemEndX = ldata()->bbox().width();
 
     Measure* lastMeas = lastMeasure();
     if (!lastMeas) {
         return systemEndX - margin;
     }
 
-    Segment* lastSeg = lastMeas->last();
-    while (lastSeg && !lastSeg->isType(SegmentType::BarLineType)) {
-        lastSeg = lastSeg->prevEnabled();
-    }
-    if (!lastSeg) {
-        return systemEndX - margin;
-    }
-
-    return lastSeg->x() + lastMeas->x() - margin;
+    return lastMeas->endingXForOpenEndedLines();
 }
 
 //---------------------------------------------------------
@@ -1034,19 +1106,12 @@ double System::endingXForOpenEndedLines() const
 //    returns the last chordrest of a system for a particular track
 //---------------------------------------------------------
 
-ChordRest* System::lastChordRest(track_idx_t track)
+ChordRest* System::lastChordRest(track_idx_t track) const
 {
     for (auto measureBaseIter = measures().rbegin(); measureBaseIter != measures().rend(); measureBaseIter++) {
         if ((*measureBaseIter)->isMeasure()) {
-            const Measure* measure = static_cast<const Measure*>(*measureBaseIter);
-            for (const Segment* seg = measure->last(); seg; seg = seg->prev()) {
-                if (seg->isChordRestType()) {
-                    ChordRest* cr = seg->cr(track);
-                    if (cr) {
-                        return cr;
-                    }
-                }
-            }
+            const Measure* measure = toMeasure(*measureBaseIter);
+            return measure->lastChordRest(track);
         }
     }
     return nullptr;
@@ -1057,23 +1122,16 @@ ChordRest* System::lastChordRest(track_idx_t track)
 //    returns the last chordrest of a system for a particular track
 //---------------------------------------------------------
 
-ChordRest* System::firstChordRest(track_idx_t track)
+ChordRest* System::firstChordRest(track_idx_t track) const
 {
     for (const MeasureBase* mb : measures()) {
         if (!mb->isMeasure()) {
             continue;
         }
-        const Measure* measure = static_cast<const Measure*>(mb);
-        for (const Segment* seg = measure->first(); seg; seg = seg->next()) {
-            if (seg->isChordRestType()) {
-                ChordRest* cr = seg->cr(track);
-                if (cr) {
-                    return cr;
-                }
-            }
-        }
+        const Measure* measure = toMeasure(mb);
+        return measure->firstChordRest(track);
     }
-    return 0;
+    return nullptr;
 }
 
 //---------------------------------------------------------
@@ -1107,7 +1165,7 @@ staff_idx_t System::firstSysStaffOfPart(const Part* part) const
         }
         staffIdx += p->nstaves();
     }
-    return mu::nidx;   // Part not found.
+    return muse::nidx;   // Part not found.
 }
 
 //---------------------------------------------------------
@@ -1117,12 +1175,34 @@ staff_idx_t System::firstSysStaffOfPart(const Part* part) const
 staff_idx_t System::firstVisibleSysStaffOfPart(const Part* part) const
 {
     staff_idx_t firstIdx = firstSysStaffOfPart(part);
+    if (firstIdx == muse::nidx) {
+        return muse::nidx;
+    }
+
     for (staff_idx_t idx = firstIdx; idx < firstIdx + part->nstaves(); ++idx) {
-        if (staff(idx)->show()) {
+        const SysStaff* s = staff(idx);
+        if (s && s->show()) {
             return idx;
         }
     }
-    return mu::nidx;   // No visible staves on this part.
+
+    return muse::nidx; // No visible staves on this part.
+}
+
+staff_idx_t System::firstVisibleSysStaffWithInstrument(const String& instrumentId, staff_idx_t startFrom)
+{
+    Fraction tick = first()->tick();
+    for (staff_idx_t idx = startFrom; idx < m_staves.size(); ++idx) {
+        Part* part = score()->staff(idx)->part();
+        if (part->instrument(tick)->id() == instrumentId) {
+            staff_idx_t firstVisOfPart = firstVisibleSysStaffOfPart(part);
+            if (firstVisOfPart != muse::nidx) {
+                return firstVisOfPart;
+            }
+        }
+    }
+
+    return muse::nidx;
 }
 
 //---------------------------------------------------------
@@ -1132,8 +1212,8 @@ staff_idx_t System::firstVisibleSysStaffOfPart(const Part* part) const
 staff_idx_t System::lastSysStaffOfPart(const Part* part) const
 {
     staff_idx_t firstIdx = firstSysStaffOfPart(part);
-    if (firstIdx == mu::nidx) {
-        return mu::nidx;     // Part not found.
+    if (firstIdx == muse::nidx) {
+        return muse::nidx;     // Part not found.
     }
     return firstIdx + part->nstaves() - 1;
 }
@@ -1145,101 +1225,45 @@ staff_idx_t System::lastSysStaffOfPart(const Part* part) const
 staff_idx_t System::lastVisibleSysStaffOfPart(const Part* part) const
 {
     staff_idx_t firstStaffIdx = firstSysStaffOfPart(part);
-    if (firstStaffIdx == mu::nidx) {
-        return mu::nidx;
+    if (firstStaffIdx == muse::nidx) {
+        return muse::nidx;
     }
     for (int idx = static_cast<int>(lastSysStaffOfPart(part)); idx >= static_cast<int>(firstStaffIdx); --idx) {
         if (staff(idx)->show()) {
             return idx;
         }
     }
-    return mu::nidx;    // No visible staves on this part.
+    return muse::nidx;    // No visible staves on this part.
 }
 
-//---------------------------------------------------------
-//      minSysTicks
-//      returns the shortest note/rest in the system
-//---------------------------------------------------------
-
-Fraction System::minSysTicks() const
+std::vector<staff_idx_t> System::visibleStavesOfPart(const Part* part) const
 {
-    Fraction minTicks = Fraction::max(); // Initializing the variable at an arbitrary high value.
-    // In principle, it just needs to be longer than any possible note, such that the following loop
-    // always correctly returns the shortest note/rest of the system.
-    for (MeasureBase* mb : measures()) {
-        if (mb->isMeasure()) {
-            Measure* m = toMeasure(mb);
-            minTicks = std::min(m->shortestChordRest(), minTicks);
+    std::vector<staff_idx_t> result;
+    result.reserve(part->nstaves());
+
+    staff_idx_t startIdx = firstSysStaffOfPart(part);
+    staff_idx_t endIdx = startIdx + part->nstaves();
+    for (staff_idx_t staffIdx = startIdx; staffIdx < endIdx; ++staffIdx) {
+        if (staff(staffIdx)->show()) {
+            result.push_back(staffIdx);
         }
     }
-    return minTicks;
+
+    return result;
 }
 
-//---------------------------------------------------------
-//    squeezableSpace
-//    Collects the squeezable space of a system. This allows
-//    for some systems to be justified by squeezing rather
-//    than stretching.
-//---------------------------------------------------------
-
-double System::squeezableSpace() const
+std::vector<Part*> System::visiblePartsOfGroup(staff_idx_t start, staff_idx_t end) const
 {
-    double squeezableSpace = 0;
-    for (auto mb : measures()) {
-        if (mb->isMeasure()) {
-            const Measure* m = toMeasure(mb);
-            squeezableSpace += (m->isWidthLocked() ? 0.0 : m->squeezableSpace());
-        }
-    }
-    return squeezableSpace;
-}
+    std::vector<Part*> result;
 
-Fraction System::maxSysTicks() const
-{
-    Fraction maxTicks = Fraction(0, 1);
-    for (auto mb : measures()) {
-        if (mb->isMeasure()) {
-            maxTicks = std::max(maxTicks, toMeasure(mb)->maxTicks());
+    for (staff_idx_t idx = start; idx < end;) {
+        Part* part = score()->staff(idx)->part();
+        if (visibleStavesOfPart(part).size() > 0) {
+            result.push_back(part);
         }
+        idx += part->nstaves();
     }
-    return maxTicks;
-}
 
-bool System::hasCrossStaffOrModifiedBeams()
-{
-    for (MeasureBase* mb : measures()) {
-        if (!mb->isMeasure()) {
-            continue;
-        }
-        for (Segment& seg : toMeasure(mb)->segments()) {
-            if (!seg.isChordRestType()) {
-                continue;
-            }
-            for (EngravingItem* e : seg.elist()) {
-                if (!e || !e->isChordRest()) {
-                    continue;
-                }
-                if (toChordRest(e)->beam() && (toChordRest(e)->beam()->cross() || toChordRest(e)->beam()->userModified())) {
-                    return true;
-                }
-                Chord* c = e->isChord() ? toChord(e) : nullptr;
-                if (c && c->tremolo() && c->tremolo()->twoNotes()) {
-                    Chord* c1 = c->tremolo()->chord1();
-                    Chord* c2 = c->tremolo()->chord2();
-                    if (c->tremolo()->userModified() || c1->staffMove() != c2->staffMove()) {
-                        return true;
-                    }
-                }
-                if (e->isChord() && !toChord(e)->graceNotes().empty()) {
-                    for (Chord* grace : toChord(e)->graceNotes()) {
-                        if (grace->beam() && (grace->beam()->cross() || grace->beam()->userModified())) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return false;
+    return result;
 }
-}
+} // namespace mu::engraving

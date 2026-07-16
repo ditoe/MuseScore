@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TEXTLINE_H__
-#define __TEXTLINE_H__
+#ifndef MU_ENGRAVING_TEXTLINE_H
+#define MU_ENGRAVING_TEXTLINE_H
 
 #include "textlinebase.h"
 
@@ -42,13 +42,11 @@ public:
 
     TextLineSegment* clone() const override { return new TextLineSegment(*this); }
 
-    virtual EngravingItem* propertyDelegate(Pid) override;
+    void initStyle();
+
+    virtual EngravingObject* propertyDelegate(Pid) const override;
 
     TextLine* textLine() const { return toTextLine(spanner()); }
-
-private:
-    Sid getTextLinePos(bool above) const;
-    Sid getPropertyStyle(Pid) const override;
 };
 
 //---------------------------------------------------------
@@ -59,9 +57,6 @@ class TextLine final : public TextLineBase
 {
     OBJECT_ALLOCATOR(engraving, TextLine)
     DECLARE_CLASSOF(ElementType::TEXTLINE)
-
-    Sid getTextLinePos(bool above) const;
-    Sid getPropertyStyle(Pid) const override;
 
 public:
     TextLine(EngravingItem* parent, bool system=false);
@@ -75,8 +70,15 @@ public:
     void initStyle();
 
     LineSegment* createLineSegment(System* parent) override;
+
+    bool allowTimeAnchor() const override;
+
     PropertyValue propertyDefault(Pid) const override;
-    bool setProperty(Pid propertyId, const PropertyValue&) override;
+    bool setProperty(Pid id, const PropertyValue&) override;
+    PropertyValue getProperty(Pid id) const override;
+
+protected:
+    Sid defaultPosSid() const override;
 };
 } // namespace mu::engraving
 #endif

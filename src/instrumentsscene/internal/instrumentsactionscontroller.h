@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,27 +19,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_INSTRUMENTSSCENE_INSTRUMENTSACTIONSCONTROLLER_H
-#define MU_INSTRUMENTSSCENE_INSTRUMENTSACTIONSCONTROLLER_H
+
+#pragma once
 
 #include "actions/actionable.h"
+#include "global/async/asyncable.h"
 
 #include "modularity/ioc.h"
 #include "actions/iactionsdispatcher.h"
-#include "notation/iselectinstrumentscenario.h"
+#include "notationscene/iselectinstrumentscenario.h"
 #include "context/iglobalcontext.h"
 
 namespace mu::instrumentsscene {
-class InstrumentsActionsController : public actions::Actionable
+class InstrumentsActionsController : public muse::actions::Actionable, public muse::async::Asyncable, public muse::Contextable
 {
-    INJECT(actions::IActionsDispatcher, dispatcher)
-    INJECT(notation::ISelectInstrumentsScenario, selectInstrumentsScenario)
-    INJECT(context::IGlobalContext, context)
+    muse::ContextInject<muse::actions::IActionsDispatcher> dispatcher = { this };
+    muse::ContextInject<notation::ISelectInstrumentsScenario> selectInstrumentsScenario = { this };
+    muse::ContextInject<context::IGlobalContext> context = { this };
 
 public:
+
+    InstrumentsActionsController(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx)
+    {
+    }
+
     virtual ~InstrumentsActionsController() = default;
 
-    bool canReceiveAction(const actions::ActionCode&) const override;
+    bool canReceiveAction(const muse::actions::ActionCode&) const override;
 
     void init();
 
@@ -48,5 +55,3 @@ private:
     void changeInstrument();
 };
 }
-
-#endif // MU_INSTRUMENTSSCENE_INSTRUMENTSACTIONSCONTROLLER_H

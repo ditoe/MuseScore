@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,27 +23,30 @@
 #include "instrumentsuiactions.h"
 
 #include "context/uicontext.h"
+#include "context/shortcutcontext.h"
 #include "types/translatablestring.h"
 
 using namespace mu::instrumentsscene;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
+using namespace muse::actions;
 
 const UiActionList InstrumentsUiActions::m_actions = {
     UiAction("instruments",
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_ANY,
              TranslatableString("action", "Add/remove instruments…"),
-             TranslatableString("action", "Add/remove instruments…")
+             TranslatableString("action", "Add/remove instruments")
              ),
     UiAction("change-instrument",
-             mu::context::UiCtxNotationOpened,
+             mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Select instrument…"),
-             TranslatableString("action", "Select instrument…")
+             TranslatableString("action", "Select instrument")
              )
 };
 
-const mu::ui::UiActionList& InstrumentsUiActions::actionsList() const
+const muse::ui::UiActionList& InstrumentsUiActions::actionsList() const
 {
     return m_actions;
 }
@@ -58,12 +61,12 @@ bool InstrumentsUiActions::actionChecked(const UiAction&) const
     return false;
 }
 
-mu::async::Channel<mu::actions::ActionCodeList> InstrumentsUiActions::actionEnabledChanged() const
+muse::async::Channel<ActionCodeList> InstrumentsUiActions::actionEnabledChanged() const
 {
     return m_actionEnabledChanged;
 }
 
-mu::async::Channel<mu::actions::ActionCodeList> InstrumentsUiActions::actionCheckedChanged() const
+muse::async::Channel<ActionCodeList> InstrumentsUiActions::actionCheckedChanged() const
 {
     return m_actionCheckedChanged;
 }

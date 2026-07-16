@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -121,7 +121,7 @@ MidiOperations::QuantValue fractionToQuantValue(const ReducedFraction& fraction)
 
 MidiOperations::QuantValue defaultQuantValueFromPreferences()
 {
-    auto conf = mu::modularity::ioc()->resolve<mu::iex::midi::IMidiImportExportConfiguration>("iex_midi");
+    auto conf = muse::modularity::globalIoc()->resolve<mu::iex::midi::IMidiImportExportConfiguration>("iex_midi");
     int ticks = conf ? conf->midiShortestNote() : (Constants::DIVISION / 4);
     const auto fraction = ReducedFraction::fromTicks(ticks);
     MidiOperations::QuantValue quantValue = fractionToQuantValue(fraction);
@@ -581,9 +581,9 @@ quantizeOffTimeForNonTuplet(
             ++next;
             continue;
         }
+        const bool isInSameTuplet = chord.isInTuplet && next->second.tuplet == chord.tuplet;
         const auto& tuplet = next->second.tuplet->second;
-        if (next->second.tuplet == chord.tuplet
-            || tuplet.onTime + tuplet.len <= offTime) {
+        if (isInSameTuplet || tuplet.onTime + tuplet.len <= offTime) {
             ++next;
             continue;
         }

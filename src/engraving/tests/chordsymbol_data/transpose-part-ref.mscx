@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.76389</Spatium>
+      <defaultsVersion>301</defaultsVersion>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -15,21 +17,23 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
-        <longName>Flute</longName>
-        <shortName>Fl.</shortName>
+        <InstrumentLabel>
+          <longName>Flute</longName>
+          <shortName>Fl.</shortName>
+          </InstrumentLabel>
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
         <maxPitchP>98</maxPitchP>
@@ -75,28 +79,33 @@
     <Staff id="1">
       <VBox>
         <height>10</height>
-        <linkedMain/>
-        <excludeFromParts>0</excludeFromParts>
+        <boxAutoSize>0</boxAutoSize>
+        <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+        <eid>E_E</eid>
         </VBox>
       <Measure>
+        <eid>F_F</eid>
         <voice>
           <TimeSig>
-            <linkedMain/>
+            <eid>G_G</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Harmony>
-            <root>17</root>
-            <name>7</name>
-            <linkedMain/>
+            <harmonyInfo>
+              <name>7</name>
+              <root>17</root>
+              </harmonyInfo>
+            <eid>H_H</eid>
             </Harmony>
           <Chord>
-            <linkedMain/>
+            <eid>I_I</eid>
             <durationType>whole</durationType>
             <Note>
-              <linkedMain/>
+              <eid>J_J</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>K_K</eid>
                 </Accidental>
               <pitch>73</pitch>
               <tpc>21</tpc>
@@ -105,16 +114,19 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>L_L</eid>
         <voice>
           <Harmony>
-            <root>16</root>
-            <linkedMain/>
+            <harmonyInfo>
+              <root>16</root>
+              </harmonyInfo>
+            <eid>M_M</eid>
             </Harmony>
           <Chord>
-            <linkedMain/>
+            <eid>N_N</eid>
             <durationType>whole</durationType>
             <Note>
-              <linkedMain/>
+              <eid>O_O</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
@@ -123,28 +135,34 @@
         </Measure>
       </Staff>
     <Score>
+      <eid>P_P</eid>
+      <name>Flute</name>
       <initialPartId>1</initialPartId>
       <Division>480</Division>
       <Style>
         <createMultiMeasureRests>1</createMultiMeasureRests>
-        <Spatium>1.76389</Spatium>
+        <defaultsVersion>301</defaultsVersion>
+        <spatium>1.76389</spatium>
         </Style>
       <showInvisible>1</showInvisible>
       <showUnprintable>1</showUnprintable>
       <showFrames>1</showFrames>
       <showMargins>0</showMargins>
-      <metaTag name="partName">Flute</metaTag>
+      <open>1</open>
       <Part id="1">
-        <Staff id="1">
-          <linkedTo>1</linkedTo>
+        <eid>Q_Q</eid>
+        <Staff>
+          <eid>R_R</eid>
+          <linkedTo>D_D</linkedTo>
           <StaffType group="pitched">
             <name>stdNormal</name>
             </StaffType>
           </Staff>
-        <trackName>Flute</trackName>
         <Instrument id="flute">
-          <longName>Flute</longName>
-          <shortName>Fl.</shortName>
+          <InstrumentLabel>
+            <longName>Flute</longName>
+            <shortName>Fl.</shortName>
+            </InstrumentLabel>
           <trackName>Flute</trackName>
           <minPitchP>59</minPitchP>
           <maxPitchP>98</maxPitchP>
@@ -190,37 +208,43 @@
       <Staff id="1">
         <VBox>
           <height>10</height>
-          <linked>
-            </linked>
-          <excludeFromParts>0</excludeFromParts>
+          <boxAutoSize>0</boxAutoSize>
+          <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+          <eid>S_S</eid>
+          <linkedTo>E_E</linkedTo>
           <Text>
+            <eid>T_T</eid>
             <style>instrument_excerpt</style>
             <text>Flute</text>
             </Text>
           </VBox>
         <Measure>
+          <eid>U_U</eid>
           <voice>
             <TimeSig>
-              <linked>
-                </linked>
+              <eid>V_V</eid>
+              <linkedTo>G_G</linkedTo>
               <sigN>4</sigN>
               <sigD>4</sigD>
               </TimeSig>
             <Harmony>
-              <root>17</root>
-              <name>7</name>
-              <linked>
-                </linked>
+              <harmonyInfo>
+                <name>7</name>
+                <root>17</root>
+                </harmonyInfo>
+              <eid>W_W</eid>
+              <linkedTo>H_H</linkedTo>
               </Harmony>
             <Chord>
-              <linked>
-                </linked>
+              <eid>X_X</eid>
+              <linkedTo>I_I</linkedTo>
               <durationType>whole</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>Y_Y</eid>
+                <linkedTo>J_J</linkedTo>
                 <Accidental>
                   <subtype>accidentalSharp</subtype>
+                  <eid>Z_Z</eid>
                   </Accidental>
                 <pitch>73</pitch>
                 <tpc>21</tpc>
@@ -229,19 +253,22 @@
             </voice>
           </Measure>
         <Measure>
+          <eid>a_a</eid>
           <voice>
             <Harmony>
-              <root>16</root>
-              <linked>
-                </linked>
+              <harmonyInfo>
+                <root>16</root>
+                </harmonyInfo>
+              <eid>b_b</eid>
+              <linkedTo>M_M</linkedTo>
               </Harmony>
             <Chord>
-              <linked>
-                </linked>
+              <eid>c_c</eid>
+              <linkedTo>N_N</linkedTo>
               <durationType>whole</durationType>
               <Note>
-                <linked>
-                  </linked>
+                <eid>d_d</eid>
+                <linkedTo>O_O</linkedTo>
                 <pitch>74</pitch>
                 <tpc>16</tpc>
                 </Note>
@@ -249,7 +276,6 @@
             </voice>
           </Measure>
         </Staff>
-      <name>Flute</name>
       </Score>
     </Score>
   </museScore>

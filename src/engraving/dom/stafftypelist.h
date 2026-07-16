@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __STAFFTYPELIST_H__
-#define __STAFFTYPELIST_H__
+#ifndef MU_ENGRAVING_STAFFTYPELIST_H
+#define MU_ENGRAVING_STAFFTYPELIST_H
 
 #include "stafftype.h"
 
@@ -34,11 +34,7 @@ namespace mu::engraving {
 
 class StaffTypeList
 {
-    StaffType firstStaffType;   ///< staff type at tick 0
-    std::map<int, StaffType> staffTypeChanges;
-
 public:
-    StaffTypeList() {}
     StaffType& staffType(const Fraction&);
     const StaffType& staffType(const Fraction& f) const;
     StaffType* setStaffType(const Fraction&, const StaffType&);
@@ -46,8 +42,14 @@ public:
     bool isStaffTypeStartFrom(const Fraction&) const;
     void moveStaffType(const Fraction& from, const Fraction& to);
 
-    bool uniqueStaffType() const { return staffTypeChanges.empty(); }
+    bool uniqueStaffType() const { return m_staffTypeChanges.empty(); }
     std::pair<int, int> staffTypeRange(const Fraction&) const;
+
+    const std::map<int, StaffType>& staffTypeChanges() const { return m_staffTypeChanges; }
+
+private:
+    StaffType m_firstStaffType;   // staff type at tick 0
+    std::map<int, StaffType> m_staffTypeChanges;
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,19 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
 
-#ifndef __AMBITUS_H__
-#define __AMBITUS_H__
-
+#include "accidental.h"
 #include "engravingitem.h"
 
 #include "pitchspelling.h"
 
-#include "types/types.h"
-#include "dom/types.h"
-#include "types/dimension.h"
-
-#include "accidental.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class Factory;
@@ -52,14 +47,10 @@ public:
     static constexpr NoteHeadType NOTEHEADTYPE_DEFAULT = NoteHeadType::HEAD_AUTO;
     static constexpr DirectionH DIRECTION_DEFAULT = DirectionH::AUTO;
     static constexpr bool HASLINE_DEFAULT = true;
-    static const Spatium LINEWIDTH_DEFAULT;
-    static constexpr double LINEOFFSET_DEFAULT = 0.8;               // the distance between notehead and line
+    static constexpr Spatium LINEWIDTH_DEFAULT = 0.12_sp;
+    static constexpr Spatium LINEOFFSET_DEFAULT = 0.8_sp;               // the distance between notehead and line
 
     Ambitus* clone() const override { return new Ambitus(*this); }
-
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
 
     double mag() const override;
 
@@ -71,8 +62,8 @@ public:
     DirectionH direction() const { return m_direction; }
     bool hasLine() const { return m_hasLine; }
     Spatium lineWidth() const { return m_lineWidth; }
-    int topOctave() const { return (m_topPitch / 12) - 1; }
-    int bottomOctave() const { return (m_bottomPitch / 12) - 1; }
+    int topOctave() const { return (m_topPitch / PITCH_DELTA_OCTAVE) - 1; }
+    int bottomOctave() const { return (m_bottomPitch / PITCH_DELTA_OCTAVE) - 1; }
     int topPitch() const { return m_topPitch; }
     int bottomPitch() const { return m_bottomPitch; }
     int topTpc() const { return m_topTpc; }
@@ -97,8 +88,7 @@ public:
     double headWidth() const;
 
     // re-implemented virtual functions
-    mu::PointF pagePos() const override;        // position in page coordinates
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
     void setTrack(track_idx_t val) override;
 
     String accessibleInfo() const override;
@@ -121,7 +111,7 @@ public:
         PointF bottomPos;       // position of bottom note symbol
         LineF line;             // the drawn line
     };
-    DECLARE_LAYOUTDATA_METHODS(Ambitus);
+    DECLARE_LAYOUTDATA_METHODS(Ambitus)
 
 private:
 
@@ -135,7 +125,7 @@ private:
         int topTpc = Tpc::TPC_INVALID;
         int bottomTpc = Tpc::TPC_INVALID;
         int topPitch = INVALID_PITCH;
-        int bottomPitch = INVALID_PITCH;
+        int bottomPitch = MAX_PITCH + 1;
     };
 
     Ranges estimateRanges() const;                // scan staff up to next section break and update range pitches
@@ -150,6 +140,4 @@ private:
     int m_topPitch = INVALID_PITCH, m_bottomPitch = INVALID_PITCH;
     int m_topTpc = Tpc::TPC_INVALID, m_bottomTpc = Tpc::TPC_INVALID;
 };
-} // namespace mu::engraving
-
-#endif
+}

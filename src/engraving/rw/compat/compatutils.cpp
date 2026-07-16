@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,24 +23,42 @@
 #include "compatutils.h"
 
 #include "dom/articulation.h"
+#include "dom/capo.h"
 #include "dom/chord.h"
 #include "dom/dynamic.h"
-#include "dom/expression.h"
-#include "dom/masterscore.h"
-#include "dom/score.h"
 #include "dom/excerpt.h"
-#include "dom/part.h"
-#include "dom/stem.h"
-#include "dom/tremolo.h"
-#include "dom/linkedobjects.h"
-#include "dom/measure.h"
+#include "dom/expression.h"
 #include "dom/factory.h"
+#include "dom/harmony.h"
+#include "dom/image.h"
+#include "dom/key.h"
+#include "dom/keylist.h"
+#include "dom/laissezvib.h"
+#include "dom/linkedobjects.h"
+#include "dom/masterscore.h"
+#include "dom/measure.h"
+#include "dom/note.h"
+#include "dom/noteline.h"
 #include "dom/ornament.h"
+#include "dom/part.h"
+#include "dom/playtechannotation.h"
 #include "dom/rest.h"
+#include "dom/score.h"
+#include "dom/staff.h"
 #include "dom/stafftext.h"
 #include "dom/stafftextbase.h"
-#include "dom/playtechannotation.h"
-#include "dom/capo.h"
+#include "dom/stem.h"
+#include "dom/tempotext.h"
+#include "dom/textline.h"
+
+#include "editing/editchord.h"
+#include "editing/editkeysig.h"
+#include "editing/transaction/transaction.h"
+#include "editing/transpose.h"
+
+#include "style/defaultstyle.h"
+#include "style/styledef.h"
+#include "style/textstyle.h"
 
 #include "types/string.h"
 
@@ -73,6 +91,71 @@ const std::set<SymId> CompatUtils::ORNAMENT_IDS {
     SymId::ornamentPinceCouperin
 };
 
+const std::map<Sid, Sid> CompatUtils::ALIGN_VALS_TO_CONVERT {
+    { Sid::defaultAlign, Sid::defaultPosition },
+    { Sid::titleAlign, Sid::titlePosition },
+    { Sid::subTitleAlign, Sid::subTitlePosition },
+    { Sid::composerAlign, Sid::composerPosition },
+    { Sid::lyricistAlign, Sid::lyricistPosition },
+    { Sid::lyricsEvenAlign, Sid::lyricsEvenPosition },
+    { Sid::lyricsOddAlign, Sid::lyricsOddPosition },
+    { Sid::fingeringAlign, Sid::fingeringPosition },
+    { Sid::lhGuitarFingeringAlign, Sid::lhGuitarFingeringPosition },
+    { Sid::rhGuitarFingeringAlign, Sid::rhGuitarFingeringPosition },
+    { Sid::hammerOnPullOffTappingAlign, Sid::hammerOnPullOffTappingPosition },
+    { Sid::stringNumberAlign, Sid::stringNumberPosition },
+    { Sid::staffTextAlign, Sid::staffTextPosition },
+    { Sid::fretDiagramFingeringAlign, Sid::fretDiagramFingeringPosition },
+    { Sid::fretDiagramFretNumberAlign, Sid::fretDiagramFretNumberPosition },
+    { Sid::harpPedalDiagramAlign, Sid::harpPedalDiagramPosition },
+    { Sid::harpPedalTextDiagramAlign, Sid::harpPedalTextDiagramPosition },
+    { Sid::longInstrumentAlign, Sid::longInstrumentPosition },
+    { Sid::shortInstrumentAlign, Sid::shortInstrumentPosition },
+    { Sid::partInstrumentAlign, Sid::partInstrumentPosition },
+    { Sid::dynamicsAlign, Sid::dynamicsPosition },
+    { Sid::expressionAlign, Sid::expressionPosition },
+    { Sid::tempoAlign, Sid::tempoPosition },
+    { Sid::tempoChangeAlign, Sid::tempoChangePosition },
+    { Sid::metronomeAlign, Sid::metronomePosition },
+    { Sid::measureNumberAlign, Sid::measureNumberPosition },
+    { Sid::mmRestRangeAlign, Sid::mmRestRangePosition },
+    { Sid::translatorAlign, Sid::translatorPosition },
+    { Sid::tupletAlign, Sid::tupletPosition },
+    { Sid::systemTextAlign, Sid::systemTextPosition },
+    { Sid::chordSymbolAAlign, Sid::chordSymPosition },
+    { Sid::repeatLeftAlign, Sid::repeatLeftPosition },
+    { Sid::repeatRightAlign, Sid::repeatRightPosition },
+    { Sid::frameAlign, Sid::framePosition },
+    { Sid::textLineTextAlign, Sid::textLinePosition },
+    { Sid::noteLineAlign, Sid::noteLinePosition },
+    { Sid::glissandoAlign, Sid::glissandoPosition },
+    { Sid::ottavaTextAlignAbove, Sid::ottavaPosition },
+    { Sid::voltaAlign, Sid::voltaPosition },
+    { Sid::pedalTextAlign, Sid::pedalPosition },
+    { Sid::letRingTextAlign, Sid::letRingPosition },
+    { Sid::palmMuteTextAlign, Sid::palmMutePosition },
+    { Sid::hairpinTextAlign, Sid::hairpinPosition },
+    { Sid::bendAlign, Sid::bendPosition },
+    { Sid::headerAlign, Sid::headerPosition },
+    { Sid::footerAlign, Sid::footerPosition },
+    { Sid::copyrightAlign, Sid::copyrightPosition },
+    { Sid::pageNumberAlign, Sid::pageNumberPosition },
+    { Sid::instrumentChangeAlign, Sid::instrumentChangePosition },
+    { Sid::stickingAlign, Sid::stickingPosition },
+    { Sid::user1Align, Sid::user1Position },
+    { Sid::user2Align, Sid::user2Position },
+    { Sid::user3Align, Sid::user3Position },
+    { Sid::user4Align, Sid::user4Position },
+    { Sid::user5Align, Sid::user5Position },
+    { Sid::user6Align, Sid::user6Position },
+    { Sid::user7Align, Sid::user7Position },
+    { Sid::user8Align, Sid::user8Position },
+    { Sid::user9Align, Sid::user9Position },
+    { Sid::user10Align, Sid::user10Position },
+    { Sid::user11Align, Sid::user11Position },
+    { Sid::user12Align, Sid::user12Position },
+};
+
 void CompatUtils::doCompatibilityConversions(MasterScore* masterScore)
 {
     TRACEFUNC;
@@ -99,6 +182,18 @@ void CompatUtils::doCompatibilityConversions(MasterScore* masterScore)
         addMissingInitKeyForTransposingInstrument(masterScore);
         resetFramesExclusionFromParts(masterScore);
     }
+    if (masterScore->mscVersion() < 440) {
+        mapHeaderFooterStyles(masterScore);
+    }
+
+    if (masterScore->mscVersion() < 450) {
+        convertTextLineToNoteAnchoredLine(masterScore);
+        convertLaissezVibArticToTie(masterScore);
+    }
+
+    if (masterScore->mscVersion() < 500) {
+        removeMMRestElements(masterScore);
+    }
 }
 
 void CompatUtils::replaceStaffTextWithPlayTechniqueAnnotation(MasterScore* score)
@@ -106,7 +201,7 @@ void CompatUtils::replaceStaffTextWithPlayTechniqueAnnotation(MasterScore* score
     TRACEFUNC;
 
     //! NOTE: Before MU4, they were available in the Staff Text Properties dialog (Change Channel page)
-    static const std::unordered_map<mu::String, PlayingTechniqueType> textToPlayTechniqueType {
+    static const std::unordered_map<muse::String, PlayingTechniqueType> textToPlayTechniqueType {
         { u"natural", PlayingTechniqueType::Natural },
         { u"normal", PlayingTechniqueType::Natural },
 
@@ -136,13 +231,13 @@ void CompatUtils::replaceStaffTextWithPlayTechniqueAnnotation(MasterScore* score
 
                 StaffTextBase* text = toStaffTextBase(annotation);
                 PlayingTechniqueType type
-                    = mu::value(textToPlayTechniqueType, text->plainText().toLower(), PlayingTechniqueType::Undefined);
+                    = muse::value(textToPlayTechniqueType, text->plainText().toLower(), PlayingTechniqueType::Undefined);
 
                 if (type == PlayingTechniqueType::Undefined) {
-                    mu::String channelName = text->channelName(0).toLower();
+                    muse::String channelName = text->channelName(0).toLower();
 
                     if (!channelName.isEmpty()) {
-                        type = mu::value(textToPlayTechniqueType, channelName, PlayingTechniqueType::Undefined);
+                        type = muse::value(textToPlayTechniqueType, channelName, PlayingTechniqueType::Undefined);
                     }
                 }
 
@@ -195,7 +290,7 @@ void CompatUtils::assignInitialPartToExcerpts(const std::vector<Excerpt*>& excer
         excerpt->setInitialPartId(initialPartId);
         assignedPartIdSet.insert(initialPartId);
     };
-    // Excerpt name is same as Part name (Violin - Violin)
+
     for (Excerpt* excerpt : excerpts) {
         for (const Part* part : excerpt->excerptScore()->parts()) {
             if (excerpt->name() == part->partName()) {
@@ -204,14 +299,14 @@ void CompatUtils::assignInitialPartToExcerpts(const std::vector<Excerpt*>& excer
             }
         }
     }
-    // Excerpt name contains Part name (Violin1 - Violin)
+
     for (Excerpt* excerpt : excerpts) {
         if (excerpt->initialPartId().isValid()) {
             continue;
         }
 
         for (Part* part : excerpt->excerptScore()->parts()) {
-            if (mu::contains(assignedPartIdSet, part->id())) {
+            if (muse::contains(assignedPartIdSet, part->id())) {
                 continue;
             }
 
@@ -219,38 +314,6 @@ void CompatUtils::assignInitialPartToExcerpts(const std::vector<Excerpt*>& excer
                 assignInitialPartId(excerpt, part->id());
                 break;
             }
-        }
-    }
-    // Excerpt contains only single instrument
-    for (Excerpt* excerpt : excerpts) {
-        if (excerpt->initialPartId().isValid()) {
-            continue;
-        }
-
-        for (Part* part : excerpt->excerptScore()->parts()) {
-            if (mu::contains(assignedPartIdSet, part->id())) {
-                continue;
-            }
-
-            if (excerpt->excerptScore()->parts().size() == 1) {
-                assignInitialPartId(excerpt, part->id());
-                break;
-            }
-        }
-    }
-    // Excerpt contains instrument
-    for (Excerpt* excerpt : excerpts) {
-        if (excerpt->initialPartId().isValid()) {
-            continue;
-        }
-
-        for (Part* part : excerpt->excerptScore()->parts()) {
-            if (mu::contains(assignedPartIdSet, part->id())) {
-                continue;
-            }
-
-            assignInitialPartId(excerpt, part->id());
-            break;
         }
     }
 }
@@ -299,6 +362,8 @@ void CompatUtils::replaceOldWithNewOrnaments(MasterScore* score)
         newOrnament->setPos(oldOrnament->pos());
         newOrnament->setOrnamentStyle(oldOrnament->ornamentStyle());
         newOrnament->setDirection(oldOrnament->direction());
+        newOrnament->setAutoplace(oldOrnament->autoplace());
+        newOrnament->setPlayArticulation(oldOrnament->playArticulation());
 
         LinkedObjects* links = oldOrnament->links();
         newOrnament->setLinks(links);
@@ -432,7 +497,7 @@ void CompatUtils::splitArticulations(MasterScore* masterScore)
             newArtic->setPlayArticulation(combinedArtic->playArticulation());
             newArtic->setVisible(combinedArtic->visible());
             newArtic->setOrnamentStyle(combinedArtic->ornamentStyle());
-            LinkedObjects* links = new LinkedObjects(masterScore);
+            LinkedObjects* links = new LinkedObjects();
             links->push_back(newArtic);
             newArtic->setLinks(links);
             parentChord->add(newArtic);
@@ -527,6 +592,20 @@ ArticulationAnchor CompatUtils::translateToNewArticulationAnchor(int anchor)
     }
 }
 
+double CompatUtils::convertChordExtModUnits(double val)
+{
+    // Pre 4.6 this value was in 1/5 of a spatium
+    // After 4.6 this is in % of root cap height
+    // The best we can do for conversion of old files is to assume a default spatium of 1.75mm and a default font size of 10pt
+    // The height value is calculated from Edwin at 10pt using FontMetrics::capHeight
+    const double DEFAULT_SPATIUM = StyleDef::styleValues[static_cast<size_t>(Sid::spatium)].defaultValue.toDouble();
+    muse::draw::Font f(u"Edwin", muse::draw::Font::Type::Text);
+    f.setPointSizeF(10);
+    const double DEFAULT_FONT_CAP_HEIGHT = muse::draw::FontMetrics::capHeight(f);   // 121
+
+    return ((val / 5) * DEFAULT_SPATIUM) / DEFAULT_FONT_CAP_HEIGHT;
+}
+
 void CompatUtils::resetRestVerticalOffset(MasterScore* masterScore)
 {
     for (Score* score : masterScore->scoreList()) {
@@ -588,11 +667,11 @@ void CompatUtils::resetStemLengthsForTwoNoteTrems(MasterScore* masterScore)
                         continue;
                     }
                     Chord* chord = toChord(item);
-                    Tremolo* trem = chord->tremolo();
+                    TremoloTwoChord* trem = chord->tremoloTwoChord();
                     Stem* stem = chord->stem();
-                    if (stem && trem && trem->twoNotes()) {
-                        if (stem->userLength() != Millimetre(0)) {
-                            stem->setUserLength(Millimetre(0));
+                    if (stem && trem) {
+                        if (!stem->userLength().isZero()) {
+                            stem->setUserLength(0_sp);
                         }
                     }
                 }
@@ -678,11 +757,12 @@ void CompatUtils::addMissingInitKeyForTransposingInstrument(MasterScore* score)
                     Key key = Key::C;
                     Key cKey = key;
                     if (!score->style().styleB(Sid::concertPitch)) {
-                        cKey = transposeKey(key, v);
+                        cKey = Transpose::transposeKey(key, v);
                     }
                     kse.setConcertKey(cKey);
                     kse.setKey(key);
-                    score->undoChangeKeySig(staff, Fraction(0, 1), kse);
+                    EditKeySig::undoChangeKeySig(score->transactionManager()->currentOrDummyTransaction(), score, staff,
+                                                 Fraction(0, 1), kse);
                 }
             }
         }
@@ -695,6 +775,409 @@ void CompatUtils::resetFramesExclusionFromParts(MasterScore* masterScore)
         for (MeasureBase* measureBase = score->first(); measureBase; measureBase = measureBase->next()) {
             if (!measureBase->isMeasure()) {
                 measureBase->setExcludeFromOtherParts(false);
+            }
+        }
+    }
+}
+
+void CompatUtils::mapHeaderFooterStyles(MasterScore* score)
+{
+    // Copyright and page numbers used header/footer styling before 4.4 - after 4.4 these have their own styles. To ensure nothing
+    // changes visually when loading a pre-4.4 score for the first time, we must search the header/footer strings for copyright/page
+    // number macros and set the "defaults" for copyright/page number styles based on where the macros were inserted...
+    const auto doMap = [score](const TextStyleType type, const std::vector<Sid>& headerFooterStringSids) {
+        const TextStyle* headerFooterTextStyle = textStyle(type);
+        const TextStyle* copyrightTextStyle = textStyle(TextStyleType::COPYRIGHT);
+        const TextStyle* pageNumberTextStyle = textStyle(TextStyleType::PAGE_NUMBER);
+
+        //! NOTE: Keep in sync with Page::replaceTextMacros
+        const std::wregex copyrightSearch(LR"(\$[cC])");
+        const std::wregex pageNumberSearch(LR"(\$[pPnN])");
+
+        bool haveMappedCopyright = false;
+        bool haveMappedPageNumber = false;
+        for (const Sid sid : headerFooterStringSids) {
+            const String s = score->style().styleSt(sid);
+            if (!haveMappedCopyright && s.contains(copyrightSearch)) {
+                for (size_t i = 0; i < TEXT_STYLE_SIZE; ++i) {
+                    const Sid headerFooterSid = headerFooterTextStyle->at(i).sid;
+                    const PropertyValue pv = score->style().styleV(headerFooterSid);
+                    const Sid copyrightSid = copyrightTextStyle->at(i).sid;
+                    score->style().set(copyrightSid, pv);
+                }
+                haveMappedCopyright = true;
+            }
+            if (!haveMappedPageNumber && s.contains(pageNumberSearch)) {
+                for (size_t i = 0; i < TEXT_STYLE_SIZE; ++i) {
+                    const Sid headerFooterSid = headerFooterTextStyle->at(i).sid;
+                    const Sid pageNumberSid = pageNumberTextStyle->at(i).sid;
+                    const PropertyValue pv = score->style().styleV(headerFooterSid);
+                    score->style().set(pageNumberSid, pv);
+                }
+                haveMappedPageNumber = true;
+            }
+        }
+    };
+
+    doMap(TextStyleType::HEADER, { Sid::oddHeaderL,  Sid::oddHeaderC,  Sid::oddHeaderR,
+                                   Sid::evenHeaderL, Sid::evenHeaderC, Sid::evenHeaderR });
+    doMap(TextStyleType::FOOTER, { Sid::oddFooterL,  Sid::oddFooterC,  Sid::oddFooterR,
+                                   Sid::evenFooterL, Sid::evenFooterC, Sid::evenFooterR });
+}
+
+NoteLine* CompatUtils::createNoteLineFromTextLine(TextLine* textLine)
+{
+    assert(textLine->anchor() == Spanner::Anchor::NOTE);
+    Note* startNote = toNote(textLine->startElement());
+    Note* endNote = toNote(textLine->endElement());
+
+    NoteLine* noteLine = Factory::createNoteLine(startNote);
+    noteLine->setParent(startNote);
+    noteLine->setStartElement(startNote);
+    noteLine->setTrack(textLine->track());
+    noteLine->setTick(textLine->tick());
+    noteLine->setEndElement(endNote);
+    noteLine->setTick2(textLine->tick2());
+    noteLine->setVisible(textLine->visible());
+
+    // Preserve old layout style
+    noteLine->setLineEndPlacement(NoteLineEndPlacement::LEFT_EDGE);
+
+    for (Pid pid : textLine->textLineBasePropertyIds()) {
+        noteLine->setProperty(pid, textLine->getProperty(pid));
+    }
+
+    for (const SpannerSegment* oldSeg : textLine->spannerSegments()) {
+        LineSegment* newSeg = noteLine->createLineSegment(toSystem(oldSeg->parent()));
+        newSeg->setOffset(oldSeg->offset());
+        newSeg->setUserOff2(oldSeg->userOff2());
+
+        noteLine->add(newSeg);
+    }
+
+    LinkedObjects* links = textLine->links();
+    noteLine->setLinks(links);
+    if (links) {
+        links->push_back(noteLine);
+    }
+
+    return noteLine;
+}
+
+void CompatUtils::convertTextLineToNoteAnchoredLine(MasterScore* masterScore)
+{
+    std::set<TextLine*> oldLines; // NoteLines used to be TextLines
+
+    for (Measure* measure = masterScore->firstMeasure(); measure; measure = measure->nextMeasure()) {
+        for (Segment& segment : measure->segments()) {
+            if (!segment.isChordRestType()) {
+                continue;
+            }
+            for (track_idx_t track = 0; track <= masterScore->ntracks(); track++) {
+                EngravingItem* el = segment.element(track);
+                if (!el || !el->isChord()) {
+                    continue;
+                }
+                Chord* chord = toChord(el);
+                for (Note* note : chord->notes()) {
+                    for (Spanner* spanner : note->spannerFor()) {
+                        if (!spanner->isTextLine() || spanner->anchor() != Spanner::Anchor::NOTE) {
+                            continue;
+                        }
+
+                        oldLines.insert(toTextLine(spanner));
+
+                        LinkedObjects* links = spanner->links();
+                        if (!links || links->empty()) {
+                            continue;
+                        }
+
+                        for (EngravingObject* linked : *links) {
+                            if (linked != spanner && linked && linked->isTextLine()
+                                && toTextLine(linked)->anchor() == Spanner::Anchor::NOTE) {
+                                oldLines.insert(toTextLine(linked));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (TextLine* oldLine : oldLines) {
+        NoteLine* newLine = createNoteLineFromTextLine(oldLine);
+        EngravingItem* parent = newLine->parentItem();
+
+        parent->remove(oldLine);
+        parent->add(newLine);
+
+        delete oldLine;
+    }
+}
+
+void CompatUtils::convertLaissezVibArticToTie(MasterScore* masterScore)
+{
+    std::set<Articulation*> oldArtics; // NoteLines used to be TextLines
+
+    for (Measure* meas = masterScore->firstMeasure(); meas; meas = meas->nextMeasure()) {
+        for (Segment& seg : meas->segments()) {
+            if (!seg.isChordRestType()) {
+                continue;
+            }
+            for (EngravingItem* item : seg.elist()) {
+                if (!item || !item->isChord()) {
+                    continue;
+                }
+                Chord* chord = toChord(item);
+                for (Articulation* a : chord->articulations()) {
+                    if (!a->isLaissezVib()) {
+                        continue;
+                    }
+                    oldArtics.insert(a);
+
+                    LinkedObjects* links = a->links();
+                    if (!links || links->empty()) {
+                        continue;
+                    }
+
+                    for (EngravingObject* linked : *links) {
+                        if (linked != a && linked && linked->isLaissezVib()) {
+                            oldArtics.insert(toArticulation(linked));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (Articulation* oldArtic : oldArtics) {
+        Chord* parentChord = toChord(oldArtic->parentItem());
+        Note* parentNote = oldArtic->up() ? parentChord->upNote() : parentChord->downNote();
+
+        parentChord->remove(oldArtic);
+
+        LaissezVib* lv = Factory::createLaissezVib(parentNote);
+        lv->setParent(parentNote);
+        parentNote->add(lv);
+
+        delete oldArtic;
+    }
+}
+
+void CompatUtils::setHarmonyRootTpcFromFunction(HarmonyInfo* info, const Harmony* h, const muse::String& s)
+{
+    Key key = Key::INVALID;
+    const Staff* st = h->staff();
+    key = st ? st->key(h->tick()) : Key::INVALID;
+    info->setRootTpc(function2Tpc(s, key));
+}
+
+Sid CompatUtils::positionStyleFromAlign(Sid align)
+{
+    return muse::value(ALIGN_VALS_TO_CONVERT, align, Sid::NOSTYLE);
+}
+
+void CompatUtils::setPositionStylesFromAlign(MStyle* style, std::vector<Sid> ignoreSids)
+{
+    // Make sure new position styles are initially the same as align values
+    for (const StyleDef::StyleValue& st : StyleDef::styleValues) {
+        if (muse::contains(ignoreSids, st.sid)) {
+            continue;
+        }
+        Sid positionSid = CompatUtils::positionStyleFromAlign(st.sid);
+        if (positionSid == Sid::NOSTYLE) {
+            continue;
+        }
+        AlignH val = style->value(st.sid).value<Align>().horizontal;
+        style->set(positionSid, val);
+    }
+}
+
+void CompatUtils::setTextLineTextPositionFromAlign(TextLineBase* tl)
+{
+    tl->setBeginTextPosition(tl->beginTextAlign().horizontal);
+    if (tl->beginTextPosition() != tl->propertyDefault(Pid::BEGIN_TEXT_POSITION).value<AlignH>()) {
+        tl->setPropertyFlags(Pid::BEGIN_TEXT_POSITION, PropertyFlags::UNSTYLED);
+    }
+    tl->setContinueTextPosition(tl->continueTextAlign().horizontal);
+    if (tl->continueTextPosition() != tl->propertyDefault(Pid::CONTINUE_TEXT_POSITION).value<AlignH>()) {
+        tl->setPropertyFlags(Pid::CONTINUE_TEXT_POSITION, PropertyFlags::UNSTYLED);
+    }
+    tl->setEndTextPosition(tl->endTextAlign().horizontal);
+    if (tl->endTextPosition() != tl->propertyDefault(Pid::END_TEXT_POSITION).value<AlignH>()) {
+        tl->setPropertyFlags(Pid::END_TEXT_POSITION, PropertyFlags::UNSTYLED);
+    }
+}
+
+void CompatUtils::resetHookHeightSign(TextLineBase* tl)
+{
+    if (!tl->placeBelow()) {
+        return;
+    }
+
+    if (!tl->isStyled(Pid::BEGIN_HOOK_HEIGHT)) {
+        Spatium beginHookHeight = tl->getProperty(Pid::BEGIN_HOOK_HEIGHT).value<Spatium>();
+        tl->setProperty(Pid::BEGIN_HOOK_HEIGHT, -beginHookHeight);
+    }
+    if (!tl->isStyled(Pid::END_HOOK_HEIGHT)) {
+        Spatium endHookHeight = tl->getProperty(Pid::END_HOOK_HEIGHT).value<Spatium>();
+        tl->setProperty(Pid::END_HOOK_HEIGHT, -endHookHeight);
+    }
+}
+
+void CompatUtils::setMusicSymbolSize470(MStyle& style)
+{
+    // Music symbols have their own point size in 4.7
+    // Initialize this to the text type's default font size
+    for (TextStyleType textStyleType : allTextStyles()) {
+        if (textStyleType == TextStyleType::REPEAT_LEFT || textStyleType == TextStyleType::REPEAT_RIGHT) {
+            continue;
+        }
+
+        const TextStyle* ts = textStyle(textStyleType);
+        Sid musicSymbolSizeSid = Sid::NOSTYLE;
+        Sid fontSizeSid = Sid::NOSTYLE;
+
+        for (size_t i = 0; i < TEXT_STYLE_SIZE; ++i) {
+            if (ts->at(i).pid == Pid::MUSIC_SYMBOL_SIZE) {
+                musicSymbolSizeSid = ts->at(i).sid;
+            }
+
+            if (ts->at(i).pid == Pid::FONT_SIZE) {
+                fontSizeSid = ts->at(i).sid;
+            }
+        }
+
+        if (musicSymbolSizeSid == Sid::NOSTYLE || fontSizeSid == Sid::NOSTYLE) {
+            continue;
+        }
+
+        double size = style.value(fontSizeSid).toDouble();
+        if (textStyleType == TextStyleType::TEMPO) {
+            size *= TempoText::DEFAULT_SYM_SIZE_RATIO;
+        }
+
+        style.set(musicSymbolSizeSid, size);
+    }
+}
+
+void CompatUtils::doMigrateNoteParens(EngravingItem* item)
+{
+    if (!item->isNote()) {
+        return;
+    }
+    Note* note = toNote(item);
+    if (!note->leftParen() && !note->rightParen()) {
+        return;
+    }
+
+    if (note->leftParen()) {
+        note->remove(note->leftParen());
+    }
+
+    if (note->rightParen()) {
+        note->remove(note->rightParen());
+    }
+
+    Chord* chord = note->chord();
+
+    EditChord::addChordParentheses(chord, { note });
+}
+
+static constexpr double PRE_470_DPI = 360;
+
+Spatium CompatUtils::convertPre470FrameRadius(double frameRadius)
+{
+    // The frame radius used to be expressed in raster units and divided by 2 at drawing. Since 4.7 it is expressed in spatium.
+    return Spatium(frameRadius * (DPI / PRE_470_DPI) / DefaultStyle::baseStyle().value(Sid::spatium).toDouble()) / 2;
+}
+
+void CompatUtils::convertPre470ImageSize(Image* image)
+{
+    if (image->size().isNull() && image->score()->mscVersion() < 470) {
+        image->init();
+        image->setSize(image->size() * (DPI / PRE_470_DPI));
+    }
+}
+
+PointF CompatUtils::getAdjustedOffset(EngravingItem* item, PointF offset)
+{
+    PointF defaultOffset = item->defaultPos();
+    return offset - defaultOffset;
+}
+
+void CompatUtils::migrateOffset500(EngravingItem* item, PropertyValue& offset)
+{
+    if (!item->isTextBase() && !item->isSpanner() && !item->isSpannerSegment()) {
+        return;
+    }
+
+    // We need additional context for items with voice assignment properties
+    // Migrate in EngravingCompat after layout
+    if (item->hasVoiceAssignmentProperties()) {
+        return;
+    }
+
+    offset = getAdjustedOffset(item, offset.value<PointF>());
+}
+
+void CompatUtils::migrateOffsetPre302(EngravingItem* item, int mscVersion)
+{
+    if (mscVersion > 301 || item->offset().isNull()) {
+        return;
+    }
+
+    PropertyValue offset = item->getProperty(Pid::OFFSET);
+    CompatUtils::migrateOffset500(item, offset);
+    item->setProperty(Pid::OFFSET, offset);
+}
+
+void CompatUtils::removeMMRestElements(MasterScore* masterScore)
+{
+    // <5.0 MMRests had copies of underlying elements. We now move the element when toggling the rests.
+    // Remove redundant copies which are written to the file
+
+    for (Score* score : masterScore->scoreList()) {
+        for (MeasureBase* mb = score->first(); mb; mb = mb->next()) {
+            if (!mb->isMeasure()) {
+                continue;
+            }
+            Measure* m = toMeasure(mb);
+            Measure* mmrest = m->mmRest();
+
+            if (!mmrest) {
+                continue;
+            }
+
+            // Remove jumps/markers/layout breaks
+            std::vector<EngravingItem*> measureEls = mmrest->el();
+            for (EngravingItem* el : measureEls) {
+                el->unlink();
+                score->removeElement(el);
+                delete el;
+            }
+
+            // Remove annotations
+            for (Segment& seg : mmrest->segments()) {
+                std::vector<EngravingItem*> annotations = seg.annotations();
+                for (EngravingItem* annotation : annotations) {
+                    annotation->unlink();
+                    score->removeElement(annotation);
+                    delete annotation;
+                }
+                if (seg.isChordRestType()) {
+                    continue;
+                }
+                // Remove time sigs, key sigs, clefs, ambitus, breaths, barlines
+                for (staff_idx_t staffIdx = 0; staffIdx < score->nstaves(); ++staffIdx) {
+                    EngravingItem* el = seg.element(staff2track(staffIdx));
+                    if (!el) {
+                        continue;
+                    }
+                    el->unlink();
+                    score->removeElement(el);
+                    delete el;
+                }
             }
         }
     }

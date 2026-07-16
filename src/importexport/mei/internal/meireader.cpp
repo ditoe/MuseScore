@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,16 +30,17 @@
 #include "meiimporter.h"
 #include "meiconverter.h"
 
+using namespace muse;
 using namespace mu::iex::mei;
 using namespace mu::engraving;
 
-mu::Ret MeiReader::read(MasterScore* score, const io::path_t& path, const Options& options)
+Ret MeiReader::read(MasterScore* score, const muse::io::path_t& path, const Options& options)
 {
     Err result = this->import(score, path, options);
-    return (result == Err::NoError) ? make_ok() : make_ret(result, path);
+    return (result == Err::NoError) ? muse::make_ok() : make_ret(result, path);
 }
 
-Err MeiReader::import(MasterScore* score, const io::path_t& path, const Options& options)
+Err MeiReader::import(MasterScore* score, const muse::io::path_t& path, const Options& options)
 {
     if (!fileSystem()->exists(path)) {
         return Err::FileNotFound;
@@ -59,8 +60,9 @@ Err MeiReader::import(MasterScore* score, const io::path_t& path, const Options&
     bool hasWarnings = (Convert::logs.size() > 0);
 
     if (!forceMode && !MScore::noGui && hasWarnings) {
-        const String text
-            = qtrc("iex_mei", "%n problem(s) occured and the import may be incomplete.", nullptr, static_cast<int>(Convert::logs.size()));
+        int numLogs = static_cast<int>(Convert::logs.size());
+        const String text = muse::qtrc("iex_mei", "%Ln problem(s) occurred and the import may be incomplete.",
+                                       nullptr, numLogs);
         if (!this->askToLoadDespiteWarnings(text, Convert::logs.join(u"\n"))) {
             return Err::FileBadFormat;
         }
@@ -72,11 +74,14 @@ Err MeiReader::import(MasterScore* score, const io::path_t& path, const Options&
 /**
  * Show a dialog displaying the MEI import problem(s) and ask whether to load or cancel.
  */
-bool MeiReader::askToLoadDespiteWarnings(const String& text, const String& detailedText)
+bool MeiReader::askToLoadDespiteWarnings(const String& title, const String& detailedText)
 {
-    using framework::IInteractive;
-    IInteractive::Button btn = interactive()->warning(
-        text.toStdString(), trc("iex_mei", "Do you want to try to load this MEI file anyway?"), detailedText.toStdString(), {
+    IInteractive::Text t;
+    t.text = muse::trc("iex_mei", "Do you want to try to load this MEI file anyway?");
+    t.detailedText = detailedText.toStdString();
+
+    IInteractive::Button btn = interactive()->warningSync(
+        title.toStdString(), t, {
         interactive()->buttonData(IInteractive::Button::Cancel),
         interactive()->buttonData(IInteractive::Button::Yes)
     }, (int)IInteractive::Button::Yes).standardButton();

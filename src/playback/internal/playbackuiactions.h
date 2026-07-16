@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,40 +26,48 @@
 #include "playbackcontroller.h"
 #include "modularity/ioc.h"
 #include "context/iuicontextresolver.h"
+#include "context/iglobalcontext.h"
 #include "async/asyncable.h"
 #include "ui/uitypes.h"
 
 namespace mu::playback {
-class PlaybackUiActions : public ui::IUiActionsModule, public async::Asyncable
+class PlaybackUiActions : public muse::ui::IUiActionsModule, public muse::async::Asyncable, public muse::Contextable
 {
-    INJECT(context::IUiContextResolver, uicontextResolver)
+    muse::ContextInject<context::IUiContextResolver> uicontextResolver = { this };
+    muse::ContextInject<context::IGlobalContext> globalContext = { this };
 
 public:
-    PlaybackUiActions(std::shared_ptr<PlaybackController> controller);
+    PlaybackUiActions(std::shared_ptr<PlaybackController> controller, const muse::modularity::ContextPtr& iocCtx);
 
     void init();
 
-    const ui::UiActionList& actionsList() const override;
+    const muse::ui::UiActionList& actionsList() const override;
 
-    bool actionEnabled(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionEnabledChanged() const override;
+    bool actionEnabled(const muse::ui::UiAction& act) const override;
+    muse::async::Channel<muse::actions::ActionCodeList> actionEnabledChanged() const override;
 
-    bool actionChecked(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionCheckedChanged() const override;
+    bool actionChecked(const muse::ui::UiAction& act) const override;
+    muse::async::Channel<muse::actions::ActionCodeList> actionCheckedChanged() const override;
 
-    static const ui::UiActionList& settingsActions();
-    static const ui::UiActionList& loopBoundaryActions();
+    static const muse::ui::UiActionList& midiInputActions();
+    static const muse::ui::UiActionList& midiInputPitchActions();
+    static const muse::ui::UiActionList& settingsActions();
+    static const muse::ui::UiActionList& loopBoundaryActions();
 
-    static const ui::ToolConfig& defaultPlaybackToolConfig();
+    static const muse::ui::ToolConfig& defaultPlaybackToolConfig();
 
 private:
-    static const ui::UiActionList m_mainActions;
-    static const ui::UiActionList m_settingsActions;
-    static const ui::UiActionList m_loopBoundaryActions;
+    static const muse::ui::UiActionList s_mainActions;
+    static const muse::ui::UiActionList s_midiInputActions;
+    static const muse::ui::UiActionList s_midiInputPitchActions;
+    static const muse::ui::UiActionList s_settingsActions;
+    static const muse::ui::UiActionList s_loopBoundaryActions;
+    static const muse::ui::UiActionList s_diagnosticActions;
+    static const muse::ui::UiActionList s_onlineSoundsActions;
 
     std::shared_ptr<PlaybackController> m_controller;
-    async::Channel<actions::ActionCodeList> m_actionEnabledChanged;
-    async::Channel<actions::ActionCodeList> m_actionCheckedChanged;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionEnabledChanged;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionCheckedChanged;
 };
 }
 

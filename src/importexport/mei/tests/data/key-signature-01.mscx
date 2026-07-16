@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.74978</Spatium>
+      <spatium>1.75</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -16,21 +17,23 @@
     <metaTag name="meiHead">&lt;meiHead&gt;&lt;fileDesc&gt;&lt;titleStmt&gt;&lt;title&gt;Untitled score&lt;/title&gt;&lt;respStmt&gt;&lt;persName role=&quot;composer&quot;&gt;Composer / arranger&lt;/persName&gt;&lt;/respStmt&gt;&lt;/titleStmt&gt;&lt;pubStmt&gt;&lt;date isodate=&quot;2023-08-11T14:52:51&quot;/&gt;&lt;/pubStmt&gt;&lt;/fileDesc&gt;&lt;/meiHead&gt;</metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">Untitled score</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName></trackName>
       <Instrument id="piano">
-        <longName>Clarinet in B♭</longName>
-        <shortName>Cl. in B♭</shortName>
+        <InstrumentLabel>
+          <longName>Clarinet in B♭</longName>
+          <shortName>Cl. in B♭</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <transposeDiatonic>-1</transposeDiatonic>
         <transposeChromatic>-2</transposeChromatic>
@@ -40,22 +43,30 @@
         </Instrument>
       </Part>
     <Part id="2">
-      <Staff id="2">
+      <eid>E_E</eid>
+      <Staff>
+        <eid>F_F</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
-        <bracket type="1" span="2" col="0" visible="1"/>
+        <BracketItem>
+          <type>Brace</type>
+          <bracketSpan>2</bracketSpan>
+          <level>0</level>
+          </BracketItem>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <Staff id="3">
+      <Staff>
+        <eid>G_G</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName></trackName>
       <Instrument id="piano">
-        <longName>Piano</longName>
-        <shortName>Pno.</shortName>
+        <InstrumentLabel>
+          <longName>Piano</longName>
+          <shortName>Pno.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <instrumentId>keyboard.piano</instrumentId>
         <Channel>
@@ -65,36 +76,46 @@
     <Staff id="1">
       <VBox>
         <height>10</height>
+        <eid>H_H</eid>
         <Text>
+          <eid>I_I</eid>
           <style>title</style>
           <text>Untitled score</text>
           </Text>
         <Text>
+          <eid>J_J</eid>
           <style>subtitle</style>
           <text>Subtitle</text>
           </Text>
         <Text>
+          <eid>K_K</eid>
           <style>composer</style>
           <text>Composer / arranger</text>
           </Text>
         </VBox>
       <Measure>
+        <eid>L_L</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>M_M</eid>
             </Clef>
           <KeySig>
+            <eid>N_N</eid>
             <concertKey>2</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>O_O</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
+            <eid>P_P</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               <tpc2>17</tpc2>
@@ -103,8 +124,10 @@
           </voice>
         <voice>
           <Chord>
+            <eid>R_R</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>S_S</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
@@ -113,13 +136,17 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>T_T</eid>
         <voice>
           <KeySig>
+            <eid>U_U</eid>
             <concertKey>-1</concertKey>
             </KeySig>
           <Chord>
+            <eid>V_V</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>W_W</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               <tpc2>17</tpc2>
@@ -128,8 +155,10 @@
           </voice>
         <voice>
           <Chord>
+            <eid>X_X</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>Y_Y</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
@@ -138,18 +167,23 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>Z_Z</eid>
         <voice>
           <KeySig>
+            <eid>a_a</eid>
             <concertKey>2</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>b_b</eid>
             <sigN>3</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
+            <eid>c_c</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Note>
+              <eid>d_d</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               <tpc2>17</tpc2>
@@ -157,13 +191,16 @@
             </Chord>
           <BarLine>
             <subtype>end</subtype>
+            <eid>e_e</eid>
             </BarLine>
           </voice>
         <voice>
           <Chord>
+            <eid>f_f</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Note>
+              <eid>g_g</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               <tpc2>16</tpc2>
@@ -179,20 +216,25 @@
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>h_h</eid>
             </Clef>
           <TimeSig>
+            <eid>i_i</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>j_j</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         <voice>
           <Chord>
+            <eid>k_k</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>l_l</eid>
               <pitch>64</pitch>
               <tpc>18</tpc>
               </Note>
@@ -202,17 +244,21 @@
       <Measure>
         <voice>
           <KeySig>
+            <eid>m_m</eid>
             <concertKey>-3</concertKey>
             </KeySig>
           <Rest>
+            <eid>n_n</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         <voice>
           <Chord>
+            <eid>o_o</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>p_p</eid>
               <pitch>63</pitch>
               <tpc>11</tpc>
               </Note>
@@ -222,25 +268,31 @@
       <Measure>
         <voice>
           <KeySig>
+            <eid>q_q</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>r_r</eid>
             <sigN>3</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>s_s</eid>
             <durationType>measure</durationType>
             <duration>3/4</duration>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>t_t</eid>
             </BarLine>
           </voice>
         <voice>
           <Chord>
+            <eid>u_u</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Note>
+              <eid>v_v</eid>
               <pitch>64</pitch>
               <tpc>18</tpc>
               </Note>
@@ -255,20 +307,25 @@
             <concertClefType>F</concertClefType>
             <transposingClefType>F</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>w_w</eid>
             </Clef>
           <TimeSig>
+            <eid>x_x</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>y_y</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         <voice>
           <Chord>
+            <eid>z_z</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>0_0</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               </Note>
@@ -278,17 +335,21 @@
       <Measure>
         <voice>
           <KeySig>
+            <eid>1_1</eid>
             <concertKey>-3</concertKey>
             </KeySig>
           <Rest>
+            <eid>2_2</eid>
             <durationType>measure</durationType>
             <duration>4/4</duration>
             </Rest>
           </voice>
         <voice>
           <Chord>
+            <eid>3_3</eid>
             <durationType>whole</durationType>
             <Note>
+              <eid>4_4</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               </Note>
@@ -298,25 +359,31 @@
       <Measure>
         <voice>
           <KeySig>
+            <eid>5_5</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>6_6</eid>
             <sigN>3</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>7_7</eid>
             <durationType>measure</durationType>
             <duration>3/4</duration>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>8_8</eid>
             </BarLine>
           </voice>
         <voice>
           <Chord>
+            <eid>9_9</eid>
             <dots>1</dots>
             <durationType>half</durationType>
             <Note>
+              <eid>+_+</eid>
               <pitch>48</pitch>
               <tpc>14</tpc>
               </Note>

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -36,7 +36,7 @@ namespace mu::engraving::compat {
 
 class PageFormat
 {
-    mu::SizeF _size;
+    muse::SizeF _size;
     double _printableWidth;          // _width - left margin - right margin
     double _evenLeftMargin;          // values in inch
     double _oddLeftMargin;
@@ -49,10 +49,10 @@ class PageFormat
 public:
     PageFormat() {}
 
-    const SizeF& size() const { return _size; } // size in inch
+    const muse::SizeF& size() const { return _size; } // size in inch
     double width() const { return _size.width(); }
     double height() const { return _size.height(); }
-    void setSize(const SizeF& s) { _size = s; }
+    void setSize(const muse::SizeF& s) { _size = s; }
 
     void read206(XmlReader&);
 
@@ -80,6 +80,8 @@ public:
     double oddRightMargin() const { return _size.width() - _printableWidth - _oddLeftMargin; }
 };
 
+void initPageFormat(MStyle* style, PageFormat* pf);
+void setPageFormat(MStyle* style, const PageFormat& pf);
 void readPageFormat206(MStyle* style, XmlReader& e);
 }
 #endif // MU_ENGRAVING_READPAGEFORMAT_H

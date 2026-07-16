@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,11 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+ 
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
+import Muse.UiComponents
+import Muse.Ui
 
 Item {
     id: root
@@ -34,7 +35,11 @@ Item {
     property alias beatNumber: beatNumberField.value
     property alias maxBeatNumber: beatNumberField.maxValue
 
-    property var font: ui.theme.largeBodyFont
+    property font font: ui.theme.largeBodyFont
+
+    property NavigationPanel navigationPanel: null
+    property int navigationOrderStart: 0
+    readonly property int navigationOrderEnd: beatNumberField.navigation.order
 
     signal measureNumberEdited(var newValue)
     signal beatNumberEdited(var newValue)
@@ -66,6 +71,11 @@ Item {
 
                 font: root.font
 
+                navigation.panel: root.navigationPanel
+                navigation.order: root.navigationOrderStart
+                navigation.name: "measure"
+                accessible.name: qsTrc("playback", "Measure", "Measure number")
+
                 onValueEdited: function(newValue) {
                     root.measureNumberEdited(newValue)
                 }
@@ -93,6 +103,11 @@ Item {
                 addLeadingZeros: false
 
                 font: root.font
+
+                navigation.panel: root.navigationPanel
+                navigation.order: root.navigationOrderStart + 1
+                navigation.name: "beat"
+                accessible.name: qsTrc("playback", "Beat", "Beat number")
 
                 onValueEdited: function(newValue) {
                     root.beatNumberEdited(newValue)

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __KEY__H__
-#define __KEY__H__
+#pragma once
 
 #include <vector>
 #include <array>
 
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class Score;
@@ -39,9 +38,9 @@ enum class AccidentalVal : signed char;
 //---------------------------------------------------------
 
 struct KeySym {
-    SymId sym;
-    int line;       // relative line position (first staffline: line == 0, first gap: line == 1, ...)
-    double xPos;    // x position in staff spatium units
+    SymId sym = SymId::noSym;
+    int line = 0;       // relative line position (first staffline: line == 0, first gap: line == 1, ...)
+    Spatium xPos = 0.0_sp;    // x position in staff spatium units
 };
 
 //---------------------------------------------------------
@@ -50,10 +49,10 @@ struct KeySym {
 //---------------------------------------------------------
 
 struct CustDef {
-    int degree;             // scale degree
-    SymId sym;
-    double xAlt { 0.0 };    // x position alteration in spatium units (default symbol position is based on index)
-    int octAlt { 0 };       // octave alteration
+    int degree = 0;             // scale degree
+    SymId sym = SymId::noSym;
+    Spatium xAlt = 0.0_sp;    // x position alteration in spatium units (default symbol position is based on index)
+    int octAlt = 0;       // octave alteration
 };
 
 //---------------------------------------------------------
@@ -111,9 +110,6 @@ static const int MAX_ACC_STATE = 75;
 
 class AccidentalState
 {
-    uint8_t state[MAX_ACC_STATE] = {};      // (0 -- 4) | TIE_CONTEXT
-    std::array<bool, MAX_ACC_STATE> m_forceRestateAccidental;
-
 public:
     AccidentalState() {}
     void init(Key key);
@@ -124,12 +120,15 @@ public:
     bool tieContext(int line) const;
     void setAccidentalVal(int line, AccidentalVal val, bool tieContext = false);
     void setForceRestateAccidental(int line, bool forceRestate);
+
+private:
+
+    uint8_t m_state[MAX_ACC_STATE] = {};      // (0 -- 4) | TIE_CONTEXT
+    std::array<bool, MAX_ACC_STATE> m_forceRestateAccidental;
 };
 
 struct Interval;
 
 enum class PreferSharpFlat : char;
-extern Key transposeKey(Key oldKey, const Interval&, PreferSharpFlat prefer = PreferSharpFlat(0));
 extern Interval calculateInterval(Key key1, Key key2);
 } // namespace mu::engraving
-#endif

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,9 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef MU_ENGRAVING_ORNAMENT_H
-#define MU_ENGRAVING_ORNAMENT_H
+#pragma once
 
 #include "articulation.h"
 
@@ -39,6 +37,8 @@ public:
     Ornament(const Ornament& o);
     ~Ornament();
 
+    TranslatableString typeUserName() const override;
+
     static SymId fromTrillType(TrillType trillType);
 
     PropertyValue getProperty(Pid propertyId) const override;
@@ -49,32 +49,32 @@ public:
     bool hasIntervalAbove() const;
     bool hasIntervalBelow() const;
     bool hasFullIntervalChoice() const;
-    bool showCueNote() { return _intervalAbove.step != IntervalStep::SECOND; }
+    bool showCueNote();
 
     void computeNotesAboveAndBelow(AccidentalState* accState);
 
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
-
-    Shape shape() const override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
 
     void remove(EngravingItem* e) override;
 
-    Chord* cueNoteChord() const { return _cueNoteChord; }
-    void setCueNoteChord(Chord* c) { _cueNoteChord = c; }
-    void setNoteAbove(Note* n) { _notesAboveAndBelow[0] = n; }
+    Chord* cueNoteChord() const { return m_cueNoteChord; }
+    void setCueNoteChord(Chord* c) { m_cueNoteChord = c; }
+    void setNoteAbove(Note* n) { m_notesAboveAndBelow[0] = n; }
 
-    const auto& accidentalsAboveAndBelow() const { return _accidentalsAboveAndBelow; }
-    Accidental* accidentalAbove() const { return _accidentalsAboveAndBelow[0]; }
-    Accidental* accidentalBelow() const { return _accidentalsAboveAndBelow[1]; }
-    void setAccidentalAbove(Accidental* a) { _accidentalsAboveAndBelow[0] = a; }
-    void setAccidentalBelow(Accidental* a) { _accidentalsAboveAndBelow[1] = a; }
+    const auto& accidentalsAboveAndBelow() const { return m_accidentalsAboveAndBelow; }
+    Accidental* accidentalAbove() const { return m_accidentalsAboveAndBelow[0]; }
+    Accidental* accidentalBelow() const { return m_accidentalsAboveAndBelow[1]; }
+    void setAccidentalAbove(Accidental* a) { m_accidentalsAboveAndBelow[0] = a; }
+    void setAccidentalBelow(Accidental* a) { m_accidentalsAboveAndBelow[1] = a; }
 
-    void setTrillOldCompatAccidental(Accidental* a) { _trillOldCompatAccidental = a; }
+    void setTrillOldCompatAccidental(Accidental* a) { m_trillOldCompatAccidental = a; }
 
-    Note* noteAbove() const { return _notesAboveAndBelow[0]; }
-    Note* noteBelow() const { return _notesAboveAndBelow[1]; }
+    Note* noteAbove() const { return m_notesAboveAndBelow[0]; }
+    Note* noteBelow() const { return m_notesAboveAndBelow[1]; }
 
     void setTrack(track_idx_t val) override;
+
+    void setShowCueNote(AutoOnOff show) { m_showCueNote = show; }
 
 private:
     void updateAccidentalsAboveAndBelow();
@@ -88,13 +88,13 @@ private:
     M_PROPERTY(OrnamentShowAccidental, showAccidental, setShowAccidental)
     M_PROPERTY(bool, startOnUpperNote, setStartOnUpperNote)
 
-    std::array<Note*, 2> _notesAboveAndBelow { nullptr, nullptr }; // [0] = above, [1] = below
+    std::array<Note*, 2> m_notesAboveAndBelow { nullptr, nullptr }; // [0] = above, [1] = below
 
-    std::array<Accidental*, 2> _accidentalsAboveAndBelow { nullptr, nullptr }; // [0] = above, [1] = below
+    std::array<Accidental*, 2> m_accidentalsAboveAndBelow { nullptr, nullptr }; // [0] = above, [1] = below
 
-    Chord* _cueNoteChord = nullptr;
+    Chord* m_cueNoteChord = nullptr;
+    AutoOnOff m_showCueNote = AutoOnOff::AUTO;
 
-    Accidental* _trillOldCompatAccidental = nullptr; // used temporarily to map old (i.e. pre-4.1) trill accidentals
+    Accidental* m_trillOldCompatAccidental = nullptr; // used temporarily to map old (i.e. pre-4.1) trill accidentals
 };
-} // namespace mu::engraving
-#endif // MU_ENGRAVING_ORNAMENT_H
+}

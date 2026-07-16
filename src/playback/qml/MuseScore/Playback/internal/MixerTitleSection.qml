@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Audio 1.0
-import MuseScore.Playback 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Playback
 
 MixerPanelSection {
     id: root
@@ -32,6 +34,10 @@ MixerPanelSection {
     headerTitle: qsTrc("playback", "Name")
 
     Rectangle {
+        id: content
+
+        required property MixerChannelItem channelItem
+
         width: root.channelItemWidth
         height: 22
 
@@ -64,6 +70,7 @@ MixerPanelSection {
         border.width: 1
 
         StyledTextLabel {
+            id: textLabel
             anchors.centerIn: parent
 
             font: ui.theme.bodyBoldFont
@@ -71,7 +78,23 @@ MixerPanelSection {
             readonly property int margin: -8
             width: margin + parent.width + margin
 
-            text: channelItem.title
+            text: content.channelItem.title
+        }
+
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+
+            enabled: parent.enabled
+            hoverEnabled: true
+
+            onContainsMouseChanged: {
+                if (mouseArea.containsMouse && textLabel.truncated) {
+                    ui.tooltip.show(mouseArea, content.channelItem.title)
+                } else {
+                    ui.tooltip.hide(mouseArea)
+                }
+            }
         }
     }
 }

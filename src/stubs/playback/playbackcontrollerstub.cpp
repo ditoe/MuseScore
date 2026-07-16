@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2025 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,16 @@
 #include "playbackcontrollerstub.h"
 
 using namespace mu::playback;
+using namespace muse::actions;
 
 bool PlaybackControllerStub::isPlayAllowed() const
 {
     return false;
 }
 
-mu::async::Notification PlaybackControllerStub::isPlayAllowedChanged() const
+muse::async::Channel<bool> PlaybackControllerStub::isPlayAllowedChanged() const
 {
-    return mu::async::Notification();
+    return {};
 }
 
 bool PlaybackControllerStub::isPlaying() const
@@ -38,46 +39,29 @@ bool PlaybackControllerStub::isPlaying() const
     return false;
 }
 
-mu::async::Notification PlaybackControllerStub::isPlayingChanged() const
+muse::async::Channel<bool> PlaybackControllerStub::isPlayingChanged() const
 {
-    return mu::async::Notification();
+    return {};
 }
 
-void PlaybackControllerStub::seek(const midi::tick_t)
+bool PlaybackControllerStub::isPlaybackInited() const
 {
+    return false;
 }
 
-void PlaybackControllerStub::seek(const audio::msecs_t)
+muse::async::Channel<bool> PlaybackControllerStub::playbackInitedChanged() const
 {
+    return {};
 }
 
-void PlaybackControllerStub::reset()
+bool PlaybackControllerStub::isLoopEnabled() const
 {
+    return false;
 }
 
-mu::async::Notification PlaybackControllerStub::playbackPositionChanged() const
+muse::async::Channel<bool> PlaybackControllerStub::loopEnabledChanged() const
 {
-    return mu::async::Notification();
-}
-
-mu::async::Channel<uint32_t> PlaybackControllerStub::midiTickPlayed() const
-{
-    return mu::async::Channel<uint32_t>();
-}
-
-float PlaybackControllerStub::playbackPositionInSeconds() const
-{
-    return 0.f;
-}
-
-mu::audio::TrackSequenceId PlaybackControllerStub::currentTrackSequenceId() const
-{
-    return 0;
-}
-
-mu::async::Notification PlaybackControllerStub::currentTrackSequenceIdChanged() const
-{
-    return mu::async::Notification();
+    return {};
 }
 
 const IPlaybackController::InstrumentTrackIdMap& PlaybackControllerStub::instrumentTrackIdMap() const
@@ -92,27 +76,49 @@ const IPlaybackController::AuxTrackIdMap& PlaybackControllerStub::auxTrackIdMap(
     return m;
 }
 
-mu::async::Channel<mu::audio::TrackId> PlaybackControllerStub::trackAdded() const
+muse::async::Channel<muse::audio::TrackId> PlaybackControllerStub::trackAdded() const
 {
     return {};
 }
 
-mu::async::Channel<mu::audio::TrackId> PlaybackControllerStub::trackRemoved() const
+muse::async::Channel<muse::audio::TrackId> PlaybackControllerStub::trackRemoved() const
 {
     return {};
 }
 
-std::string PlaybackControllerStub::auxChannelName(audio::aux_channel_idx_t) const
+std::string PlaybackControllerStub::auxChannelName(muse::audio::aux_channel_idx_t) const
 {
     return "";
 }
 
-mu::async::Channel<mu::audio::aux_channel_idx_t, std::string> PlaybackControllerStub::auxChannelNameChanged() const
+muse::async::Channel<muse::audio::aux_channel_idx_t, std::string> PlaybackControllerStub::auxChannelNameChanged() const
 {
     return {};
 }
 
-void PlaybackControllerStub::playElements(const std::vector<const notation::EngravingItem*>&)
+muse::async::Promise<muse::audio::SoundPresetList> PlaybackControllerStub::availableSoundPresets(const engraving::InstrumentTrackId&) const
+{
+    return muse::async::Promise<muse::audio::SoundPresetList>([](auto /*resolve*/, auto reject) {
+        return reject(int(muse::Ret::Code::UnknownError), "stub");
+    });
+}
+
+const PlaybackControllerStub::SoloMuteState& PlaybackControllerStub::trackSoloMuteState(const engraving::InstrumentTrackId&) const
+{
+    static const SoloMuteState state;
+    return state;
+}
+
+void PlaybackControllerStub::setTrackSoloMuteState(const engraving::InstrumentTrackId&, const SoloMuteState&)
+{
+}
+
+void PlaybackControllerStub::playElements(const std::vector<const engraving::EngravingItem*>&, const PlayParams&, bool)
+{
+}
+
+void PlaybackControllerStub::playNotes(const engraving::NoteValList&, engraving::staff_idx_t, const engraving::Segment*,
+                                       const PlayParams&)
 {
 }
 
@@ -120,46 +126,55 @@ void PlaybackControllerStub::playMetronome(int)
 {
 }
 
-void PlaybackControllerStub::seekElement(const notation::EngravingItem*)
+void PlaybackControllerStub::triggerControllers(const muse::mpe::ControllerChangeEventList&, engraving::staff_idx_t, int)
 {
 }
 
-bool PlaybackControllerStub::actionChecked(const actions::ActionCode&) const
+void PlaybackControllerStub::seekElement(const engraving::EngravingItem*, bool)
+{
+}
+
+void PlaybackControllerStub::seekBeat(int, int, bool)
+{
+}
+
+bool PlaybackControllerStub::actionChecked(const ActionCode&) const
 {
     return false;
 }
 
-mu::async::Channel<mu::actions::ActionCode> PlaybackControllerStub::actionCheckedChanged() const
+muse::async::Channel<ActionCode> PlaybackControllerStub::actionCheckedChanged() const
 {
     return {};
 }
 
-QTime PlaybackControllerStub::totalPlayTime() const
+muse::secs_t PlaybackControllerStub::totalPlayTime() const
+{
+    return muse::secs_t { 0.0 };
+}
+
+muse::async::Notification PlaybackControllerStub::totalPlayTimeChanged() const
 {
     return {};
 }
 
-mu::async::Notification PlaybackControllerStub::totalPlayTimeChanged() const
+const mu::notation::Tempo& PlaybackControllerStub::currentTempo() const
+{
+    static const mu::notation::Tempo dummyTempo;
+    return dummyTempo;
+}
+
+muse::async::Notification PlaybackControllerStub::currentTempoChanged() const
 {
     return {};
 }
 
-mu::notation::Tempo PlaybackControllerStub::currentTempo() const
+mu::engraving::MeasureBeat PlaybackControllerStub::currentBeat() const
 {
     return {};
 }
 
-mu::async::Notification PlaybackControllerStub::currentTempoChanged() const
-{
-    return {};
-}
-
-mu::notation::MeasureBeat PlaybackControllerStub::currentBeat() const
-{
-    return {};
-}
-
-mu::audio::msecs_t PlaybackControllerStub::beatToMilliseconds(int, int) const
+muse::audio::secs_t PlaybackControllerStub::beatToSecs(int, int) const
 {
     return 0;
 }
@@ -173,7 +188,7 @@ void PlaybackControllerStub::setTempoMultiplier(double)
 {
 }
 
-mu::framework::Progress PlaybackControllerStub::loadingProgress() const
+muse::Progress PlaybackControllerStub::loadingProgress() const
 {
     return {};
 }
@@ -188,4 +203,20 @@ void PlaybackControllerStub::setNotation(notation::INotationPtr)
 
 void PlaybackControllerStub::setIsExportingAudio(bool)
 {
+}
+
+const std::map<muse::audio::TrackId, muse::audio::AudioResourceMeta>& PlaybackControllerStub::onlineSounds() const
+{
+    static const std::map<muse::audio::TrackId, muse::audio::AudioResourceMeta> dummy;
+    return dummy;
+}
+
+muse::async::Notification PlaybackControllerStub::onlineSoundsChanged() const
+{
+    return {};
+}
+
+muse::Progress PlaybackControllerStub::onlineSoundsProcessingProgress() const
+{
+    return {};
 }

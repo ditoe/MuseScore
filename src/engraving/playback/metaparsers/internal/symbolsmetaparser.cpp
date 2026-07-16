@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,22 +25,31 @@
 #include "dom/articulation.h"
 
 using namespace mu::engraving;
+using namespace muse;
 
-void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContext& ctx, mpe::ArticulationMap& result)
+static mpe::ArticulationType textTypeToArticulationType(ArticulationTextType textType)
 {
-    IF_ASSERT_FAILED(item->isArticulationFamily()) {
-        return;
+    switch (textType) {
+    case ArticulationTextType::NO_TEXT: return mpe::ArticulationType::Standard;
+    case ArticulationTextType::SLAP: return mpe::ArticulationType::Slap;
+    case ArticulationTextType::POP: return mpe::ArticulationType::Pop;
+    case ArticulationTextType::TD: return mpe::ArticulationType::ThumbDamp;
+    case ArticulationTextType::BD: return mpe::ArticulationType::BrushDamp;
+    case ArticulationTextType::RT: return mpe::ArticulationType::RingTouch;
+    case ArticulationTextType::PL: return mpe::ArticulationType::Pluck;
+    case ArticulationTextType::SB: return mpe::ArticulationType::SingingBell;
+    case ArticulationTextType::VIB: return mpe::ArticulationType::SingingVibrate;
     }
 
-    const Articulation* articulationSymbol = toArticulation(item);
+    UNREACHABLE;
+    return mpe::ArticulationType::Undefined;
+}
 
-    if (!articulationSymbol->playArticulation()) {
-        return;
-    }
-
+mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symId, OrnamentStyle ornamentStyle)
+{
     mpe::ArticulationTypeSet types;
 
-    switch (articulationSymbol->symId()) {
+    switch (symId) {
     case SymId::articAccentAbove:
     case SymId::articAccentBelow:
         types.emplace(mpe::ArticulationType::Accent);
@@ -138,7 +147,6 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
         break;
     case SymId::stringsMuteOn:
     case SymId::elecMute:
-    case SymId::handbellsMutedMartellato:
     case SymId::brassMuteHalfClosed:
     case SymId::brassMuteClosed:
     case SymId::brassHarmonMuteStemHalfRight:
@@ -158,7 +166,6 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
     case SymId::stringsMuteOff:
         types.emplace(mpe::ArticulationType::Open);
         break;
-
     case SymId::pluckedLeftHandPizzicato:
         types.emplace(mpe::ArticulationType::Pizzicato);
         break;
@@ -177,12 +184,18 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
         types.emplace(mpe::ArticulationType::Jete);
         break;
     case SymId::noteheadXWhole:
-    case SymId::noteheadXOrnate:
     case SymId::noteheadXBlack:
     case SymId::noteheadXDoubleWhole:
     case SymId::noteheadWholeWithX:
     case SymId::noteheadVoidWithX:
         types.emplace(mpe::ArticulationType::CrossNote);
+        break;
+    case SymId::noteheadSlashX:
+        types.emplace(mpe::ArticulationType::CrossLargeNote);
+        break;
+    case SymId::noteheadXOrnate:
+    case SymId::noteheadXOrnateEllipse:
+        types.emplace(mpe::ArticulationType::CrossOrnateNote);
         break;
     case SymId::noteheadCircleSlash:
     case SymId::noteheadCircledBlack:
@@ -194,6 +207,16 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
     case SymId::noteheadCircledWhole:
     case SymId::noteheadCircledWholeLarge:
         types.emplace(mpe::ArticulationType::CircleNote);
+        break;
+    case SymId::noteheadCircleX:
+    case SymId::noteheadCircleXDoubleWhole:
+    case SymId::noteheadCircleXHalf:
+    case SymId::noteheadCircleXWhole:
+        types.emplace(mpe::ArticulationType::CircleCrossNote);
+        break;
+    case SymId::noteheadRoundWhiteWithDot:
+    case SymId::noteheadRoundWhiteWithDotLarge:
+        types.emplace(mpe::ArticulationType::CircleDotNote);
         break;
     case SymId::noteheadDiamondBlack:
     case SymId::noteheadDiamondBlackOld:
@@ -208,17 +231,29 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
     case SymId::noteheadDiamondHalfOld:
         types.emplace(mpe::ArticulationType::DiamondNote);
         break;
+    case SymId::noteShapeMoonBlack:
+    case SymId::noteShapeMoonDoubleWhole:
+    case SymId::noteShapeMoonWhite:
+        types.emplace(mpe::ArticulationType::MoonNote);
+        break;
+    case SymId::noteheadTriangleLeftBlack:
+    case SymId::noteheadTriangleLeftWhite:
+        types.emplace(mpe::ArticulationType::TriangleLeftNote);
+        break;
+    case SymId::noteheadTriangleRightBlack:
+    case SymId::noteheadTriangleRightWhite:
+    case SymId::noteShapeTriangleRightWhite:
+    case SymId::noteShapeTriangleRightBlack:
+    case SymId::noteShapeTriangleRightDoubleWhole:
+        types.emplace(mpe::ArticulationType::TriangleRightNote);
+        break;
     case SymId::noteheadTriangleDownBlack:
     case SymId::noteheadTriangleDownDoubleWhole:
     case SymId::noteheadTriangleDownHalf:
     case SymId::noteheadTriangleDownWhite:
     case SymId::noteheadTriangleDownWhole:
-    case SymId::noteheadTriangleLeftBlack:
-    case SymId::noteheadTriangleLeftWhite:
-    case SymId::noteheadTriangleRightBlack:
-    case SymId::noteheadTriangleRightWhite:
-    case SymId::noteheadTriangleRoundDownBlack:
-    case SymId::noteheadTriangleRoundDownWhite:
+        types.emplace(mpe::ArticulationType::TriangleDownNote);
+        break;
     case SymId::noteheadTriangleUpBlack:
     case SymId::noteheadTriangleUpDoubleWhole:
     case SymId::noteheadTriangleUpHalf:
@@ -226,7 +261,46 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
     case SymId::noteheadTriangleUpRightWhite:
     case SymId::noteheadTriangleUpWhite:
     case SymId::noteheadTriangleUpWhole:
-        types.emplace(mpe::ArticulationType::TriangleNote);
+    case SymId::noteShapeTriangleUpBlack:
+    case SymId::noteShapeTriangleUpWhite:
+    case SymId::noteShapeTriangleUpDoubleWhole:
+        types.emplace(mpe::ArticulationType::TriangleUpNote);
+        break;
+    case SymId::noteheadTriangleRoundDownBlack:
+    case SymId::noteheadTriangleRoundDownWhite:
+    case SymId::noteShapeTriangleRoundBlack:
+    case SymId::noteShapeTriangleRoundWhite:
+    case SymId::noteShapeTriangleRoundDoubleWhole:
+        types.emplace(mpe::ArticulationType::TriangleRoundDownNote);
+        break;
+    case SymId::noteheadPlusBlack:
+    case SymId::noteheadPlusDoubleWhole:
+    case SymId::noteheadPlusHalf:
+    case SymId::noteheadPlusWhole:
+        types.emplace(mpe::ArticulationType::PlusNote);
+        break;
+    case SymId::noteheadSlashWhiteWhole:
+    case SymId::noteheadSlashWhiteHalf:
+    case SymId::noteheadSlashHorizontalEnds:
+    case SymId::noteheadSlashWhiteDoubleWhole:
+        types.emplace(mpe::ArticulationType::SlashNote);
+        break;
+    case SymId::noteShapeSquareBlack:
+    case SymId::noteShapeSquareWhite:
+    case SymId::noteShapeSquareDoubleWhole:
+        types.emplace(mpe::ArticulationType::SquareNote);
+        break;
+    case SymId::noteheadSlashedWhole1:
+    case SymId::noteheadSlashedHalf1:
+    case SymId::noteheadSlashedBlack1:
+    case SymId::noteheadSlashedDoubleWhole1:
+        types.emplace(mpe::ArticulationType::SlashedForwardsNote);
+        break;
+    case SymId::noteheadSlashedWhole2:
+    case SymId::noteheadSlashedHalf2:
+    case SymId::noteheadSlashedBlack2:
+    case SymId::noteheadSlashedDoubleWhole2:
+        types.emplace(mpe::ArticulationType::SlashedBackwardsNote);
         break;
     case SymId::brassScoop:
         types.emplace(mpe::ArticulationType::Scoop);
@@ -253,13 +327,13 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
         types.emplace(mpe::ArticulationType::Doit);
         break;
     case SymId::brassBend:
-        types.emplace(mpe::ArticulationType::Bend);
+        types.emplace(mpe::ArticulationType::BrassBend);
         break;
     case SymId::dynamicCrescendoHairpin:
         types.emplace(mpe::ArticulationType::Crescendo);
         break;
     case SymId::dynamicDiminuendoHairpin:
-        types.emplace(mpe::ArticulationType::Decrescendo);
+        types.emplace(mpe::ArticulationType::Diminuendo);
         break;
     case SymId::ornamentUpPrall:
         types.emplace(mpe::ArticulationType::UpPrall);
@@ -287,24 +361,27 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
         types.emplace(mpe::ArticulationType::DownMordent);
         break;
     case SymId::ornamentTurn:
+    case SymId::ornamentTurnUp:
+    case SymId::ornamentHaydn:
     case SymId::brassJazzTurn:
         types.emplace(mpe::ArticulationType::Turn);
         break;
     case SymId::ornamentTurnInverted:
+    case SymId::ornamentTurnUpS:
     case SymId::ornamentTurnSlash:
         types.emplace(mpe::ArticulationType::InvertedTurn);
         break;
     case SymId::ornamentTrill:
     case SymId::ornamentShake3:
     case SymId::ornamentShakeMuffat1:
-        if (articulationSymbol->ornamentStyle() == OrnamentStyle::DEFAULT) {
+        if (ornamentStyle == OrnamentStyle::DEFAULT) {
             types.emplace(mpe::ArticulationType::Trill);
         } else {
             types.emplace(mpe::ArticulationType::TrillBaroque);
         }
         break;
     case SymId::ornamentShortTrill:
-        if (articulationSymbol->ornamentStyle() == OrnamentStyle::DEFAULT) {
+        if (ornamentStyle == OrnamentStyle::DEFAULT) {
             types.emplace(mpe::ArticulationType::UpperMordent);
         } else {
             types.emplace(mpe::ArticulationType::UpperMordentBaroque);
@@ -382,12 +459,61 @@ void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContex
     case SymId::wiggleVibratoWide:
         types.emplace(mpe::ArticulationType::WideVibrato);
         break;
+    case SymId::handbellsMalletBellOnTable:
+        types.emplace(mpe::ArticulationType::MalletBellOnTable);
+        break;
+    case SymId::handbellsMalletBellSuspended:
+        types.emplace(mpe::ArticulationType::MalletBellSuspended);
+        break;
+    case SymId::handbellsMalletLft:
+        types.emplace(mpe::ArticulationType::MalletLift);
+        break;
+    case SymId::handbellsPluckLift:
+        types.emplace(mpe::ArticulationType::PluckLift);
+        break;
+    case SymId::handbellsGyro:
+        types.emplace(mpe::ArticulationType::Gyro);
+        break;
+    case SymId::handbellsMartellato:
+        types.emplace(mpe::ArticulationType::Martellato);
+        break;
+    case SymId::handbellsMartellatoLift:
+        types.emplace(mpe::ArticulationType::MartellatoLift);
+        break;
+    case SymId::handbellsHandMartellato:
+        types.emplace(mpe::ArticulationType::HandMartellato);
+        break;
+    case SymId::handbellsMutedMartellato:
+        types.emplace(mpe::ArticulationType::MutedMartellato);
+        break;
     default:
         break;
     }
 
+    return types;
+}
+
+void SymbolsMetaParser::doParse(const EngravingItem* item, const RenderingContext& ctx, mpe::ArticulationMap& result)
+{
+    IF_ASSERT_FAILED(item->isArticulationFamily()) {
+        return;
+    }
+
+    const Articulation* articulationSymbol = toArticulation(item);
+    if (!articulationSymbol->playArticulation()) {
+        return;
+    }
+
+    mpe::ArticulationTypeSet types;
+
+    if (articulationSymbol->textType() != ArticulationTextType::NO_TEXT) {
+        types.insert(textTypeToArticulationType(articulationSymbol->textType()));
+    } else {
+        types = symbolToArticulations(articulationSymbol->symId(), articulationSymbol->ornamentStyle());
+    }
+
     for (mpe::ArticulationType type : types) {
-        const mpe::ArticulationPattern& pattern = ctx.profile->pattern(type);
+        const mpe::ArticulationPattern& pattern = ctx.profile->pattern(type, mpe::ArticulationType::Standard);
         if (pattern.empty()) {
             continue;
         }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_READ410_READ410_H
-#define MU_ENGRAVING_READ410_READ410_H
+#pragma once
 
 #include "../ireader.h"
 
@@ -35,16 +34,16 @@ class Read410 : public rw::IReader
 {
 public:
 
-    Err readScore(Score* score, XmlReader& e, rw::ReadInOutData* data) override;
+    muse::Ret readScoreFile(Score* score, XmlReader& e, rw::ReadInOutData* data) override;
 
-    static bool readScore410(Score* score, XmlReader& e, ReadContext& ctx);
+    static bool readScoreTag(Score* score, XmlReader& e, ReadContext& ctx);
 
     bool pasteStaff(XmlReader& e, Segment* dst, staff_idx_t dstStaff, Fraction scale) override;
     void pasteSymbols(XmlReader& e, ChordRest* dst) override;
+    void readTremoloCompat(compat::TremoloCompat* item, XmlReader& xml) override;
 
 private:
+    bool preparePasteDurationElement(Score* score, const Fraction& tick, const Fraction& ticks, const track_idx_t track);
     void doReadItem(EngravingItem* item, XmlReader& xml) override;
 };
 }
-
-#endif // MU_ENGRAVING_READ410_READ410_H

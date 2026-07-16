@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,11 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SHADOWNOTE_H__
-#define __SHADOWNOTE_H__
+#pragma once
 
 #include "engravingitem.h"
+
+#include "accidental.h"
 #include "durationtype.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 //---------------------------------------------------------
@@ -58,17 +60,26 @@ public:
 
     const TDuration& duration() const { return m_duration; }
 
-    void setState(SymId noteSymbol, TDuration duration, bool isRest, double segmentSkylineTopY, double segmentSkylineBottomY);
+    void setState(SymId noteSymbol, TDuration duration, bool isRest, bool beyondScore, AccidentalType accidentalType = AccidentalType::NONE,
+                  const std::set<SymId>& articulationIds = {});
 
-    void drawArticulations(mu::draw::Painter* painter) const;
-    void drawMarcato(mu::draw::Painter* painter, const SymId& articulation, mu::RectF& boundRect) const;
-    void drawArticulation(mu::draw::Painter* painter, const SymId& articulation, mu::RectF& boundRect) const;
+    void drawArticulations(muse::draw::Painter* painter) const;
+    void drawCloseArticulation(muse::draw::Painter* painter, const SymId& articulation, RectF& boundRect, bool up,
+                               const SymId& prevArticulation) const;
+    void drawFarArticulation(muse::draw::Painter* painter, const SymId& articulation, RectF& boundRect, bool up,
+                             bool accentStaccatoKern) const;
 
     bool computeUp() const;
     SymId noteheadSymbol() const { return m_noteheadSymbol; }
     bool hasStem() const;
     bool hasFlag() const;
     SymId flagSym() const;
+    AccidentalType accidentalType() const;
+    const std::set<SymId>& articulationIds() const;
+
+    bool ledgerLinesVisible() const;
+
+    bool isBeyondScore() const { return m_beyondScore; }
 
 private:
 
@@ -77,9 +88,8 @@ private:
     SymId m_noteheadSymbol = SymId::noSym;
     TDuration m_duration;
     bool m_isRest = false;
-
-    double m_segmentSkylineTopY = 0.0;
-    double m_segmentSkylineBottomY = 0.0;
+    AccidentalType m_accidentalType = AccidentalType::NONE;
+    std::set<SymId> m_articulationIds;
+    bool m_beyondScore = false;
 };
 } // namespace mu::engraving
-#endif

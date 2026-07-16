@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,18 +22,18 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/chord.h"
-#include "dom/factory.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/staff.h"
-#include "dom/timesig.h"
-#include "dom/tuplet.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/staff.h"
+#include "engraving/dom/timesig.h"
+#include "engraving/dom/tuplet.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String TUPLET_DATA_DIR(u"tuplet_data/");
@@ -88,7 +88,7 @@ bool Engraving_TupletTests::createTuplet(int n, ChordRest* cr)
     if (ot) {
         tuplet->setTuplet(ot);
     }
-    cr->score()->startCmd();
+    cr->score()->startCmd(TranslatableString::untranslatable("Engraving tuplet tests"));
     cr->score()->cmdCreateTuplet(cr, tuplet);
     cr->score()->endCmd();
     return true;
@@ -127,14 +127,14 @@ void Engraving_TupletTests::split(const char16_t* p1, const char16_t* p2)
     TimeSig* ts        = Factory::createTimeSig(score->dummy()->segment());
     ts->setSig(Fraction(3, 4), TimeSigType::NORMAL);
 
-    score->startCmd();
-    EditData dd(0);
-    dd.dropElement = ts;
-    dd.modifiers = {};
-    dd.dragOffset = QPointF();
-    dd.pos = m->pagePos();
-    m->drop(dd);
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving tuplet tests"), [&](Transaction& tx) {
+        EditData dd(0);
+        dd.dropElement = ts;
+        dd.modifiers = {};
+        dd.dragOffset = QPointF();
+        dd.track = 0;
+        m->drop(tx, dd);
+    });
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, p1, TUPLET_DATA_DIR + p2));
     delete score;

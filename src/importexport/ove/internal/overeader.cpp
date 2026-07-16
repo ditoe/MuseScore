@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,7 +27,7 @@ extern mu::engraving::Err importOve(mu::engraving::MasterScore*, const QString& 
 
 using namespace mu::iex::ove;
 
-mu::Ret OveReader::read(mu::engraving::MasterScore* score, const io::path_t& path, const Options&)
+muse::Ret OveReader::read(mu::engraving::MasterScore* score, const muse::io::path_t& path, const Options&)
 {
     mu::engraving::Err err = importOve(score, path.toQString());
     return mu::engraving::make_ret(err, path);

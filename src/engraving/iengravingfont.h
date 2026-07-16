@@ -9,12 +9,13 @@
 #include "types/symid.h"
 #include "style/styledef.h"
 
-namespace mu::draw {
+namespace muse::draw {
 class Painter;
 }
 
 namespace mu::engraving {
 class Shape;
+class EngravingItem;
 
 class IEngravingFont
 {
@@ -40,19 +41,21 @@ public:
     virtual double advance(SymId id, double mag) const = 0;
 
     virtual RectF bbox(SymId id, double mag) const = 0;
-    virtual RectF bbox(SymId id, const mu::SizeF&) const = 0;
+    virtual RectF bbox(SymId id, const SizeF&) const = 0;
     virtual RectF bbox(const SymIdList& sl, double mag) const = 0;
-    virtual RectF bbox(const SymIdList& s, const mu::SizeF& mag) const = 0;
+    virtual RectF bbox(const SymIdList& s, const SizeF& mag) const = 0;
     virtual Shape shape(const SymIdList& s, double mag) const = 0;
-    virtual Shape shape(const SymIdList& s, const mu::SizeF& mag) const = 0;
+    virtual Shape shape(const SymIdList& s, const SizeF& mag) const = 0;
+    virtual Shape shapeWithCutouts(SymId id, double mag) = 0;
+    virtual Shape shapeWithCutouts(SymId id, const SizeF& mag) = 0;
 
     virtual PointF smuflAnchor(SymId symId, SmuflAnchorId anchorId, double mag) const = 0;
 
     // Draw
-    virtual void draw(SymId id, draw::Painter* p, double mag, const PointF& pos) const = 0;
-    virtual void draw(SymId id, draw::Painter* p, const SizeF& mag, const PointF& pos) const = 0;
-    virtual void draw(const SymIdList& ids, draw::Painter* p, double mag, const PointF& pos) const = 0;
-    virtual void draw(const SymIdList& ids, draw::Painter* p, const SizeF& mag, const PointF& pos) const = 0;
+    virtual void draw(SymId id, muse::draw::Painter* p, double mag, const PointF& pos, const double angle = 0) const = 0;
+    virtual void draw(SymId id, muse::draw::Painter* p, const SizeF& mag, const PointF& pos, const double angle = 0) const = 0;
+    virtual void draw(const SymIdList& ids, muse::draw::Painter* p, double mag, const PointF& pos, const double angle = 0) const = 0;
+    virtual void draw(const SymIdList& ids, muse::draw::Painter* p, const SizeF& mag, const PointF& pos, const double angle = 0) const = 0;
 };
 
 using IEngravingFontPtr = std::shared_ptr<IEngravingFont>;

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,17 +22,19 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/chord.h"
-#include "dom/chordrest.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/note.h"
-#include "dom/segment.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/segment.h"
+
+#include "engraving/editing/splitjoinmeasure.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String JOIN_DATA_DIR("join_data/");
@@ -61,9 +63,9 @@ void Engraving_JoinTests::join(const char* p1, const char* p2, int index)
 
     EXPECT_NE(m1, m2);
 
-    score->startCmd();
-    score->cmdJoinMeasure(m1, m2);
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving join tests"), [&](Transaction& tx) {
+        SplitJoinMeasure::joinMeasures(tx, score->masterScore(), m1->tick(), m2->tick());
+    });
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String::fromUtf8(p1), JOIN_DATA_DIR + String::fromUtf8(p2)));
     delete score;
@@ -82,7 +84,9 @@ void Engraving_JoinTests::join1(const char* p1)
 
     EXPECT_NE(m1, m2);
 
-    score->cmdJoinMeasure(m1, m2);
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving join tests"), [&](Transaction& tx) {
+        SplitJoinMeasure::joinMeasures(tx, score->masterScore(), m1->tick(), m2->tick());
+    });
 
     // check if notes are still on line 6
     Segment* s = score->firstSegment(SegmentType::ChordRest);
@@ -134,4 +138,60 @@ TEST_F(Engraving_JoinTests, join07)
 TEST_F(Engraving_JoinTests, join08)
 {
     join1("join08.mscx");
+}
+
+TEST_F(Engraving_JoinTests, join09)
+{
+    join("join09.mscx", "join09-ref.mscx");
+}
+
+TEST_F(Engraving_JoinTests, join10)
+{
+    join("join10.mscx", "join10-ref.mscx", 1);
+}
+
+TEST_F(Engraving_JoinTests, joinTieAtStart) {
+    // Test splitting a measure when there is a tie ending on the first chord on the split range
+    MasterScore* score = ScoreRW::readScore(JOIN_DATA_DIR + u"joinTieAtStart.mscx");
+    EXPECT_TRUE(score);
+
+    Measure* m1 = score->firstMeasure();
+    EXPECT_TRUE(m1);
+
+    Segment* s1 = m1->last(SegmentType::ChordRest);
+    ChordRest* cr1 = toChordRest(s1->element(0));
+    EXPECT_TRUE(cr1 && cr1->isChord());
+    Chord* c1 = toChord(cr1);
+    Note* n1 = c1->upNote();
+    EXPECT_TRUE(n1);
+
+    auto checkTie = [&]() -> Tie* {
+        Tie* t = n1->tieFor();
+        EXPECT_TRUE(t);
+
+        Note* n2 = t->endNote();
+        EXPECT_TRUE(n2);
+        EXPECT_EQ(n2->tick(), Fraction(1, 1));
+        EXPECT_EQ(n2->chord()->measure(), m1->nextMeasure());
+
+        return t;
+    };
+
+    Tie* tie1 = checkTie();
+
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving join tests"), [&](auto& tx) {
+        Measure* m2 = m1->nextMeasure();
+        Measure* m3 = m2->nextMeasure();
+        SplitJoinMeasure::joinMeasures(tx, score->masterScore(), m2->tick(), m3->tick());
+    });
+
+    Tie* tie2 = checkTie();
+    EXPECT_NE(tie2, tie1);
+
+    score->transactionManager()->undoRedo(true, nullptr);
+
+    Tie* tie3 = checkTie();
+    EXPECT_EQ(tie3, tie1);
+
+    delete score;
 }

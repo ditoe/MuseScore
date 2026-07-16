@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,49 +19,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_APPSHELL_APPLICATIONUIACTIONS_H
-#define MU_APPSHELL_APPLICATIONUIACTIONS_H
+
+#pragma once
 
 #include "ui/iuiactionsmodule.h"
 #include "applicationactioncontroller.h"
 #include "modularity/ioc.h"
-#include "context/iuicontextresolver.h"
 #include "async/asyncable.h"
 #include "ui/imainwindow.h"
+#include "braille/ibrailleconfiguration.h"
 
-#include "view/dockwindow/idockwindowprovider.h"
+#include "dockwindow/idockwindowprovider.h"
+
+#include "iappshellstate.h"
 
 namespace mu::appshell {
-class ApplicationUiActions : public ui::IUiActionsModule, public async::Asyncable
+class ApplicationUiActions : public muse::ui::IUiActionsModule, public muse::Contextable, public muse::async::Asyncable
 {
-    INJECT(ui::IMainWindow, mainWindow)
-    INJECT(dock::IDockWindowProvider, dockWindowProvider)
-    INJECT(IAppShellConfiguration, configuration)
+    muse::GlobalInject<braille::IBrailleConfiguration> brailleConfiguration;
+    muse::ContextInject<IAppShellState> appShellState = { this };
+    muse::ContextInject<muse::ui::IMainWindow> mainWindow = { this };
+    muse::ContextInject<muse::dock::IDockWindowProvider> dockWindowProvider = { this };
 
 public:
-    ApplicationUiActions(std::shared_ptr<ApplicationActionController> controller);
+    ApplicationUiActions(std::shared_ptr<ApplicationActionController> controller, const muse::modularity::ContextPtr& iocCtx);
 
     void init();
 
-    const ui::UiActionList& actionsList() const override;
+    const muse::ui::UiActionList& actionsList() const override;
 
-    bool actionEnabled(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionEnabledChanged() const override;
+    bool actionEnabled(const muse::ui::UiAction& act) const override;
+    muse::async::Channel<muse::actions::ActionCodeList> actionEnabledChanged() const override;
 
-    bool actionChecked(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionCheckedChanged() const override;
+    bool actionChecked(const muse::ui::UiAction& act) const override;
+    muse::async::Channel<muse::actions::ActionCodeList> actionCheckedChanged() const override;
 
-    static const QMap<actions::ActionCode, DockName>& toggleDockActions();
+    static const QMap<muse::actions::ActionCode, DockName>& toggleDockActions();
 
 private:
-    void listenOpenedDocksChanged(dock::IDockWindow* window);
+    void listenOpenedDocksChanged(muse::dock::IDockWindow* window);
 
-    static const ui::UiActionList m_actions;
+    static const muse::ui::UiActionList m_actions;
 
     std::shared_ptr<ApplicationActionController> m_controller;
-    async::Channel<actions::ActionCodeList> m_actionEnabledChanged;
-    async::Channel<actions::ActionCodeList> m_actionCheckedChanged;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionEnabledChanged;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionCheckedChanged;
 };
 }
-
-#endif // MU_APPSHELL_APPLICATIONUIACTIONS_H

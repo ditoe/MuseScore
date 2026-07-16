@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,20 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/chord.h"
-#include "dom/masterscore.h"
-#include "dom/segment.h"
-#include "dom/undo.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/segment.h"
+#include "engraving/dom/score.h"
+#include "engraving/editing/editvoice.h"
+#include "engraving/editing/exchangevoices.h"
+#include "engraving/editing/transaction/transaction.h"
+#include "engraving/editing/transaction/undostack.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String EXCHVOICES_DATA_DIR("exchangevoices_data/");
@@ -46,13 +51,13 @@ TEST_F(Engraving_ExchangevoicesTests, slurs)
     score->doLayout();
 
     // select all
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Exchange select all"));
     score->cmdSelectAll();
     score->endCmd();
 
     // do
-    score->startCmd();
-    score->cmdExchangeVoice(0, 1);
+    score->startCmd(TranslatableString::untranslatable("Exchange voices tests"));
+    ExchangeVoices::exchangeVoicesInSelection(score, 0, 1);
     score->endCmd();
 
     // compare
@@ -66,17 +71,42 @@ TEST_F(Engraving_ExchangevoicesTests, glissandi)
     score->doLayout();
 
     // select all
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Exchange voices select all"));
     score->cmdSelectAll();
     score->endCmd();
 
     // do
-    score->startCmd();
-    score->cmdExchangeVoice(0, 1);
+    score->startCmd(TranslatableString::untranslatable("Exchange voices tests"));
+    ExchangeVoices::exchangeVoicesInSelection(score, 0, 1);
     score->endCmd();
 
     // compare
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, u"exchangevoices-gliss.mscx", EXCHVOICES_DATA_DIR + u"exchangevoices-gliss-ref.mscx"));
+}
+
+TEST_F(Engraving_ExchangevoicesTests, rangeSelection)
+{
+    // Change voice of range selection including lyrics, lyrics lines, partial ties, slur, glissando, note anchored line, dynamics
+    Score* score = ScoreRW::readScore(EXCHVOICES_DATA_DIR + u"exchangevoices-range.mscx");
+    EXPECT_TRUE(score);
+    score->doLayout();
+
+    score->startCmd(TranslatableString::untranslatable("Exchange voices select all"));
+    score->cmdSelectAll();
+    score->endCmd();
+
+    score->startCmd(TranslatableString::untranslatable("Exchange voices tests"));
+    ExchangeVoices::exchangeVoicesInSelection(score, 0, 1);
+    score->endCmd();
+
+    EXPECT_TRUE(ScoreComp::saveCompareScore(score, u"exchangevoices-range.mscx",
+                                            EXCHVOICES_DATA_DIR + u"exchangevoices-range-ref.mscx"));
+
+    EditData ed;
+    score->undoStack()->undo(&ed);
+
+    EXPECT_TRUE(ScoreComp::saveCompareScore(score, u"exchangevoices-range.mscx",
+                                            EXCHVOICES_DATA_DIR + u"exchangevoices-range.mscx"));
 }
 
 TEST_F(Engraving_ExchangevoicesTests, undoChangeVoice)
@@ -94,16 +124,16 @@ TEST_F(Engraving_ExchangevoicesTests, undoChangeVoice)
     // do
     score->deselectAll();
     // select bottom note of all voice 1 chords
-    for (Segment* s = score->firstSegment(SegmentType::ChordRest); s; s = s->next1()) {
-        ChordRest* cr = static_cast<ChordRest*>(s->element(0));
-        if (cr && cr->type() == ElementType::CHORD) {
+    for (Segment* s = score->firstSegment(SegmentType::ChordRest); s; s = s->next1(SegmentType::ChordRest)) {
+        ChordRest* cr = toChordRest(s->element(0));
+        if (cr && cr->isChord()) {
             Chord* c = toChord(cr);
             score->select(c->downNote(), SelectType::ADD);
         }
     }
     // change voice
-    score->startCmd();
-    score->changeSelectedNotesVoice(1);
+    score->startCmd(TranslatableString::untranslatable("Exchange voices tests"));
+    EditVoice::changeSelectedElementsVoice(score->transactionManager()->currentOrDummyTransaction(), score, 1);
     score->endCmd(false, /*layoutAllParts = */ true);
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
 

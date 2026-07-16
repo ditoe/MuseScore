@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -18,40 +18,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-file(GLOB INSTRUMENTS_TS_FILES  ${CMAKE_CURRENT_LIST_DIR}/instruments_*.ts )
-file(GLOB MUSESCORE_TS_FILES    ${CMAKE_CURRENT_LIST_DIR}/musescore_*.ts )
-file(GLOB QT_TS_FILES           ${CMAKE_CURRENT_LIST_DIR}/qt_*.ts )
+# Technically it should be `CONFIGURE_DEPENDS` but given we hardly ever add new
+# translations, it's not worth the extra overhead before every single build.
+file(GLOB TS_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts)
 
-# Translations update and generate on CI
 if (MUE_RUN_LRELEASE)
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_LIST_DIR}/musescore_en_US.qm
-        COMMAND Qt5::lrelease ${INSTRUMENTS_TS_FILES}
-        COMMAND Qt5::lrelease ${MUSESCORE_TS_FILES}
-        COMMAND Qt5::lrelease ${QT_TS_FILES}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-    )
-
-    add_custom_target(lrelease ALL
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/musescore_en_US.qm
+    add_custom_target(translations ALL
         COMMENT "Generating .qm files" VERBATIM
     )
+
+    qt_add_lrelease(translations TS_FILES ${TS_FILES} NO_GLOBAL_TARGET QM_FILES_OUTPUT_VARIABLE QM_FILES)
 endif()
 
 install(FILES
-      ${CMAKE_CURRENT_LIST_DIR}/languages.json
-      DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}locale
-      )
-
-install(DIRECTORY ./
-    DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}locale
-    FILES_MATCHING
-    REGEX ".*\\.qm"
-    REGEX ".*_en\\.qm" EXCLUDE
-    )
+    ${QM_FILES}
+    DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}/locale
+)
 
 install(DIRECTORY ${QT_INSTALL_PREFIX}/translations/
-    DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}locale
+    DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}/locale
     FILES_MATCHING
     REGEX "qt_.*\\.qm"
     REGEX "qt_help_.*\\.qm" EXCLUDE

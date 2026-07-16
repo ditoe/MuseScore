@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,21 +27,42 @@
 
 #include "containers.h"
 
+#include "actionicon.h"
+#include "accidental.h"
+#include "arpeggio.h"
 #include "chord.h"
 #include "chordrest.h"
 #include "clef.h"
+#include "fret.h"
+#include "harmony.h"
+#include "laissezvib.h"
+#include "lyrics.h"
+#include "marker.h"
+#include "masterscore.h"
+#include "repeatlist.h"
+#include "keysig.h"
 #include "measure.h"
+#include "measurenumber.h"
+#include "measurerepeat.h"
 #include "note.h"
 #include "page.h"
 #include "part.h"
+#include "playcounttext.h"
+#include "partialtie.h"
 #include "pitchspelling.h"
 #include "rest.h"
 #include "score.h"
 #include "segment.h"
+#include "select.h"
 #include "sig.h"
 #include "staff.h"
 #include "system.h"
+#include "spanner.h"
+#include "tremolosinglechord.h"
+#include "tremolotwochord.h"
 #include "tuplet.h"
+#include "drumset.h"
+#include "barline.h"
 
 #include "log.h"
 
@@ -70,20 +91,7 @@ Measure* Score::tick2measure(const Fraction& tick) const
         return firstMeasure();
     }
 
-    Measure* lm = 0;
-    for (Measure* m = firstMeasure(); m; m = m->nextMeasure()) {
-        if (tick < m->tick()) {
-            assert(lm);
-            return lm;
-        }
-        lm = m;
-    }
-    // check last measure
-    if (lm && (tick >= lm->tick()) && (tick <= lm->endTick())) {
-        return lm;
-    }
-    LOGD("tick2measure %d (max %d) not found", tick.ticks(), lm ? lm->tick().ticks() : -1);
-    return 0;
+    return m_measures.measureByTick(tick.ticks());
 }
 
 //---------------------------------------------------------
@@ -100,38 +108,25 @@ Measure* Score::tick2measureMM(const Fraction& t) const
         tick = Fraction(0, 1);
     }
 
-    Measure* lm = 0;
+    Measure* measure = m_measures.measureByTick(t.ticks());
+    if (!measure) {
+        LOGD("tick2measureMM %d not found", tick.ticks());
+        return nullptr;
+    }
 
-    for (Measure* m = firstMeasureMM(); m; m = m->nextMeasureMM()) {
-        if (tick < m->tick()) {
-            assert(lm);
-            return lm;
-        }
-        lm = m;
-    }
-    // check last measure
-    if (lm && (tick >= lm->tick()) && (tick <= lm->endTick())) {
-        return lm;
-    }
-    LOGD("tick2measureMM %d (max %d) not found", tick.ticks(), lm ? lm->tick().ticks() : -1);
-    return 0;
+    return measure->coveringMMRestOrThis();
 }
-
-//---------------------------------------------------------
-//   tick2measureBase
-//---------------------------------------------------------
 
 MeasureBase* Score::tick2measureBase(const Fraction& tick) const
 {
-    for (MeasureBase* mb = first(); mb; mb = mb->next()) {
-        Fraction st = mb->tick();
-        Fraction l  = mb->ticks();
-        if (tick >= st && tick < (st + l)) {
-            return mb;
-        }
+    if (tick == Fraction(-1, 1)) {   // special number
+        return m_measures.last();
     }
-//      LOGD("tick2measureBase %d not found", tick);
-    return 0;
+    if (tick <= Fraction(0, 1)) {
+        return m_measures.first();
+    }
+
+    return m_measures.firstMeasureBaseAtTick(tick.ticks());
 }
 
 //---------------------------------------------------------
@@ -168,7 +163,7 @@ Segment* Score::tick2segment(const Fraction& t, bool first, SegmentType st, bool
     }
 
     if (m == 0) {
-        LOGD("no measure for tick %d", tick.ticks());
+        LOGD() << "no measure for tick " << tick.ticks();
         return 0;
     }
     for (Segment* segment   = m->first(st); segment;) {
@@ -185,7 +180,6 @@ Segment* Score::tick2segment(const Fraction& t, bool first, SegmentType st, bool
         }
         segment = nsegment;
     }
-    LOGD("no segment for tick %d (start search at %d (measure %d))", tick.ticks(), t.ticks(), m->tick().ticks());
     return 0;
 }
 
@@ -205,7 +199,7 @@ Segment* Score::tick2segment(const Fraction& tick, bool first) const
 /// the first segment *before* this tick position
 //---------------------------------------------------------
 
-Segment* Score::tick2leftSegment(const Fraction& tick, bool useMMrest, bool anySegmentType) const
+Segment* Score::tick2leftSegment(const Fraction& tick, bool useMMrest, SegmentType segType) const
 {
     Measure* m = useMMrest ? tick2measureMM(tick) : tick2measure(tick);
     if (m == 0) {
@@ -214,9 +208,8 @@ Segment* Score::tick2leftSegment(const Fraction& tick, bool useMMrest, bool anyS
     }
 
     // loop over all segments
-    SegmentType segmentType = anySegmentType ? SegmentType::All : SegmentType::ChordRest;
     Segment* ps = 0;
-    for (Segment* s = m->first(segmentType); s; s = s->next(segmentType)) {
+    for (Segment* s = m->first(segType); s; s = s->next(segType)) {
         if (tick < s->tick()) {
             return ps;
         } else if (tick == s->tick()) {
@@ -233,7 +226,7 @@ Segment* Score::tick2leftSegment(const Fraction& tick, bool useMMrest, bool anyS
 /// the first segment *after* this tick position
 //---------------------------------------------------------
 
-Segment* Score::tick2rightSegment(const Fraction& tick, bool useMMrest) const
+Segment* Score::tick2rightSegment(const Fraction& tick, bool useMMrest, SegmentType segType) const
 {
     Measure* m = useMMrest ? tick2measureMM(tick) : tick2measure(tick);
     if (m == 0) {
@@ -241,7 +234,7 @@ Segment* Score::tick2rightSegment(const Fraction& tick, bool useMMrest) const
         return 0;
     }
     // loop over all segments
-    for (Segment* s = m->first(SegmentType::ChordRest); s; s = s->next1(SegmentType::ChordRest)) {
+    for (Segment* s = m->first(segType); s; s = s->next1(segType)) {
         if (tick <= s->tick()) {
             return s;
         }
@@ -268,80 +261,9 @@ BeatType Score::tick2beatType(const Fraction& tick) const
     return timeSig.rtick2beatType(rtick);
 }
 
-//---------------------------------------------------------
-//   getStaff
-//---------------------------------------------------------
-
-int getStaff(System* system, const PointF& p)
+void Score::checkChordList()
 {
-    PointF pp = p - system->page()->pos() - system->pos();
-    for (size_t i = 0; i < system->page()->score()->nstaves(); ++i) {
-        double sp = system->spatium();
-        RectF r = system->bboxStaff(static_cast<int>(i)).adjusted(0.0, -sp, 0.0, sp);
-        if (r.contains(pp)) {
-            return static_cast<int>(i);
-        }
-    }
-    return -1;
-}
-
-//---------------------------------------------------------
-//   nextSeg
-//---------------------------------------------------------
-
-Fraction Score::nextSeg(const Fraction& tick, int track)
-{
-    Segment* seg = tick2segment(tick);
-    while (seg) {
-        seg = seg->next1(SegmentType::ChordRest);
-        if (seg == 0) {
-            break;
-        }
-        if (seg->element(track)) {
-            break;
-        }
-    }
-    return seg ? seg->tick() : Fraction(-1, 1);
-}
-
-//---------------------------------------------------------
-//   nextSeg1
-//---------------------------------------------------------
-
-Segment* nextSeg1(Segment* seg, track_idx_t& track)
-{
-    staff_idx_t staffIdx   = track / VOICES;
-    track_idx_t startTrack = staffIdx * VOICES;
-    track_idx_t endTrack   = startTrack + VOICES;
-    while ((seg = seg->next1(SegmentType::ChordRest))) {
-        for (track_idx_t t = startTrack; t < endTrack; ++t) {
-            if (seg->element(t)) {
-                track = t;
-                return seg;
-            }
-        }
-    }
-    return 0;
-}
-
-//---------------------------------------------------------
-//   prevSeg1
-//---------------------------------------------------------
-
-Segment* prevSeg1(Segment* seg, track_idx_t& track)
-{
-    staff_idx_t staffIdx = track / VOICES;
-    track_idx_t startTrack = staffIdx * VOICES;
-    track_idx_t endTrack   = startTrack + VOICES;
-    while ((seg = seg->prev1(SegmentType::ChordRest))) {
-        for (track_idx_t t = startTrack; t < endTrack; ++t) {
-            if (seg->element(t)) {
-                track = t;
-                return seg;
-            }
-        }
-    }
-    return 0;
+    m_chordList.checkChordList(style());
 }
 
 //---------------------------------------------------------
@@ -361,14 +283,14 @@ Note* nextChordNote(Note* note)
     // TODO : limit to same instrument, not simply to same staff!
     Segment* seg   = note->chord()->segment()->nextCR(track, true);
     while (seg) {
-        EngravingItem* targetElement = seg->elementAt(track);
+        EngravingItem* targetElement = seg->element(track);
         // if a chord exists in the same track, return its top note
         if (targetElement && targetElement->isChord()) {
             return toChord(targetElement)->upNote();
         }
         // if not, return topmost chord in track range
         for (track_idx_t i = fromTrack; i < toTrack; i++) {
-            targetElement = seg->elementAt(i);
+            targetElement = seg->element(i);
             if (targetElement && targetElement->isChord()) {
                 return toChord(targetElement)->upNote();
             }
@@ -387,14 +309,14 @@ Note* prevChordNote(Note* note)
     Segment* seg   = note->chord()->segment()->prev1();
     while (seg) {
         if (seg->segmentType() == SegmentType::ChordRest) {
-            EngravingItem* targetElement = seg->elementAt(track);
+            EngravingItem* targetElement = seg->element(track);
             // if a chord exists in the same track, return its top note
             if (targetElement && targetElement->isChord()) {
                 return toChord(targetElement)->upNote();
             }
             // if not, return topmost chord in track range
             for (track_idx_t i = fromTrack; i < toTrack; i++) {
-                targetElement = seg->elementAt(i);
+                targetElement = seg->element(i);
                 if (targetElement && targetElement->isChord()) {
                     return toChord(targetElement)->upNote();
                 }
@@ -453,38 +375,15 @@ int y2pitch(double y, ClefType clef, double _spatium)
 
 int line2pitch(int line, ClefType clef, Key key)
 {
-    int l      = ClefInfo::pitchOffset(clef) - line;
-    int octave = 0;
-    if (l < 0) {
-        l = 0;
-    }
+    int l = std::max(ClefInfo::pitchOffset(clef) - line, 0);
+    int octave = l / STEP_DELTA_OCTAVE;
+    l %= STEP_DELTA_OCTAVE;
 
-    octave += l / 7;
-    l       = l % 7;
-
-    int pitch = pitchKeyAdjust(l, key) + octave * 12;
-
-    if (pitch > 127) {
-        pitch = 127;
-    } else if (pitch < 0) {
-        pitch = 0;
-    }
-    return pitch;
+    int pitch = pitchKeyAdjust(l, key) + octave * PITCH_DELTA_OCTAVE;
+    return clampPitch(pitch);
 }
 
-//---------------------------------------------------------
-//   quantizeLen
-//---------------------------------------------------------
-
-int quantizeLen(int len, int raster)
-{
-    if (raster == 0) {
-        return len;
-    }
-    return int(((float)len / raster) + 0.5) * raster;   //round to the closest multiple of raster
-}
-
-static const char16_t* vall[] = {
+static const char16_t* valSharp[] = {
     u"c",
     u"c♯",
     u"d",
@@ -498,19 +397,19 @@ static const char16_t* vall[] = {
     u"a♯",
     u"b"
 };
-static const char16_t* valu[] = {
-    u"C",
-    u"C♯",
-    u"D",
-    u"D♯",
-    u"E",
-    u"F",
-    u"F♯",
-    u"G",
-    u"G♯",
-    u"A",
-    u"A♯",
-    u"B"
+static const char16_t* valFlat[] = {
+    u"c",
+    u"d♭",
+    u"d",
+    u"e♭",
+    u"e",
+    u"f",
+    u"g♭",
+    u"g",
+    u"a♭",
+    u"a",
+    u"b♭",
+    u"b"
 };
 
 /*!
@@ -525,207 +424,84 @@ static const char16_t* valu[] = {
  * @return
  *  The string representation of the note.
  */
-String pitch2string(int v)
+String pitch2string(int v, bool useFlats)
 {
-    if (v < 0 || v > 127) {
+    if (!pitchIsValid(v)) {
         return String(u"----");
     }
-    int octave = (v / 12) - 1;
+    int octave = (v / PITCH_DELTA_OCTAVE) - 1;
     String o;
     o = String::number(octave);
-    int i = v % 12;
-    return (octave < 0 ? valu[i] : vall[i]) + o;
+    int i = v % PITCH_DELTA_OCTAVE;
+
+    String pitchStr = useFlats ? valFlat[i] : valSharp[i];
+    if (octave < 0) {
+        pitchStr = pitchStr.toUpper();
+    }
+
+    return pitchStr + o;
 }
 
 /*!
- * An array of all supported interval sorted by size.
+ * Returns the pitch number of the given string.
  *
- * Because intervals can be spelled differently, this array
- * tracks all the different valid intervals. They are arranged
- * in diatonic then chromatic order.
- */
-Interval intervalList[intervalListSize] = {
-    // diatonic - chromatic
-    Interval(0, 0),           //  0 Perfect Unison
-    Interval(0, 1),           //  1 Augmented Unison
-
-    Interval(1, 0),           //  2 Diminished Second
-    Interval(1, 1),           //  3 Minor Second
-    Interval(1, 2),           //  4 Major Second
-    Interval(1, 3),           //  5 Augmented Second
-
-    Interval(2, 2),           //  6 Diminished Third
-    Interval(2, 3),           //  7 Minor Third
-    Interval(2, 4),           //  8 Major Third
-    Interval(2, 5),           //  9 Augmented Third
-
-    Interval(3, 4),           // 10 Diminished Fourth
-    Interval(3, 5),           // 11 Perfect Fourth
-    Interval(3, 6),           // 12 Augmented Fourth
-
-    Interval(4, 6),           // 13 Diminished Fifth
-    Interval(4, 7),           // 14 Perfect Fifth
-    Interval(4, 8),           // 15 Augmented Fifth
-
-    Interval(5, 7),           // 16 Diminished Sixth
-    Interval(5, 8),           // 17 Minor Sixth
-    Interval(5, 9),           // 18 Major Sixth
-    Interval(5, 10),          // 19 Augmented Sixth
-
-    Interval(6, 9),           // 20 Diminished Seventh
-    Interval(6, 10),          // 21 Minor Seventh
-    Interval(6, 11),          // 22 Major Seventh
-    Interval(6, 12),          // 23 Augmented Seventh
-
-    Interval(7, 11),          // 24 Diminished Octave
-    Interval(7, 12)           // 25 Perfect Octave
-};
-
-/*!
- * Finds the most likely diatonic interval for a semitone distance.
- *
- * Uses the most common diatonic intervals.
- *
- * @param
- *  The number of semitones in the chromatic interval.
- *  Negative semitones will simply be made positive.
+ * @param s
+ *  The string representation of the note.
  *
  * @return
- *  The number of diatonic steps in the interval.
+ *  The pitch number of the note.
  */
-
-int chromatic2diatonic(int semitones)
+int string2pitch(const String& s)
 {
-    static int il[12] = {
-        0,        // Perfect Unison
-        3,        // Minor Second
-        4,        // Major Second
-        7,        // Minor Third
-        8,        // Major Third
-        11,       // Perfect Fourth
-        12,       // Augmented Fourth
-        14,       // Perfect Fifth
-        17,       // Minor Sixth
-        18,       // Major Sixth
-        21,       // Minor Seventh
-        22,       // Major Seventh
-        // 25    Perfect Octave
-    };
-    bool down = semitones < 0;
-    if (down) {
-        semitones = -semitones;
+    if (s == String(u"----")) {
+        return INVALID_PITCH;
     }
-    int val = semitones % 12;
-    int octave = semitones / 12;
-    int intervalIndex = il[val];
-    int steps = intervalList[intervalIndex].diatonic;
-    steps = steps + octave * 7;
-    return down ? -steps : steps;
-}
 
-//---------------------------------------------------------
-//   searchInterval
-//---------------------------------------------------------
+    String value = s;
 
-int searchInterval(int steps, int semitones)
-{
-    unsigned n = sizeof(intervalList) / sizeof(*intervalList);
-    for (unsigned i = 0; i < n; ++i) {
-        if ((intervalList[i].diatonic == steps) && (intervalList[i].chromatic == semitones)) {
-            return i;
-        }
+    bool negative = s.contains(u'-');
+    int octave = String(s[s.size() - 1]).toInt() * (negative ? -1 : 1);
+    if (octave < -1 || octave > 9) {
+        return -1;
     }
-    return -1;
-}
 
-//---------------------------------------------------------
-//   diatonicUpDown
-//    used to find the second note of a trill, mordent etc.
-//    key  -7 ... +7
-//---------------------------------------------------------
+    value = value.mid(0, value.size() - (negative ? 2 : 1));
+    value = value.toLower();
 
-int diatonicUpDown(Key k, int pitch, int steps)
-{
-    static int ptab[15][7] = {
-//             c  c#   d  d#    e   f  f#   g  g#  a  a#   b
-        { -1,      1,       3,  4,      6,     8,      10 },         // Cb Ces
-        { -1,      1,       3,  5,      6,     8,      10 },         // Gb Ges
-        { 0,      1,       3,  5,      6,     8,      10 },          // Db Des
-        { 0,      1,       3,  5,      7,     8,      10 },          // Ab As
-        { 0,      2,       3,  5,      7,     8,      10 },          // Eb Es
-        { 0,      2,       3,  5,      7,     9,      10 },          // Bb B
-        { 0,      2,       4,  5,      7,     9,      10 },          // F  F
-
-        { 0,      2,       4,  5,      7,     9,      11 },          // C  C
-
-        { 0,      2,       4,  6,      7,     9,      11 },          // G  G
-        { 1,      2,       4,  6,      7,     9,      11 },          // D  D
-        { 1,      2,       4,  6,      8,     9,      11 },          // A  A
-        { 1,      3,       4,  6,      8,     9,      11 },          // E  E
-        { 1,      3,       4,  6,      8,    10,      11 },          // B  H
-        { 1,      3,       5,  6,      8,    10,      11 },          // F# Fis
-        { 1,      3,       5,  6,      8,    10,      12 },          // C# Cis
-    };
-
-    int key    = int(k) + 7;
-    int step   = pitch % 12;
-    int octave = pitch / 12;
-
-    // loop through the diatonic steps of the key looking for the given note
-    // or the gap where it would fit
-    int i = 0;
-    while (i < 7) {
-        if (ptab[key][i] >= step) {
+    int pitchIndex = -1;
+    for (int i = 0; i < PITCH_DELTA_OCTAVE; ++i) {
+        if (value == valFlat[i] || value == valSharp[i]) {
+            pitchIndex = i;
             break;
         }
-        ++i;
     }
 
-    // neither step nor gap found
-    // reset to beginning
-    if (i == 7) {
-        ++octave;
-        i = 0;
-    }
-    // if given step not found (gap found instead), and we are stepping up
-    // then we've already accounted for one step
-    if (ptab[key][i] > step && steps > 0) {
-        --steps;
+    if (pitchIndex == -1) {
+        return -1;
     }
 
-    // now start counting diatonic steps up or down
-    if (steps > 0) {
-        // count up
-        while (steps--) {
-            ++i;
-            if (i == 7) {
-                // hit last step; reset to beginning
-                ++octave;
-                i = 0;
-            }
-        }
-    } else if (steps < 0) {
-        // count down
-        while (steps++) {
-            --i;
-            if (i < 0) {
-                // hit first step; reset to end
-                --octave;
-                i = 6;
-            }
+    return (octave + 1) * PITCH_DELTA_OCTAVE + pitchIndex;
+}
+
+String convertPitchStringFlatsAndSharpsToUnicode(const String& str)
+{
+    if (str.isEmpty()) {
+        return String();
+    }
+
+    String value = String(str[0]);
+    for (size_t i = 1; i < str.size(); ++i) {
+        Char symbol = str.at(i).toLower();
+        if (symbol == u'b') {
+            value.append(u'♭');
+        } else if (symbol == u'#') {
+            value.append(u'♯');
+        } else {
+            value.append(symbol);
         }
     }
 
-    // convert step to pitch
-    step = ptab[key][i];
-    pitch = octave * 12 + step;
-    if (pitch < 0) {
-        pitch = 0;
-    }
-    if (pitch > 127) {
-        pitch = 128;
-    }
-    return pitch;
+    return value;
 }
 
 //---------------------------------------------------------
@@ -733,18 +509,30 @@ int diatonicUpDown(Key k, int pitch, int steps)
 //    search Note to tie to "note"
 //---------------------------------------------------------
 
-Note* searchTieNote(Note* note)
+Note* searchTieNote(const Note* note, const Segment* nextSegment, const bool disableOverRepeats)
 {
     if (!note) {
         return nullptr;
     }
 
-    Note* note2  = 0;
+    Note* note2  = nullptr;
     Chord* chord = note->chord();
     Segment* seg = chord->segment();
-    Part* part   = chord->part();
-    track_idx_t strack = part->staves().front()->idx() * VOICES;
-    track_idx_t etrack = strack + part->staves().size() * VOICES;
+
+    if (!nextSegment) {
+        nextSegment = seg->next1(SegmentType::ChordRest);
+        while (nextSegment && nextSegment->tick() < chord->endTick()) {
+            nextSegment = nextSegment->next1(SegmentType::ChordRest);
+        }
+    }
+
+    if (!nextSegment) {
+        return nullptr;
+    }
+
+    if (disableOverRepeats && !segmentsAreAdjacent(seg, nextSegment)) {
+        return nullptr;
+    }
 
     if (chord->isGraceBefore()) {
         chord = toChord(chord->explicitParent());
@@ -756,7 +544,6 @@ Note* searchTieNote(Note* note)
             if (c->graceIndex() == index + 1) {
                 note2 = c->findNote(note->pitch());
                 if (note2) {
-//printf("found grace-grace tie\n");
                     return note2;
                 }
             }
@@ -777,7 +564,7 @@ Note* searchTieNote(Note* note)
         // try to tie to grace note after if present
         std::vector<Chord*> gna = chord->graceNotesAfter();
         if (!gna.empty()) {
-            Chord* gc = gna[0];
+            Chord* gc = gna.front();
             note2 = gc->findNote(note->pitch());
             if (note2) {
                 return note2;
@@ -787,94 +574,40 @@ Note* searchTieNote(Note* note)
     // at this point, chord is a regular chord, not a grace chord
     // and we are looking for a note in the *next* chord (grace or regular)
 
-    // calculate end of current note duration
-    // but err on the safe side in case there is roundoff in tick count
-    Fraction endTick = chord->tick() + chord->actualTicks() - Fraction(1, 4 * 480);
-
     int idx1 = note->unisonIndex();
-    while ((seg = seg->next1(SegmentType::ChordRest))) {
-        // skip ahead to end of current note duration as calculated above
-        // but just in case, stop if we find element in current track
-        if (seg->tick() < endTick && !seg->element(chord->track())) {
+    Part* part = chord->part();
+    const TrackRange trackRange = part->trackRange();
+    for (track_idx_t track = trackRange.startTrack; track < trackRange.endTrack; ++track) {
+        EngravingItem* e = nextSegment->element(track);
+        if (!e || !e->isChord()) {
             continue;
         }
-        for (track_idx_t track = strack; track < etrack; ++track) {
-            EngravingItem* e = seg->element(track);
-            if (e == 0 || !e->isChord()) {
-                continue;
-            }
-            Chord* c = toChord(e);
-            const staff_idx_t staffIdx = c->staffIdx() + c->staffMove();
-            if (staffIdx != chord->staffIdx() + chord->staffMove()) {
-                // this check is needed as we are iterating over all staves to capture cross-staff chords
-                continue;
-            }
-            // if there are grace notes before, try to tie to first one
-            std::vector<Chord*> gnb = c->graceNotesBefore();
-            if (!gnb.empty()) {
-                Chord* gc = gnb[0];
-                Note* gn2 = gc->findNote(note->pitch());
-                if (gn2) {
-                    return gn2;
-                }
-            }
-            int idx2 = 0;
-            for (Note* n : c->notes()) {
-                if (n->pitch() == note->pitch()) {
-                    if (idx1 == idx2) {
-                        if (note2 == 0 || c->track() == chord->track()) {
-                            note2 = n;
-                            break;
-                        }
-                    } else {
-                        ++idx2;
-                    }
-                }
+        Chord* c = toChord(e);
+        if (c->vStaffIdx() != chord->vStaffIdx()) {
+            // this check is needed as we are iterating over all staves to capture cross-staff chords
+            continue;
+        }
+        // if there are grace notes before, try to tie to first one
+        std::vector<Chord*> gnb = c->graceNotesBefore();
+        if (!gnb.empty()) {
+            Chord* gc = gnb.front();
+            Note* gn2 = gc->findNote(note->pitch());
+            if (gn2) {
+                return gn2;
             }
         }
-        if (note2) {
-            break;
-        }
-    }
-    return note2;
-}
-
-//---------------------------------------------------------
-//   searchTieNote114
-//    search Note to tie to "note", tie to next note in
-//    same voice
-//---------------------------------------------------------
-
-Note* searchTieNote114(Note* note)
-{
-    Note* note2  = 0;
-    Chord* chord = note->chord();
-    Segment* seg = chord->segment();
-    Part* part   = chord->part();
-    track_idx_t strack = part->staves().front()->idx() * VOICES;
-    track_idx_t etrack = strack + part->staves().size() * VOICES;
-
-    while ((seg = seg->next1(SegmentType::ChordRest))) {
-        for (track_idx_t track = strack; track < etrack; ++track) {
-            EngravingItem* e = seg->element(track);
-            if (e == 0 || (!e->isChord()) || (e->track() != chord->track())) {
-                continue;
-            }
-            Chord* c = toChord(e);
-            staff_idx_t staffIdx = c->staffIdx() + c->staffMove();
-            if (staffIdx != chord->staffIdx() + chord->staffMove()) {      // cannot happen?
-                continue;
-            }
-            for (Note* n : c->notes()) {
-                if (n->pitch() == note->pitch()) {
-                    if (note2 == 0 || c->track() == chord->track()) {
+        int idx2 = 0;
+        for (Note* n : c->notes()) {
+            if (n->pitch() == note->pitch()) {
+                if (idx1 == idx2) {
+                    if (!note2 || c->track() == chord->track()) {
                         note2 = n;
+                        break;
                     }
+                } else {
+                    ++idx2;
                 }
             }
-        }
-        if (note2) {
-            break;
         }
     }
     return note2;
@@ -888,13 +621,13 @@ Note* searchTieNote114(Note* note)
 
 int absStep(int tpc, int pitch)
 {
-    int line     = tpc2step(tpc) + (pitch / 12) * 7;
+    int line = tpc2step(tpc) + (pitch / PITCH_DELTA_OCTAVE) * STEP_DELTA_OCTAVE;
     int tpcPitch = tpc2pitch(tpc);
 
-    if (tpcPitch < 0) {
-        line += 7;
+    if (tpcPitch < MIN_PITCH) {
+        line += STEP_DELTA_OCTAVE;
     } else {
-        line -= (tpcPitch / 12) * 7;
+        line -= (tpcPitch / PITCH_DELTA_OCTAVE) * STEP_DELTA_OCTAVE;
     }
     return line;
 }
@@ -961,10 +694,10 @@ int convertLine(int lineL2, ClefType clefL, ClefType clefR)
     int lineR2 = lineL2;
     int goalpitch = line2pitch(lineL2, clefL, Key::C);
     int p;
-    while ((p = line2pitch(lineR2, clefR, Key::C)) > goalpitch && p < 127) {
+    while ((p = line2pitch(lineR2, clefR, Key::C)) > goalpitch && p < MAX_PITCH) {
         lineR2++;
     }
-    while ((p = line2pitch(lineR2, clefR, Key::C)) < goalpitch && p > 0) {
+    while ((p = line2pitch(lineR2, clefR, Key::C)) < goalpitch && p > MIN_PITCH) {
         lineR2--;
     }
     return lineR2;
@@ -1026,9 +759,9 @@ int chromaticPitchSteps(const Note* noteL, const Note* noteR, const int nominalD
     //  ... 8 is the bottom line.
     int lineL = noteL->line();
     if (lineL == INVALID_LINE) {
-        int relLine = absStep(noteL->tpc(), noteL->epitch());
+        int absLine = absStep(noteL->tpc(), noteL->epitch());
         ClefType clef = noteL->staff()->clef(noteL->tick());
-        lineL = relStep(relLine, clef);
+        lineL = relStep(absLine, clef);
     }
 
     // we use line - deltastep, because lines are oriented from top to bottom, while step is oriented from bottom to top.
@@ -1046,7 +779,7 @@ int chromaticPitchSteps(const Note* noteL, const Note* noteR, const int nominalD
     bool done = false;
     for (track_idx_t track = startTrack; track < endTrack; ++track) {
         EngravingItem* e = segment->element(track);
-        if (!e || e->type() != ElementType::CHORD) {
+        if (!e || !e->isChord()) {
             continue;
         }
         Chord* chord = toChord(e);
@@ -1067,6 +800,71 @@ int chromaticPitchSteps(const Note* noteL, const Note* noteR, const int nominalD
         }
     }
     return halfsteps;
+}
+
+static void noteValToEffectivePitchAndTpc(const NoteVal& nval, const Staff* staff, const Fraction& tick, int& epitch, int& tpc)
+{
+    const bool concertPitch = staff->concertPitch();
+
+    if (concertPitch) {
+        epitch = nval.pitch;
+    } else {
+        const int pitchOffset = staff->part()->instrument(tick)->transpose().chromatic;
+        epitch = nval.pitch - pitchOffset;
+    }
+
+    tpc = nval.tpc(concertPitch);
+    if (tpc == static_cast<int>(mu::engraving::Tpc::TPC_INVALID)) {
+        tpc = pitch2tpc(epitch, staff->key(tick), mu::engraving::Prefer::NEAREST);
+    }
+}
+
+int noteValToLine(const NoteVal& nval, const Staff* staff, const Fraction& tick)
+{
+    if (staff->isDrumStaff(tick)) {
+        const Drumset* drumset = staff->part()->instrument(tick)->drumset();
+        if (drumset) {
+            return drumset->line(nval.pitch);
+        }
+    }
+
+    if (nval.isRest()) {
+        return staff->middleLine(tick);
+    }
+
+    int epitch = nval.pitch;
+    int tpc = static_cast<int>(mu::engraving::Tpc::TPC_INVALID);
+    noteValToEffectivePitchAndTpc(nval, staff, tick, epitch, tpc);
+
+    return relStep(epitch, tpc, staff->clef(tick));
+}
+
+AccidentalVal noteValToAccidentalVal(const NoteVal& nval, const Staff* staff, const Fraction& tick)
+{
+    if (nval.isRest()) {
+        return AccidentalVal::NATURAL;
+    }
+
+    if (staff->isDrumStaff(tick)) {
+        return AccidentalVal::NATURAL;
+    }
+
+    int epitch = nval.pitch;
+    int tpc = static_cast<int>(mu::engraving::Tpc::TPC_INVALID);
+    noteValToEffectivePitchAndTpc(nval, staff, tick, epitch, tpc);
+
+    return tpc2alter(tpc);
+}
+
+int compareNotesPos(const Note* n1, const Note* n2)
+{
+    if (n1->line() != n2->line() && !(n1->staffType()->isTabStaff())) {
+        return n2->line() - n1->line();
+    } else if (n1->string() != n2->string()) {
+        return n2->string() - n1->string();
+    } else {
+        return n1->pitch() - n2->pitch();
+    }
 }
 
 //---------------------------------------------------------
@@ -1090,42 +888,106 @@ Segment* skipTuplet(Tuplet* tuplet)
 //    replace ascii with bravura symbols
 //---------------------------------------------------------
 
-SymIdList timeSigSymIdsFromString(const String& string)
+SymIdList timeSigSymIdsFromString(const String& string, TimeSigStyle timeSigStyle)
 {
     static const std::map<Char, SymId> dict = {
-        { 43,    SymId::timeSigPlusSmall },             // '+'
-        { 48,    SymId::timeSig0 },                     // '0'
-        { 49,    SymId::timeSig1 },                     // '1'
-        { 50,    SymId::timeSig2 },                     // '2'
-        { 51,    SymId::timeSig3 },                     // '3'
-        { 52,    SymId::timeSig4 },                     // '4'
-        { 53,    SymId::timeSig5 },                     // '5'
-        { 54,    SymId::timeSig6 },                     // '6'
-        { 55,    SymId::timeSig7 },                     // '7'
-        { 56,    SymId::timeSig8 },                     // '8'
-        { 57,    SymId::timeSig9 },                     // '9'
-        { 67,    SymId::timeSigCommon },                // 'C'
-        { 40,    SymId::timeSigParensLeftSmall },       // '('
-        { 41,    SymId::timeSigParensRightSmall },      // ')'
-        { 162,   SymId::timeSigCutCommon },             // '¢'
-        { 189,   SymId::timeSigFractionHalf },
-        { 188,   SymId::timeSigFractionQuarter },
-        { 59664, SymId::mensuralProlation1 },
-        { 79,    SymId::mensuralProlation2 },           // 'O'
-        { 59665, SymId::mensuralProlation2 },
-        { 216,   SymId::mensuralProlation3 },           // 'Ø'
-        { 59666, SymId::mensuralProlation3 },
-        { 59667, SymId::mensuralProlation4 },
-        { 59668, SymId::mensuralProlation5 },
-        { 59670, SymId::mensuralProlation7 },
-        { 59671, SymId::mensuralProlation8 },
-        { 59673, SymId::mensuralProlation10 },
-        { 59674, SymId::mensuralProlation11 },
+        { '+',    SymId::timeSigPlusSmall },
+        { '0',    SymId::timeSig0 },
+        { '1',    SymId::timeSig1 },
+        { '2',    SymId::timeSig2 },
+        { '3',    SymId::timeSig3 },
+        { '4',    SymId::timeSig4 },
+        { '5',    SymId::timeSig5 },
+        { '6',    SymId::timeSig6 },
+        { '7',    SymId::timeSig7 },
+        { '8',    SymId::timeSig8 },
+        { '9',    SymId::timeSig9 },
+        { 'C',    SymId::timeSigCommon },
+        { '(',    SymId::timeSigParensLeftSmall },
+        { ')',    SymId::timeSigParensRightSmall },
+        { '[',    SymId::timeSigBracketLeftSmall },
+        { ']',    SymId::timeSigBracketRightSmall },
+        { u'¢',   SymId::timeSigCutCommon },
+        { u'½',   SymId::timeSigFractionHalf },
+        { u'¼',   SymId::timeSigFractionQuarter },
+        { '*',    SymId::timeSigMultiply },
+        { 'X',    SymId::timeSigMultiply },
+        { 'x',    SymId::timeSigMultiply },
+        { u'×',   SymId::timeSigMultiply },
+        { 59664,  SymId::mensuralProlation1 },
+        { 79,     SymId::mensuralProlation2 },           // 'O'
+        { 59665,  SymId::mensuralProlation2 },
+        { 216,    SymId::mensuralProlation3 },           // 'Ø'
+        { 59666,  SymId::mensuralProlation3 },
+        { 59667,  SymId::mensuralProlation4 },
+        { 59668,  SymId::mensuralProlation5 },
+        { 59669,  SymId::mensuralProlation6 },
+        { 59670,  SymId::mensuralProlation7 },
+        { 59671,  SymId::mensuralProlation8 },
+        { 59672,  SymId::mensuralProlation9 },
+        { 59673,  SymId::mensuralProlation10 },
+        { 59674,  SymId::mensuralProlation11 },
+    };
+
+    static const std::map<Char, SymId> dictLarge = {
+        { '+',    SymId::timeSigPlusSmallLarge },
+        { '0',    SymId::timeSig0Large },
+        { '1',    SymId::timeSig1Large },
+        { '2',    SymId::timeSig2Large },
+        { '3',    SymId::timeSig3Large },
+        { '4',    SymId::timeSig4Large },
+        { '5',    SymId::timeSig5Large },
+        { '6',    SymId::timeSig6Large },
+        { '7',    SymId::timeSig7Large },
+        { '8',    SymId::timeSig8Large },
+        { '9',    SymId::timeSig9Large },
+        { 'C',    SymId::timeSigCommonLarge },
+        { '(',    SymId::timeSigParensLeftSmallLarge },
+        { ')',    SymId::timeSigParensRightSmallLarge },
+        { '[',    SymId::timeSigBracketLeftSmallLarge },
+        { ']',    SymId::timeSigBracketRightSmallLarge },
+        { u'¢',   SymId::timeSigCutCommonLarge },
+        { u'½',   SymId::timeSigFractionHalfLarge },
+        { u'¼',   SymId::timeSigFractionQuarterLarge },
+        { '*',    SymId::timeSigMultiplyLarge },
+        { 'X',    SymId::timeSigMultiplyLarge },
+        { 'x',    SymId::timeSigMultiplyLarge },
+        { u'×',   SymId::timeSigMultiplyLarge },
+    };
+
+    static const std::map<Char, SymId> dictNarrow = {
+        { '+',    SymId::timeSigPlusSmallNarrow },
+        { '0',    SymId::timeSig0Narrow },
+        { '1',    SymId::timeSig1Narrow },
+        { '2',    SymId::timeSig2Narrow },
+        { '3',    SymId::timeSig3Narrow },
+        { '4',    SymId::timeSig4Narrow },
+        { '5',    SymId::timeSig5Narrow },
+        { '6',    SymId::timeSig6Narrow },
+        { '7',    SymId::timeSig7Narrow },
+        { '8',    SymId::timeSig8Narrow },
+        { '9',    SymId::timeSig9Narrow },
+        { 'C',    SymId::timeSigCommonNarrow },
+        { '(',    SymId::timeSigParensLeftSmallNarrow },
+        { ')',    SymId::timeSigParensRightSmallNarrow },
+        { '[',    SymId::timeSigBracketLeftSmallNarrow },
+        { ']',    SymId::timeSigBracketRightSmallNarrow },
+        { u'¢',   SymId::timeSigCutCommonNarrow },
+        { u'½',   SymId::timeSigFractionHalfNarrow },
+        { u'¼',   SymId::timeSigFractionQuarterNarrow },
+        { '*',    SymId::timeSigMultiplyNarrow },
+        { 'X',    SymId::timeSigMultiplyNarrow },
+        { 'X',    SymId::timeSigMultiplyNarrow },
+        { u'×',   SymId::timeSigMultiplyNarrow },
     };
 
     SymIdList list;
     for (size_t i = 0; i < string.size(); ++i) {
-        SymId sym = mu::value(dict, string.at(i), SymId::noSym);
+        SymId sym = muse::value(
+            timeSigStyle == TimeSigStyle::NARROW ? dictNarrow
+            : timeSigStyle == TimeSigStyle::LARGE ? dictLarge
+            : dict,
+            string.at(i), SymId::noSym);
         if (sym != SymId::noSym) {
             list.push_back(sym);
         }
@@ -1146,13 +1008,71 @@ Fraction actualTicks(Fraction duration, Tuplet* tuplet, Fraction timeStretch)
     return f;
 }
 
-double yStaffDifference(const System* system1, staff_idx_t staffIdx1, const System* system2, staff_idx_t staffIdx2)
+bool dragPositionToMeasure(const PointF& pos, const Score* score,
+                           Measure** measure, staff_idx_t* staffIdx,
+                           const double spacingFactor)
+{
+    const System* preferredSystem = (*measure) ? (*measure)->system() : nullptr;
+
+    Measure* m = score->searchMeasure(pos, preferredSystem, spacingFactor);
+    if (!m) {
+        return false;
+    }
+
+    const System* system = m->system();
+    const double y = pos.y() - system->canvasPos().y();
+    const staff_idx_t i = system->searchStaff(y, *staffIdx, spacingFactor);
+    if (!score->staff(i)) {
+        return false;
+    }
+
+    *measure = m;
+    *staffIdx = i;
+    return true;
+}
+
+bool dragPositionToSegment(const PointF& pos, const Measure* measure, const staff_idx_t staffIdx,
+                           Segment** segment,
+                           const double spacingFactor, const bool allowTimeAnchor)
+{
+    const track_idx_t strack = staffIdx * VOICES;
+    const track_idx_t etrack = strack + VOICES;
+
+    const double x = pos.x() - measure->canvasPos().x();
+    const SegmentType st = allowTimeAnchor ? SegmentType::Duration : SegmentType::ChordRest;
+    Segment* s = measure->searchSegment(x, st, strack, etrack, *segment, spacingFactor);
+    if (!s) {
+        return false;
+    }
+
+    *segment = segmentOrChordRestSegmentAtSameTick(s);
+    return true;
+}
+
+Segment* segmentOrChordRestSegmentAtSameTick(Segment* segment)
+{
+    IF_ASSERT_FAILED(segment) {
+        return nullptr;
+    }
+
+    // If TimeTick and ChordRest segments are at the same tick, prefer ChordRest
+    if (segment->isTimeTickType() && segment->measure()) {
+        if (Segment* crSegAtSameTick = segment->measure()->findSegmentR(SegmentType::ChordRest, segment->rtick())) {
+            return crSegAtSameTick;
+        }
+    }
+
+    return segment;
+}
+
+double yStaffDifference(const System* system1, const System* system2, staff_idx_t staffIdx)
 {
     if (!system1 || !system2) {
         return 0.0;
     }
-    const SysStaff* staff1 = system1->staff(staffIdx1);
-    const SysStaff* staff2 = system2->staff(staffIdx2);
+
+    const SysStaff* staff1 = system1->staff(staffIdx);
+    const SysStaff* staff2 = system2->staff(staffIdx);
     if (!staff1 || !staff2) {
         return 0.0;
     }
@@ -1162,7 +1082,7 @@ double yStaffDifference(const System* system1, staff_idx_t staffIdx1, const Syst
 bool allowRemoveWhenRemovingStaves(EngravingItem* item, staff_idx_t startStaff, staff_idx_t endStaff)
 {
     // Sanity checks
-    if (!item || item->staffIdx() == mu::nidx || startStaff == mu::nidx || endStaff == mu::nidx) {
+    if (!item || item->staffIdx() == muse::nidx || startStaff == muse::nidx || endStaff == muse::nidx) {
         return false;
     }
 
@@ -1181,7 +1101,7 @@ bool allowRemoveWhenRemovingStaves(EngravingItem* item, staff_idx_t startStaff, 
     }
 
     Staff* nextRemaining = score->staff(endStaff);
-    bool nextRemainingIsSystemObjectStaff = nextRemaining && score->isSystemObjectStaff(nextRemaining);
+    bool nextRemainingIsSystemObjectStaff = nextRemaining && nextRemaining->isSystemObjectStaff();
     if (item->isTopSystemObject() && !nextRemainingIsSystemObjectStaff) {
         return false;
     }
@@ -1192,7 +1112,7 @@ bool allowRemoveWhenRemovingStaves(EngravingItem* item, staff_idx_t startStaff, 
 bool moveDownWhenAddingStaves(EngravingItem* item, staff_idx_t startStaff, staff_idx_t endStaff)
 {
     // Sanity checks
-    if (!item || item->staffIdx() == mu::nidx || startStaff == mu::nidx || endStaff == mu::nidx) {
+    if (!item || item->staffIdx() == muse::nidx || startStaff == muse::nidx || endStaff == muse::nidx) {
         return false;
     }
 
@@ -1206,7 +1126,7 @@ bool moveDownWhenAddingStaves(EngravingItem* item, staff_idx_t startStaff, staff
 
     Score* score = item->score();
     Staff* nextAfterInserted = score->staff(endStaff);
-    bool nextAfterInsertedIsSystemObjectStaff = nextAfterInserted && score->isSystemObjectStaff(nextAfterInserted);
+    bool nextAfterInsertedIsSystemObjectStaff = nextAfterInserted && nextAfterInserted->isSystemObjectStaff();
     if (item->isTopSystemObject() && !nextAfterInsertedIsSystemObjectStaff) {
         return false;
     }
@@ -1224,13 +1144,13 @@ void collectChordsAndRest(Segment* segment, staff_idx_t staffIdx, std::vector<Ch
     track_idx_t endTrack = startTrack + VOICES;
 
     for (track_idx_t track = startTrack; track < endTrack; ++track) {
-        EngravingItem* e = segment->elementAt(track);
+        EngravingItem* e = segment->element(track);
         if (!e) {
             continue;
         }
         if (e->isChord() && !toChordRest(e)->staffMove()) {
             chords.push_back(toChord(e));
-        } else if (e->isRest() && !toChordRest(e)->staffMove()) {
+        } else if (e->isRest() && !toChordRest(e)->staffMove() && !toRest(e)->isFullMeasureRest()) {
             rests.push_back(toRest(e));
         }
     }
@@ -1246,7 +1166,7 @@ void collectChordsOverlappingRests(Segment* segment, staff_idx_t staffIdx, std::
 
     std::set<track_idx_t> tracksToCheck;
     for (track_idx_t track = startTrack; track < endTrack; ++track) {
-        EngravingItem* item = segment->elementAt(track);
+        EngravingItem* item = segment->element(track);
         if (!item || !item->isRest()) {
             tracksToCheck.insert(track);
         }
@@ -1259,7 +1179,7 @@ void collectChordsOverlappingRests(Segment* segment, staff_idx_t staffIdx, std::
         }
         Fraction prevSegTick = prevSeg->rtick();
         for (track_idx_t track : tracksToCheck) {
-            EngravingItem* e = prevSeg->elementAt(track);
+            EngravingItem* e = prevSeg->element(track);
             if (!e || !e->isChord()) {
                 continue;
             }
@@ -1268,19 +1188,199 @@ void collectChordsOverlappingRests(Segment* segment, staff_idx_t staffIdx, std::
             if (chordEndTick <= curTick) {
                 continue;
             }
-            Measure* measure = segment->measure();
-            Segment* endSegment = measure->findSegmentR(SegmentType::ChordRest, chordEndTick);
-            if (!endSegment) {
-                continue;
-            }
-            EngravingItem* endItem = endSegment->elementAt(track);
-            if (!endItem || !endItem->isChord()) {
-                continue;
-            }
 
             chords.push_back(chord);
         }
     }
+}
+
+std::vector<EngravingItem*> collectSystemObjects(const Score* score, const std::vector<Staff*>& staves)
+{
+    TRACEFUNC;
+
+    std::vector<EngravingItem*> result;
+
+    const TimeSigPlacement timeSigPlacement = score->style().styleV(Sid::timeSigPlacement).value<TimeSigPlacement>();
+    const bool isOnStaffTimeSig = timeSigPlacement != TimeSigPlacement::NORMAL;
+
+    for (const Measure* measure = score->firstMeasure(); measure; measure = measure->nextMeasure()) {
+        for (EngravingItem* measureElement : measure->el()) {
+            if (!measureElement || !measureElement->systemFlag() || measureElement->isLayoutBreak()) {
+                continue;
+            }
+            if (!staves.empty()) {
+                if (muse::contains(staves, measureElement->staff())) {
+                    result.push_back(measureElement);
+                }
+            } else if (measureElement->isTopSystemObject()) {
+                result.push_back(measureElement);
+            }
+        }
+
+        for (const Segment& seg : measure->segments()) {
+            if (seg.isType(SegmentType::Duration | SegmentType::EndBarLine)) {
+                for (EngravingItem* annotation : seg.annotations()) {
+                    if (!annotation || !annotation->systemFlag()) {
+                        continue;
+                    }
+
+                    if (!staves.empty()) {
+                        if (muse::contains(staves, annotation->staff())) {
+                            result.push_back(annotation);
+                        }
+                    } else if (annotation->isTopSystemObject()) {
+                        result.push_back(annotation);
+                    }
+                }
+            }
+
+            if (isOnStaffTimeSig && seg.isType(SegmentType::TimeSigTypes)) {
+                for (EngravingItem* item : seg.elist()) {
+                    if (!item || !item->isTimeSig()) {
+                        continue;
+                    }
+
+                    if (!staves.empty()) {
+                        if (muse::contains(staves, item->staff())) {
+                            result.push_back(item);
+                        }
+                    } else if (item->staffIdx() == 0) {
+                        result.push_back(item);
+                    }
+                }
+            }
+        }
+    }
+
+    for (const auto& pair : score->spanner()) {
+        Spanner* spanner = pair.second;
+        if (!spanner->systemFlag()) {
+            continue;
+        }
+
+        if (!staves.empty()) {
+            if (muse::contains(staves, spanner->staff())) {
+                result.push_back(spanner);
+            }
+        } else if (spanner->isTopSystemObject()) {
+            result.push_back(spanner);
+        }
+    }
+
+    return result;
+}
+
+std::unordered_set<EngravingItem*> collectElementsAnchoredToChordRest(const ChordRest* cr)
+{
+    std::unordered_set<EngravingItem*> elems;
+    for (EngravingItem* lyric : cr->lyrics()) {
+        elems.emplace(lyric);
+    }
+    if (!cr->isChord()) {
+        return elems;
+    }
+    const Chord* chord = toChord(cr);
+    if (Arpeggio* arp = chord->arpeggio()) {
+        elems.emplace(arp);
+    }
+    if (TremoloTwoChord* tremTwo = chord->tremoloTwoChord()) {
+        elems.emplace(tremTwo);
+    }
+    if (TremoloSingleChord* tremSing = chord->tremoloSingleChord()) {
+        elems.emplace(tremSing);
+    }
+    for (Articulation* art : chord->articulations()) {
+        elems.emplace(art);
+    }
+    // Chord brackets and chord lines
+    for (EngravingItem* e : chord->el()) {
+        elems.emplace(e);
+    }
+    for (Chord* grace : chord->graceNotes()) {
+        elems.emplace(grace);
+        for (Articulation* gArt : grace->articulations()) {
+            elems.emplace(gArt);
+        }
+        if (TremoloSingleChord* gTremSing = grace->tremoloSingleChord()) {
+            elems.emplace(gTremSing);
+        }
+    }
+    return elems;
+}
+
+std::unordered_set<EngravingItem*> collectElementsAnchoredToNote(const Note* note, bool includeForwardTiesSpanners,
+                                                                 bool includeBackwardTiesSpanners)
+{
+    std::unordered_set<EngravingItem*> elems;
+    LaissezVib* lv = note->laissezVib();
+    if (lv && !lv->segmentsEmpty()) {
+        elems.emplace(lv);
+    }
+    PartialTie* ipt = note->incomingPartialTie();
+    if (ipt && !ipt->segmentsEmpty()) {
+        elems.emplace(ipt);
+    }
+    PartialTie* opt = note->outgoingPartialTie();
+    if (opt && !opt->segmentsEmpty()) {
+        elems.emplace(opt);
+    }
+    // The following is a bit of a hack - addressing properly would require a fingering rework...
+    for (EngravingItem* elem : note->el()) {
+        if (elem->isFingering()) {
+            elems.emplace(elem);
+        }
+    }
+    if (includeForwardTiesSpanners) {
+        Tie* tieFor = note->tieFor();
+        if (tieFor && !tieFor->segmentsEmpty()) {
+            elems.emplace(tieFor);
+        }
+        for (Spanner* sp : note->spannerFor()) {
+            if (sp->segmentsEmpty()) {
+                continue;
+            }
+            elems.emplace(sp);
+        }
+    }
+    if (includeBackwardTiesSpanners) {
+        Tie* tieBack = note->tieBack();
+        if (tieBack && !tieBack->segmentsEmpty()) {
+            elems.emplace(tieBack);
+        }
+        for (Spanner* sp : note->spannerBack()) {
+            if (sp->segmentsEmpty()) {
+                continue;
+            }
+            elems.emplace(sp);
+        }
+    }
+    const NoteParenthesisInfo* noteParenInfo = note->parenthesisInfo();
+    if (noteParenInfo && noteParenInfo->notes().size()) {
+        elems.emplace(noteParenInfo->leftParen());
+        elems.emplace(noteParenInfo->rightParen());
+    }
+    return elems;
+}
+
+bool noteAnchoredSpannerIsInRange(const Spanner* spanner, const Fraction& rangeStart, const Fraction& rangeEnd)
+{
+    IF_ASSERT_FAILED(rangeStart < rangeEnd) {
+        return false;
+    }
+    const EngravingItem* startElement = spanner->startElement();
+    const EngravingItem* endElement = spanner->endElement();
+    IF_ASSERT_FAILED(startElement && startElement->isNote() && endElement && endElement->isNote()) {
+        LOGD() << "Cannot calculate isInRange - might be a partial tie or laissez vibrer";
+        return false;
+    }
+    const Note* startNote = toNote(startElement);
+    const Segment* startSeg = startNote->chord()->segment();
+    if (startSeg->tick() < rangeStart) {
+        return false;
+    }
+    const Note* endNote = toNote(endElement);
+    const Segment* endSeg = endNote->chord()->segment();
+    return !endSeg || endSeg->tick() <= rangeEnd;
 }
 
 String formatUniqueExcerptName(const String& baseName, const StringList& allExcerptLowerNames)
@@ -1293,5 +1393,543 @@ String formatUniqueExcerptName(const String& baseName, const StringList& allExce
     }
 
     return result;
+}
+
+bool isFirstSystemKeySig(const KeySig* ks)
+{
+    if (!ks) {
+        return false;
+    }
+    const System* sys = ks->measure()->system();
+    if (!sys) {
+        return false;
+    }
+    return ks->tick() == sys->firstMeasure()->tick();
+}
+
+String bendAmountToString(int fulls, int quarts, bool useFractions)
+{
+    String string = fulls != 0 ? String::number(fulls) : String();
+
+    if (useFractions) {
+        switch (std::abs(quarts)) {
+        case 1:
+            string += u"\u00BC";
+            break;
+        case 2:
+            string += u"\u00BD";
+            break;
+        case 3:
+            string += u"\u00BE";
+            break;
+        default:
+            break;
+        }
+    } else {
+        if (!string.empty() && quarts != 0) {
+            string += u" ";
+        }
+        switch (std::abs(quarts)) {
+        case 1:
+            string += u"1/4";
+            break;
+        case 2:
+            string += u"1/2";
+            break;
+        case 3:
+            string += u"3/4";
+            break;
+        default:
+            break;
+        }
+    }
+
+    return string;
+}
+
+InstrumentTrackId makeInstrumentTrackId(const EngravingItem* item)
+{
+    const Part* part = item->part();
+    if (!part) {
+        return InstrumentTrackId();
+    }
+
+    InstrumentTrackId trackId {
+        part->id(),
+        part->instrumentId(item->tick())
+    };
+
+    return trackId;
+}
+
+std::vector<Measure*> findFollowingRepeatMeasures(const Measure* measure)
+{
+    const MasterScore* master = measure->masterScore();
+    const Score* score = measure->score();
+
+    const Measure* masterMeasure = master->tick2measureMM(measure->tick());
+
+    const RepeatList& repeatList = master->repeatList(true, false);
+
+    std::vector<Measure*> measures;
+
+    for (auto it = repeatList.begin(); it != repeatList.end(); it++) {
+        const RepeatSegment* rs = *it;
+        const auto nextSegIt = std::next(it);
+        if (!rs->endsWithMeasure(masterMeasure) || nextSegIt == repeatList.end()) {
+            continue;
+        }
+
+        // Get next segment
+        const RepeatSegment* nextSeg = *nextSegIt;
+        const Measure* firstMasterMeasure = nextSeg->firstMeasure();
+        Measure* firstMeasure = firstMasterMeasure ? score->tick2measureMM(firstMasterMeasure->tick()) : nullptr;
+        if (!firstMeasure) {
+            continue;
+        }
+
+        measures.push_back(firstMeasure);
+    }
+
+    return measures;
+}
+
+std::vector<Measure*> findPreviousRepeatMeasures(const Measure* measure)
+{
+    const MasterScore* master = measure->masterScore();
+    const Score* score = measure->score();
+
+    const Measure* masterMeasure = master->tick2measure(measure->tick());
+
+    const RepeatList& repeatList = master->repeatList(true, false);
+
+    std::vector<Measure*> measures;
+
+    if (repeatList.empty()) {
+        return measures;
+    }
+
+    for (auto it = repeatList.begin() + 1; it != repeatList.end(); it++) {
+        const RepeatSegment* rs = *it;
+        const auto prevSegIt = std::prev(it);
+        if (!rs->startsWithMeasure(masterMeasure) || prevSegIt == repeatList.end()) {
+            continue;
+        }
+
+        // Get next segment
+        const RepeatSegment* prevSeg = *prevSegIt;
+        const Measure* lastMasterMeasure = prevSeg->lastMeasure();
+        Measure* lastMeasure = lastMasterMeasure ? score->tick2measure(lastMasterMeasure->tick()) : nullptr;
+        if (!lastMeasure) {
+            continue;
+        }
+
+        measures.push_back(lastMeasure);
+    }
+
+    return measures;
+}
+
+bool repeatHasPartialLyricLine(const Measure* endRepeatMeasure)
+{
+    const std::vector<Measure*> measures = findFollowingRepeatMeasures(endRepeatMeasure);
+    const Score* score = endRepeatMeasure->score();
+
+    for (const Measure* measure : measures) {
+        const SpannerMap::IntervalList& spanners = score->spannerMap().findOverlapping(measure->tick().ticks(), measure->endTick().ticks());
+
+        for (auto& spanner : spanners) {
+            if (spanner.value->isPartialLyricsLine() && spanner.start == measure->tick().ticks()) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool segmentsAreAdjacent(const Segment* firstSeg, const Segment* secondSeg)
+{
+    if (!firstSeg || !secondSeg) {
+        return false;
+    }
+    const MasterScore* master = firstSeg->masterScore();
+
+    Measure* firstMeasure = firstSeg->measure();
+    Measure* secondMeasure = secondSeg->measure();
+
+    if (firstMeasure == secondMeasure) {
+        return true;
+    }
+
+    const Measure* firstMasterMeasure = master->tick2measure(firstMeasure->tick());
+    const Measure* secondMasterMeasure = master->tick2measure(secondMeasure->tick());
+
+    Score* score = firstSeg->score();
+
+    const RepeatList& repeatList = score->repeatList(true, false);
+
+    std::vector<const Measure*> measures;
+
+    bool firstMeasureSegmentFound = false;
+    bool secondMeasureSegmentFound = false;
+
+    for (auto it = repeatList.begin(); it != repeatList.end(); it++) {
+        const RepeatSegment* rs = *it;
+        const auto nextSegIt = std::next(it);
+
+        // Check if measures are in the same repeat segment
+        bool containsFirstMeasure = rs->containsMeasure(firstMasterMeasure);
+        bool containsSecondMeasure = rs->containsMeasure(secondMasterMeasure);
+        firstMeasureSegmentFound |= containsFirstMeasure;
+        secondMeasureSegmentFound |= containsSecondMeasure;
+
+        if (containsFirstMeasure && containsSecondMeasure) {
+            return true;
+        }
+
+        // Continue to build list of measures at the start of following repeat segments
+        if (!rs->endsWithMeasure(firstMasterMeasure) || nextSegIt == repeatList.end()) {
+            continue;
+        }
+
+        // Get next segment
+        const RepeatSegment* nextSeg = *nextSegIt;
+        const Measure* nextSegFirstMeasure = nextSeg->firstMeasure();
+        if (!nextSegFirstMeasure) {
+            continue;
+        }
+
+        measures.push_back(nextSegFirstMeasure);
+    }
+
+    // Check if second segment is in a following measure in the repeat structure
+    for (const Measure* m : measures) {
+        if (m == secondMasterMeasure) {
+            return true;
+        }
+    }
+
+    if (!firstMeasureSegmentFound && !secondMeasureSegmentFound) {
+        // The measures are outside of the (invalid) repeat structure
+        return firstMasterMeasure->nextMeasure() == secondMasterMeasure;
+    }
+
+    return false;
+}
+
+bool segmentsAreInDifferentRepeatSegments(const Segment* firstSeg, const Segment* secondSeg)
+{
+    if (!firstSeg || !secondSeg) {
+        return false;
+    }
+    const MasterScore* master = firstSeg->masterScore();
+
+    Measure* firstMeasure = firstSeg->measure();
+    Measure* secondMeasure = secondSeg->measure();
+
+    if (firstMeasure == secondMeasure) {
+        return false;
+    }
+
+    const Measure* firstMasterMeasure = master->tick2measure(firstMeasure->tick());
+    const Measure* secondMasterMeasure = master->tick2measure(secondMeasure->tick());
+
+    Score* score = firstSeg->score();
+
+    const RepeatList& repeatList = score->repeatList(true, false);
+
+    std::vector<const Measure*> measures;
+
+    for (auto it = repeatList.begin(); it != repeatList.end(); it++) {
+        const RepeatSegment* rs = *it;
+
+        if (!rs->containsMeasure(firstMasterMeasure) || !rs->containsMeasure(secondMasterMeasure)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool isValidBarLineForRepeatSection(const Segment* firstSeg, const Segment* secondSeg)
+{
+    if (!firstSeg || !secondSeg) {
+        return false;
+    }
+    if (!firstSeg->isType(SegmentType::BarLineTypes)) {
+        return false;
+    }
+
+    const MasterScore* master = firstSeg->masterScore();
+
+    Measure* firstMeasure = firstSeg->measure();
+    Measure* secondMeasure = secondSeg->measure();
+
+    const Measure* firstMasterMeasure = master->tick2measure(firstMeasure->tick());
+    const Measure* secondMasterMeasure = master->tick2measure(secondMeasure->tick());
+    const Measure* adjacentMasterMeasure = firstMasterMeasure->nextMeasure();
+
+    Score* score = firstSeg->score();
+
+    const RepeatList& repeatList = score->repeatList(true, false);
+
+    std::vector<const Measure*> measures;
+
+    bool segEndsWithBl = false;
+    bool adjacentAndSecondShareSegment = false;
+
+    for (auto it = repeatList.begin(); it != repeatList.end(); it++) {
+        const RepeatSegment* rs = *it;
+
+        if (rs->endsWithMeasure(firstMasterMeasure)) {
+            segEndsWithBl = true;
+        }
+
+        if (rs->startsWithMeasure(adjacentMasterMeasure) && rs->containsMeasure(secondMasterMeasure)) {
+            adjacentAndSecondShareSegment = true;
+        }
+    }
+
+    return segEndsWithBl && adjacentAndSecondShareSegment;
+}
+
+PartialLyricsLine* findPrevPartialLyricsLineDash(Lyrics* lyrics)
+{
+    Score* score = lyrics->score();
+    for (auto sp : score->spannerMap().findOverlapping(lyrics->tick().ticks(), lyrics->tick().ticks())) {
+        if (!sp.value->isPartialLyricsLine() || sp.value->track() != lyrics->track()) {
+            continue;
+        }
+        PartialLyricsLine* partialLine = toPartialLyricsLine(sp.value);
+        if (partialLine->isEndMelisma() || partialLine->verse() != lyrics->verse() || partialLine->placement() != lyrics->placement()) {
+            continue;
+        }
+        return partialLine;
+    }
+
+    return nullptr;
+}
+
+MeasureBeat findBeat(const Score* score, int tick)
+{
+    MeasureBeat measureBeat;
+    if (!score || !score->checkHasMeasures()) {
+        return measureBeat;
+    }
+
+    int ticks = 0;
+    int beatIndex = 0;
+    score->sigmap()->tickValues(tick, &measureBeat.measureIndex, &beatIndex, &ticks);
+
+    const TimeSigFrac timeSig = score->sigmap()->timesig(Fraction::fromTicks(tick)).timesig();
+    const int ticksB = ticks_beat(timeSig.denominator());
+
+    measureBeat.beat = beatIndex + ticks / static_cast<float>(ticksB);
+    measureBeat.maxMeasureIndex = const_cast<Score*>(score)->measures()->size() - 1;
+    measureBeat.maxBeatIndex = timeSig.numerator() - 1;
+
+    return measureBeat;
+}
+
+bool isElementInFretBox(const EngravingItem* item)
+{
+    if (item->isHarmony()) {
+        return toHarmony(item)->isInFretBox();
+    } else if (item->isFretDiagram()) {
+        return toFretDiagram(item)->isInFretBox();
+    }
+    return false;
+}
+
+std::vector<EngravingItem*> filterTargetElements(const Selection& sel, EngravingItem* dropElement, bool& unique)
+{
+    bool uniqueMeasures =  false;
+    bool uniqueStaves = false;
+
+    switch (dropElement->type()) {
+    // Brackets have a special logic for range selections.
+    // For other selections add only one to each staff:
+    case ElementType::BRACKET:
+        if (sel.isRange()) {
+            unique = true;
+            return { sel.startSegment()->firstElementForNavigation(sel.staffStart()) };
+        }
+        uniqueStaves = true;
+        break;
+
+    // Barlines are only added to measures in range selections:
+    case ElementType::BAR_LINE:
+        uniqueMeasures = sel.isRange();
+        break;
+
+    // For multi-measure measure repeats, avoid overlap by adding only one per staff:
+    case ElementType::MEASURE_REPEAT:
+        uniqueStaves = true;
+        uniqueMeasures = toMeasureRepeat(dropElement)->numMeasures() == 1;
+        break;
+
+    // Add these elements once per measure in list selections, else once total:
+    case ElementType::MARKER:
+    case ElementType::JUMP:
+    case ElementType::SPACER:  //! HACK - these should be applied "per staff" in range selections (see issue #33486)
+    case ElementType::STAFFTYPE_CHANGE:  //! HACK - these should be applied "per staff" in range selections (see issue #33486)
+    case ElementType::VBOX:
+    case ElementType::HBOX:
+    case ElementType::TBOX:
+    case ElementType::FBOX:
+    case ElementType::MEASURE:
+        if (sel.isRange()) {
+            unique = true;
+            return { sel.startSegment()->firstElementForNavigation(sel.staffStart()) };
+        }
+        uniqueMeasures = true;
+        break;
+
+    // Add these elements once per measure, always:
+    case ElementType::MEASURE_NUMBER:
+        uniqueMeasures = true;
+        break;
+
+    case ElementType::ACTION_ICON: {
+        const ActionIconType actionType = toActionIcon(dropElement)->actionType();
+        switch (actionType) {
+        case ActionIconType::STAFF_TYPE_CHANGE: //! HACK - these should be applied "per staff" in range selections (see issue #33486)
+        case ActionIconType::VFRAME:
+        case ActionIconType::HFRAME:
+        case ActionIconType::TFRAME:
+        case ActionIconType::FFRAME:
+        case ActionIconType::MEASURE:
+            if (sel.isRange()) {
+                unique = true;
+                return { sel.startSegment()->firstElementForNavigation(sel.staffStart()) };
+            }
+            break;
+        default: break;
+        }
+        break;
+    }
+    default: break;
+    }
+
+    unique = uniqueStaves || uniqueMeasures;
+    if (!unique) {
+        return sel.elements();
+    }
+
+    std::vector<EngravingItem*> result;
+    if (uniqueStaves && uniqueMeasures) {
+        std::vector<MStaff*> foundMStaves;
+        for (EngravingItem* e : sel.elements()) {
+            if (Measure* m = e->findMeasure()) {
+                if (!muse::contains(foundMStaves, m->mstaves().at(e->staffIdx()))) {
+                    result.emplace_back(e);
+                    foundMStaves.emplace_back(m->mstaves().at(e->staffIdx()));
+                }
+            }
+        }
+    } else if (uniqueStaves) {
+        std::vector<staff_idx_t> foundStaves;
+        for (EngravingItem* e : sel.elements()) {
+            if (!muse::contains(foundStaves, e->staffIdx())) {
+                result.emplace_back(e);
+                foundStaves.emplace_back(e->staffIdx());
+            }
+        }
+    } else {
+        std::vector<MeasureBase*> foundMeasures;
+        for (EngravingItem* e : sel.elements()) {
+            if (MeasureBase* mb = e->findMeasureBase()) {
+                if (!muse::contains(foundMeasures, mb)) {
+                    result.emplace_back(e);
+                    foundMeasures.emplace_back(mb);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+Lyrics* searchNextLyrics(Segment* s, staff_idx_t staffIdx, int verse, PlacementV p)
+{
+    Lyrics* l = nullptr;
+    const Segment* originalSeg = s;
+    while ((s = s->next1(SegmentType::ChordRest))) {
+        if (!segmentsAreAdjacent(originalSeg, s)) {
+            return nullptr;
+        }
+
+        track_idx_t strack = staffIdx * VOICES;
+        track_idx_t etrack = strack + VOICES;
+        // search through all tracks of current staff looking for a lyric in specified verse
+        for (track_idx_t track = strack; track < etrack; ++track) {
+            ChordRest* cr = toChordRest(s->element(track));
+            if (cr) {
+                // cr with lyrics found, but does it have a syllable in specified verse?
+                l = cr->lyrics(verse, p);
+                if (l) {
+                    break;
+                }
+            }
+        }
+        if (l) {
+            break;
+        }
+    }
+    return l;
+}
+
+bool noteIsBefore(const Note* n1, const Note* n2)
+{
+    const int l1 = n1->line();
+    const int l2 = n2->line();
+    if (l1 != l2) {
+        return l1 > l2;
+    }
+
+    const int p1 = n1->pitch();
+    const int p2 = n2->pitch();
+    if (p1 != p2) {
+        return p1 < p2;
+    }
+
+    if (n1->tieBack()) {
+        if (n2->tieBack() && !n2->incomingPartialTie()) {
+            const Note* sn1 = n1->tieBack()->startNote();
+            const Note* sn2 = n2->tieBack()->startNote();
+            if (sn1->chord() == sn2->chord()) {
+                return sn1->unisonIndex() < sn2->unisonIndex();
+            }
+            return sn1->chord()->isBefore(sn2->chord());
+        } else {
+            return true;       // place tied notes before
+        }
+    }
+
+    return false;
+}
+
+void updatePercussionNotes(Chord* c, const Drumset* drumset)
+{
+    TRACEFUNC;
+    for (Chord* ch : c->graceNotes()) {
+        updatePercussionNotes(ch, drumset);
+    }
+    std::vector<Note*> lnotes(c->notes());    // we need a copy!
+    for (Note* note : lnotes) {
+        if (!drumset) {
+            note->setLine(0);
+        } else {
+            int pitch = note->pitch();
+            if (!drumset->isValid(pitch)) {
+                note->setLine(0);
+                //! NOTE May be called too often
+                //LOGW("unmapped drum note %d", pitch);
+            } else if (!note->fixed()) {
+                note->undoChangeProperty(Pid::HEAD_GROUP, drumset->noteHead(pitch));
+                note->setLine(drumset->line(pitch));
+            }
+        }
+    }
 }
 }

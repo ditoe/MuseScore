@@ -9,9 +9,9 @@
       </Synthesizer>
     <Division>480</Division>
     <Style>
-      <pageWidth>3.93701</pageWidth>
+      <pageWidth>4.33071</pageWidth>
       <pageHeight>1.1811</pageHeight>
-      <pagePrintableWidth>3.77953</pagePrintableWidth>
+      <pagePrintableWidth>4.17323</pagePrintableWidth>
       <pageEvenLeftMargin>0.0787403</pageEvenLeftMargin>
       <pageOddLeftMargin>0.0787403</pageOddLeftMargin>
       <pageEvenTopMargin>0</pageEvenTopMargin>
@@ -43,7 +43,6 @@
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
     <metaTag name="platform">X11</metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>

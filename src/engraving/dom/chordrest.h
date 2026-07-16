@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,14 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHORDREST_H__
-#define __CHORDREST_H__
+#pragma once
 
 #include <functional>
 
-#include "durationelement.h"
-#include "types/types.h"
+#include "../types/types.h"
 
+#include "durationelement.h"
 #include "fermata.h"
 
 namespace mu::engraving {
@@ -39,14 +38,16 @@ enum class CrossMeasure : signed char {
 };
 
 class Articulation;
+class BeamBase;
+class BeamSegment;
 class Lyrics;
 class Measure;
 class Score;
 class Segment;
 class Slur;
 class TabDurationSymbol;
+class Transaction;
 enum class SegmentType;
-class BeamSegment;
 
 //-------------------------------------------------------------------
 //   ChordRest
@@ -64,44 +65,30 @@ public:
     ChordRest& operator=(const ChordRest&) = delete;
     ~ChordRest();
 
-    // Score Tree functions
-    virtual EngravingObject* scanParent() const override;
-    virtual EngravingObjectList scanChildren() const override;
-    virtual void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
+    virtual void scanElements(std::function<void(EngravingItem*)> func) override;
 
-    virtual EngravingItem* drop(EditData&) override;
+    bool acceptDrop(EditData&) const override;
+    virtual EngravingItem* drop(Transaction& tx, EditData&) override;
     virtual void undoUnlink() override;
 
     virtual Segment* segment() const { return (Segment*)explicitParent(); }
 
     void setBeamMode(BeamMode m) { m_beamMode = m; }
-    void undoSetBeamMode(BeamMode m);
     BeamMode beamMode() const { return m_beamMode; }
 
     void setBeam(Beam* b);
     void setBeamlet(BeamSegment* b);
+    BeamSegment* beamlet() const { return m_beamlet; }
+
     virtual Beam* beam() const final;
     int beams() const { return m_durationType.hooks(); }
     virtual double upPos()   const = 0;
     virtual double downPos() const = 0;
 
-    int line(bool up) const { return up ? upLine() : downLine(); }
-    int line() const { return m_up ? upLine() : downLine(); }
-    virtual int upLine() const = 0;
-    virtual int downLine() const = 0;
-    virtual mu::PointF stemPos() const = 0;
-    virtual double stemPosX() const = 0;
-    virtual mu::PointF stemPosBeam() const = 0;
     virtual double rightEdge() const = 0;
-
-    void setUp(bool val) { m_up = val; }
-    bool up() const { return m_up; }
-    bool usesAutoUp() const { return m_usesAutoUp; }
-    void setUsesAutoUp(bool val) { m_usesAutoUp = val; }
 
     bool isSmall() const { return m_isSmall; }
     void setSmall(bool val) { m_isSmall = val; }
-    void undoSetSmall(bool val);
 
     int staffMove() const { return m_staffMove; }
     void setStaffMove(int val) { m_staffMove = val; }
@@ -166,6 +153,7 @@ public:
     TDuration crossMeasureDurationType() const { return m_crossMeasureTDur; }
     void setCrossMeasureDurationType(TDuration v) { m_crossMeasureTDur = v; }
 
+    void undoChangeProperty(Pid id, const PropertyValue& newValue, PropertyFlags ps = PropertyFlags::NOSTYLE) override;
     void localSpatiumChanged(double oldValue, double newValue) override;
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
@@ -186,13 +174,12 @@ public:
     virtual EngravingItem* nextSegmentElement() override;
     virtual EngravingItem* prevSegmentElement() override;
     virtual String accessibleExtraInfo() const override;
-    virtual Shape shape() const override;
     virtual void computeUp();
 
     bool isFullMeasureRest() const { return m_durationType == DurationType::V_MEASURE; }
     virtual void removeMarkings(bool keepTremolo = false);
 
-    bool isBefore(const ChordRest*) const;
+    bool isBefore(const EngravingItem*) const override;
 
     void undoAddAnnotation(EngravingItem*);
 
@@ -200,6 +187,21 @@ public:
 
     TabDurationSymbol* tabDur() const { return m_tabDur; }
     void setTabDur(TabDurationSymbol* s) { m_tabDur = s; }
+
+    bool isBelowCrossBeam(const BeamBase* beamBase) const;
+
+    bool hasFollowingJumpItem() const;
+    bool hasPrecedingJumpItem() const;
+
+    struct LayoutData : public DurationElement::LayoutData {
+        ld_field<bool> up = { "[ChordRest] up", true }; // actual stem direction
+    };
+    DECLARE_LAYOUTDATA_METHODS(ChordRest)
+
+    //! DEPRECATED ------
+    void setUp(bool val) { mutldata()->up = val; }
+    bool up() const { return ldata()->up; }
+    //! -----------------
 
 protected:
 
@@ -213,8 +215,6 @@ protected:
     Beam* m_beam = nullptr;
     BeamSegment* m_beamlet = nullptr;
     BeamMode m_beamMode = BeamMode::INVALID;
-    bool m_up = false;                      // actual stem direction
-    bool m_usesAutoUp = false;
     bool m_isSmall = false;
     bool m_melismaEnd = false;
 
@@ -231,5 +231,4 @@ private:
     int m_staffMove = 0; // -1, 0, +1, used for crossbeaming
     int m_storedStaffMove = 0; // used to remember and re-apply staff move if needed
 };
-} // namespace mu::engraving
-#endif
+}

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,14 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
-import MuseScore.Cloud 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
+import Muse.Cloud
 
 ScoresListView {
     id: root
@@ -38,20 +38,38 @@ ScoresListView {
         prv.updateDesiredRowCount()
     }
 
+    Connections {
+        target: root.model
+        function onStateChanged() {
+            if (root.model.state === CloudScoresModel.Fine) {
+                // After the model has loaded more, check if even more is needed
+                prv.updateDesiredRowCount();
+            }
+        }
+    }
+
     QtObject {
         id: prv
 
         readonly property int remainingScoresBelowViewport:
-            root.model.rowCount - Math.ceil((view.contentY + view.height) / view.rowHeight)
+            root.view.count - Math.ceil((root.view.contentY + root.view.height) / root.view.rowHeight)
 
-        onRemainingScoresBelowViewportChanged: {
-            updateDesiredRowCount()
+        readonly property bool isSatisfied: remainingScoresBelowViewport >= 20
+
+        onIsSatisfiedChanged: {
+            if (!isSatisfied) {
+                updateDesiredRowCount();
+            }
         }
 
         property bool updateDesiredRowCountScheduled: false
 
         function updateDesiredRowCount() {
             if (updateDesiredRowCountScheduled) {
+                return
+            }
+
+            if (isSatisfied || !root.model.hasMore) {
                 return
             }
 
@@ -78,7 +96,7 @@ ScoresListView {
             id: visibilityColumn
             header: qsTrc("project/cloud", "Visibility")
 
-            width: function (parentWidth) {
+            width: function(parentWidth) {
                 let parentWidthExclusingSpacing = parentWidth - root.columns.length * root.view.columnSpacing;
                 return 0.16 * parentWidthExclusingSpacing
             }
@@ -152,7 +170,7 @@ ScoresListView {
             //: Used as the header of this column in the scores list.
             header: qsTrc("project", "Modified")
 
-            width: function (parentWidth) {
+            width: function(parentWidth) {
                 let parentWidthExclusingSpacing = parentWidth - root.columns.length * root.view.columnSpacing;
                 return 0.16 * parentWidthExclusingSpacing
             }
@@ -191,7 +209,7 @@ ScoresListView {
             id: sizeColumn
             header: qsTrc("global", "Size", "file size")
 
-            width: function (parentWidth) {
+            width: function(parentWidth) {
                 let parentWidthExclusingSpacing = parentWidth - root.columns.length * root.view.columnSpacing;
                 return 0.13 * parentWidthExclusingSpacing
             }
@@ -233,7 +251,7 @@ ScoresListView {
             //: Used as the header of this column in the scores list.
             header: qsTrc("project", "Views", "number of views")
 
-            width: function (parentWidth) {
+            width: function(parentWidth) {
                 let parentWidthExclusingSpacing = parentWidth - root.columns.length * root.view.columnSpacing;
                 return Math.max(0.08 * parentWidthExclusingSpacing, 76)
             }
@@ -307,4 +325,3 @@ ScoresListView {
         }
     }
 }
-

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SYSTEM_H__
-#define __SYSTEM_H__
+#pragma once
 
 /**
  \file
@@ -29,8 +28,7 @@
 */
 
 #include "engravingitem.h"
-
-#include "skyline.h"
+#include "instrumentname.h"
 
 namespace mu::engraving {
 class Box;
@@ -39,6 +37,8 @@ class InstrumentName;
 class MeasureBase;
 class Page;
 class SpannerSegment;
+class StaffVisibilityIndicator;
+class RangeLock;
 
 //---------------------------------------------------------
 //   SysStaff
@@ -51,12 +51,14 @@ public:
     SysStaff() {}
     ~SysStaff();
 
-    //int idx     { 0    };
-    std::vector<InstrumentName*> instrumentNames;
+    const std::unordered_map<InstrumentNameRole, InstrumentName*>& instrumentNames() const { return m_instrumentNames; }
+    InstrumentName* name(InstrumentNameRole role) const;
+    void addInstrumentName(InstrumentName* n);
+    void removeInstrumentName(InstrumentNameRole role);
 
-    const mu::RectF& bbox() const { return m_bbox; }
-    mu::RectF& bbox() { return m_bbox; }
-    void setbbox(const mu::RectF& r) { m_bbox = r; }
+    const RectF& bbox() const { return m_bbox; }
+    RectF& bbox() { return m_bbox; }
+    void setbbox(const RectF& r) { m_bbox = r; }
     void setbbox(double x, double y, double w, double h) { m_bbox.setRect(x, y, w, h); }
     double y() const { return m_bbox.y() + m_yOff; }
     void setYOff(double offset) { m_yOff = offset; }
@@ -76,7 +78,9 @@ public:
     Skyline& skyline() { return m_skyline; }
 
 private:
-    mu::RectF m_bbox;               // Bbox of StaffLines.
+    std::unordered_map<InstrumentNameRole, InstrumentName*> m_instrumentNames;
+
+    RectF m_bbox;               // Bbox of StaffLines.
     Skyline m_skyline;
     double m_yOff = 0.0;            // offset of top staff line within bbox
     double m_yPos = 0.0;            // y position of bbox after System::layout2
@@ -102,17 +106,13 @@ public:
 
     void moveToPage(Page* parent);
 
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
-
     System* clone() const override { return new System(*this); }
 
     void add(EngravingItem*) override;
     void remove(EngravingItem*) override;
     void change(EngravingItem* o, EngravingItem* n) override;
 
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
 
     void appendMeasure(MeasureBase*);
     void removeMeasure(MeasureBase*);
@@ -122,7 +122,6 @@ public:
 
     void clear(); ///< Clear measure list.
 
-    mu::RectF bboxStaff(int staff) const { return m_staves[staff]->bbox(); }
     std::vector<SysStaff*>& staves() { return m_staves; }
     const std::vector<SysStaff*>& staves() const { return m_staves; }
     double staffYpage(staff_idx_t staffIdx) const;
@@ -135,15 +134,16 @@ public:
     void removeStaff(int);
     void adjustStavesNumber(size_t nstaves);
 
-    int y2staff(double y) const;
-    staff_idx_t searchStaff(double y, staff_idx_t preferredStaff = mu::nidx, double spacingFactor = 0.5) const;
-    Fraction snap(const Fraction& tick, const mu::PointF p) const;
-    Fraction snapNote(const Fraction& tick, const mu::PointF p, int staff) const;
+    staff_idx_t searchStaff(double y, staff_idx_t preferredStaff = muse::nidx, double spacingFactor = 0.5) const;
+    Fraction snap(const Fraction& tick, const PointF p) const;
+    Fraction snapNote(const Fraction& tick, const PointF p, int staff) const;
 
     const std::vector<MeasureBase*>& measures() const { return m_ml; }
     std::vector<MeasureBase*>& measures() { return m_ml; }
 
     MeasureBase* measure(int idx) { return m_ml[idx]; }
+    MeasureBase* first() const { return m_ml.front(); }
+    MeasureBase* last() const { return m_ml.back(); }
     Measure* firstMeasure() const;
     Measure* lastMeasure() const;
     Fraction endTick() const;
@@ -178,36 +178,91 @@ public:
     Spacer* upSpacer(staff_idx_t staffIdx, Spacer* prevDownSpacer) const;
     Spacer* downSpacer(staff_idx_t staffIdx) const;
 
-    double firstNoteRestSegmentX(bool leading = false);
+    double firstNoteRestSegmentX(bool leading = false) const;
     double endingXForOpenEndedLines() const;
-    ChordRest* lastChordRest(track_idx_t track);
-    ChordRest* firstChordRest(track_idx_t track);
+    ChordRest* lastChordRest(track_idx_t track) const;
+    ChordRest* firstChordRest(track_idx_t track) const;
 
     bool hasFixedDownDistance() const { return m_fixedDownDistance; }
     void setFixedDownDistance(bool val) const { m_fixedDownDistance = val; }
 
     staff_idx_t firstVisibleStaff() const;
     staff_idx_t nextVisibleStaff(staff_idx_t) const;
+    staff_idx_t prevVisibleStaff(staff_idx_t) const;
+    staff_idx_t lastVisibleStaff() const;
+
     double distance() const { return m_distance; }
     void setDistance(double d) { m_distance = d; }
 
     staff_idx_t firstSysStaffOfPart(const Part* part) const;
     staff_idx_t firstVisibleSysStaffOfPart(const Part* part) const;
+    staff_idx_t firstVisibleSysStaffWithInstrument(const String& instrumentId, staff_idx_t startFrom);
     staff_idx_t lastSysStaffOfPart(const Part* part) const;
     staff_idx_t lastVisibleSysStaffOfPart(const Part* part) const;
-
-    Fraction minSysTicks() const;
-    Fraction maxSysTicks() const;
-
-    double squeezableSpace() const;
-    bool hasCrossStaffOrModifiedBeams();
+    std::vector<staff_idx_t> visibleStavesOfPart(const Part* part) const;
+    std::vector<Part*> visiblePartsOfGroup(staff_idx_t start, staff_idx_t end) const;
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
     AccessibleItemPtr createAccessible() override;
 #endif
 
-    void setBracketsXPosition(const double xOffset);
     size_t getBracketsColumnsCount();
+
+    void resetShortestLongestChordRest();
+
+    StaffVisibilityIndicator* staffVisibilityIndicator() const { return m_staffVisibilityIndicator; }
+    void setHasStaffVisibilityIndicator(bool has);
+
+    bool isLocked() const;
+    const RangeLock* systemLock() const;
+
+    const std::vector<SystemLockIndicator*> lockIndicators() const { return m_lockIndicators; }
+    void addLockIndicator(SystemLockIndicator* sli);
+    void deleteLockIndicators();
+
+    void setPageLockIndicator(PageLockIndicator* pli);
+    void deletePageLockIndicator();
+
+    struct LayoutData : public EngravingItem::LayoutData {
+    public:
+        bool useLongNames() const { return m_useLongNames; }
+        void setUseLongNames(bool v) { m_useLongNames = v; }
+        double instrumentNameOffset() const { return m_instrumentNameOffset; }
+        void setInstrumentNameOffset(double v) { m_instrumentNameOffset = v; }
+
+        double firstColumnWidth() const { return m_firstColumnWidth; }
+        void setFirstColumnWidth(double v) { m_firstColumnWidth = v; }
+        double secondColumnWidth() const { return m_secondColumnWidth; }
+        void setSecondColumnWidth(double v) { m_secondColumnWidth = v; }
+        double totalNamesWidth() const { return m_totalNamesWidth; }
+        void setTotalNamesWidth(double v) { m_totalNamesWidth = v; }
+
+        const std::unordered_map<staff_idx_t, double>& groupBracketsWidth() const { return m_groupBracketsWidth; }
+        void setGroupBracketsWidthAtStaffIdx(staff_idx_t i, double w) { m_groupBracketsWidth[i] = w; }
+        double groupBracketsWidthAtStaffIdx(staff_idx_t i) const
+        {
+            return m_groupBracketsWidth.count(i) ? m_groupBracketsWidth.at(i) : 0.0;
+        }
+
+        void clearGroupBracketsWidth() { m_groupBracketsWidth.clear(); }
+
+        const std::unordered_map<Part*, InstrumentName*>& partsWithGroupName() const { return m_partsWithGroupName; }
+        void addPartWithGroupNames(Part* p, InstrumentName* n) { m_partsWithGroupName.emplace(p, n); }
+        void clearPartsWithGroupNames() { m_partsWithGroupName.clear(); }
+
+    private:
+        bool m_useLongNames = false;
+        double m_instrumentNameOffset = 0.0;
+
+        double m_firstColumnWidth = 0.0;
+        double m_secondColumnWidth = 0.0;
+        double m_totalNamesWidth = 0.0;
+
+        std::unordered_map<staff_idx_t, double> m_groupBracketsWidth;
+
+        std::unordered_map<Part*, InstrumentName*> m_partsWithGroupName;
+    };
+    DECLARE_LAYOUTDATA_METHODS(System)
 
 private:
     friend class Factory;
@@ -226,6 +281,10 @@ private:
     std::vector<SysStaff*> m_staves;
     std::vector<Bracket*> m_brackets;
     std::list<SpannerSegment*> m_spannerSegments;
+    std::vector<SystemLockIndicator*> m_lockIndicators;
+    PageLockIndicator* m_pageLockIndicator = nullptr;
+
+    StaffVisibilityIndicator* m_staffVisibilityIndicator = nullptr;
 
     double m_leftMargin = 0.0;      // left margin for instrument name, brackets etc.
     mutable bool m_fixedDownDistance = false;
@@ -236,4 +295,3 @@ private:
 typedef std::vector<System*>::iterator iSystem;
 typedef std::vector<System*>::const_iterator ciSystem;
 } // namespace mu::engraving
-#endif

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,26 +30,27 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+using namespace muse;
 using namespace mu::project;
 
-mu::RetVal<Templates> TemplatesRepository::templates() const
+RetVal<Templates> TemplatesRepository::templates() const
 {
     TRACEFUNC;
 
     Templates templates;
 
-    for (const io::path_t& dir : configuration()->availableTemplateDirs()) {
+    for (const muse::io::path_t& dir : configuration()->availableTemplateDirs()) {
         templates << readTemplates(dir);
     }
 
     return RetVal<Templates>::make_ok(templates);
 }
 
-Templates TemplatesRepository::readTemplates(const io::path_t& dirPath) const
+Templates TemplatesRepository::readTemplates(const muse::io::path_t& dirPath) const
 {
     TRACEFUNC;
 
-    io::path_t categoriesJsonPath = configuration()->templateCategoriesJsonPath(dirPath);
+    muse::io::path_t categoriesJsonPath = configuration()->templateCategoriesJsonPath(dirPath);
 
     if (!fileSystem()->exists(categoriesJsonPath)) {
         RetVal<io::paths_t> files = fileSystem()->scanFiles(dirPath, { "*.mscz", "*.mscx" });
@@ -58,7 +59,7 @@ Templates TemplatesRepository::readTemplates(const io::path_t& dirPath) const
             return Templates();
         }
 
-        return readTemplates(files.val, qtrc("project", "My templates"));
+        return readTemplates(files.val, muse::qtrc("project", "My templates"), true /*isCustom*/);
     }
 
     RetVal<ByteArray> categoriesJson = fileSystem()->readFile(categoriesJsonPath);
@@ -74,7 +75,7 @@ Templates TemplatesRepository::readTemplates(const io::path_t& dirPath) const
 
     for (const QVariant& obj : categoryObjList) {
         QVariantMap map = obj.toMap();
-        QString categoryTitle = qtrc("project", map["title"].toString().toUtf8().data());
+        QString categoryTitle = muse::qtrc("project", map["title"].toString().toUtf8().data());
         QStringList files = map["files"].toStringList();
 
         io::paths_t paths;
@@ -82,20 +83,21 @@ Templates TemplatesRepository::readTemplates(const io::path_t& dirPath) const
             paths.push_back(path);
         }
 
-        templates << readTemplates(paths, categoryTitle, dirPath);
+        templates << readTemplates(paths, categoryTitle, false /*isCustom*/, dirPath);
     }
 
     return templates;
 }
 
-Templates TemplatesRepository::readTemplates(const io::paths_t& files, const QString& category, const io::path_t& dirPath) const
+Templates TemplatesRepository::readTemplates(const io::paths_t& files, const QString& category, bool isCustom,
+                                             const muse::io::path_t& dirPath) const
 {
     TRACEFUNC;
 
     Templates templates;
 
-    for (const io::path_t& file : files) {
-        io::path_t path = dirPath.empty() ? file : dirPath + "/" + file;
+    for (const muse::io::path_t& file : files) {
+        muse::io::path_t path = dirPath.empty() ? file : dirPath + "/" + file;
         RetVal<ProjectMeta> meta = mscReader()->readMeta(path);
         if (!meta.ret) {
             LOGE() << QString("failed read template %1: %2")
@@ -107,6 +109,7 @@ Templates TemplatesRepository::readTemplates(const io::paths_t& files, const QSt
         Template templ;
         templ.categoryTitle = category;
         templ.meta = std::move(meta.val);
+        templ.isCustom = isCustom;
 
         templates << templ;
     }

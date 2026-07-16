@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 RadioButtonGroup {
     id: root
@@ -36,6 +36,8 @@ RadioButtonGroup {
         name: "AudioGenerationSettingsContent"
         direction: NavigationPanel.Both
     }
+
+    property real columnWidth: -1
 
     orientation: Qt.Vertical
     spacing: 16
@@ -53,6 +55,10 @@ RadioButtonGroup {
 
     AudioGenerationSettingsModel {
         id: settingsModel
+    }
+
+    Component.onCompleted: {
+        settingsModel.load()
     }
 
     model: [
@@ -121,17 +127,18 @@ RadioButtonGroup {
     Component {
         id: numberOfSavesComp
 
-        RowLayout {
+        Row {
             id: numberOfSavesItem
 
             width: parent.width
-            spacing: 6
+            height: button.implicitHeight
+            spacing: 12
 
             // "Every: %1 saves" needs to be one string for correct translatability. We then split the translated version.
 
             //: `%1` will be replaced with a number input field.
             //: Text before it will appear before that number field, text after will appear after the field.
-            readonly property string text: qsTrc("project/save", "Every: %1 saves")
+            readonly property string text: qsTrc("project/save", "Every %1 saves")
 
             readonly property var textSplit: text.split("%1")
 
@@ -152,7 +159,9 @@ RadioButtonGroup {
             RoundedRadioButton {
                 id: button
 
-                Layout.minimumWidth: 80
+                anchors.verticalCenter: parent.verticalCenter
+
+                width: root.columnWidth > 0 ? root.columnWidth : implicitWidth
 
                 text: numberOfSavesItem.textPart1.trim()
                 checked: settingsModel.timePeriodType === numberOfSavesItem.type
@@ -170,7 +179,8 @@ RadioButtonGroup {
             }
 
             IncrementalPropertyControl {
-                Layout.preferredWidth: numberOfSavesItem.textPart2InSpinbox ? 96 : 60
+                anchors.verticalCenter: parent.verticalCenter
+                width: numberOfSavesItem.textPart2InSpinbox ? 96 : 60
 
                 minValue: 2
                 maxValue: 30
@@ -190,7 +200,8 @@ RadioButtonGroup {
             }
 
             StyledTextLabel {
-                Layout.fillWidth: true
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - x
 
                 text: numberOfSavesItem.textPart2InSpinbox ? "" : numberOfSavesItem.textPart2.trim()
                 horizontalAlignment: Text.AlignLeft

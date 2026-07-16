@@ -1,0 +1,74 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-Studio-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2025 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include "async/asyncable.h"
+#include "rcommand/commandable.h"
+
+#include "modularity/ioc.h"
+
+#include "playback/iplaybackconfiguration.h"
+#include "rcommand/icommanddispatcher.h"
+#include "audio/main/iplayback.h"
+#include "interactive/iinteractive.h"
+
+namespace mu::playback {
+class OnlineSoundsController : public muse::rcommand::Commandable, public muse::async::Asyncable, public muse::Contextable
+{
+    muse::GlobalInject<IPlaybackConfiguration> configuration;
+    muse::ContextInject<muse::audio::IPlayback> playback = { this };
+    muse::ContextInject<muse::rcommand::ICommandDispatcher> commandsDispatcher = { this };
+    muse::ContextInject<muse::IInteractive> interactive = { this };
+
+public:
+    OnlineSoundsController(const muse::modularity::ContextPtr& iocCtx);
+
+    void regActions();
+
+    void reset();
+
+    void addOnlineTrack(const muse::audio::TrackId trackId, const muse::audio::AudioResourceMeta& meta);
+    void removeOnlineTrack(const muse::audio::TrackId trackId);
+
+    bool shouldShowOnlineSoundsProcessingError(bool isPlaying) const;
+    void showOnlineSoundsProcessingError(const std::function<void()>& onShown);
+
+    const std::map<muse::audio::TrackId, muse::audio::AudioResourceMeta>& onlineSounds() const;
+    muse::async::Notification onlineSoundsChanged() const;
+    muse::Progress onlineSoundsProcessingProgress() const;
+
+private:
+    void listenProcessingProgress(const muse::audio::TrackId trackId);
+    void showLimitReachedErrorIfNeed(const muse::audio::InputProcessingProgress::StatusInfo& status);
+
+    muse::Ret processOnlineSounds();
+    muse::Ret clearOnlineSoundsCache();
+
+    std::map<muse::audio::TrackId, muse::audio::AudioResourceMeta> m_onlineSounds;
+    std::unordered_set<muse::audio::TrackId> m_onlineSoundsBeingProcessed;
+    std::unordered_set<muse::String> m_onlineLibrariesWithExceededLimit;
+    muse::async::Notification m_onlineSoundsChanged;
+    muse::Progress m_onlineSoundsProcessingProgress;
+    muse::Ret m_onlineSoundsProcessingRet;
+};
+}

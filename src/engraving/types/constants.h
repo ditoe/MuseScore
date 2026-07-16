@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,8 +28,8 @@
 namespace mu::engraving {
 struct Constants
 {
-    static constexpr int MSC_VERSION = 420;
-    static constexpr const char* MSC_VERSION_STR = "4.20";
+    static constexpr int MSC_VERSION = 500;
+    static constexpr const char* MSC_VERSION_STR = "5.00";
 
 // History:
 //    1.3   added staff->_barLineSpan
@@ -37,7 +37,7 @@ struct Constants
 //    1.5   save xoff/yoff in mm instead of pixel
 //    1.6   save harmony base/root as tpc value
 //    1.7   invert semantic of page fill limit
-//    1.8   slur id, slur anchor in in Note
+//    1.8   slur id, slur anchor in Note
 //    1.9   image size stored in mm instead of pixel (Versions 0.9.2 -0.9.3)
 //    1.10  TextLine properties changed (Version 0.9.4)
 //    1.11  Instrument name in part saved as TextC (Version 0.9.5)
@@ -89,6 +89,18 @@ struct Constants
 //       - By default, frames are not cloned to parts
 //       - Corrections to key signature and transposition (#18998)
 //       - New inside/outside style for ties
+
+//    4.40 (Version 4.4)
+//       - New property for cross-staff beam positioning
+//       - Copyrights and page numbers now have styles of their own (separate from header/footer)
+//
+//    4.50 (Version 4.5)
+//       - New property to set mergeMatchingRests at score level, with staff level changed to AutoOnOff from bool
+//       - New mmRest options and offset property
+//       - New EID implementation
+
+//    4.60 (Version 4.6)
+//       - New link system which uses EIDs
 
     constexpr static int DIVISION = 480;
     constexpr static BeatsPerSecond DEFAULT_TEMPO = 2.0; //default tempo is equal 120 bpm

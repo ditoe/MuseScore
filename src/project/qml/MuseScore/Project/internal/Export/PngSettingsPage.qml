@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,11 +19,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+import Muse.UiComponents
+import MuseScore.Project
 
 ExportSettingsPage {
     id: root
@@ -69,6 +69,21 @@ ExportSettingsPage {
         }
     }
 
+     CheckBox {
+        width: parent.width
+        text: qsTrc("project/export", "Grayscale")
+
+        navigation.name: "GrayscaleCheckbox"
+        navigation.panel: root.navigationPanel
+        navigation.row: root.navigationOrder + 3
+
+        checked: root.model.pngGrayscale
+
+        onClicked: {
+            root.model.pngGrayscale = !checked
+        }
+    }
+    
     StyledTextLabel {
         width: parent.width
         text: qsTrc("project/export", "Each page of the selected parts will be exported as a separate %1 file.").arg("PNG")

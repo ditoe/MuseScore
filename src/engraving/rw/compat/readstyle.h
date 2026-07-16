@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -36,7 +36,7 @@ namespace mu::engraving::compat {
 class ReadStyleHook
 {
 public:
-    ReadStyleHook(Score* score, const ByteArray& scoreData, const String& completeBaseName);
+    ReadStyleHook(Score* score, const muse::ByteArray& scoreData, const muse::String& completeBaseName);
 
     void setupDefaultStyle();
 
@@ -49,8 +49,8 @@ public:
 
 private:
     Score* m_score = nullptr;
-    const ByteArray& m_scoreData;
-    const String& m_completeBaseName;
+    const muse::ByteArray& m_scoreData;
+    const muse::String& m_completeBaseName;
 };
 }
 

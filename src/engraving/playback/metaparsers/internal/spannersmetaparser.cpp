@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,19 +33,23 @@
 #include "playback/filters/spannerfilter.h"
 
 using namespace mu::engraving;
+using namespace muse;
 
 bool SpannersMetaParser::isAbleToParse(const EngravingItem* spannerItem)
 {
-    static const std::unordered_set<ElementType> SUPPORTED_TYPES = {
+    static const std::unordered_set<ElementType> SUPPORTED_TYPES {
         ElementType::SLUR,
+        ElementType::HAMMER_ON_PULL_OFF,
         ElementType::PEDAL,
         ElementType::LET_RING,
         ElementType::PALM_MUTE,
         ElementType::TRILL,
         ElementType::GLISSANDO,
+        ElementType::GUITAR_BEND,
+        ElementType::VIBRATO,
     };
 
-    return SUPPORTED_TYPES.find(spannerItem->type()) != SUPPORTED_TYPES.cend();
+    return muse::contains(SUPPORTED_TYPES, spannerItem->type());
 }
 
 void SpannersMetaParser::doParse(const EngravingItem* item, const RenderingContext& spannerCtx, mpe::ArticulationMap& result)
@@ -55,35 +59,36 @@ void SpannersMetaParser::doParse(const EngravingItem* item, const RenderingConte
     }
 
     const Spanner* spanner = toSpanner(item);
+    if (!spanner->playSpanner()) {
+        return;
+    }
+
+    const int overallDurationTicks = SpannerFilter::spannerActualDurationTicks(spanner, spannerCtx.nominalDurationTicks);
 
     mpe::ArticulationType type = mpe::ArticulationType::Undefined;
-
     mpe::pitch_level_t overallPitchRange = 0;
     mpe::dynamic_level_t overallDynamicRange = 0;
-    int overallDurationTicks = SpannerFilter::spannerActualDurationTicks(spanner, spannerCtx.nominalDurationTicks);
 
     switch (spanner->type()) {
-    case ElementType::SLUR: {
+    case ElementType::SLUR:
+    case ElementType::HAMMER_ON_PULL_OFF:
         type = mpe::ArticulationType::Legato;
         break;
-    }
-    case ElementType::PEDAL: {
+    case ElementType::PEDAL:
+    case ElementType::LET_RING:
         type = mpe::ArticulationType::Pedal;
         break;
-    }
-    case ElementType::LET_RING:
-        type = mpe::ArticulationType::LaissezVibrer;
+    case ElementType::PALM_MUTE:
+        type = mpe::ArticulationType::PalmMute;
         break;
-    case ElementType::PALM_MUTE: {
-        type = mpe::ArticulationType::Mute;
+    case ElementType::GUITAR_BEND:
+        type = mpe::ArticulationType::Multibend;
         break;
-    }
+    case ElementType::VIBRATO:
+        type = mpe::ArticulationType::Vibrato;
+        break;
     case ElementType::TRILL: {
         const Trill* trill = toTrill(spanner);
-
-        if (!trill->playArticulation()) {
-            return;
-        }
 
         if (trill->trillType() == TrillType::TRILL_LINE) {
             type = mpe::ArticulationType::Trill;
@@ -98,12 +103,8 @@ void SpannersMetaParser::doParse(const EngravingItem* item, const RenderingConte
     }
     case ElementType::GLISSANDO: {
         const Glissando* glissando = toGlissando(spanner);
-        if (!glissando->playGlissando()) {
-            break;
-        }
-
-        Note* startNote = toNote(glissando->startElement());
-        Note* endNote = toNote(glissando->endElement());
+        const Note* startNote = toNote(glissando->startElement());
+        const Note* endNote = toNote(glissando->endElement());
 
         if (!startNote || !endNote) {
             break;
@@ -147,28 +148,10 @@ void SpannersMetaParser::doParse(const EngravingItem* item, const RenderingConte
     articulationMeta.timestamp = spannerCtx.nominalTimestamp;
     articulationMeta.overallPitchChangesRange = overallPitchRange;
     articulationMeta.overallDynamicChangesRange = overallDynamicRange;
-    articulationMeta.overallDuration = spannerDuration(spanner->score(),
-                                                       spannerCtx.nominalPositionStartTick,
-                                                       overallDurationTicks);
+    articulationMeta.overallDuration = durationFromStartAndTicks(spannerCtx.score,
+                                                                 spannerCtx.nominalPositionStartTick,
+                                                                 overallDurationTicks,
+                                                                 spannerCtx.positionTickOffset);
 
     appendArticulationData(std::move(articulationMeta), result);
-}
-
-mu::mpe::duration_t SpannersMetaParser::spannerDuration(const Score* score, const int positionTick, const int durationTicks)
-{
-    if (!score) {
-        return 0;
-    }
-
-    BeatsPerSecond startBps = score->tempomap()->tempo(positionTick);
-    BeatsPerSecond endBps = score->tempomap()->tempo(positionTick + durationTicks);
-
-    if (startBps == endBps) {
-        return durationFromTicks(startBps.val, durationTicks);
-    }
-
-    mpe::duration_t result = (durationFromTicks(startBps.val, durationTicks)
-                              + durationFromTicks(endBps.val, durationTicks)) / 2;
-
-    return result;
 }

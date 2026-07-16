@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,15 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_ENGRAVING_TYPESCONV_H
-#define MU_ENGRAVING_TYPESCONV_H
+#pragma once
 
-#include "types/string.h"
 #include "types.h"
 
-namespace mu {
-class TranslatableString;
-}
+#include "engraving/dom/guitarbend.h"
+#include "engraving/dom/pitchspelling.h"
+#include "engraving/dom/tremolobar.h"
 
 namespace mu::engraving {
 class TConv
@@ -39,10 +37,17 @@ public:
     static String toXml(const std::vector<int>& v);
     static std::vector<int> fromXml(const String& tag, const std::vector<int>& def);
 
+    static String toXml(const std::vector<string_idx_t>& v);
+    static std::vector<string_idx_t> fromXml(const String& tag, const std::vector<string_idx_t>& def);
+
     static const TranslatableString& userName(ElementType v);
+    static const TranslatableString& capitalizedUserName(ElementType v);
+
     static AsciiStringView toXml(ElementType v);
     static ElementType fromXml(const AsciiStringView& tag, ElementType def, bool silent = false);
 
+    static String toXml(AlignH v);
+    static String toXml(AlignV v);
     static String toXml(Align v);
     static Align fromXml(const String& str, Align def);
     static AlignH fromXml(const AsciiStringView& str, AlignH def);
@@ -61,6 +66,10 @@ public:
     static AsciiStringView toXml(Orientation v);
     static Orientation fromXml(const AsciiStringView& tag, Orientation def);
 
+    static String translatedUserName(SharedLabelOrientation v);
+    static AsciiStringView toXml(SharedLabelOrientation v);
+    static SharedLabelOrientation fromXml(const AsciiStringView& tag, SharedLabelOrientation def);
+
     static String translatedUserName(NoteHeadType v);
     static AsciiStringView toXml(NoteHeadType v);
     static NoteHeadType fromXml(const AsciiStringView& tag, NoteHeadType def);
@@ -77,15 +86,14 @@ public:
     static AsciiStringView toXml(ClefType v);
     static ClefType fromXml(const AsciiStringView& tag, ClefType def);
 
-    static String translatedUserName(DynamicType v);
     static SymId symId(DynamicType v);
     static DynamicType dynamicType(SymId v);
     static DynamicType dynamicType(const AsciiStringView& string);
+    static bool dynamicValid(const AsciiStringView& tag);
+    static const TranslatableString& userName(DynamicType v);
+    static String translatedUserName(DynamicType v);
     static AsciiStringView toXml(DynamicType v);
     static DynamicType fromXml(const AsciiStringView& tag, DynamicType def);
-    static String translatedUserName(DynamicRange v);
-    static String toXml(DynamicRange v);
-    static DynamicRange fromXml(const AsciiStringView& tag, DynamicRange def);
     static String translatedUserName(DynamicSpeed v);
     static AsciiStringView toXml(DynamicSpeed v);
     static DynamicSpeed fromXml(const AsciiStringView& tag, DynamicSpeed def);
@@ -119,16 +127,18 @@ public:
     static String toXml(AccidentalRole v);
     static AccidentalRole fromXml(const AsciiStringView& tag, AccidentalRole def);
 
-    static String toXml(BeatsPerSecond v);
+    static String toXml(BeatsPerSecond v, int precision);
     static BeatsPerSecond fromXml(const AsciiStringView& tag, BeatsPerSecond def);
 
     static String translatedUserName(DurationType v);
     static AsciiStringView toXml(DurationType v);
     static DurationType fromXml(const AsciiStringView& tag, DurationType def);
 
+    static const TranslatableString& userName(PlayingTechniqueType v);
     static AsciiStringView toXml(PlayingTechniqueType v);
     static PlayingTechniqueType fromXml(const AsciiStringView& tag, PlayingTechniqueType def);
 
+    static const TranslatableString& userName(GradualTempoChangeType v);
     static AsciiStringView toXml(GradualTempoChangeType v);
     static GradualTempoChangeType fromXml(const AsciiStringView& tag, GradualTempoChangeType def);
 
@@ -150,6 +160,7 @@ public:
     static AsciiStringView toXml(DirectionH v);
     static DirectionH fromXml(const AsciiStringView& str, DirectionH def);
 
+    static const TranslatableString& userName(LayoutBreakType v);
     static AsciiStringView toXml(LayoutBreakType v);
     static LayoutBreakType fromXml(const AsciiStringView& str, LayoutBreakType def);
 
@@ -169,6 +180,11 @@ public:
     static AsciiStringView toXml(TremoloType v);
     static TremoloType fromXml(const AsciiStringView& str, TremoloType def);
 
+    static AsciiStringView toXml(TremoloBarType v);
+    static TremoloBarType fromXml(const AsciiStringView& str, TremoloBarType def);
+
+    static const TranslatableString& userName(BracketType v);
+    static String translatedUserName(BracketType v);
     static AsciiStringView toXml(BracketType v);
     static BracketType fromXml(const AsciiStringView& str, BracketType def);
 
@@ -183,11 +199,17 @@ public:
     static StringList embellishmentNotes(EmbellishmentType v);
     static size_t embellishmentsCount();
 
-    static const TranslatableString& userName(ChordLineType v, bool straight);
+    static const TranslatableString& userName(ChordLineType v, bool straight, bool wavy);
     static AsciiStringView toXml(ChordLineType v);
     static ChordLineType fromXml(const AsciiStringView& tag, ChordLineType def);
 
-    static const char* userName(DrumNum v);
+    static AsciiStringView toXml(GuitarBendType v);
+    static GuitarBendType fromXml(const AsciiStringView& tag, GuitarBendType def);
+
+    static AsciiStringView toXml(NoteCaseType v);
+    static NoteCaseType fromXml(const AsciiStringView& tag, NoteCaseType def);
+
+    static const String& userName(DrumNum v);
 
     static const TranslatableString& userName(GlissandoType v);
     static AsciiStringView toXml(GlissandoType v);
@@ -223,12 +245,72 @@ public:
     static AsciiStringView toXml(LyricsSyllabic v);
     static LyricsSyllabic fromXml(const AsciiStringView& tag, LyricsSyllabic def);
 
-    static const char* userName(Key v, bool isAtonal = false, bool isCustom = false);
+    static AsciiStringView toXml(LyricsDashSystemStart v);
+    static LyricsDashSystemStart fromXml(const AsciiStringView& tag, LyricsDashSystemStart def);
+
+    static const TranslatableString& userName(Key v, bool isAtonal = false, bool isCustom = false);
     static String translatedUserName(Key v, bool isAtonal = false, bool isCustom = false);
 
     static AsciiStringView toXml(TiePlacement interval);
     static TiePlacement fromXml(const AsciiStringView& str, TiePlacement def);
+
+    static AsciiStringView toXml(TieDotsPlacement placement);
+    static TieDotsPlacement fromXml(const AsciiStringView& str, TieDotsPlacement def);
+
+    static AsciiStringView toXml(VoiceAssignment voiceAppl);
+    static VoiceAssignment fromXml(const AsciiStringView& str, VoiceAssignment def);
+
+    static AsciiStringView toXml(AutoOnOff autoOnOff);
+    static AutoOnOff fromXml(const AsciiStringView& str, AutoOnOff def);
+
+    static AsciiStringView toXml(CapoParams::TransposeMode autoOnOff);
+    static CapoParams::TransposeMode fromXml(const AsciiStringView& str, CapoParams::TransposeMode def);
+
+    static AsciiStringView toXml(PartialSpannerDirection v);
+    static PartialSpannerDirection fromXml(const AsciiStringView& str, PartialSpannerDirection def);
+
+    static AsciiStringView toXml(TimeSigPlacement timeSigPos);
+    static TimeSigPlacement fromXml(const AsciiStringView& str, TimeSigPlacement def);
+
+    static AsciiStringView toXml(TimeSigStyle timeSigStyle);
+    static TimeSigStyle fromXml(const AsciiStringView& str, TimeSigStyle def);
+
+    static AsciiStringView toXml(TimeSigVSMargin timeSigVSMargin);
+    static TimeSigVSMargin fromXml(const AsciiStringView& str, TimeSigVSMargin def);
+
+    static AsciiStringView toXml(NoteSpellingType noteSpellingType);
+    static NoteSpellingType fromXml(const AsciiStringView& str, NoteSpellingType def);
+
+    static AsciiStringView toXml(ChordStylePreset chordStylePreset);
+    static ChordStylePreset fromXml(const AsciiStringView& str, ChordStylePreset def);
+
+    static AsciiStringView toXml(TappingHand tappingHand);
+    static TappingHand fromXml(const AsciiStringView& str, TappingHand def);
+
+    static AsciiStringView toXml(LHTappingSymbol lh);
+    static LHTappingSymbol fromXml(const AsciiStringView& str, LHTappingSymbol def);
+
+    static AsciiStringView toXml(RHTappingSymbol rh);
+    static RHTappingSymbol fromXml(const AsciiStringView& str, RHTappingSymbol def);
+
+    static AsciiStringView toXml(ParenthesesMode pm);
+    static ParenthesesMode fromXml(const AsciiStringView& str, ParenthesesMode def);
+
+    static const TranslatableString& userName(RepeatPlayCountPreset v);
+    static String translatedUserName(RepeatPlayCountPreset v);
+    static AsciiStringView toXml(RepeatPlayCountPreset repeatPreset);
+    static RepeatPlayCountPreset fromXml(const AsciiStringView& str, RepeatPlayCountPreset def);
+
+    static AsciiStringView toXml(AutoCustomHide autoOnOff);
+    static AutoCustomHide fromXml(const AsciiStringView& str, AutoCustomHide def);
+
+    static AsciiStringView toXml(MeasureNumberPlacement v);
+    static MeasureNumberPlacement fromXml(const AsciiStringView& str, MeasureNumberPlacement def);
+
+    static AsciiStringView toXml(InstrumentNamesAlign v);
+    static InstrumentNamesAlign fromXml(const AsciiStringView& str, InstrumentNamesAlign def);
+
+    static AsciiStringView toXml(InstrumentNamesFormat v);
+    static InstrumentNamesFormat fromXml(const AsciiStringView& str, InstrumentNamesFormat def);
 };
 }
-
-#endif // MU_ENGRAVING_TYPESCONV_H

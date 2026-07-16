@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
+import QtQuick
 
-AudioSettingsPage {
-    showBitRateControl: true
+import Muse.UiComponents
+import MuseScore.Project
+
+ExportSettingsPage {
+    id: root
+
+    AudioSettings {
+        model: root.model
+        navigationPanel: root.navigationPanel
+        navigationOrderStart: root.navigationOrder
+        showBitRateControl: true
+    }
+
+    StyledTextLabel {
+        width: parent.width
+        text: qsTrc("project/export", "Each selected part will be exported as a separate audio file.")
+        horizontalAlignment: Text.AlignLeft
+        wrapMode: Text.WordWrap
+    }
 }

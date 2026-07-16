@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2023 MuseScore BVBA and others
+# Copyright (C) 2023 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -18,18 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE braille)
+muse_create_module(braille STUB)
 
-set(MODULE_QRC ${CMAKE_CURRENT_LIST_DIR}/braille.qrc)
+target_sources(braille PRIVATE
+    braillestubmodule.cpp
+    braillestubmodule.h
+    brailleconfigurationstub.cpp
+    brailleconfigurationstub.h
+)
 
-set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml)
-
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/braillestubmodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/braillestubmodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/brailleconfigurationstub.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/brailleconfigurationstub.h
-    )
-
-set(MODULE_IS_STUB ON)
-include(SetupModule)
+if (MUE_BUILD_BRAILLE_QML)
+    add_subdirectory(qml/MuseScore/Braille)
+endif()

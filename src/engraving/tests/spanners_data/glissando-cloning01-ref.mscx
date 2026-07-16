@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.76389</Spatium>
+      <defaultsVersion>301</defaultsVersion>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -15,28 +17,30 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
-        <linkedTo>2</linkedTo>
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <Staff id="2">
-        <linkedTo>1</linkedTo>
+      <Staff>
+        <eid>E_E</eid>
+        <linkedTo>D_D</linkedTo>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
-        <longName>Flute</longName>
-        <shortName>Fl.</shortName>
+        <InstrumentLabel>
+          <longName>Flute</longName>
+          <shortName>Fl.</shortName>
+          </InstrumentLabel>
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
         <maxPitchP>98</maxPitchP>
@@ -78,24 +82,24 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>F_F</eid>
         <voice>
           <TimeSig>
+            <eid>G_G</eid>
             <sigN>2</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
-            <linkedMain/>
+            <eid>H_H</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>I_I</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <Spanner type="Glissando">
                 <Glissando>
-                  <text>gliss.</text>
-                  <linkedMain/>
+                  <eid>J_J</eid>
                   <diagonal>1</diagonal>
-                  <anchor>3</anchor>
                   </Glissando>
                 <next>
                   <location>
@@ -106,10 +110,10 @@
               </Note>
             </Chord>
           <Chord>
-            <linkedMain/>
+            <eid>K_K</eid>
             <durationType>quarter</durationType>
             <Note>
-              <linkedMain/>
+              <eid>L_L</eid>
               <pitch>84</pitch>
               <tpc>14</tpc>
               <Spanner type="Glissando">
@@ -124,9 +128,10 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>M_M</eid>
         <voice>
           <Rest>
-            <linkedMain/>
+            <eid>N_N</eid>
             <durationType>measure</durationType>
             <duration>2/4</duration>
             </Rest>
@@ -137,25 +142,24 @@
       <Measure>
         <voice>
           <TimeSig>
+            <eid>O_O</eid>
             <sigN>2</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
-            <linked>
-              </linked>
+            <eid>P_P</eid>
+            <linkedTo>H_H</linkedTo>
             <durationType>quarter</durationType>
             <Note>
-              <linked>
-                </linked>
+              <eid>Q_Q</eid>
+              <linkedTo>I_I</linkedTo>
               <pitch>72</pitch>
               <tpc>14</tpc>
               <Spanner type="Glissando">
                 <Glissando>
-                  <text>gliss.</text>
-                  <linked>
-                    </linked>
+                  <eid>R_R</eid>
+                  <linkedTo>J_J</linkedTo>
                   <diagonal>1</diagonal>
-                  <anchor>3</anchor>
                   </Glissando>
                 <next>
                   <location>
@@ -166,12 +170,12 @@
               </Note>
             </Chord>
           <Chord>
-            <linked>
-              </linked>
+            <eid>S_S</eid>
+            <linkedTo>K_K</linkedTo>
             <durationType>quarter</durationType>
             <Note>
-              <linked>
-                </linked>
+              <eid>T_T</eid>
+              <linkedTo>L_L</linkedTo>
               <pitch>84</pitch>
               <tpc>14</tpc>
               <Spanner type="Glissando">
@@ -188,8 +192,8 @@
       <Measure>
         <voice>
           <Rest>
-            <linked>
-              </linked>
+            <eid>U_U</eid>
+            <linkedTo>N_N</linkedTo>
             <durationType>measure</durationType>
             <duration>2/4</duration>
             </Rest>

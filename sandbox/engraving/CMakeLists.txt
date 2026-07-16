@@ -1,12 +1,8 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.22)
 
 project(engraving_app LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-#set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-#set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,42 +11,25 @@ set(MU_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
 set(PROJECT_ROOT_DIR ${MU_ROOT})
 
 set(CMAKE_MODULE_PATH
-    ${MU_ROOT}/build
-    ${MU_ROOT}/build/cmake
+    ${MU_ROOT}/buildscripts
+    ${MU_ROOT}/buildscripts/cmake
+    ${MU_ROOT}/src/framework/cmake
     ${CMAKE_MODULE_PATH}
-    )
+)
 
 include(SetupBuildEnvironment)
 include(GetPlatformInfo)
 
-set(QT_MIN_VERSION    "5.15.0")
-find_package(Qt5Core ${QT_MIN_VERSION} REQUIRED)
-find_package(Qt5Gui ${QT_MIN_VERSION} REQUIRED)
-#find_package(Qt5Svg ${QT_MIN_VERSION} REQUIRED)
-#find_package(Qt5Widgets ${QT_MIN_VERSION} REQUIRED)
+find_package(Qt6 6.3 REQUIRED COMPONENTS Core Gui)
 
-set(QT_LIBRARIES
-    Qt5::Core
-    Qt5::Gui
-#    Qt5::Svg
-#    Qt5::Widgets
-)
+qt_standard_project_setup()
 
-include_directories(
-    ${Qt5Core_INCLUDE_DIRS}
-    ${Qt5Gui_INCLUDE_DIRS}
-#    ${Qt5Svg_INCLUDE_DIRS}
-#    ${Qt5Widgets_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_LIST_DIR}
-    ${MU_ROOT}/thirdparty/dtl
-)
+include_directories(${CMAKE_CURRENT_LIST_DIR})
 
-set(THIRDPARTY_DIR ${MU_ROOT}/thirdparty)
-
-add_definitions(
-    -DNO_QT_SUPPORT
-    -DNO_ENGRAVING_INTERACTIVE
-    -DNO_ENGRAVING_QSVGRENDER
+add_compile_definitions(
+    NO_QT_SUPPORT
+    NO_ENGRAVING_INTERACTIVE
+    NO_ENGRAVING_QSVGRENDER
 )
 
 set(NO_ENGRAVING_INTERNAL ON)
@@ -59,12 +38,11 @@ add_subdirectory(${MU_ROOT}/src/engraving engraving)
 set(NO_GLOBAL_INTERNAL ON)
 add_subdirectory(${MU_ROOT}/src/framework/global global)
 
-#include(${MU_ROOT}/src/framework/global/modularity/modularity.cmake)
-
+# include(${MU_ROOT}/src/framework/global/modularity/modularity.cmake)
 add_executable(engraving_app
-#    ${MODULARITY_SRC}
-#    ${MU_ROOT}/src/framework/global/translation.cpp
-#    ${MU_ROOT}/src/framework/global/translation.h
+    # ${MODULARITY_SRC}
+    # ${MU_ROOT}/src/framework/global/translation.cpp
+    # ${MU_ROOT}/src/framework/global/translation.h
     log.h
     fontproviderstub.cpp
     fontproviderstub.h
@@ -83,7 +61,8 @@ target_include_directories(engraving_app PUBLIC
 )
 
 target_link_libraries(engraving_app
-    ${QT_LIBRARIES}
     global
     engraving
+    Qt6::Core
+    Qt6::Gui
 )

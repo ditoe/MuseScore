@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -36,7 +36,7 @@ namespace mu::engraving {
 SpannerMap::SpannerMap()
     : std::multimap<int, Spanner*>()
 {
-    dirty = true;
+    m_dirty = true;
 }
 
 //---------------------------------------------------------
@@ -46,14 +46,15 @@ SpannerMap::SpannerMap()
 
 void SpannerMap::update() const
 {
+    TRACEFUNC;
     IntervalList regularIntervals;
     IntervalList collisionFreeIntervals;
 
     collectIntervals(regularIntervals, collisionFreeIntervals);
 
-    tree = interval_tree::IntervalTree<Spanner*>(std::move(regularIntervals));
-    collisionFreeTree = interval_tree::IntervalTree<Spanner*>(std::move(collisionFreeIntervals));
-    dirty = false;
+    m_tree = interval_tree::IntervalTree<Spanner*>(std::move(regularIntervals));
+    m_collisionFreeTree = interval_tree::IntervalTree<Spanner*>(std::move(collisionFreeIntervals));
+    m_dirty = false;
 }
 
 //---------------------------------------------------------
@@ -62,19 +63,19 @@ void SpannerMap::update() const
 
 const SpannerMap::IntervalList& SpannerMap::findContained(int start, int stop, bool excludeCollisions) const
 {
-    if (dirty) {
+    if (m_dirty) {
         update();
     }
 
-    results.clear();
+    m_results.clear();
 
     if (excludeCollisions) {
-        results = collisionFreeTree.findContained(start, stop);
+        m_results = m_collisionFreeTree.findContained(start, stop);
     } else {
-        results = tree.findContained(start, stop);
+        m_results = m_tree.findContained(start, stop);
     }
 
-    return results;
+    return m_results;
 }
 
 //---------------------------------------------------------
@@ -83,19 +84,19 @@ const SpannerMap::IntervalList& SpannerMap::findContained(int start, int stop, b
 
 const SpannerMap::IntervalList& SpannerMap::findOverlapping(int start, int stop, bool excludeCollisions) const
 {
-    if (dirty) {
+    if (m_dirty) {
         update();
     }
 
-    results.clear();
+    m_results.clear();
 
     if (excludeCollisions) {
-        results = collisionFreeTree.findOverlapping(start, stop);
+        m_results = m_collisionFreeTree.findOverlapping(start, stop);
     } else {
-        results = tree.findOverlapping(start, stop);
+        m_results = m_tree.findOverlapping(start, stop);
     }
 
-    return results;
+    return m_results;
 }
 
 void SpannerMap::collectIntervals(IntervalList& regularIntervals, IntervalList& collisionFreeIntervals) const
@@ -153,7 +154,7 @@ void SpannerMap::collectIntervals(IntervalList& regularIntervals, IntervalList& 
 void SpannerMap::addSpanner(Spanner* s)
 {
     insert(std::pair<int, Spanner*>(s->tick().ticks(), s));
-    dirty = true;
+    m_dirty = true;
 }
 
 //---------------------------------------------------------
@@ -165,7 +166,7 @@ bool SpannerMap::removeSpanner(Spanner* s)
     for (auto i = begin(); i != end(); ++i) {
         if (i->second == s) {
             erase(i);
-            dirty = true;
+            m_dirty = true;
             return true;
         }
     }

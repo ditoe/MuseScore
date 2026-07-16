@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -21,11 +21,15 @@
 set(MODULE_TEST project_test)
 
 set(MODULE_TEST_SRC
+    ${CMAKE_CURRENT_LIST_DIR}/mocks/mscmetareadermock.h
     ${CMAKE_CURRENT_LIST_DIR}/mocks/projectconfigurationmock.h
+    ${CMAKE_CURRENT_LIST_DIR}/mscmetareadertests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/templatesrepositorytest.cpp
 )
 
+set(MODULE_TEST_DATA_ROOT "${CMAKE_CURRENT_LIST_DIR}/data")
+
 set(MODULE_TEST_LINK project)
 
-include(${PROJECT_SOURCE_DIR}/src/framework/testing/gtest.cmake)
+include(SetupGTest)
 

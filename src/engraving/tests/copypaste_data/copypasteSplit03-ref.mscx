@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>D_D</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.74978</Spatium>
+      <pageNumberFontSize>9</pageNumberFontSize>
+      <pageNumberFontStyle>0</pageNumberFontStyle>
+      <pageNumberMusicalSymbolSize>9</pageNumberMusicalSymbolSize>
+      <spatium>1.75</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
     <showFrames>1</showFrames>
     <showMargins>0</showMargins>
+    <open>1</open>
     <metaTag name="arranger"></metaTag>
     <metaTag name="composer">Composer / arranger</metaTag>
     <metaTag name="copyright"></metaTag>
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="subtitle">Subtitle</metaTag>
     <metaTag name="translator"></metaTag>
@@ -67,15 +71,18 @@
       <unsorted/>
       </Order>
     <Part id="1">
-      <Staff id="1">
+      <eid>E_E</eid>
+      <Staff>
+        <eid>F_F</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
-        <longName>Flute</longName>
-        <shortName>Fl.</shortName>
+        <InstrumentLabel>
+          <longName>Flute</longName>
+          <shortName>Fl.</shortName>
+          </InstrumentLabel>
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
         <maxPitchP>98</maxPitchP>
@@ -89,17 +96,22 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>G_G</eid>
         <voice>
           <KeySig>
+            <eid>H_H</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>I_I</eid>
             <sigN>8</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
+            <eid>J_J</eid>
             <durationType>breve</durationType>
             <Note>
+              <eid>B_B</eid>
               <pitch>74</pitch>
               <tpc>16</tpc>
               </Note>
@@ -107,22 +119,29 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>K_K</eid>
         <voice>
           <TimeSig>
+            <eid>L_L</eid>
             <sigN>2</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>M_M</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>N_N</eid>
             <durationType>eighth</durationType>
             </Rest>
           <Chord>
+            <eid>O_O</eid>
             <durationType>eighth</durationType>
             <Note>
+              <eid>P_P</eid>
               <Spanner type="Tie">
                 <Tie>
+                  <eid>Q_Q</eid>
                   </Tie>
                 <next>
                   <location>
@@ -138,12 +157,16 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>R_R</eid>
         <voice>
           <Chord>
+            <eid>S_S</eid>
             <durationType>half</durationType>
             <Note>
+              <eid>T_T</eid>
               <Spanner type="Tie">
                 <Tie>
+                  <eid>U_U</eid>
                   </Tie>
                 <next>
                   <location>
@@ -166,12 +189,16 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>V_V</eid>
         <voice>
           <Chord>
+            <eid>W_W</eid>
             <durationType>half</durationType>
             <Note>
+              <eid>X_X</eid>
               <Spanner type="Tie">
                 <Tie>
+                  <eid>Y_Y</eid>
                   </Tie>
                 <next>
                   <location>
@@ -193,10 +220,23 @@
           </voice>
         </Measure>
       <Measure>
+        <eid>Z_Z</eid>
         <voice>
           <Chord>
+            <eid>a_a</eid>
             <durationType>half</durationType>
             <Note>
+              <eid>b_b</eid>
+              <Spanner type="Tie">
+                <Tie>
+                  <eid>c_c</eid>
+                  </Tie>
+                <next>
+                  <location>
+                    <measures>1</measures>
+                    </location>
+                  </next>
+                </Spanner>
               <Spanner type="Tie">
                 <prev>
                   <location>
@@ -208,6 +248,32 @@
               <tpc>16</tpc>
               </Note>
             </Chord>
+          </voice>
+        </Measure>
+      <Measure>
+        <eid>d_d</eid>
+        <voice>
+          <Chord>
+            <eid>e_e</eid>
+            <dots>1</dots>
+            <durationType>quarter</durationType>
+            <Note>
+              <eid>f_f</eid>
+              <Spanner type="Tie">
+                <prev>
+                  <location>
+                    <measures>-1</measures>
+                    </location>
+                  </prev>
+                </Spanner>
+              <pitch>74</pitch>
+              <tpc>16</tpc>
+              </Note>
+            </Chord>
+          <Rest>
+            <eid>g_g</eid>
+            <durationType>eighth</durationType>
+            </Rest>
           </voice>
         </Measure>
       </Staff>

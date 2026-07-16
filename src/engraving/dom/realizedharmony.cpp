@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -37,10 +37,10 @@ namespace mu::engraving {
 //---------------------------------------------------
 void RealizedHarmony::setVoicing(Voicing v)
 {
-    if (_voicing == v) {
+    if (m_voicing == v) {
         return;
     }
-    _voicing = v;
+    m_voicing = v;
     cascadeDirty(true);
 }
 
@@ -51,10 +51,10 @@ void RealizedHarmony::setVoicing(Voicing v)
 //---------------------------------------------------
 void RealizedHarmony::setDuration(HDuration d)
 {
-    if (_duration == d) {
+    if (m_duration == d) {
         return;
     }
-    _duration = d;
+    m_duration = d;
     cascadeDirty(true);
 }
 
@@ -65,10 +65,10 @@ void RealizedHarmony::setDuration(HDuration d)
 //---------------------------------------------------
 void RealizedHarmony::setLiteral(bool literal)
 {
-    if (_literal == literal) {
+    if (m_literal == literal) {
         return;
     }
-    _literal = literal;
+    m_literal = literal;
     cascadeDirty(true);
 }
 
@@ -78,11 +78,11 @@ void RealizedHarmony::setLiteral(bool literal)
 //---------------------------------------------------
 const RealizedHarmony::PitchMap& RealizedHarmony::notes() const
 {
-    assert(!_dirty);
+    assert(!m_dirty);
     //with the way that the code is currently structured, there should be no way to
     //get to this function with dirty flag set although in the future it may be
     //better to just update if dirty here
-    return _notes;
+    return m_notes;
 }
 
 //---------------------------------------------------
@@ -121,10 +121,10 @@ const RealizedHarmony::PitchMap RealizedHarmony::generateNotes(int rootTpc, int 
         break;
     case Voicing::AUTO:         //auto is close voicing for now since it is the most robust
         //but just render the root if the harmony isn't understandable
-        if (!_harmony->parsedForm()->understandable()) {
+        if (!m_harmony->parsedForm()->understandable()) {
             break;
         }
-    // FALLTHROUGH
+        [[fallthrough]];
     case Voicing::CLOSE:        //Voices notes in close position in the first octave above middle C
     {
         notes.insert({ rootPitch + DEFAULT_OCTAVE * PITCH_DELTA_OCTAVE, rootTpc });
@@ -211,17 +211,14 @@ void RealizedHarmony::update(int rootTpc, int bassTpc, int transposeOffset /*= 0
     //bit risky design since these 3 parameters rely on the dirty bit and are not
     //otherwise checked by RealizedHarmony. This saves us 3 ints of space, but
     //has the added risk
-    if (!_dirty) {
-        assert(
-            _harmony->harmonyType() != HarmonyType::STANDARD
-            || (_notes.begin()->second == rootTpc || _notes.begin()->second == bassTpc));
+    if (!m_dirty) {
         return;
     }
 
     if (tpcIsValid(rootTpc)) {
-        _notes = generateNotes(rootTpc, bassTpc, _literal, _voicing, transposeOffset);
+        m_notes = generateNotes(rootTpc, bassTpc, m_literal, m_voicing, transposeOffset);
     }
-    _dirty = false;
+    m_dirty = false;
 }
 
 //--------------------------------------------------
@@ -248,17 +245,17 @@ Fraction RealizedHarmony::getActualDuration(int utick, HDuration durationType) c
     if (durationType != HDuration::INVALID) {
         dur = durationType;
     } else {
-        dur = _duration;
+        dur = m_duration;
     }
     switch (dur) {
     case HDuration::UNTIL_NEXT_CHORD_SYMBOL:
-        return _harmony->ticksTillNext(utick, false);
+        return m_harmony->ticksTillNext(utick, false);
         break;
     case HDuration::STOP_AT_MEASURE_END:
-        return _harmony->ticksTillNext(utick, true);
+        return m_harmony->ticksTillNext(utick, true);
         break;
     case HDuration::SEGMENT_DURATION: {
-        Segment* s = _harmony->getParentSeg();
+        Segment* s = m_harmony->getParentSeg();
         if (s) {
             // TODO - use duration of chordrest on this segment / track
             // currently, this will result in too short of a duration
@@ -306,7 +303,7 @@ RealizedHarmony::PitchMap RealizedHarmony::getIntervals(int rootTpc, bool litera
 
     PitchMap ret;
 
-    const ParsedChord* p = _harmony->parsedForm();
+    const ParsedChord* p = m_harmony->parsedForm();
     String quality = p->quality();
     int ext = p->extension().toInt();
     const StringList& modList = p->modifierList();
@@ -324,12 +321,19 @@ RealizedHarmony::PitchMap RealizedHarmony::getIntervals(int rootTpc, bool litera
             if (s.at(c).isDigit()) {
                 int alter = 0;
                 size_t cutoff = c;
-                int deg = s.right(s.size() - c).toInt();
+                String degreeString = s;
+                static const std::wregex NOT_DIGITS = std::wregex(L"[^0-9]+");
+                degreeString.remove(NOT_DIGITS);
+                int deg = degreeString.toInt();
                 //account for if the flat/sharp is stuck to the end of add
                 if (c) {
                     if (s.at(c - 1) == u'#') {
                         cutoff -= 1;
-                        alter = +1;
+                        if (deg == 7) {
+                            alter = 0;
+                        } else {
+                            alter = +1;
+                        }
                     } else if (s.at(c - 1) == u'b') {
                         cutoff -= 1;
                         alter = -1;
@@ -435,7 +439,7 @@ RealizedHarmony::PitchMap RealizedHarmony::getIntervals(int rootTpc, bool litera
             ret.insert({ 9 + RANK_MULT * RANK_ADD, tpcInterval(rootTpc, 13, 0) });               //maj13
             omit |= 1 << 13;
         }
-    // FALLTHROUGH
+        [[fallthrough]];
     case 11:
         if (!(omit & (1 << 11))) {
             if (quality == "minor") {
@@ -445,13 +449,13 @@ RealizedHarmony::PitchMap RealizedHarmony::getIntervals(int rootTpc, bool litera
             }
             omit |= 1 << 11;
         }
-    // FALLTHROUGH
+        [[fallthrough]];
     case 9:
         if (!(omit & (1 << 9))) {
             ret.insert({ 2 + RANK_MULT * RANK_9TH, tpcInterval(rootTpc, 9, 0) });               //maj9
             omit |= 1 << 9;
         }
-    // FALLTHROUGH
+        [[fallthrough]];
     case 7:
         if (!(omit & (1 << 7))) {
             if (quality == "major") {
@@ -494,7 +498,7 @@ RealizedHarmony::PitchMap RealizedHarmony::getIntervals(int rootTpc, bool litera
         break;
     }
 
-    Harmony* next = _harmony->findNext();
+    Harmony* next = m_harmony->findNext();
     if (!literal && next && tpcIsValid(next->rootTpc())) {
         //jazz interpretation
         String qNext = next->parsedForm()->quality();
@@ -519,7 +523,7 @@ RealizedHarmony::PitchMap RealizedHarmony::getIntervals(int rootTpc, bool litera
             if (quality == "dominant" && pitchBetween == 5 && (qNext == "minor" || false)) {
                 //flat 13 for dominant to chord a P4 up
                 //only for minor chords for now
-                mu::remove(ret, FIFTH);
+                muse::remove(ret, FIFTH);
                 ret.insert({ 8 + RANK_MULT * RANK_ADD, tpcInterval(rootTpc, 13, -1) });
             }
             //major 13 considered, but too dependent on melody and voicing of other chord
@@ -582,12 +586,12 @@ RealizedHarmony::PitchMap RealizedHarmony::normalizeNoteMap(const PitchMap& inte
 //---------------------------------------------------
 void RealizedHarmony::cascadeDirty(bool dirty)
 {
-    if (dirty && !_dirty) {   //only cascade when we want to set our clean realized harmony to dirty
-        Harmony* prev = _harmony->findPrev();
+    if (dirty && !m_dirty) {   //only cascade when we want to set our clean realized harmony to dirty
+        Harmony* prev = m_harmony->findPrev();
         if (prev) {
             prev->realizedHarmony().cascadeDirty(dirty);
         }
     }
-    _dirty = dirty;
+    m_dirty = dirty;
 }
 }

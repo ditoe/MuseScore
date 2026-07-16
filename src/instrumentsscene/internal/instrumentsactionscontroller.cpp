@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,8 +24,14 @@
 
 #include "engraving/dom/instrchange.h"
 
+#include "notation/inotationinteraction.h"
+#include "notation/inotationparts.h" // IWYU pragma: keep
+#include "notation/inotationselection.h" // IWYU pragma: keep
+
 using namespace mu::instrumentsscene;
 using namespace mu::notation;
+using namespace muse;
+using namespace muse::actions;
 
 void InstrumentsActionsController::init()
 {
@@ -33,7 +39,7 @@ void InstrumentsActionsController::init()
     dispatcher()->reg(this, "change-instrument", this, &InstrumentsActionsController::changeInstrument);
 }
 
-bool InstrumentsActionsController::canReceiveAction(const actions::ActionCode&) const
+bool InstrumentsActionsController::canReceiveAction(const ActionCode&) const
 {
     return context()->currentMasterNotation() != nullptr;
 }
@@ -45,13 +51,10 @@ void InstrumentsActionsController::selectInstruments()
         return;
     }
 
-    RetVal<PartInstrumentListScoreOrder> selectedInstruments = selectInstrumentsScenario()->selectInstruments();
-    if (!selectedInstruments.ret) {
-        LOGE() << selectedInstruments.ret.toString();
-        return;
-    }
-
-    master->parts()->setParts(selectedInstruments.val.instruments, selectedInstruments.val.scoreOrder);
+    async::Promise<PartInstrumentListScoreOrder> selectedInstruments = selectInstrumentsScenario()->selectInstruments();
+    selectedInstruments.onResolve(this, [master](const PartInstrumentListScoreOrder& sel) {
+        master->parts()->setParts(sel.instruments, sel.scoreOrder);
+    });
 }
 
 void InstrumentsActionsController::changeInstrument()
@@ -61,22 +64,30 @@ void InstrumentsActionsController::changeInstrument()
         return;
     }
 
-    const mu::engraving::EngravingItem* element = master->notation()->interaction()->selection()->element();
-    const mu::engraving::InstrumentChange* instrumentChange = element ? mu::engraving::toInstrumentChange(element) : nullptr;
-    if (!instrumentChange) {
+    INotationPtr notation = context()->currentNotation();
+    IF_ASSERT_FAILED(notation) {
         return;
     }
+
+    const mu::engraving::EngravingItem* element = notation->interaction()->hitElementContext().element;
+    if (!element) {
+        element = notation->interaction()->selection()->element();
+    }
+
+    if (!element || !element->isInstrumentChange()) {
+        return;
+    }
+
+    const mu::engraving::InstrumentChange* instrumentChange = mu::engraving::toInstrumentChange(element);
 
     InstrumentKey key;
     key.instrumentId = instrumentChange->instrument()->id();
     key.partId = instrumentChange->part()->id();
     key.tick = instrumentChange->tick();
 
-    RetVal<Instrument> instrument = selectInstrumentsScenario()->selectInstrument(key);
-    if (!instrument.ret) {
-        LOGE() << instrument.ret.toString();
-        return;
-    }
-
-    master->parts()->replaceInstrument(key, instrument.val);
+    async::Promise<InstrumentTemplate> templ = selectInstrumentsScenario()->selectInstrument(key);
+    templ.onResolve(this, [master, key](const InstrumentTemplate& val) {
+        Instrument instrument = Instrument::fromTemplate(&val);
+        master->parts()->replaceInstrument(key, instrument);
+    });
 }

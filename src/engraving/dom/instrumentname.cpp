@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,6 +23,10 @@
 #include "instrumentname.h"
 
 #include "measure.h"
+#include "part.h"
+#include "score.h"
+#include "staff.h"
+#include "style/style.h"
 #include "system.h"
 
 #include "log.h"
@@ -56,28 +60,26 @@ InstrumentName::InstrumentName(System* s)
     setInstrumentNameType(InstrumentNameType::LONG);
 }
 
-//---------------------------------------------------------
-//   instrumentNameTypeName
-//---------------------------------------------------------
-
-String InstrumentName::instrumentNameTypeName() const
+double InstrumentName::largestStaffSpatium() const
 {
-    return instrumentNameType() == InstrumentNameType::SHORT ? u"short" : u"long";
-}
-
-//---------------------------------------------------------
-//   setInstrumentNameType
-//---------------------------------------------------------
-
-void InstrumentName::setInstrumentNameType(const String& s)
-{
-    if (s == u"short") {
-        setInstrumentNameType(InstrumentNameType::SHORT);
-    } else if (s == u"long") {
-        setInstrumentNameType(InstrumentNameType::LONG);
-    } else {
-        LOGD("InstrumentName::setSubtype: unknown <%s>", muPrintable(s));
+    if (systemFlag() || (explicitParent() && parentItem()->systemFlag())) {
+        return style().spatium();
     }
+
+    // Get spatium for instrument names from largest staff of part,
+    // instead of staff it is attached to
+    Part* p = part();
+    if (!part()) {
+        return style().spatium();
+    }
+    double largestSpatium = 0;
+    for (Staff* s: p->staves()) {
+        double sp = s->spatium(tick());
+        if (sp > largestSpatium) {
+            largestSpatium = sp;
+        }
+    }
+    return largestSpatium;
 }
 
 //---------------------------------------------------------
@@ -86,7 +88,7 @@ void InstrumentName::setInstrumentNameType(const String& s)
 
 void InstrumentName::setInstrumentNameType(InstrumentNameType st)
 {
-    _instrumentNameType = st;
+    m_instrumentNameType = st;
     if (st == InstrumentNameType::SHORT) {
         setTextStyleType(TextStyleType::INSTRUMENT_SHORT);
         initElementStyle(&shortInstrumentStyle);
@@ -96,51 +98,11 @@ void InstrumentName::setInstrumentNameType(InstrumentNameType st)
     }
 }
 
-//---------------------------------------------------------
-//   playTick
-//---------------------------------------------------------
-
-Fraction InstrumentName::playTick() const
-{
-    // Instrument names always have a tick value of zero, so play from the start of the first measure in the system that the instrument name belongs to.
-    const auto sys = system();
-    if (sys) {
-        const auto firstMeasure = sys->firstMeasure();
-        if (firstMeasure) {
-            return firstMeasure->tick();
-        }
-    }
-
-    return tick();
-}
-
-//---------------------------------------------------------
-//   getProperty
-//---------------------------------------------------------
-
-PropertyValue InstrumentName::getProperty(Pid id) const
-{
-    switch (id) {
-    case Pid::INAME_LAYOUT_POSITION:
-        return _layoutPos;
-    default:
-        return TextBase::getProperty(id);
-    }
-}
-
-//---------------------------------------------------------
-//   setProperty
-//---------------------------------------------------------
-
 bool InstrumentName::setProperty(Pid id, const PropertyValue& v)
 {
     bool rv = true;
     switch (id) {
-    case Pid::INAME_LAYOUT_POSITION:
-        _layoutPos = v.toInt();
-        break;
     case Pid::VISIBLE:
-    case Pid::COLOR:
         // not supported
         break;
     default:
@@ -150,17 +112,16 @@ bool InstrumentName::setProperty(Pid id, const PropertyValue& v)
     return rv;
 }
 
-//---------------------------------------------------------
-//   propertyDefault
-//---------------------------------------------------------
-
-PropertyValue InstrumentName::propertyDefault(Pid id) const
+mu::engraving::staff_idx_t mu::engraving::InstrumentName::effectiveStaffIdx() const
 {
-    switch (id) {
-    case Pid::INAME_LAYOUT_POSITION:
-        return 0;
-    default:
-        return TextBase::propertyDefault(id);
+    if (m_sysStaff->show() || m_instrumentNameRole == InstrumentNameRole::STAFF) {
+        return staffIdx();
+    } else if (m_instrumentNameRole == InstrumentNameRole::PART) {
+        return system()->firstVisibleSysStaffOfPart(score()->staff(staffIdx())->part());
+    } else {
+        staff_idx_t curIdx = staffIdx();
+        Instrument* instr = score()->staff(curIdx)->part()->instrument(system()->first()->tick());
+        return system()->firstVisibleSysStaffWithInstrument(instr->id(), curIdx);
     }
 }
 }

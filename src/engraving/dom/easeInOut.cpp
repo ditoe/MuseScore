@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,6 +33,7 @@
 #include "realfn.h"
 
 using namespace mu;
+using namespace muse;
 
 namespace mu::engraving {
 //-------------------------------------------------------------------------------------------------
@@ -48,8 +49,8 @@ namespace mu::engraving {
 double EaseInOut::tFromX(const double x) const
 {
     const double pi = 3.14159265358979323846;
-    double w1 = _easeIn - x;
-    double w2 = 1.0 - _easeOut - x;
+    double w1 = m_easeIn - x;
+    double w2 = 1.0 - m_easeOut - x;
     double d = x + 3.0 * w1 - 3.0 * w2 + (1.0 - x);
     double a = (-3.0 * x - 6.0 * w1 + 3 * w2) / d;
     double b = (3.0 * x + 3.0 * w1) / d;
@@ -60,7 +61,7 @@ double EaseInOut::tFromX(const double x) const
     double discr = (q * q) / 4.0 + (p * p * p) / 27.0;
     double t = 0.0;
     // Crazy idea to first test the least probable case with such an expensive test but...
-    if (RealIsNull(discr)) {
+    if (muse::RealIsNull(discr)) {
         // Case that happens extremely rarely --> 2 roots.
         double q2 = q / 2.0;
         double u = q2 < 0.0 ? std::pow(-q2, 1.0 / 3.0) : -std::pow(q2, 1.0 / 3.0);
@@ -112,7 +113,7 @@ void EaseInOut::timeList(const int nbNotes, const int duration, std::vector<int>
 {
     double nNotes = double(nbNotes);
     double space = double(duration);
-    if (_easeIn == 0.0 && _easeOut == 0.0) {
+    if (RealIsNull(m_easeIn) && RealIsNull(m_easeOut)) {
         for (int n = 0; n <= nbNotes; n++) {
             times->push_back(static_cast<int>(std::lround((static_cast<double>(n) / nNotes) * space)));
         }

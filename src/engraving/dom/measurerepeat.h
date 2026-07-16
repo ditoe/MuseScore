@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __MEASUREREPEAT_H__
-#define __MEASUREREPEAT_H__
+#ifndef MU_ENGRAVING_MEASUREREPEAT_H
+#define MU_ENGRAVING_MEASUREREPEAT_H
 
 #include "rest.h"
 
@@ -48,8 +48,8 @@ public:
     void setNumMeasures(int n);
     int numMeasures() const { return m_numMeasures; }
 
-    void setNumberPos(double d) { m_numberPos = d; }
-    double numberPos() const { return m_numberPos; }
+    void setNumberPos(const Spatium d) { m_numberPos = d; }
+    Spatium numberPos() const { return m_numberPos; }
 
     Measure* firstMeasureOfGroup() const;
     const Measure* referringMeasure(const Measure* measure) const;
@@ -61,15 +61,16 @@ public:
     bool setProperty(Pid, const PropertyValue&) override;
     PropertyValue getProperty(Pid) const override;
 
-    Shape shape() const override;
-
     String accessibleInfo() const override;
+
+    int subtype() const override { return m_numMeasures; }
+    muse::TranslatableString subtypeUserName() const override;
 
     bool placeMultiple() const override { return numMeasures() == 1; }     // prevent overlapping additions with range selection
 
-    mu::RectF numberRect() const override;
+    RectF numberRect() const override;
 
-    mu::PointF numberPosition(const mu::RectF& numberBbox) const;
+    PointF numberPosition(const RectF& numberBbox) const;
 
     struct LayoutData : public Rest::LayoutData {
         SymId symId = SymId::noSym;
@@ -80,16 +81,18 @@ public:
         void setNumberSym(int n) { numberSym = timeSigSymIdsFromString(String::number(n)); }
         void setNumberSym(const String& s) { numberSym = timeSigSymIdsFromString(s); }
         void clearNumberSym() { numberSym.clear(); }
+
+        LineF extenderLineLeft = LineF();
+        LineF extenderLineRight = LineF();
     };
-    DECLARE_LAYOUTDATA_METHODS(MeasureRepeat);
+    DECLARE_LAYOUTDATA_METHODS(MeasureRepeat)
 
 private:
 
     Sid getPropertyStyle(Pid) const override;
 
     int m_numMeasures = 0;
-
-    double m_numberPos = 0.0;
+    Spatium m_numberPos = 0.0_sp;
 };
 } // namespace mu::engraving
 #endif

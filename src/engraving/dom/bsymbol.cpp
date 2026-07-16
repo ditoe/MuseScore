@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -80,11 +80,11 @@ void BSymbol::add(EngravingItem* e)
 //   scanElements
 //---------------------------------------------------------
 
-void BSymbol::scanElements(void* data, void (* func)(void*, EngravingItem*), bool all)
+void BSymbol::scanElements(std::function<void(EngravingItem*)> func)
 {
-    func(data, this);
+    func(this);
     for (EngravingItem* e : m_leafs) {
-        e->scanElements(data, func, all);
+        e->scanElements(func);
     }
 }
 
@@ -95,7 +95,7 @@ void BSymbol::scanElements(void* data, void (* func)(void*, EngravingItem*), boo
 void BSymbol::remove(EngravingItem* e)
 {
     if (e->isSymbol() || e->isImage()) {
-        if (mu::remove(m_leafs, e)) {
+        if (muse::remove(m_leafs, e)) {
             e->removed();
         } else {
             LOGD("BSymbol::remove: element <%s> not found", e->typeName());
@@ -118,12 +118,16 @@ bool BSymbol::acceptDrop(EditData& data) const
 //   drop
 //---------------------------------------------------------
 
-EngravingItem* BSymbol::drop(EditData& data)
+EngravingItem* BSymbol::drop(Transaction&, EditData& data)
 {
     EngravingItem* el = data.dropElement;
     if (el->isSymbol() || el->isImage()) {
         el->setParent(this);
-        PointF p = data.pos - pagePos() - data.dragOffset;
+        PointF p = data.pos - pageBoundingRect().topLeft() - data.dragOffset;
+        if (p == PointF()) {
+            // offset position so newly added child is visible
+            p = PointF(width(), height());
+        }
         el->setOffset(p);
         score()->undoAddElement(el);
         return el;
@@ -137,7 +141,7 @@ EngravingItem* BSymbol::drop(EditData& data)
 //   drag
 //---------------------------------------------------------
 
-mu::RectF BSymbol::drag(EditData& ed)
+RectF BSymbol::drag(EditData& ed)
 {
     RectF r(canvasBoundingRect());
     for (const EngravingItem* e : m_leafs) {
@@ -172,7 +176,7 @@ mu::RectF BSymbol::drag(EditData& ed)
 //   dragAnchorLines
 //---------------------------------------------------------
 
-std::vector<mu::LineF> BSymbol::dragAnchorLines() const
+std::vector<LineF> BSymbol::dragAnchorLines() const
 {
     return genericDragAnchorLines();
 }
@@ -181,10 +185,10 @@ std::vector<mu::LineF> BSymbol::dragAnchorLines() const
 //   pagePos
 //---------------------------------------------------------
 
-mu::PointF BSymbol::pagePos() const
+PointF BSymbol::pagePos() const
 {
-    if (explicitParent() && (explicitParent()->type() == ElementType::SEGMENT)) {
-        mu::PointF p(pos());
+    if (explicitParent() && (explicitParent()->isSegment())) {
+        PointF p(pos());
         System* system = segment()->measure()->system();
         if (system) {
             p.ry() += system->staff(staffIdx())->y() + system->y();
@@ -200,10 +204,10 @@ mu::PointF BSymbol::pagePos() const
 //   canvasPos
 //---------------------------------------------------------
 
-mu::PointF BSymbol::canvasPos() const
+PointF BSymbol::canvasPos() const
 {
-    if (explicitParent() && (explicitParent()->type() == ElementType::SEGMENT)) {
-        mu::PointF p(pos());
+    if (explicitParent() && (explicitParent()->isSegment())) {
+        PointF p(pos());
         Segment* s = toSegment(explicitParent());
 
         System* system = s->measure()->system();

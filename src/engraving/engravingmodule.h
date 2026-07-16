@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,22 +29,42 @@
 namespace mu::engraving {
 class EngravingConfiguration;
 class EngravingFontsProvider;
-class EngravingModule : public modularity::IModuleSetup
+class PaletteScoreProvider;
+class EngravingModule : public muse::modularity::IModuleSetup
 {
 public:
     std::string moduleName() const override;
 
     void registerExports() override;
     void resolveImports() override;
+    void registerApi() override;
     void registerResources() override;
     void registerUiTypes() override;
-    void onInit(const framework::IApplication::RunMode& mode) override;
-    void onDestroy() override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+    void onDeinit() override;
+
+    muse::modularity::IContextSetup* newContext(const muse::modularity::ContextPtr& ctx) const override;
 
 private:
 
     std::shared_ptr<EngravingConfiguration> m_configuration;
     std::shared_ptr<EngravingFontsProvider> m_engravingfonts;
+};
+
+class EngravingContext : public muse::modularity::IContextSetup
+{
+public:
+
+    EngravingContext(const muse::modularity::ContextPtr& ctx)
+        : muse::modularity::IContextSetup(ctx) {}
+
+    void registerExports() override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+    void onDestroy() override;
+
+private:
+
+    std::shared_ptr<PaletteScoreProvider> m_paletteScoreProvider;
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __STICKING_H__
-#define __STICKING_H__
+#ifndef MU_ENGRAVING_STICKING_H
+#define MU_ENGRAVING_STICKING_H
 
 #include "textbase.h"
 
@@ -47,6 +47,8 @@ public:
     Measure* measure() const { return (Measure*)explicitParent()->explicitParent(); }
 
     bool isEditAllowed(EditData&) const override;
+
+    bool positionRelativeToNoteheadRest() const override { return true; }
 };
 } // namespace mu::engraving
 #endif

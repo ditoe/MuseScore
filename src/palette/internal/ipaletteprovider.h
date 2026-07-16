@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_PALETTE_IPALETTEPROVIDER_H
-#define MU_PALETTE_IPALETTEPROVIDER_H
+#pragma once
 
 #include "modularity/imoduleinterface.h"
 
@@ -30,7 +29,7 @@
 #include "palettetree.h"
 
 namespace mu::palette {
-class IPaletteProvider : MODULE_EXPORT_INTERFACE
+class IPaletteProvider : MODULE_CONTEXT_INTERFACE
 {
     INTERFACE_ID(IPaletteAdapter)
 
@@ -40,12 +39,10 @@ public:
     virtual void init() = 0;
 
     virtual PaletteTreePtr userPaletteTree() const = 0;
-    virtual async::Notification userPaletteTreeChanged() const = 0;
+    virtual muse::async::Notification userPaletteTreeChanged() const = 0;
     virtual void setUserPaletteTree(PaletteTreePtr tree) = 0;
     virtual void setDefaultPaletteTree(PaletteTreePtr tree) = 0;
 
-    virtual async::Channel<mu::engraving::ElementPtr> addCustomItemRequested() const = 0;
+    virtual muse::async::Channel<mu::engraving::ElementPtr> addCustomItemRequested() const = 0;
 };
 }
-
-#endif // MU_PALETTE_IPALETTEPROVIDER_H

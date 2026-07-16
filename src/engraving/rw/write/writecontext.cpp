@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,38 +21,34 @@
  */
 
 #include "writecontext.h"
-#include "containers.h"
 
 using namespace mu::engraving;
 using namespace mu::engraving::write;
 
-int WriteContext::assignLocalIndex(const Location& mainElementLocation)
-{
-    return m_linksIndexer.assignLocalIndex(mainElementLocation);
-}
-
-void WriteContext::setLidLocalIndex(int lid, int localIndex)
-{
-    m_lidLocalIndices.insert({ lid, localIndex });
-}
-
-int WriteContext::lidLocalIndex(int lid) const
-{
-    return mu::value(m_lidLocalIndices, lid, 0);
-}
-
 bool WriteContext::canWrite(const EngravingItem* e) const
 {
-    if (!_clipboardmode) {
+    if (!_filter.has_value()) {
         return true;
     }
-    return _filter.canSelect(e);
+
+    return _filter.value().canSelect(e);
+}
+
+bool WriteContext::canWriteNoteIdx(size_t noteIdx, size_t totalNotesInChord) const
+{
+    if (!_filter.has_value()) {
+        return true;
+    }
+
+    const Selection& sel = m_score->selection();
+    return _filter.value().canSelectNoteIdx(noteIdx, totalNotesInChord, sel.rangeContainsMultiNoteChords());
 }
 
 bool WriteContext::canWriteVoice(track_idx_t track) const
 {
-    if (!_clipboardmode) {
+    if (!_filter.has_value()) {
         return true;
     }
-    return _filter.canSelectVoice(track);
+
+    return _filter.value().canSelectVoice(track);
 }

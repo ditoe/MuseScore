@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -67,6 +67,7 @@ class Hairpin;
 class HairpinSegment;
 class HarpPedalDiagram;
 
+class Image;
 class InstrumentChange;
 
 class Jump;
@@ -78,12 +79,14 @@ class LetRing;
 class LetRingSegment;
 class SLine;
 class LineSegment;
+class Lyrics;
 
 class Marker;
 class MeasureNumber;
 class MeasureRepeat;
 
 class NoteHead;
+class NoteLine;
 
 class Ornament;
 class Ottava;
@@ -93,14 +96,19 @@ class PalmMute;
 class PalmMuteSegment;
 class Pedal;
 class PedalSegment;
+class PlayCountText;
 class PlayTechAnnotation;
 
 class RehearsalMark;
 
 class Slur;
+class SoundFlag;
 class Spacer;
 class StaffText;
+class StaveSharingLabel;
 class StaffTypeChange;
+class Sticking;
+class StringTunings;
 class Symbol;
 class SystemText;
 
@@ -110,7 +118,8 @@ class TextLine;
 class TextLineSegment;
 class TextLineBaseSegment;
 class TimeSig;
-class Tremolo;
+class TremoloSingleChord;
+class TremoloTwoChord;
 class TremoloBar;
 class Trill;
 class TrillSegment;
@@ -152,6 +161,7 @@ public:
     static void layout(ActionIcon* item, const Context& ctx);
     static void layout(Ambitus* item, const Context& ctx);
     static void layout(Arpeggio* item, const Context& ctx);
+    static void layout(ChordBracket* item, const Context& ctx);
     static void layout(Articulation* item, const Context& ctx);
 
     static void layout(BagpipeEmbellishment* item, const Context& ctx);
@@ -176,10 +186,14 @@ public:
 
     static void layout(Glissando* item, const Context& ctx);
     static void layout(GradualTempoChange* item, const Context& ctx);
+    static void layout(GuitarBend* item, const Context& ctx);
 
     static void layout(Hairpin* item, const Context& ctx);
+    static void layout(HammerOnPullOff* item, const Context& ctx);
+    static void layout(HammerOnPullOffSegment* item, const Context& ctx);
     static void layout(HarpPedalDiagram* item, const Context& ctx);
 
+    static void layout(Image* item, const Context& ctx);
     static void layout(InstrumentChange* item, const Context& ctx);
 
     static void layout(Jump* item, const Context& ctx);
@@ -188,8 +202,10 @@ public:
 
     static void layout(LayoutBreak* item, const Context& ctx);
     static void layout(LetRing* item, const Context& ctx);
+    static void layout(Lyrics* item, const Context& ctx);
 
     static void layout(NoteHead* item, const Context& ctx);
+    static void layout(NoteLine* item, const Context& ctx);
 
     static void layout(Marker* item, const Context& ctx);
     static void layout(MeasureNumber* item, const Context& ctx);
@@ -200,30 +216,40 @@ public:
 
     static void layout(PalmMute* item, const Context& ctx);
     static void layout(Pedal* item, const Context& ctx);
+    static void layout(PlayCountText* item, const Context& ctx);
     static void layout(PlayTechAnnotation* item, const Context& ctx);
 
     static void layout(RehearsalMark* item, const Context& ctx);
 
     static void layout(Slur* item, const Context& ctx);
+    static void layout(SoundFlag* item, const Context& ctx);
     static void layout(Spacer* item, const Context&);
     static void layout(StaffText* item, const Context& ctx);
+    static void layout(StaveSharingLabel* item, const Context& ctx);
     static void layout(StaffTypeChange* item, const Context& ctx);
+    static void layout(Stem* item, const Context& ctx);
+    static void layout(Sticking* item, const Context& ctx);
+    static void layout(StringTunings* item, const Context& ctx);
     static void layout(Symbol* item, const Context& ctx);
     static void layout(SystemText* item, const Context& ctx);
 
+    static void layout(Tapping* item, const Context& ctx);
     static void layout(TempoText* item, const Context& ctx);
     static void layout(TextLine* item, const Context& ctx);
     static void layout(TimeSig* item, const Context& ctx);
-    static void layout(Tremolo* item, const Context& ctx);
+    static void layout(TremoloSingleChord* item, const Context& ctx);
+    static void layout(TremoloTwoChord* item, const Context& ctx);
     static void layout(TremoloBar* item, const Context& ctx);
     static void layout(Trill* item, const Context& ctx);
 
     static void layout(Vibrato* item, const Context& ctx);
     static void layout(Volta* item, const Context& ctx);
+    static void layout(WhammyBar* item, const Context& ctx);
 
 private:
     static void layout(GlissandoSegment* item, const Context& ctx);
     static void layout(GradualTempoChangeSegment* item, const Context& ctx);
+    static void layout(GuitarBendSegment* item, const Context& ctx);
     static void layout(HairpinSegment* item, const Context& ctx);
     static void layout(LetRingSegment* item, const Context& ctx);
     static void layout(OttavaSegment* item, const Context& ctx);
@@ -233,6 +259,7 @@ private:
     static void layout(TrillSegment* item, const Context& ctx);
     static void layout(VibratoSegment* item, const Context& ctx);
     static void layout(VoltaSegment* item, const Context& ctx);
+    static void layout(WhammyBarSegment* item, const Context& ctx);
 
     static void layout(Text* item, const Context& ctx);
     static void layoutTextBase(const TextBase* item, const Context& ctx, TextBase::LayoutData* ldata);
@@ -241,6 +268,8 @@ private:
     static void layoutLine(SLine* item, const Context& ctx);
     static void layoutLineSegment(LineSegment* item, const Context& ctx);
     static void layoutTextLineBaseSegment(TextLineBaseSegment* item, const Context& ctx);
+
+    static void layoutGroupBracket(Bracket* item, const Context& ctx);
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,15 @@
 
 #include "spacer.h"
 
-#include "draw/types/pen.h"
+#include "../editing/editdata.h"
+#include "../editing/elementeditdata.h"
 
 #include "measure.h"
 #include "score.h"
-
-#include "log.h"
+#include "system.h"
 
 using namespace mu;
-using namespace mu::draw;
+using namespace muse::draw;
 using namespace mu::engraving;
 
 namespace mu::engraving {
@@ -41,115 +41,55 @@ namespace mu::engraving {
 Spacer::Spacer(Measure* parent)
     : EngravingItem(ElementType::SPACER, parent)
 {
-    _spacerType = SpacerType::UP;
-    _gap = 0.0;
+    m_spacerType = SpacerType::UP;
+    m_gap = 0.0_sp;
+    m_z = -10; // Ensure behind notation
 }
 
 Spacer::Spacer(const Spacer& s)
     : EngravingItem(s)
 {
-    _gap        = s._gap;
-    m_path        = s.m_path;
-    _spacerType = s._spacerType;
-}
-
-//---------------------------------------------------------
-//   layout0
-//---------------------------------------------------------
-
-void Spacer::layout0()
-{
-    double _spatium = spatium();
-
-    m_path    = PainterPath();
-    double w = _spatium;
-    double b = w * .5;
-    double h = explicitParent() ? _gap : std::min(_gap.val(), spatium() * 4.0);      // limit length for palette
-
-    switch (spacerType()) {
-    case SpacerType::DOWN:
-        m_path.lineTo(w, 0.0);
-        m_path.moveTo(b, 0.0);
-        m_path.lineTo(b, h);
-        m_path.lineTo(0.0, h - b);
-        m_path.moveTo(b, h);
-        m_path.lineTo(w, h - b);
-        break;
-    case SpacerType::UP:
-        m_path.moveTo(b, 0.0);
-        m_path.lineTo(0.0, b);
-        m_path.moveTo(b, 0.0);
-        m_path.lineTo(w, b);
-        m_path.moveTo(b, 0.0);
-        m_path.lineTo(b, h);
-        m_path.moveTo(0.0, h);
-        m_path.lineTo(w, h);
-        break;
-    case SpacerType::FIXED:
-        m_path.lineTo(w, 0.0);
-        m_path.moveTo(b, 0.0);
-        m_path.lineTo(b, h);
-        m_path.moveTo(0.0, h);
-        m_path.lineTo(w, h);
-        break;
-    }
-    double lw = _spatium * 0.4;
-    RectF bb(0, 0, w, h);
-    bb.adjust(-lw, -lw, lw, lw);
-    setbbox(bb);
+    m_gap        = s.m_gap;
+    m_spacerType = s.m_spacerType;
 }
 
 //---------------------------------------------------------
 //   setGap
 //---------------------------------------------------------
 
-void Spacer::setGap(Millimetre sp)
+void Spacer::setGap(Spatium sp)
 {
-    _gap = sp;
-    layout0();
+    m_gap = sp;
 }
 
 //---------------------------------------------------------
-//   spatiumChanged
+//   startDragGrip
 //---------------------------------------------------------
 
-void Spacer::spatiumChanged(double ov, double nv)
-{
-    _gap = (_gap / ov) * nv;
-    layout0();
-}
-
-//---------------------------------------------------------
-//   startEditDrag
-//---------------------------------------------------------
-
-void Spacer::startEditDrag(EditData& ed)
+void Spacer::startDragGrip(EditData& ed)
 {
     ElementEditDataPtr eed = ed.getData(this);
     eed->pushProperty(Pid::SPACE);
 }
 
 //---------------------------------------------------------
-//   editDrag
+//   dragGrip
 //---------------------------------------------------------
 
-void Spacer::editDrag(EditData& ed)
+void Spacer::dragGrip(EditData& ed)
 {
     double s = ed.delta.y();
 
     switch (spacerType()) {
     case SpacerType::DOWN:
     case SpacerType::FIXED:
-        _gap += s;
+        m_gap += Spatium::fromAbsolute(s, spatium());
         break;
     case SpacerType::UP:
-        _gap -= s;
+        m_gap -= Spatium::fromAbsolute(s, spatium());
         break;
     }
-    if (_gap.val() < spatium() * 2.0) {
-        _gap = Millimetre(spatium() * 2);
-    }
-    layout0();
+    m_gap = std::max(m_gap, 2.0_sp);
     triggerLayout();
 }
 
@@ -157,14 +97,14 @@ void Spacer::editDrag(EditData& ed)
 //   gripsPositions
 //---------------------------------------------------------
 
-std::vector<mu::PointF> Spacer::gripsPositions(const EditData&) const
+std::vector<PointF> Spacer::gripsPositions(const EditData&) const
 {
     double _spatium = spatium();
     PointF p;
     switch (spacerType()) {
     case SpacerType::DOWN:
     case SpacerType::FIXED:
-        p = PointF(_spatium * .5, _gap);
+        p = PointF(_spatium * .5, absoluteGap());
         break;
     case SpacerType::UP:
         p = PointF(_spatium * .5, 0.0);
@@ -195,7 +135,7 @@ bool Spacer::setProperty(Pid propertyId, const PropertyValue& v)
 {
     switch (propertyId) {
     case Pid::SPACE:
-        setGap(v.value<Millimetre>());
+        setGap(v.value<Spatium>());
         break;
     default:
         if (!EngravingItem::setProperty(propertyId, v)) {
@@ -203,7 +143,6 @@ bool Spacer::setProperty(Pid propertyId, const PropertyValue& v)
         }
         break;
     }
-    layout0();
     triggerLayout();
     setGenerated(false);
     return true;
@@ -217,9 +156,82 @@ PropertyValue Spacer::propertyDefault(Pid id) const
 {
     switch (id) {
     case Pid::SPACE:
-        return Millimetre(0.0);
+        return 0.0_sp;
     default:
         return EngravingItem::propertyDefault(id);
     }
+}
+
+//---------------------------------------------------------
+//   triggerLayout
+//---------------------------------------------------------
+
+void Spacer::triggerLayout() const
+{
+    if (!explicitParent()) {
+        return;
+    }
+
+    Measure* m = measure();
+    if (!m) {
+        EngravingItem::triggerLayout();
+        return;
+    }
+
+    Score* s = score();
+    System* system = m->system();
+    if (!s || !system || s->nstaves() == 0) {
+        m->triggerLayout();
+        return;
+    }
+
+    // Most spacer edits can stay local to the measure and are much cheaper.
+    // Escalate only for down/fixed spacers on the last non-vbox system of the page,
+    // where edits can repaginate and affect page-end spacing.
+    if (spacerType() == SpacerType::UP) {
+        m->triggerLayout();
+        return;
+    }
+
+    System* nextSystem = m->nextNonVBoxSystem();
+    if (nextSystem && nextSystem->page() == system->page()) {
+        m->triggerLayout();
+        return;
+    }
+
+    // For the last notation system on a page, include the next system boundary
+    // so page-end spacing can be recomputed without relaying out the whole score.
+    Measure* firstMeasure = system->firstMeasure();
+    if (!firstMeasure) {
+        m->triggerLayout();
+        return;
+    }
+
+    Fraction startTick = firstMeasure->tick();
+    Fraction endTick = s->endTick();
+    if (nextSystem) {
+        if (Measure* nextFirstMeasure = nextSystem->firstMeasure()) {
+            endTick = nextFirstMeasure->tick();
+        }
+    }
+
+    s->setLayout(startTick, endTick, 0, s->nstaves() - 1, this);
+}
+
+//---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString Spacer::subtypeUserName() const
+{
+    switch (m_spacerType) {
+    case SpacerType::UP:
+        return TranslatableString("engraving/spacertype", "Staff spacer up");
+    case SpacerType::DOWN:
+        return TranslatableString("engraving/spacertype", "Staff spacer down");
+    case SpacerType::FIXED:
+        return TranslatableString("engraving/spacertype", "Staff spacer fixed down");
+    }
+    return TranslatableString::untranslatable("Unknown spacer");
 }
 }

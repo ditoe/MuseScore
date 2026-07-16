@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_INOTATIONMIDIINPUT_H
-#define MU_NOTATION_INOTATIONMIDIINPUT_H
 
-#include "async/notification.h"
-#include "midi/miditypes.h"
+#pragma once
 
-#include "notationtypes.h"
+#include "async/channel.h"
+
+namespace muse::midi {
+struct Event;
+}
+
+namespace mu::engraving {
+class Note;
+}
 
 namespace mu::notation {
 class INotationMidiInput
@@ -33,13 +38,11 @@ class INotationMidiInput
 public:
     virtual ~INotationMidiInput() = default;
 
-    virtual void onMidiEventReceived(const midi::Event& event) = 0;
-    virtual async::Channel<std::vector<const Note*> > notesReceived() const = 0;
+    virtual void onMidiEventReceived(const muse::midi::Event& event) = 0;
+    virtual muse::async::Channel<std::vector<const engraving::Note*> > notesReceived() const = 0;
 
     virtual void onRealtimeAdvance() = 0;
 };
 
 using INotationMidiInputPtr = std::shared_ptr<INotationMidiInput>;
 }
-
-#endif // MU_NOTATION_INOTATIONMIDIINPUT_H

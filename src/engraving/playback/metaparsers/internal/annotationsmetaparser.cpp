@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,7 +25,8 @@
 #include "dom/dynamic.h"
 
 using namespace mu::engraving;
-using namespace mu::mpe;
+using namespace muse;
+using namespace muse::mpe;
 
 void AnnotationsMetaParser::doParse(const EngravingItem* item, const RenderingContext& ctx, mpe::ArticulationMap& result)
 {
@@ -42,10 +43,12 @@ void AnnotationsMetaParser::doParse(const EngravingItem* item, const RenderingCo
         if (dynamicType == DynamicType::S
             || dynamicType == DynamicType::SF
             || dynamicType == DynamicType::SFF
+            || dynamicType == DynamicType::SFFF
+            || dynamicType == DynamicType::SFZ
             || dynamicType == DynamicType::SFFZ
+            || dynamicType == DynamicType::SFFFZ
             || dynamicType == DynamicType::SFP
-            || dynamicType == DynamicType::SFPP
-            || dynamicType == DynamicType::SFZ) {
+            || dynamicType == DynamicType::SFPP) {
             type = mpe::ArticulationType::Subito;
         }
     }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,14 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __LAYOUTBREAK_H__
-#define __LAYOUTBREAK_H__
+#pragma once
 
 #include "engravingitem.h"
-#include "draw/types/painterpath.h"
+#include "draw/types/font.h"
 
 namespace mu::engraving {
 class Factory;
+class Transaction;
 
 //---------------------------------------------------------
 //   @@ LayoutBreak
@@ -43,39 +43,41 @@ public:
     void setParent(MeasureBase* parent);
 
     LayoutBreak* clone() const override { return new LayoutBreak(*this); }
-    int subtype() const override { return static_cast<int>(_layoutBreakType); }
+    int subtype() const override { return static_cast<int>(m_layoutBreakType); }
+    TranslatableString subtypeUserName() const override;
 
     void setLayoutBreakType(LayoutBreakType);
-    LayoutBreakType layoutBreakType() const { return _layoutBreakType; }
+    LayoutBreakType layoutBreakType() const { return m_layoutBreakType; }
 
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     MeasureBase* measure() const { return (MeasureBase*)explicitParent(); }
-    double pause() const { return _pause; }
-    void setPause(double v) { _pause = v; }
-    bool startWithLongNames() const { return _startWithLongNames; }
-    void setStartWithLongNames(bool v) { _startWithLongNames = v; }
-    bool startWithMeasureOne() const { return _startWithMeasureOne; }
-    void setStartWithMeasureOne(bool v) { _startWithMeasureOne = v; }
-    bool firstSystemIndentation() const { return _firstSystemIndentation; }
-    void setFirstSystemIndentation(bool v) { _firstSystemIndentation = v; }
+    double pause() const { return m_pause; }
+    void setPause(double v) { m_pause = v; }
+    bool startWithLongNames() const { return m_startWithLongNames; }
+    void setStartWithLongNames(bool v) { m_startWithLongNames = v; }
+    bool startWithMeasureOne() const { return m_startWithMeasureOne; }
+    void setStartWithMeasureOne(bool v) { m_startWithMeasureOne = v; }
+    bool firstSystemIndentation() const { return m_firstSystemIndentation; }
+    void setFirstSystemIndentation(bool v) { m_firstSystemIndentation = v; }
+    bool showCourtesy() const { return m_showCourtesy; }
+    void setShowCourtesy(bool v) { m_showCourtesy = v; }
 
-    bool isPageBreak() const { return _layoutBreakType == LayoutBreakType::PAGE; }
-    bool isLineBreak() const { return _layoutBreakType == LayoutBreakType::LINE; }
-    bool isSectionBreak() const { return _layoutBreakType == LayoutBreakType::SECTION; }
-    bool isNoBreak() const { return _layoutBreakType == LayoutBreakType::NOBREAK; }
+    bool isPageBreak() const { return m_layoutBreakType == LayoutBreakType::PAGE; }
+    bool isLineBreak() const { return m_layoutBreakType == LayoutBreakType::LINE; }
+    bool isSectionBreak() const { return m_layoutBreakType == LayoutBreakType::SECTION; }
+    bool isNoBreak() const { return m_layoutBreakType == LayoutBreakType::NOBREAK; }
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
 
-    void init();
+    String accessibleInfo() const override;
 
-    double lineWidth() const { return m_lw; }
-    const RectF& iconBorderRect() const { return m_iconBorderRect; }
-    const draw::PainterPath& iconPath() const { return m_iconPath; }
+    char16_t iconCode() const;
 
+    muse::draw::Font font() const;
 protected:
     void added() override;
     void removed() override;
@@ -86,17 +88,11 @@ private:
     LayoutBreak(MeasureBase* parent = 0);
     LayoutBreak(const LayoutBreak&);
 
-    void spatiumChanged(double oldValue, double newValue) override;
-
-    double m_lw;
-    mu::RectF m_iconBorderRect;
-    mu::draw::PainterPath m_iconPath;
-    double _pause;
-    bool _startWithLongNames;
-    bool _startWithMeasureOne;
-    bool _firstSystemIndentation;
-    LayoutBreakType _layoutBreakType;
+    double m_pause = 0.0;
+    bool m_startWithLongNames = false;
+    bool m_startWithMeasureOne = false;
+    bool m_firstSystemIndentation = false;
+    bool m_showCourtesy = false;
+    LayoutBreakType m_layoutBreakType = LayoutBreakType::NOBREAK;
 };
-} // namespace mu::engraving
-
-#endif
+}

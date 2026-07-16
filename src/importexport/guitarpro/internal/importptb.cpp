@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -45,7 +45,7 @@
 #include "engraving/dom/timesig.h"
 #include "engraving/dom/tuplet.h"
 
-#include "types/symid.h"
+#include "engraving/types/symid.h"
 
 #include "log.h"
 
@@ -585,7 +585,7 @@ void PowerTab::addPalmMute(Chord* chord)
         if (pm->tick2() < tick) {
             _palmMutes[track] = 0;
         } else {
-            pm->setTick2(chord->tick() + chord->actualTicks());
+            pm->setTick2(chord->endTick());
             pm->setEndElement(chord);
         }
     }
@@ -703,7 +703,7 @@ void PowerTab::fillMeasure(tBeatList& elist, Measure* measure, int staff, std::v
                 note->setFret(n.value);
                 note->setString(n.str);
                 const StringData* sd = score->staff(staff)->part()->instrument()->stringData();
-                int k     = int(curTrack->infos[staff].strings.size()) - n.str - 1;
+                int k     = std::max(int(curTrack->infos[staff].strings.size()) - n.str - 1, 0);
                 int pitch = sd->stringList().at(k).pitch + n.value;         //getPitch(n.str, n.value, 0);
                 note->setPitch(pitch);
                 note->setTpcFromPitch();
@@ -743,6 +743,7 @@ void PowerTab::fillMeasure(tBeatList& elist, Measure* measure, int staff, std::v
             tuple = Factory::createTuplet(measure);
             tuple->setParent(measure);
             tuple->setTrack(cr->track());
+            tuple->setTick(cr->tick());
             tuple->setBaseLen(l);
             tuple->setRatio(Fraction(3, 2));
             tuple->setTicks(l * tuple->ratio().denominator());
@@ -782,8 +783,15 @@ void PowerTab::addToScore(ptSection& sec)
             Staff* s = Factory::createStaff(part);
             auto info = &curTrack->infos[i];
             std::string ss = info->name;
-            part->setPartName(String::fromStdString(ss));
-            part->setPlainLongName(String::fromStdString(ss));
+            String staffName;
+            if (muse::UtfCodec::isValidUtf8(ss)) {
+                staffName = muse::String::fromStdString(ss);
+            } else {
+                // invalid utf most likely windows-125x used
+                std::string n = "part " + std::to_string(i + 1);
+                staffName = muse::String::fromStdString(n);
+            }
+            part->setPlainLongName(staffName);
 
             std::vector<int> reverseStr;
             for (auto it = info->strings.rbegin(); it != info->strings.rend(); ++it) {
@@ -836,15 +844,17 @@ void PowerTab::addToScore(ptSection& sec)
         lastPart = sec.partMarker;
         auto seg = measure->getSegment(SegmentType::ChordRest, measure->tick());
         RehearsalMark* t = new RehearsalMark(seg);
-        t->setFrameType(FrameType::SQUARE);
+        t->setFrameType(FrameType::RECTANGLE);
         t->setPlainText(String(Char::fromAscii(sec.partMarker)));
         t->setTrack(0);
         seg->add(t);
 
         t = new RehearsalMark(seg);
         t->setFrameType(FrameType::NO_FRAME);
-        t->setPlainText(String::fromStdString(sec.partName));
-        t->setOffset(mu::PointF(10.0, 0.0));
+        std::string valid;
+        muse::UtfCodec::replaceInvalid(sec.partName, valid);
+        t->setPlainText(String::fromStdString(valid));
+        t->setOffset(PointF(10.0, 0.0));
         t->setTrack(0);
         seg->add(t);
     }
@@ -1162,7 +1172,7 @@ Measure* PowerTab::createMeasure(ptBar* bar, const Fraction& tick)
     measure->setTimesig(nts);
     measure->setTicks(nts);
 
-    score->measures()->add(measure);
+    score->measures()->append(measure);
 
     return measure;
 }
@@ -1258,14 +1268,12 @@ Err PowerTab::read()
 
     MeasureBase* m;
     if (!score->measures()->first()) {
-        m = Factory::createVBox(score->dummy()->system());
-        m->setTick(Fraction(0, 1));
-        score->addMeasure(m, 0);
+        m = Factory::createTitleVBox(score->dummy()->system());
+        score->measures()->append(m);
     } else {
         m = score->measures()->first();
         if (!m->isVBox()) {
-            MeasureBase* mb = Factory::createVBox(score->dummy()->system());
-            mb->setTick(Fraction(0, 1));
+            MeasureBase* mb = Factory::createTitleVBox(score->dummy()->system());
             score->addMeasure(mb, m);
             m = mb;
         }
@@ -1274,7 +1282,9 @@ Err PowerTab::read()
     std::string name = song.info.name;
     if (!name.empty()) {
         Text* s = Factory::createText(m, TextStyleType::TITLE);
-        s->setPlainText(String::fromStdString(name));
+        std::string valid;
+        muse::UtfCodec::replaceInvalid(name, valid);
+        s->setPlainText(String::fromStdString(valid));
         m->add(s);
     }
     return Err::NoError;

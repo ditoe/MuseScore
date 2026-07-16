@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
+      <pageWidth>8.26772</pageWidth>
+      <pageHeight>11.6929</pageHeight>
+      <pagePrintableWidth>7.48032</pagePrintableWidth>
+      <pageEvenLeftMargin>0.393701</pageEvenLeftMargin>
+      <pageOddLeftMargin>0.393701</pageOddLeftMargin>
+      <pageEvenTopMargin>0.393701</pageEvenTopMargin>
+      <pageEvenBottomMargin>0.787403</pageEvenBottomMargin>
+      <pageOddTopMargin>0.393701</pageOddTopMargin>
+      <pageOddBottomMargin>0.787403</pageOddBottomMargin>
       <frameSystemDistance>7</frameSystemDistance>
       <voltaPosAbove x="0" y="-2"/>
       <defaultsVersion>114</defaultsVersion>
-      <Spatium>1.764</Spatium>
+      <spatium>1.764</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -18,18 +28,17 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           </StaffType>
-        <bracket type="-1" span="1" col="0" visible="1"/>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
@@ -62,169 +71,213 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>E_E</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>F_F</eid>
             </Clef>
           <KeySig>
+            <eid>G_G</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>H_H</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
+            <eid>I_I</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>J_J</eid>
               <offset x="-1" y="1.5"/>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>K_K</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>L_L</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>M_M</eid>
         <voice>
           <Chord>
+            <eid>N_N</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>O_O</eid>
               <offset x="1" y="1.5"/>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             <Note>
+              <eid>P_P</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>79</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>R_R</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>S_S</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>T_T</eid>
         <voice>
           <Chord>
+            <eid>U_U</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>V_V</eid>
               <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             <Note>
+              <eid>W_W</eid>
               <offset x="1" y="1.5"/>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             <Note>
+              <eid>X_X</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>Y_Y</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>Z_Z</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>a_a</eid>
         <voice>
           <Chord>
+            <eid>b_b</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>c_c</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             <Note>
+              <eid>d_d</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             <Note>
+              <eid>e_e</eid>
               <offset x="1" y="-0.5"/>
               <pitch>79</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>f_f</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>g_g</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>h_h</eid>
         <voice>
           <Chord>
+            <eid>i_i</eid>
             <durationType>quarter</durationType>
             <Note>
+              <eid>j_j</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             <Note>
+              <eid>k_k</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             <Note>
+              <eid>l_l</eid>
               <offset x="0" y="-2.5"/>
               <pitch>79</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>m_m</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>n_n</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
+        <eid>o_o</eid>
         <voice>
           <Chord>
+            <eid>p_p</eid>
             <durationType>quarter</durationType>
             <Stem>
+              <eid>q_q</eid>
               <offset x="0.617965" y="-3.31219"/>
-              <userLen>0.2</userLen>
               </Stem>
             <Note>
+              <eid>r_r</eid>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
             <Note>
+              <eid>s_s</eid>
               <pitch>76</pitch>
               <tpc>18</tpc>
               </Note>
             <Note>
+              <eid>t_t</eid>
               <offset x="1" y="-3.5"/>
               <pitch>79</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>u_u</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>v_v</eid>
             <durationType>half</durationType>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>w_w</eid>
             </BarLine>
           </voice>
         </Measure>

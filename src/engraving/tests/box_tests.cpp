@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,14 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/box.h"
-#include "dom/masterscore.h"
-#include "dom/system.h"
-#include "dom/undo.h"
+#include "engraving/dom/box.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/system.h"
+#include "engraving/editing/transaction/undostack.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String BOX_DATA_DIR(u"box_data/");
@@ -59,7 +58,7 @@ TEST_F(Engraving_BoxTests, undoRemoveVBox)
     System* s = score->systems()[0];
     VBox* box = toVBox(s->measure(0));
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving box tests"));
     score->select(box);
     score->cmdDeleteSelection();
     score->endCmd();

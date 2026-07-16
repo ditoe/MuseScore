@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,15 +23,20 @@
 #define MU_IMPORTEXPORT_OVECONFIGURATION_H
 
 #include "../ioveconfiguration.h"
+#include "async/asyncable.h"
 
 namespace mu::iex::ove {
-class OveConfiguration : public IOveConfiguration
+class OveConfiguration : public IOveConfiguration, public muse::async::Asyncable
 {
 public:
     void init();
 
     std::string importOvertureCharset() const override;
     void setImportOvertureCharset(const std::string& charset) override;
+    muse::async::Channel<std::string> importOvertureCharsetChanged() const override;
+
+private:
+    muse::async::Channel<std::string> m_importOvertureCharsetChanged;
 };
 }
 

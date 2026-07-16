@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __REHEARSALMARK_H__
-#define __REHEARSALMARK_H__
+#ifndef MU_ENGRAVING_REHEARSALMARK_H
+#define MU_ENGRAVING_REHEARSALMARK_H
 
 #include "textbase.h"
 
@@ -36,12 +36,16 @@ class RehearsalMark final : public TextBase
     DECLARE_CLASSOF(ElementType::REHEARSAL_MARK)
 
 public:
-    enum class Type {
+    enum class Type : unsigned char {
         Main = 0,
         Additional
     };
 
     RehearsalMark(Segment* parent);
+
+    bool isEditAllowed(EditData&) const override;
+    bool allowTimeAnchor() const override { return false; }
+    RectF drag(EditData& ed) override;
 
     RehearsalMark* clone() const override { return new RehearsalMark(*this); }
 
@@ -50,14 +54,16 @@ public:
     PropertyValue propertyDefault(Pid id) const override;
 
     void setType(Type type);
-    Type type() const { return _type; }
+    Type type() const { return m_type; }
 
     void styleChanged() override;
+
+    bool positionRelativeToNoteheadRest() const override { return false; }
 
 private:
     void applyTypeStyle();
 
-    Type _type = Type::Main;
+    Type m_type = Type::Main;
 };
 } // namespace mu::engraving
 #endif

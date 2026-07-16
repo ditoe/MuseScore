@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,13 +41,14 @@ static int run_command(const QString& name, const QStringList& args)
     QString path = ROOT_DIR + "/" + name;
 
     QProcess p;
-    p.start(path, args);
 
     QObject::connect(&p, &QProcess::readyReadStandardOutput, [&p]() {
         QByteArray ba = p.readAllStandardOutput();
         QTextStream outputText(stdout);
         outputText << QString(ba);
     });
+
+    p.start(path, args);
 
     if (!p.waitForFinished(60000 * 5)) {
         return -1;

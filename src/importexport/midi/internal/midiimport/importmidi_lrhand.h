@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,10 +19,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef IMPORTMIDI_LRHAND_H
-#define IMPORTMIDI_LRHAND_H
+#pragma once
 
 #include <map>
+
+#include "internal/midishared/generalmidi.h"
 
 namespace mu::iex::midi {
 class MTrack;
@@ -30,10 +31,8 @@ class MidiChord;
 class ReducedFraction;
 
 namespace LRHand {
-bool needToSplit(const std::multimap<ReducedFraction, MidiChord>& chords, int midiProgram, bool isDrumTrack);
+bool needToSplit(const std::multimap<ReducedFraction, MidiChord>& chords, GM1Program, bool isDrumTrack);
 
 void splitIntoLeftRightHands(std::multimap<int, MTrack>& tracks);
 } // namespace LRHand
 } // namespace mu::iex::midi
-
-#endif // IMPORTMIDI_LRHAND_H

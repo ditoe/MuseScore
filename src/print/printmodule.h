@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,11 +25,21 @@
 #include "modularity/imodulesetup.h"
 
 namespace mu::print {
-class PrintModule : public modularity::IModuleSetup
+class PrintModule : public muse::modularity::IModuleSetup
 {
 public:
 
     std::string moduleName() const override;
+
+    muse::modularity::IContextSetup* newContext(const muse::modularity::ContextPtr& ctx) const override;
+};
+
+class PrintContext : public muse::modularity::IContextSetup
+{
+public:
+    PrintContext(const muse::modularity::ContextPtr& ctx)
+        : muse::modularity::IContextSetup(ctx) {}
+
     void registerExports() override;
 };
 }

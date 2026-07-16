@@ -1,41 +1,45 @@
-set(MODULE braille)
+muse_create_module(braille)
 
 add_subdirectory(tables)
-add_subdirectory(thirdparty/liblouis)
 
-if (MUE_BUILD_UNIT_TESTS)
+target_sources(braille PRIVATE
+    braillemodule.cpp
+    braillemodule.h
+    ibrailleconfiguration.h
+    ibrailleconverter.h
+    inotationbraille.h
+    internal/braillecode.cpp
+    internal/braillecode.h
+    internal/brailleconfiguration.cpp
+    internal/brailleconfiguration.h
+    internal/brailleconverter.cpp
+    internal/brailleconverter.h
+    internal/brailleinput.cpp
+    internal/brailleinput.h
+    internal/brailleinputparser.cpp
+    internal/brailleinputparser.h
+    internal/braillewriter.cpp
+    internal/braillewriter.h
+    internal/braille.cpp
+    internal/braille.h
+    internal/louis.cpp
+    internal/louis.h
+    internal/notationbraille.cpp
+    internal/notationbraille.h
+)
+
+target_link_libraries(braille PRIVATE
+    engraving
+    liblouis
+)
+
+get_property(_liblouis_tables GLOBAL PROPERTY liblouis_TABLES)
+install(FILES ${_liblouis_tables} DESTINATION ${MUSE_APP_INSTALL_RESOURCES_LOCATION}/tables)
+
+if (MUE_BUILD_BRAILLE_TESTS)
     add_subdirectory(tests)
 endif()
 
-set(MODULE_QRC ${CMAKE_CURRENT_LIST_DIR}/braille.qrc)
-
-set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml)
-
-set(MODULE_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/braillemodule.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/braillemodule.h
-    ${CMAKE_CURRENT_LIST_DIR}/ibrailleconfiguration.h
-    ${CMAKE_CURRENT_LIST_DIR}/ibrailleconverter.h
-    ${CMAKE_CURRENT_LIST_DIR}/inotationbraille.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/brailleconfiguration.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/brailleconfiguration.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/brailleconverter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/brailleconverter.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/braillewriter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/braillewriter.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/braille.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/braille.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/louis.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/louis.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/notationbraille.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/notationbraille.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/braillemodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/braillemodel.h
-    )
-
-set(MODULE_LINK
-    engraving
-    liblouis
-    )
-
-include(${PROJECT_SOURCE_DIR}/build/module.cmake)
+if (MUE_BUILD_BRAILLE_QML)
+    add_subdirectory(qml/MuseScore/Braille)
+endif()

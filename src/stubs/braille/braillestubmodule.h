@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,19 +19,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_BRAILLE_BRAILLEMODULE_H
-#define MU_BRAILLE_BRAILLEMODULE_H
+
+#pragma once
 
 #include "modularity/imodulesetup.h"
 
 namespace mu::braille {
-class BrailleModule : public modularity::IModuleSetup
+class BrailleModule : public muse::modularity::IModuleSetup
 {
 public:
     std::string moduleName() const override;
     void registerExports() override;
-    void registerUiTypes() override;
 };
 }
-
-#endif // MU_BRAILLE_BRAILLEMODULE_H

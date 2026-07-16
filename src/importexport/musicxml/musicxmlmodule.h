@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_IMPORTEXPORT_MUSICXMLMODULE_H
-#define MU_IMPORTEXPORT_MUSICXMLMODULE_H
+#pragma once
 
 #include <memory>
 
@@ -28,19 +27,16 @@
 
 namespace mu::iex::musicxml {
 class MusicXmlConfiguration;
-class MusicXmlModule : public modularity::IModuleSetup
+class MusicXmlModule : public muse::modularity::IModuleSetup
 {
 public:
 
     std::string moduleName() const override;
-    void registerResources() override;
     void registerExports() override;
     void resolveImports() override;
-    void onInit(const framework::IApplication::RunMode&) override;
+    void onInit(const muse::IApplication::RunMode&) override;
 
 private:
     std::shared_ptr<MusicXmlConfiguration> m_configuration;
 };
 }
-
-#endif // MU_IMPORTEXPORT_MUSICXMLMODULE_H

@@ -37,7 +37,7 @@
     <measure number="1">
       <attributes>
         <divisions>1</divisions>
-        <key>
+        <key print-object="no">
           <fifths>0</fifths>
           </key>
         <time>
@@ -46,7 +46,6 @@
           </time>
         <clef>
           <sign>TAB</sign>
-          <line>5</line>
           </clef>
         <staff-details>
           <staff-lines>6</staff-lines>

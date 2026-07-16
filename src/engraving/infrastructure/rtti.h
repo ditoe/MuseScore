@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_RTTI_H
-#define MU_ENGRAVING_RTTI_H
+#pragma once
 
 #include "log.h"
 
-namespace mu::engraving::rtti {
+namespace mu::engraving {
 #define DECLARE_CLASSOF(Type) \
 public: \
     static bool classof(const ElementType type) noexcept { return type == Type; } \
@@ -34,16 +33,34 @@ template<typename To, typename From>
 bool is_classof(From* p) noexcept
 {
     using ResultType = std::remove_pointer_t<To>;
-    return ResultType::classof(p);
+    return p ? ResultType::classof(p) : false;
 }
+
+enum class CastMode {
+    CHECK = 0,  // should be correct; assert if still not
+    BAD,        // known to be bad; don’t assert, we’ll fix it later
+    MAYBE_BAD   // in this case it’s okay if type mismatch
+};
 
 template<typename To, typename From>
-auto item_cast(From* p) noexcept
+To item_cast(From from, CastMode mode = CastMode::CHECK) noexcept
 {
-    using ResultType = std::remove_cv_t<std::remove_pointer_t<To> >;
-    return is_classof<ResultType>(p) ? static_cast<To>(p) : nullptr;
+    if constexpr (std::is_same_v<From, void>) {
+        return static_cast<To>(from);
+    } else {
+        To casted = dynamic_cast<To>(from);
+        if (mode == CastMode::CHECK) {
+            if (!(casted || !from)) {
+                LOGE() << "[BAD CAST] from: " << typeid(From).name() << ", to: " << typeid(To).name();
+            }
+            assert(casted || !from);
+        }
+        return casted;
+    }
+}
 }
 
+namespace mu::engraving::rtti {
 /* ===============================================
 This visitor to foreaching the list of given types
 How to use:
@@ -113,5 +130,3 @@ private:
     }
 };
 }
-
-#endif // MU_ENGRAVING_RTTI_H

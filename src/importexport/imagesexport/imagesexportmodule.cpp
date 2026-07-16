@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,8 +30,7 @@
 
 #include "internal/imagesexportconfiguration.h"
 
-#include "log.h"
-
+using namespace muse;
 using namespace mu::iex::imagesexport;
 using namespace mu::project;
 
@@ -44,12 +43,12 @@ void ImagesExportModule::registerExports()
 {
     m_configuration = std::make_shared<ImagesExportConfiguration>();
 
-    modularity::ioc()->registerExport<IImagesExportConfiguration>(moduleName(), m_configuration);
+    globalIoc()->registerExport<IImagesExportConfiguration>(moduleName(), m_configuration);
 }
 
 void ImagesExportModule::resolveImports()
 {
-    auto writers = modularity::ioc()->resolve<INotationWritersRegister>(moduleName());
+    auto writers = globalIoc()->resolve<INotationWritersRegister>(moduleName());
     if (writers) {
         writers->reg({ "pdf" }, std::make_shared<PdfWriter>());
         writers->reg({ "svg" }, std::make_shared<SvgWriter>());
@@ -57,11 +56,7 @@ void ImagesExportModule::resolveImports()
     }
 }
 
-void ImagesExportModule::onInit(const framework::IApplication::RunMode& mode)
+void ImagesExportModule::onInit(const IApplication::RunMode&)
 {
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
     m_configuration->init();
 }

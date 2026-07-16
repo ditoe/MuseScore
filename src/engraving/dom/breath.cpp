@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -54,7 +54,7 @@ const std::vector<BreathType> Breath::BREATH_LIST {
 //---------------------------------------------------------
 
 Breath::Breath(Segment* parent)
-    : EngravingItem(ElementType::BREATH, parent, ElementFlag::MOVABLE)
+    : EngravingItem(ElementType::BREATH, parent, ElementFlag::MOVABLE | ElementFlag::ON_STAFF)
 {
     m_symId = SymId::breathMarkComma;
     m_pause = 0.0;
@@ -81,23 +81,6 @@ bool Breath::isCaesura() const
 double Breath::mag() const
 {
     return staff() ? staff()->staffMag(tick()) : 1.0;
-}
-
-//---------------------------------------------------------
-//   pagePos
-//---------------------------------------------------------
-
-mu::PointF Breath::pagePos() const
-{
-    if (explicitParent() == 0) {
-        return pos();
-    }
-    System* system = segment()->measure()->system();
-    double yp = y();
-    if (system) {
-        yp += system->staff(staffIdx())->y() + system->y();
-    }
-    return PointF(pageX(), yp);
 }
 
 //---------------------------------------------------------
@@ -128,6 +111,7 @@ bool Breath::setProperty(Pid propertyId, const PropertyValue& v)
         break;
     case Pid::PAUSE:
         setPause(v.toDouble());
+        score()->setUpTempoMapLater();
         break;
     default:
         if (!EngravingItem::setProperty(propertyId, v)) {
@@ -181,6 +165,15 @@ EngravingItem* Breath::prevSegmentElement()
 String Breath::accessibleInfo() const
 {
     return SymNames::translatedUserNameForSymId(m_symId);
+}
+
+//---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString Breath::subtypeUserName() const
+{
+    return SymNames::userNameForSymId(symId());
 }
 
 void Breath::added()

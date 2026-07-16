@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
       <pageWidth>8.27007</pageWidth>
@@ -54,7 +55,6 @@
       <tupletFrameWidth>0</tupletFrameWidth>
       <textLineFramePadding>0</textLineFramePadding>
       <textLineFrameWidth>0</textLineFrameWidth>
-      <defaultFontSpatiumDependent>0</defaultFontSpatiumDependent>
       <defaultAlign>left,baseline</defaultAlign>
       <defaultFramePadding>0</defaultFramePadding>
       <defaultFrameWidth>0</defaultFrameWidth>
@@ -80,14 +80,17 @@
       <rhGuitarFingeringFramePadding>0</rhGuitarFingeringFramePadding>
       <rhGuitarFingeringFrameWidth>0</rhGuitarFingeringFrameWidth>
       <longInstrumentFontSize>11</longInstrumentFontSize>
+      <longInstrumentAlign>right,center</longInstrumentAlign>
       <longInstrumentFramePadding>0</longInstrumentFramePadding>
       <longInstrumentFrameWidth>0</longInstrumentFrameWidth>
       <shortInstrumentFontSize>11</shortInstrumentFontSize>
+      <shortInstrumentAlign>right,center</shortInstrumentAlign>
       <shortInstrumentFramePadding>0</shortInstrumentFramePadding>
       <shortInstrumentFrameWidth>0</shortInstrumentFrameWidth>
       <partInstrumentFramePadding>0</partInstrumentFramePadding>
       <partInstrumentFrameWidth>0</partInstrumentFrameWidth>
       <expressionFontSize>12</expressionFontSize>
+      <expressionFontStyle>0</expressionFontStyle>
       <expressionFramePadding>0</expressionFramePadding>
       <expressionFrameWidth>0</expressionFrameWidth>
       <tempoFontSize>10</tempoFontSize>
@@ -102,12 +105,13 @@
       <translatorAlign>center,top</translatorAlign>
       <translatorFramePadding>0</translatorFramePadding>
       <translatorFrameWidth>0</translatorFrameWidth>
-      <systemAlign>left,top</systemAlign>
-      <systemFramePadding>0</systemFramePadding>
-      <systemFrameWidth>0</systemFrameWidth>
-      <staffAlign>left,top</staffAlign>
-      <staffFramePadding>0</staffFramePadding>
-      <staffFrameWidth>0</staffFrameWidth>
+      <translatorPosition>center</translatorPosition>
+      <systemTextAlign>left,top</systemTextAlign>
+      <systemTextFramePadding>0</systemTextFramePadding>
+      <systemTextFrameWidth>0</systemTextFrameWidth>
+      <staffTextAlign>left,top</staffTextAlign>
+      <staffTextFramePadding>0</staffTextFramePadding>
+      <staffTextFrameWidth>0</staffTextFrameWidth>
       <rehearsalMarkFontSize>10</rehearsalMarkFontSize>
       <rehearsalMarkFramePadding>0.1</rehearsalMarkFramePadding>
       <repeatLeftFramePadding>0</repeatLeftFramePadding>
@@ -124,15 +128,23 @@
       <glissandoAlign>center,baseline</glissandoAlign>
       <glissandoFramePadding>0</glissandoFramePadding>
       <glissandoFrameWidth>0</glissandoFrameWidth>
+      <glissandoPosition>center</glissandoPosition>
       <bendAlign>center,center</bendAlign>
       <bendFramePadding>0</bendFramePadding>
       <bendFrameWidth>0</bendFrameWidth>
+      <bendPosition>center</bendPosition>
       <headerFontSize>11</headerFontSize>
       <headerFramePadding>0</headerFramePadding>
       <headerFrameWidth>0</headerFrameWidth>
       <footerFontSize>11</footerFontSize>
       <footerFramePadding>0</footerFramePadding>
       <footerFrameWidth>0</footerFrameWidth>
+      <copyrightFontSize>11</copyrightFontSize>
+      <copyrightFramePadding>0</copyrightFramePadding>
+      <copyrightFrameWidth>0</copyrightFrameWidth>
+      <pageNumberFontSize>11</pageNumberFontSize>
+      <pageNumberFramePadding>0</pageNumberFramePadding>
+      <pageNumberFrameWidth>0</pageNumberFrameWidth>
       <instrumentChangeAlign>left,bottom</instrumentChangeAlign>
       <instrumentChangeFramePadding>0</instrumentChangeFramePadding>
       <instrumentChangeFrameWidth>0</instrumentChangeFrameWidth>
@@ -145,7 +157,7 @@
       <user2FramePadding>0</user2FramePadding>
       <user2FrameWidth>0</user2FrameWidth>
       <defaultsVersion>206</defaultsVersion>
-      <Spatium>1.94</Spatium>
+      <spatium>1.94</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -158,19 +170,21 @@
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle">L'Académie et le Caveau</metaTag>
     <metaTag name="originalFormat">xml</metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           </StaffType>
         </Staff>
-      <trackName>Tenor</trackName>
       <Instrument id="tenor">
-        <longName>Tenor</longName>
+        <InstrumentLabel>
+          <longName>Tenor</longName>
+          </InstrumentLabel>
         <trackName>Choir Aahs</trackName>
         <instrumentId>voice.tenor</instrumentId>
         <Channel>
@@ -183,33 +197,36 @@
     <Staff id="1">
       <VBox>
         <height>25.5926</height>
-        <bottomGap>0</bottomGap>
         <topMargin>3</topMargin>
         <boxAutoSize>0</boxAutoSize>
-        <excludeFromParts>0</excludeFromParts>
+        <sizeIsSpatiumDependent>1</sizeIsSpatiumDependent>
+        <eid>E_E</eid>
         <Text>
+          <eid>F_F</eid>
           <style>frame</style>
           <text>îèéààéà</text>
           </Text>
         <Text>
-          <style>frame</style>
+          <eid>G_G</eid>
           <offset x="55" y="0.5"/>
+          <style>frame</style>
           <text>éééàè</text>
           </Text>
         </VBox>
       <VBox>
         <height>47.762</height>
         <topGap>10</topGap>
-        <bottomGap>0</bottomGap>
         <boxAutoSize>0</boxAutoSize>
-        <excludeFromParts>0</excludeFromParts>
+        <eid>H_H</eid>
         <Text>
+          <eid>I_I</eid>
           <style>frame</style>
           <text>êêàééééç*éô</text>
           </Text>
         <Text>
-          <style>frame</style>
+          <eid>J_J</eid>
           <offset x="55" y="0.5"/>
+          <style>frame</style>
           <text>àéùééé</text>
           </Text>
         </VBox>

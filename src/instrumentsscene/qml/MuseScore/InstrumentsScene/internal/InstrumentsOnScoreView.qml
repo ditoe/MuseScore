@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,60 +19,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.9
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.12
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.InstrumentsScene 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Layouts
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.InstrumentsScene
 
 Item {
     id: root
 
-    readonly property bool hasInstruments: instrumentsOnScoreModel.count > 0
-    readonly property alias isMovingUpAvailable: instrumentsOnScoreModel.isMovingUpAvailable
-    readonly property alias isMovingDownAvailable: instrumentsOnScoreModel.isMovingDownAvailable
+    required property InstrumentsOnScoreListModel instrumentsOnScoreModel
 
-    property alias navigation: navPanel
-
-    function instruments() {
-        return instrumentsOnScoreModel.instruments()
-    }
-
-    function currentOrder() {
-        return instrumentsOnScoreModel.currentOrder()
-    }
-
-    function addInstruments(instruments) {
-        instrumentsOnScoreModel.addInstruments(instruments)
-    }
-
-    function moveSelectedInstrumentsUp() {
-        instrumentsOnScoreModel.moveSelectionUp()
-    }
-
-    function moveSelectedInstrumentsDown() {
-        instrumentsOnScoreModel.moveSelectionDown()
-    }
+    property alias navigation: instrumentsView.navigation
 
     function scrollViewToEnd() {
         instrumentsView.positionViewAtEnd()
-    }
-
-    InstrumentsOnScoreListModel {
-        id: instrumentsOnScoreModel
-    }
-
-    Component.onCompleted: {
-        instrumentsOnScoreModel.load()
-    }
-
-    NavigationPanel {
-        id: navPanel
-        name: "InstrumentsOnScoreView"
-        direction: NavigationPanel.Both
-        enabled: root.enabled && root.visible
     }
 
     StyledTextLabel {
@@ -99,18 +64,18 @@ Item {
             Layout.fillWidth: true
 
             navigation.name: "Orders"
-            navigation.panel: navPanel
+            navigation.panel: instrumentsView.navigation
             navigation.row: 0
             navigation.column: 0
 
-            model: instrumentsOnScoreModel.orders
+            model: root.instrumentsOnScoreModel.orders
 
-            currentIndex: instrumentsOnScoreModel.currentOrderIndex
+            currentIndex: root.instrumentsOnScoreModel.currentOrderIndex
 
             displayText: qsTrc("instruments", "Order:") + " " + currentText
 
             onActivated: function(index, value) {
-                instrumentsOnScoreModel.currentOrderIndex = index
+                root.instrumentsOnScoreModel.currentOrderIndex = index
             }
         }
 
@@ -118,17 +83,17 @@ Item {
             Layout.preferredWidth: width
 
             navigation.name: "Delete"
-            navigation.panel: navPanel
+            navigation.panel: instrumentsView.navigation
             navigation.row: 0
             navigation.column: 1
 
             icon: IconCode.DELETE_TANK
             toolTipTitle: qsTrc("instruments", "Remove selected instruments from score")
 
-            enabled: instrumentsOnScoreModel.isRemovingAvailable
+            enabled: root.instrumentsOnScoreModel.isRemovingAvailable
 
             onClicked: {
-                instrumentsOnScoreModel.removeSelection()
+                root.instrumentsOnScoreModel.removeSelection()
             }
         }
     }
@@ -142,19 +107,27 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        model: instrumentsOnScoreModel
+        model: root.instrumentsOnScoreModel
+
+        accessible.name: instrumentsLabel.text
 
         delegate: ListItemBlank {
             id: item
 
-            isSelected: model.isSelected
-
-            navigation.name: model.name
-            navigation.panel: navPanel
-            navigation.row: 1 + model.index
+            required property var model
+            required isSelected
+            required property string name
+            required property string description
+            required property bool isSoloist
+            required property int index
+            
+            navigation.name: name
+            navigation.panel: instrumentsView.navigation
+            navigation.row: 1 + index
             navigation.column: 0
             navigation.accessible.name: itemTitleLabel.text
-            navigation.accessible.description: model.description
+            navigation.accessible.description: description
+            navigation.accessible.row: index
 
             StyledTextLabel {
                 id: itemTitleLabel
@@ -165,7 +138,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 horizontalAlignment: Text.AlignLeft
-                text:  model.isSoloist ? qsTrc("instruments", "Soloist:") + " " + model.name : model.name
+                text:  item.isSoloist ? qsTrc("instruments", "Soloist:") + " " + item.name : item.name
                 font: ui.theme.bodyBoldFont
             }
 
@@ -177,29 +150,29 @@ Item {
 
                 isNarrow: true
 
-                text: model.isSoloist ? qsTrc("instruments", "Undo soloist") : qsTrc("instruments", "Make soloist")
-                visible: model.isSelected
+                text: item.isSoloist ? qsTrc("instruments", "Undo soloist") : qsTrc("instruments", "Make soloist")
+                visible: item.isSelected
 
-                navigation.name: model.name + "MakeSoloist"
-                navigation.panel: navPanel
-                navigation.row: 1 + model.index
+                navigation.name: item.name + "MakeSoloist"
+                navigation.panel: instrumentsView.navigation
+                navigation.row: 1 + item.index
                 navigation.column: 1
 
                 onClicked: {
-                    model.isSoloist = !model.isSoloist
+                    item.model.isSoloist = !item.model.isSoloist
                 }
             }
 
             onClicked: {
-                instrumentsOnScoreModel.selectRow(model.index)
+                root.instrumentsOnScoreModel.selectRow(index)
             }
 
             onDoubleClicked: {
-                instrumentsOnScoreModel.removeSelection()
+                root.instrumentsOnScoreModel.removeSelection()
             }
 
             onRemoveSelectionRequested: {
-                instrumentsOnScoreModel.removeSelection()
+                root.instrumentsOnScoreModel.removeSelection()
             }
         }
     }

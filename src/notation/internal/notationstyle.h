@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2025 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_NOTATION_NOTATIONSTYLE_H
-#define MU_NOTATION_NOTATIONSTYLE_H
+#pragma once
 
 #include "inotationstyle.h"
 #include "inotationundostack.h"
@@ -34,28 +33,27 @@ class NotationStyle : public INotationStyle
 public:
     NotationStyle(IGetScore* getScore, INotationUndoStackPtr);
 
-    PropertyValue styleValue(const StyleId& styleId) const override;
-    PropertyValue defaultStyleValue(const StyleId& styleId) const override;
+    const PropertyValue& styleValue(const StyleId& styleId) const override;
+    const PropertyValue& defaultStyleValue(const StyleId& styleId) const override;
     void setStyleValue(const StyleId& styleId, const PropertyValue& newValue) override;
     void resetStyleValue(const StyleId& styleId) override;
+    void resetStyleValues(const std::vector<StyleId>& styleIds) override;
 
     bool canApplyToAllParts() const override;
     void applyToAllParts() override;
 
-    void resetAllStyleValues(const std::set<StyleId>& exceptTheseOnes = {}) override;
+    void resetAllStyleValues(const StyleIdSet& exceptTheseOnes = {}) override;
 
-    async::Notification styleChanged() const override;
+    muse::async::Notification styleChanged() const override;
 
-    bool loadStyle(const mu::io::path_t&, bool allowAnyVersion) override;
-    bool saveStyle(const mu::io::path_t&) override;
+    bool loadStyle(const muse::io::path_t&, bool allowAnyVersion) override;
+    bool saveStyle(const muse::io::path_t&) override;
 
 private:
     mu::engraving::Score* score() const;
 
     IGetScore* m_getScore = nullptr;
-    async::Notification m_styleChanged;
+    muse::async::Notification m_styleChanged;
     INotationUndoStackPtr m_undoStack;
 };
 }
-
-#endif // MU_NOTATION_NOTATIONSTYLE_H

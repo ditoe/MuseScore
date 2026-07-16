@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_ENGRAVING_ENGRAVINGFONTSPROVIDER_H
-#define MU_ENGRAVING_ENGRAVINGFONTSPROVIDER_H
+#pragma once
 
 #include <vector>
 
@@ -35,7 +34,11 @@ class EngravingFontsProvider : public IEngravingFontsProvider
 {
 public:
 
-    void addFont(const std::string& name, const std::string& family, const io::path_t& filePath) override;
+    void deinit();
+
+    void addInternalFont(const std::string& name, const std::string& family, const muse::io::path_t& filePath) override;
+    void addExternalFont(const std::string& name, const std::string& family, const muse::io::path_t& filePath,
+                         const muse::io::path_t& metadataPath) override;
     IEngravingFontPtr fontByName(const std::string& name) const override;
     std::vector<IEngravingFontPtr> fonts() const override;
 
@@ -43,10 +46,11 @@ public:
     IEngravingFontPtr fallbackFont() const override;
     bool isFallbackFont(const IEngravingFont* f) const override;
 
+    void clearExternalFonts() override;
+
     void loadAllFonts() override;
 
 private:
-
     std::shared_ptr<EngravingFont> doFontByName(const std::string& name) const;
     std::shared_ptr<EngravingFont> doFallbackFont() const;
 
@@ -57,7 +61,6 @@ private:
 
     mutable Fallback m_fallback;
     std::vector<std::shared_ptr<EngravingFont> > m_symbolFonts;
+    std::unordered_map<std::string, std::shared_ptr<EngravingFont> > m_externalSymbolFonts;
 };
 }
-
-#endif // MU_ENGRAVING_ENGRAVINGFONTSPROVIDER_H

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,18 +20,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __MCURSOR_H__
-#define __MCURSOR_H__
+#ifndef MU_ENGRAVING_MCURSOR_H
+#define MU_ENGRAVING_MCURSOR_H
 
 #include "types/string.h"
-#include "types/fraction.h"
+#include "../types/types.h"
+
+#include "modularity/ioc.h"
 
 namespace mu::engraving {
 class MasterScore;
 class TDuration;
 class TimeSig;
 class Chord;
-enum class Key;
+enum class Key : signed char;
 
 //---------------------------------------------------------
 //   MCursor
@@ -39,16 +41,9 @@ enum class Key;
 
 class MCursor
 {
-    MasterScore* _score;
-    Fraction _tick;
-    int _track;
-    Fraction _sig;
-
-    void createMeasures();
-
 public:
     MCursor(MasterScore* s = 0);
-    void createScore(const String& s);
+    void createScore(const muse::modularity::ContextPtr& iocCtx, const String& s);
 
     void addPart(const String& instrument);
     Chord* addChord(int pitch, const TDuration& duration);
@@ -56,9 +51,18 @@ public:
     TimeSig* addTimeSig(const Fraction&);
 
     void move(int track, const Fraction& tick);
-    MasterScore* score() const { return _score; }
-    void setScore(MasterScore* s) { _score = s; }
-    void setTimeSig(Fraction f) { _sig = f; }
+    MasterScore* score() const { return m_score; }
+    void setScore(MasterScore* s) { m_score = s; }
+    void setTimeSig(Fraction f) { m_sig = f; }
+
+private:
+
+    void createMeasures();
+
+    MasterScore* m_score = nullptr;
+    Fraction m_tick;
+    int m_track = 0;
+    Fraction m_sig;
 };
 } // namespace mu::engraving
 #endif

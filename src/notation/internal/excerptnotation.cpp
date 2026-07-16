@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,14 +23,15 @@
 #include "excerptnotation.h"
 
 #include "engraving/dom/excerpt.h"
-#include "engraving/dom/text.h"
+#include "engraving/editing/editexcerpt.h"
+#include "engraving/editing/transaction/transaction.h"
 
-#include "log.h"
+#include "inotationundostack.h"
 
 using namespace mu::notation;
 
-ExcerptNotation::ExcerptNotation(mu::engraving::Excerpt* excerpt)
-    : Notation(), m_excerpt(excerpt)
+ExcerptNotation::ExcerptNotation(MasterNotation* master, engraving::Excerpt* excerpt, const muse::modularity::ContextPtr& iocCtx)
+    : Notation(master, iocCtx), m_excerpt(excerpt)
 {
 }
 
@@ -48,10 +49,6 @@ void ExcerptNotation::init()
     }
 
     setScore(m_excerpt->excerptScore());
-
-    if (isEmpty()) {
-        fillWithDefaultInfo();
-    }
 
     m_inited = true;
 }
@@ -81,34 +78,6 @@ bool ExcerptNotation::isEmpty() const
     return m_excerpt->parts().empty();
 }
 
-void ExcerptNotation::fillWithDefaultInfo()
-{
-    TRACEFUNC;
-
-    IF_ASSERT_FAILED(m_excerpt || m_excerpt->excerptScore()) {
-        return;
-    }
-
-    mu::engraving::Score* score = m_excerpt->excerptScore();
-    mu::engraving::MeasureBase* topVerticalFrame = score->first();
-
-    if (topVerticalFrame && topVerticalFrame->isVBox()) {
-        topVerticalFrame->undoUnlink();
-    }
-
-    auto unlinkText = [&score](TextStyleType textType) {
-        engraving::Text* textItem = score->getText(textType);
-        if (textItem) {
-            textItem->undoUnlink();
-        }
-    };
-
-    unlinkText(TextStyleType::TITLE);
-    unlinkText(TextStyleType::SUBTITLE);
-    unlinkText(TextStyleType::COMPOSER);
-    unlinkText(TextStyleType::POET);
-}
-
 mu::engraving::Excerpt* ExcerptNotation::excerpt() const
 {
     return m_excerpt;
@@ -129,9 +98,38 @@ void ExcerptNotation::setName(const QString& name)
     }
 }
 
-mu::async::Notification ExcerptNotation::nameChanged() const
+void ExcerptNotation::undoSetName(const QString& name)
+{
+    if (name == this->name()) {
+        return;
+    }
+
+    if (!score()) {
+        setName(name);
+        return;
+    }
+
+    //: Means: "edit the name of a part score"
+    undoStack()->transaction(muse::TranslatableString("undoableAction", "Rename part"), [&](engraving::Transaction& tx) {
+        tx.push(new engraving::ChangeExcerptTitle(m_excerpt, name));
+    });
+
+    notifyAboutNotationChanged();
+}
+
+muse::async::Notification ExcerptNotation::nameChanged() const
 {
     return m_excerpt->nameChanged();
+}
+
+bool ExcerptNotation::hasFileName() const
+{
+    return m_excerpt->hasFileName();
+}
+
+const muse::String& ExcerptNotation::fileName() const
+{
+    return m_excerpt->fileName();
 }
 
 INotationPtr ExcerptNotation::notation()
@@ -144,5 +142,5 @@ IExcerptNotationPtr ExcerptNotation::clone() const
     mu::engraving::Excerpt* copy = new mu::engraving::Excerpt(*m_excerpt);
     copy->markAsCustom();
 
-    return std::make_shared<ExcerptNotation>(copy);
+    return std::make_shared<ExcerptNotation>(m_masterNotation, copy, iocContext());
 }

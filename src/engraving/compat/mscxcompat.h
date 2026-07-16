@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,16 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_MSCXCOMPAT_H
-#define MU_ENGRAVING_MSCXCOMPAT_H
+#pragma once
 
-#include "dom/masterscore.h"
-#include "engravingproject.h"
+#include "../dom/masterscore.h"
+#include "../engravingproject.h"
 
 namespace mu::engraving::compat {
-Ret mscxToMscz(const String& mscxFilePath, ByteArray* msczData);
-Ret loadMsczOrMscx(MasterScore* score, const String& path, bool ignoreVersionError = false);
-Ret loadMsczOrMscx(EngravingProjectPtr project, const String& path, bool ignoreVersionError = false);
+muse::Ret loadMsczOrMscx(MasterScore* score, const muse::io::path_t& path, bool ignoreVersionError = false);
+muse::Ret loadMsczOrMscx(EngravingProjectPtr project, const muse::io::path_t& path, bool ignoreVersionError = false);
 }
-
-#endif // MU_ENGRAVING_MSCXCOMPAT_H

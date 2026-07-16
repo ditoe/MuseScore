@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_EXPRESSION_H
-#define MU_ENGRAVING_EXPRESSION_H
+#pragma once
 
 #include "textbase.h"
 
 namespace mu::engraving {
 class Dynamic;
+class Transaction;
 
 class Expression final : public TextBase
 {
@@ -35,31 +35,32 @@ class Expression final : public TextBase
 public:
     Expression(Segment* parent);
     Expression(const Expression& expression);
+
+    bool isEditAllowed(EditData&) const override;
+
     Expression* clone() const override { return new Expression(*this); }
 
     Segment* segment() const { return toSegment(explicitParent()); }
 
     PropertyValue propertyDefault(Pid id) const override;
 
-    double computeDynamicExpressionDistance() const;
+    double computeDynamicExpressionDistance(const Dynamic* snappedDyn) const;
 
     std::unique_ptr<ElementGroup> getDragGroup(std::function<bool(const EngravingItem*)> isDragged) override;
 
-    void undoChangeProperty(Pid id, const PropertyValue& v, PropertyFlags ps) override;
-
     bool acceptDrop(EditData& ed) const override;
-    EngravingItem* drop(EditData& ed) override;
+    EngravingItem* drop(Transaction& tx, EditData& ed) override;
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue& v) override;
     void mapPropertiesFromOldExpressions(StaffText* staffText);
 
-    Dynamic* snappedDynamic() const { return m_snappedDynamic; }
-    void setSnappedDynamic(Dynamic* d) { m_snappedDynamic = d; }
+    Dynamic* snappedDynamic() const;
 
-private:
+    bool hasVoiceAssignmentProperties() const override { return true; }
 
-    Dynamic* m_snappedDynamic = nullptr;
+    void reset() override;
+
+    bool positionRelativeToNoteheadRest() const override { return true; }
 };
-} // namespace mu::engraving
-#endif // MU_ENGRAVING_EXPRESSION_H
+}

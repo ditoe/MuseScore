@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,15 +29,16 @@ namespace mu::engraving {
 class ChordArticulationsRenderer : public RenderBase<ChordArticulationsRenderer>
 {
 public:
-    static const mpe::ArticulationTypeSet& supportedTypes();
+    static const muse::mpe::ArticulationTypeSet& supportedTypes();
 
-    static void doRender(const EngravingItem* item, const mpe::ArticulationType type, const RenderingContext& ctx,
-                         mpe::PlaybackEventList& result);
+    static void doRender(const EngravingItem* item, const muse::mpe::ArticulationType type, const RenderingContext& ctx,
+                         muse::mpe::PlaybackEventList& result);
 
 private:
-    static bool renderChordArticulations(const Chord* chord, const RenderingContext& ctx, mpe::PlaybackEventList& result);
-    static void renderNoteArticulations(const Chord* chord, const RenderingContext& ctx, mpe::PlaybackEventList& result);
-    static mpe::duration_t tiedNotesTotalDuration(const Note* firstNote);
+    static void renderChord(const Chord* chord, const RenderingContext& ctx, muse::mpe::PlaybackEventList& result);
+    static void renderChordWithGraceChords(const Chord* chord, const muse::mpe::ArticulationType type, const RenderingContext& ctx,
+                                           muse::mpe::PlaybackEventList& result);
+    static bool renderChordArticulations(const Chord* chord, const RenderingContext& ctx, muse::mpe::PlaybackEventList& result);
 };
 }
 

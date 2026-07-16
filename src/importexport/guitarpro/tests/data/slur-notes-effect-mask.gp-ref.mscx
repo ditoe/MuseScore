@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -12,22 +13,24 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle"></metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         <defaultClef>F</defaultClef>
         </Staff>
-      <trackName>Bass</trackName>
       <Instrument id="bass">
-        <longName>Bass</longName>
-        <shortName>el.bs.</shortName>
+        <InstrumentLabel>
+          <longName>Bass</longName>
+          <shortName>el.bs.</shortName>
+          </InstrumentLabel>
         <trackName></trackName>
         <transposeDiatonic>-7</transposeDiatonic>
         <transposeChromatic>-12</transposeChromatic>
@@ -40,34 +43,6 @@
           <string>50</string>
           <string>55</string>
           </StringData>
-        <Articulation name="staccatissimo">
-          <velocity>100</velocity>
-          <gateTime>30</gateTime>
-          </Articulation>
-        <Articulation name="staccato">
-          <velocity>100</velocity>
-          <gateTime>50</gateTime>
-          </Articulation>
-        <Articulation name="portato">
-          <velocity>100</velocity>
-          <gateTime>67</gateTime>
-          </Articulation>
-        <Articulation name="tenuto">
-          <velocity>100</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
-        <Articulation name="accent">
-          <velocity>120</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
-        <Articulation name="marcato">
-          <velocity>144</velocity>
-          <gateTime>67</gateTime>
-          </Articulation>
-        <Articulation name="sforzato">
-          <velocity>169</velocity>
-          <gateTime>100</gateTime>
-          </Articulation>
         <Channel>
           <program value="36"/>
           <controller ctrl="7" value="74"/>
@@ -77,34 +52,55 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>E_E</eid>
         <voice>
           <KeySig>
+            <eid>F_F</eid>
             <concertKey>0</concertKey>
+            <mode>major</mode>
             </KeySig>
           <TimeSig>
+            <eid>G_G</eid>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Tempo>
             <tempo>1.783333</tempo>
+            <eid>H_H</eid>
             <text>Moderate <sym>metNoteQuarterUp</sym> = 107</text>
             </Tempo>
           <Rest>
+            <eid>I_I</eid>
             <durationType>16th</durationType>
             </Rest>
           <Dynamic>
             <subtype>f</subtype>
             <velocity>96</velocity>
+            <eid>J_J</eid>
             </Dynamic>
           <Beam>
+            <eid>K_K</eid>
             <l1>14</l1>
             <l2>16</l2>
             </Beam>
           <Chord>
+            <eid>L_L</eid>
             <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <Slur>
-                </Slur>
+            <Spanner type="HammerOnPullOff">
+              <HammerOnPullOff>
+                <eid>M_M</eid>
+                <HammerOnPullOffSegment no="0">
+                  <HammerOnPullOffText idx="0">
+                    <eid>N_N</eid>
+                    <style>hammer_on_pull_off</style>
+                    </HammerOnPullOffText>
+                  <HammerOnPullOffText idx="1">
+                    <eid>O_O</eid>
+                    <style>hammer_on_pull_off</style>
+                    </HammerOnPullOffText>
+                  <eid>P_P</eid>
+                  </HammerOnPullOffSegment>
+                </HammerOnPullOff>
               <next>
                 <location>
                   <fractions>1/8</fractions>
@@ -112,26 +108,21 @@
                 </next>
               </Spanner>
             <Note>
+              <eid>Q_Q</eid>
               <pitch>55</pitch>
               <tpc>15</tpc>
               <fret>12</fret>
               <string>0</string>
               </Note>
             </Chord>
-          <location>
-            <fractions>-1/32</fractions>
-            </location>
-          <StaffText>
-            <text>P</text>
-            </StaffText>
-          <location>
-            <fractions>1/32</fractions>
-            </location>
           <Chord>
+            <eid>R_R</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>S_S</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>T_T</eid>
                 </Accidental>
               <pitch>54</pitch>
               <tpc>20</tpc>
@@ -139,18 +130,10 @@
               <string>0</string>
               </Note>
             </Chord>
-          <location>
-            <fractions>-1/32</fractions>
-            </location>
-          <StaffText>
-            <text>P</text>
-            </StaffText>
-          <location>
-            <fractions>1/32</fractions>
-            </location>
           <Chord>
+            <eid>U_U</eid>
             <durationType>16th</durationType>
-            <Spanner type="Slur">
+            <Spanner type="HammerOnPullOff">
               <prev>
                 <location>
                   <fractions>-1/8</fractions>
@@ -158,6 +141,7 @@
                 </prev>
               </Spanner>
             <Note>
+              <eid>V_V</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>9</fret>
@@ -165,14 +149,24 @@
               </Note>
             </Chord>
           <Beam>
-            <l1>40</l1>
-            <l2>40</l2>
+            <eid>W_W</eid>
+            <l1>44</l1>
+            <l2>44</l2>
             </Beam>
           <Chord>
+            <eid>X_X</eid>
             <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <Slur>
-                </Slur>
+            <Spanner type="HammerOnPullOff">
+              <HammerOnPullOff>
+                <eid>Y_Y</eid>
+                <HammerOnPullOffSegment no="0">
+                  <HammerOnPullOffText idx="0">
+                    <eid>Z_Z</eid>
+                    <style>hammer_on_pull_off</style>
+                    </HammerOnPullOffText>
+                  <eid>a_a</eid>
+                  </HammerOnPullOffSegment>
+                </HammerOnPullOff>
               <next>
                 <location>
                   <fractions>1/16</fractions>
@@ -180,24 +174,17 @@
                 </next>
               </Spanner>
             <Note>
+              <eid>b_b</eid>
               <pitch>47</pitch>
               <tpc>19</tpc>
               <fret>9</fret>
               <string>1</string>
               </Note>
             </Chord>
-          <location>
-            <fractions>-1/32</fractions>
-            </location>
-          <StaffText>
-            <text>H</text>
-            </StaffText>
-          <location>
-            <fractions>1/32</fractions>
-            </location>
           <Chord>
+            <eid>c_c</eid>
             <durationType>16th</durationType>
-            <Spanner type="Slur">
+            <Spanner type="HammerOnPullOff">
               <prev>
                 <location>
                   <fractions>-1/16</fractions>
@@ -205,8 +192,10 @@
                 </prev>
               </Spanner>
             <Note>
+              <eid>d_d</eid>
               <Accidental>
                 <subtype>accidentalSharp</subtype>
+                <eid>e_e</eid>
                 </Accidental>
               <pitch>49</pitch>
               <tpc>21</tpc>
@@ -215,11 +204,14 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>f_f</eid>
             <durationType>16th</durationType>
             <Articulation>
               <subtype>Slap</subtype>
+              <eid>g_g</eid>
               </Articulation>
             <Note>
+              <eid>h_h</eid>
               <pitch>38</pitch>
               <tpc>16</tpc>
               <head>cross</head>
@@ -229,11 +221,14 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>i_i</eid>
             <durationType>16th</durationType>
             <Articulation>
               <subtype>Pop</subtype>
+              <eid>j_j</eid>
               </Articulation>
             <Note>
+              <eid>k_k</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>9</fret>
@@ -241,8 +236,10 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>l_l</eid>
             <durationType>16th</durationType>
             <Note>
+              <eid>m_m</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <head>cross</head>
@@ -252,18 +249,23 @@
               </Note>
             </Chord>
           <Rest>
+            <eid>n_n</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Beam>
+            <eid>o_o</eid>
             <l1>52</l1>
             <l2>52</l2>
             </Beam>
           <Chord>
+            <eid>p_p</eid>
             <durationType>16th</durationType>
             <Articulation>
               <subtype>Slap</subtype>
+              <eid>q_q</eid>
               </Articulation>
             <Note>
+              <eid>r_r</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <head>cross</head>
@@ -273,11 +275,14 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>s_s</eid>
             <durationType>16th</durationType>
             <Articulation>
               <subtype>Pop</subtype>
+              <eid>t_t</eid>
               </Articulation>
             <Note>
+              <eid>u_u</eid>
               <pitch>52</pitch>
               <tpc>18</tpc>
               <fret>9</fret>
@@ -285,11 +290,14 @@
               </Note>
             </Chord>
           <Chord>
+            <eid>v_v</eid>
             <durationType>16th</durationType>
             <Articulation>
               <subtype>Slap</subtype>
+              <eid>w_w</eid>
               </Articulation>
             <Note>
+              <eid>x_x</eid>
               <pitch>33</pitch>
               <tpc>17</tpc>
               <head>cross</head>

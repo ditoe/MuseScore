@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,54 +24,81 @@
 
 #include <QObject>
 
-#include "../iapplicationactioncontroller.h"
-
 #include "modularity/ioc.h"
 #include "actions/actionable.h"
 #include "actions/iactionsdispatcher.h"
+#include "rcommand/icommanddispatcher.h"
 #include "ui/iuiactionsregister.h"
 #include "async/asyncable.h"
 #include "ui/imainwindow.h"
 #include "languages/ilanguagesservice.h"
-#include "iinteractive.h"
+#include "interactive/iinteractive.h"
+#include "interactive/iplatforminteractive.h"
 #include "iappshellconfiguration.h"
-#include "multiinstances/imultiinstancesprovider.h"
+#include "multiwindows/imultiwindowsprovider.h"
 #include "project/iprojectfilescontroller.h"
-#include "audio/isoundfontrepository.h"
+#include "audio/main/isoundfontinstallscenario.h"
 #include "istartupscenario.h"
 #include "iapplication.h"
+#include "extensions/iextensioninstaller.h"
+#include "context/iglobalcontext.h"
+#include "context/iuicontextresolver.h"
+
+class QDragEnterEvent;
+class QDragMoveEvent;
+class QDropEvent;
 
 namespace mu::appshell {
-class ApplicationActionController : public QObject, public IApplicationActionController, public actions::Actionable, public async::Asyncable
+class ApplicationActionController : public QObject, public muse::Contextable, public muse::actions::Actionable,
+    public muse::async::Asyncable
 {
-    INJECT(actions::IActionsDispatcher, dispatcher)
-    INJECT(ui::IUiActionsRegister, actionsRegister)
-    INJECT(ui::IMainWindow, mainWindow)
-    INJECT(languages::ILanguagesService, languagesService)
-    INJECT(framework::IInteractive, interactive)
-    INJECT(IAppShellConfiguration, configuration)
-    INJECT(mi::IMultiInstancesProvider, multiInstancesProvider)
-    INJECT(project::IProjectFilesController, projectFilesController)
-    INJECT(audio::ISoundFontRepository, soundFontRepository)
-    INJECT(IStartupScenario, startupScenario)
-    INJECT(framework::IApplication, application)
+    muse::GlobalInject<muse::mi::IMultiWindowsProvider> multiwindowsProvider;
+    muse::GlobalInject<IAppShellConfiguration> configuration;
+    muse::GlobalInject<muse::languages::ILanguagesService> languagesService;
+    muse::GlobalInject<muse::IApplication> application;
+    muse::GlobalInject<muse::IPlatformInteractive> platformInteractive;
+    muse::ContextInject<muse::extensions::IExtensionInstaller> extensionInstaller = { this };
+    muse::ContextInject<muse::ui::IUiActionsRegister> actionsRegister = { this };
+    muse::ContextInject<muse::actions::IActionsDispatcher> dispatcher = { this };
+    muse::ContextInject<muse::rcommand::ICommandDispatcher> commandDispatcher = { this };
+    muse::ContextInject<muse::ui::IMainWindow> mainWindow = { this };
+    muse::ContextInject<muse::IInteractive> interactive = { this };
+    muse::ContextInject<project::IProjectFilesController> projectFilesController = { this };
+    muse::ContextInject<muse::audio::ISoundFontInstallScenario> soundFontInstallScenario = { this };
+    muse::ContextInject<IStartupScenario> startupScenario = { this };
+    muse::ContextInject<context::IGlobalContext> globalContext = { this };
+    muse::ContextInject<context::IUiContextResolver> uiContextResolver = { this };
 
 public:
+    ApplicationActionController(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
+
     void preInit();
     void init();
 
-    ValCh<bool> isFullScreen() const;
-
-    void onDragEnterEvent(QDragEnterEvent* event) override;
-    void onDragMoveEvent(QDragMoveEvent* event) override;
-    void onDropEvent(QDropEvent* event) override;
+    muse::ValCh<bool> isFullScreen() const;
 
 private:
+
+    enum DragTarget {
+        Unknown = 0,
+        ProjectFile,
+        SoundFont,
+        Extension
+    };
+
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+    QWindow* qWindow() const;
+
+    DragTarget dragTarget(const QUrl& url) const;
+    bool onDragEnterEvent(QDragEnterEvent* event);
+    bool onDragMoveEvent(QDragMoveEvent* event);
+    bool onDropEvent(QDropEvent* event);
 
     void setupConnections();
 
-    bool quit(bool isAllInstances, const io::path_t& installerPath = io::path_t());
+    bool quit(bool isAllInstances, const muse::io::path_t& installerPath = muse::io::path_t());
     void restart();
 
     void toggleFullScreen();
@@ -81,13 +108,15 @@ private:
 
     void openOnlineHandbookPage();
     void openAskForHelpPage();
+    void openAccessibilityStatementPage();
     void openPreferencesDialog();
+    void doOpenPreferencesDialog();
 
     void revertToFactorySettings();
 
     bool m_quiting = false;
 
-    async::Channel<actions::ActionCodeList> m_actionsReceiveAvailableChanged;
+    muse::async::Channel<muse::actions::ActionCodeList> m_actionsReceiveAvailableChanged;
 };
 }
 

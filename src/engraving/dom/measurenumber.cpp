@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,7 +34,8 @@ namespace mu::engraving {
 
 static const ElementStyle measureNumberStyle {
     { Sid::measureNumberVPlacement, Pid::PLACEMENT },
-    { Sid::measureNumberHPlacement, Pid::HPLACEMENT },
+    { Sid::measureNumberMinDistance, Pid::MIN_DISTANCE },
+    { Sid::measureNumberTextStyle, Pid::TEXT_STYLE }
 };
 
 //---------------------------------------------------------
@@ -45,8 +46,6 @@ MeasureNumber::MeasureNumber(Measure* parent, TextStyleType tid)
     : MeasureNumberBase(ElementType::MEASURE_NUMBER, parent, tid)
 {
     initElementStyle(&measureNumberStyle);
-
-    setHPlacement(style().styleV(Sid::measureNumberHPlacement).value<PlacementH>());
 }
 
 //---------------------------------------------------------
@@ -60,21 +59,9 @@ MeasureNumber::MeasureNumber(const MeasureNumber& other)
     initElementStyle(&measureNumberStyle);
 }
 
-//---------------------------------------------------------
-//   propertyDefault
-//---------------------------------------------------------
-
-engraving::PropertyValue MeasureNumber::propertyDefault(Pid id) const
+bool MeasureNumber::isSystemObjectBelowBottomStaff() const
 {
-    switch (id) {
-    case Pid::TEXT_STYLE:
-        return TextStyleType::MEASURE_NUMBER;
-    case Pid::PLACEMENT:
-        return style().styleV(Sid::measureNumberVPlacement);
-    case Pid::HPLACEMENT:
-        return style().styleV(Sid::measureNumberHPlacement);
-    default:
-        return MeasureNumberBase::propertyDefault(id);
-    }
+    return style().styleV(Sid::measureNumberPlacementMode).value<MeasureNumberPlacement>() == MeasureNumberPlacement::BELOW_SYSTEM
+           || EngravingItem::isSystemObjectBelowBottomStaff();
 }
 } // namespace MS

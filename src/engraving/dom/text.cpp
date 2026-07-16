@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -39,15 +39,37 @@ static const ElementStyle defaultStyle {
     { Sid::defaultSystemFlag, Pid::SYSTEM_FLAG },
 };
 
+static bool styleIsSelectable(TextStyleType style)
+{
+    switch (style) {
+    case TextStyleType::HEADER:
+    case TextStyleType::FOOTER:
+    case TextStyleType::COPYRIGHT:
+    case TextStyleType::PAGE_NUMBER:
+    case TextStyleType::GROUP_BRACKET:
+        return false;
+    default: break;
+    }
+    return true;
+}
+
 //---------------------------------------------------------
 //   Text
 //---------------------------------------------------------
 
 Text::Text(EngravingItem* parent, TextStyleType tid)
-    : TextBase(ElementType::TEXT, parent, tid,
-               tid == TextStyleType::HEADER || tid == TextStyleType::FOOTER ? ElementFlag::NOT_SELECTABLE : ElementFlag::NOTHING)
+    : TextBase(ElementType::TEXT, parent, tid, styleIsSelectable(tid) ? ElementFlag::NOTHING : ElementFlag::NOT_SELECTABLE)
 {
     initElementStyle(&defaultStyle);
+}
+
+EngravingObject* Text::propertyDelegate(Pid id) const
+{
+    if (id == Pid::TEXT_STYLE && parent() && parent()->isTextLineBaseSegment()) {
+        return parent();
+    }
+
+    return nullptr;
 }
 
 //---------------------------------------------------------
@@ -56,6 +78,10 @@ Text::Text(EngravingItem* parent, TextStyleType tid)
 
 engraving::PropertyValue Text::propertyDefault(Pid id) const
 {
+    if (EngravingObject* item = propertyDelegate(id)) {
+        return item->propertyDefault(id);
+    }
+
     switch (id) {
     case Pid::TEXT_STYLE:
         return TextStyleType::DEFAULT;
@@ -64,10 +90,46 @@ engraving::PropertyValue Text::propertyDefault(Pid id) const
     }
 }
 
+PropertyValue Text::getProperty(Pid id) const
+{
+    switch (id) {
+    case Pid::VOICE_ASSIGNMENT:
+        if (hasVoiceAssignmentProperties()) {
+            return parentItem()->getProperty(id);
+        }
+    // fallthrough
+    default:
+        return TextBase::getProperty(id);
+    }
+}
+
 String Text::readXmlText(XmlReader& xml, Score* score)
 {
     Text t(score->dummy());
     rw::RWRegister::reader()->readItem(&t, xml);
     return t.xmlText();
+}
+
+bool Text::hasVoiceAssignmentProperties() const
+{
+    const EngravingItem* parent = parentItem();
+    if (parent && parent->isTextLineBaseSegment()) {
+        return parent->hasVoiceAssignmentProperties();
+    }
+    return false;
+}
+
+bool mu::engraving::Text::collectForDrawing() const
+{
+    return !(parent() && parent()->isTuplet());
+}
+
+bool Text::positionRelativeToNoteheadRest() const
+{
+    if (parent()->isBox() || parent()->isTuplet() || parent()->isSpannerSegment() || parent()->isBracket()) {
+        return false;
+    }
+
+    return true;
 }
 }

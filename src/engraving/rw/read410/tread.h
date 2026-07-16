@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,15 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_READ410_TREAD_H
-#define MU_ENGRAVING_READ410_TREAD_H
+#pragma once
 
-#include "global/types/string.h"
-
+#include "../compat/compattypes.h"
 #include "../xmlreader.h"
-#include "readcontext.h"
 
-#include "../../dom/property.h"
+#include "readcontext.h"
 
 namespace mu::engraving {
 class XmlReader;
@@ -53,7 +50,6 @@ class BagpipeEmbellishment;
 class BarLine;
 class Beam;
 class Bend;
-class StretchedBend;
 class Box;
 class HBox;
 class VBox;
@@ -77,6 +73,9 @@ class Fingering;
 class Glissando;
 class GradualTempoChange;
 class Groups;
+class GuitarBend;
+class GuitarBendSegment;
+class GuitarBendHold;
 
 class Hairpin;
 class Harmony;
@@ -142,9 +141,11 @@ class StaffTypeChange;
 class Stem;
 class StemSlash;
 class StringData;
+class StringTunings;
 class System;
 class SystemDivider;
 class Symbol;
+class SoundFlag;
 class BSymbol;
 class FSymbol;
 
@@ -153,17 +154,25 @@ class TextLine;
 class TextLineBase;
 class Tie;
 class TimeSig;
-class TimeSigMap;
-class SigEvent;
-class Tremolo;
+class TremoloSingleChord;
+class TremoloTwoChord;
 class TremoloBar;
 class Trill;
 class Tuplet;
 class Vibrato;
 class Volta;
+
+enum class Pid : short;
+}
+
+namespace mu::engraving::compat {
+struct TremoloCompat;
 }
 
 namespace mu::engraving::read410 {
+using rw::compat::StaffHideMode;
+using rw::compat::StaffHideModes;
+
 class TRead
 {
 public:
@@ -193,7 +202,6 @@ public:
     static void read(BarLine* l, XmlReader& xml, ReadContext& ctx);
     static void read(Beam* b, XmlReader& xml, ReadContext& ctx);
     static void read(Bend* b, XmlReader& xml, ReadContext& ctx);
-    static void read(StretchedBend* b, XmlReader& xml, ReadContext& ctx);
     static void read(Box* b, XmlReader& xml, ReadContext& ctx);
     static void read(HBox* b, XmlReader& xml, ReadContext& ctx);
     static void read(VBox* b, XmlReader& xml, ReadContext& ctx);
@@ -219,6 +227,8 @@ public:
     static void read(Glissando* g, XmlReader& xml, ReadContext& ctx);
     static void read(GradualTempoChange* c, XmlReader& xml, ReadContext& ctx);
     static void read(Groups* g, XmlReader& xml, ReadContext& ctx);
+    static void read(GuitarBend* g, XmlReader& xml, ReadContext& ctx);
+    static void read(GuitarBendHold* h, XmlReader& xml, ReadContext& ctx);
 
     static void read(Hairpin* h, XmlReader& xml, ReadContext& ctx);
     static void read(Harmony* h, XmlReader& xml, ReadContext& ctx);
@@ -233,6 +243,7 @@ public:
     static void read(KeyList* item, XmlReader& xml, ReadContext& ctx);
     static void read(KeySig* s, XmlReader& xml, ReadContext& ctx);
 
+    static void read(LaissezVib* lv, XmlReader& xml, ReadContext& ctx);
     static void read(LayoutBreak* b, XmlReader& xml, ReadContext& ctx);
     static void read(LedgerLine* l, XmlReader& xml, ReadContext& ctx);
     static void read(LetRing* r, XmlReader& xml, ReadContext& ctx);
@@ -251,12 +262,16 @@ public:
     static void read(NoteEvent* item, XmlReader& xml, ReadContext& ctx);
     static void read(NoteDot* d, XmlReader& xml, ReadContext& ctx);
     static void read(NoteHead* h, XmlReader& xml, ReadContext& ctx);
+    static void read(NoteLine* nl, XmlReader& xml, ReadContext& ctx);
     static void read(Ornament* o, XmlReader& xml, ReadContext& ctx);
     static void read(Ottava* o, XmlReader& xml, ReadContext& ctx);
 
     static void read(Page* p, XmlReader& xml, ReadContext& ctx);
     static void read(PalmMute* p, XmlReader& xml, ReadContext& ctx);
+    static void read(Parenthesis* p, XmlReader& xml, ReadContext& ctx);
     static void read(Part* p, XmlReader& xml, ReadContext& ctx);
+    static void read(PartialLyricsLine* p, XmlReader& xml, ReadContext& ctx);
+    static void read(PartialTie* p, XmlReader& xml, ReadContext& ctx);
     static void read(Pedal* p, XmlReader& xml, ReadContext& ctx);
     static void read(PlayTechAnnotation* a, XmlReader& xml, ReadContext& ctx);
 
@@ -269,8 +284,7 @@ public:
     static void read(SlurTie* s, XmlReader& xml, ReadContext& ctx);
     static void read(SlurTieSegment* s, XmlReader& xml, ReadContext& ctx);
     static void read(Spacer* s, XmlReader& xml, ReadContext& ctx);
-    static void read(Staff* s, XmlReader& xml, ReadContext& ctx);
-    static void read(StaffName* item, XmlReader& xml);
+    static void read(Staff* s, XmlReader& xml, ReadContext& ctx, StaffHideModes& staffHideModes);
     static void read(StaffState* s, XmlReader& xml, ReadContext& ctx);
     static void read(StaffText* t, XmlReader& xml, ReadContext& ctx);
     static void read(StaffTextBase* t, XmlReader& xml, ReadContext& ctx);
@@ -280,9 +294,11 @@ public:
     static void read(Stem* s, XmlReader& xml, ReadContext& ctx);
     static void read(StemSlash* s, XmlReader& xml, ReadContext& ctx);
     static void read(StringData* item, XmlReader& xml);
+    static void read(StringTunings* s, XmlReader& xml, ReadContext& ctx);
     static void read(System* s, XmlReader& xml, ReadContext& ctx);
     static void read(SystemDivider* d, XmlReader& xml, ReadContext& ctx);
     static void read(Symbol* sym, XmlReader& xml, ReadContext& ctx);
+    static void read(SoundFlag* sym, XmlReader& xml, ReadContext& ctx);
     static void read(FSymbol* sym, XmlReader& xml, ReadContext& ctx);
 
     static void read(Text* t, XmlReader& xml, ReadContext& ctx);
@@ -290,13 +306,17 @@ public:
     static void read(TextLineBase* b, XmlReader& xml, ReadContext& ctx);
     static void read(Tie* t, XmlReader& xml, ReadContext& ctx);
     static void read(TimeSig* s, XmlReader& xml, ReadContext& ctx);
-    static void read(TimeSigMap* item, XmlReader& xml, ReadContext& ctx);
-    static void read(Tremolo* t, XmlReader& xml, ReadContext& ctx);
+    static void read(TremoloTwoChord* t, XmlReader& xml, ReadContext& ctx);
+    static void read(TremoloSingleChord* t, XmlReader& xml, ReadContext& ctx);
+
     static void read(TremoloBar* b, XmlReader& xml, ReadContext& ctx);
     static void read(Trill* t, XmlReader& xml, ReadContext& ctx);
     static void read(Tuplet* t, XmlReader& xml, ReadContext& ctx);
     static void read(Vibrato* v, XmlReader& xml, ReadContext& ctx);
     static void read(Volta* v, XmlReader& xml, ReadContext& ctx);
+
+    // compat
+    static void read(compat::TremoloCompat* tc, XmlReader& xml, ReadContext& ctx);
 
     // temp compat
 
@@ -317,6 +337,8 @@ public:
     static bool readProperties(Clef* c, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(Fermata* f, XmlReader& xml, ReadContext& ctx);
 
+    static bool readProperties(GuitarBendSegment* g, const AsciiStringView& tag, XmlReader& xml, ReadContext&);
+
     static bool readProperties(Instrument* item, XmlReader& xml, ReadContext& ctx, Part* part, bool* customDrumset);
 
     static bool readProperties(LedgerLine* l, XmlReader& xml, ReadContext& ctx);
@@ -333,14 +355,13 @@ public:
     static bool readProperties(Ornament* o, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(Ottava* o, XmlReader& xml, ReadContext& ctx);
 
-    static bool readProperties(Part* p, XmlReader& xml, ReadContext& ctx);
+    static bool readProperties(Part* p, XmlReader& xml, ReadContext& ctx, StaffHideModes& staffHideModes);
 
-    static int read(SigEvent* item, XmlReader& xml, int fileDivision);
     static bool readProperties(SLine* l, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(Slur* s, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(SlurTie* s, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(Spanner* s, XmlReader& xml, ReadContext& ctx);
-    static bool readProperties(Staff* s, XmlReader& e, ReadContext& ctx);
+    static bool readProperties(Staff* s, XmlReader& e, ReadContext& ctx, StaffHideModes& staffHideModes);
     static bool readProperties(Stem* s, XmlReader& e, ReadContext& ctx);
 
     static bool readProperties(TextLineBase* b, XmlReader& e, ReadContext& ctx);
@@ -349,13 +370,15 @@ public:
     static void readSpanner(XmlReader& e, ReadContext& ctx, EngravingItem* current, track_idx_t track);
     static void readSpanner(XmlReader& e, ReadContext& ctx, Score* current, track_idx_t track);
 
+    static void readSystemLocks(Score* score, XmlReader& e);
+
 private:
     static bool readProperties(Box* b, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(HBox* b, XmlReader& xml, ReadContext& ctx);
 
     static bool readProperties(TextBase* t, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(StaffTextBase* t, XmlReader& xml, ReadContext& ctx);
+
+    static void readSystemLock(Score* score, XmlReader& e);
 };
 }
-
-#endif // MU_ENGRAVING_READ410_TREAD_H

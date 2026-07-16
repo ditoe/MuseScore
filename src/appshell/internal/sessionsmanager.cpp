@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,6 +23,8 @@
 #include "sessionsmanager.h"
 
 using namespace mu::appshell;
+using namespace muse;
+using namespace muse::actions;
 
 void SessionsManager::init()
 {
@@ -41,8 +43,8 @@ void SessionsManager::init()
 
 void SessionsManager::deinit()
 {
-    bool isServer = multiInstancesProvider()->isMainInstance();
-    if (!isServer) {
+    bool isLastContext = multiwindowsProvider()->windowCount() == 1;
+    if (!isLastContext) {
         return;
     }
 
@@ -63,8 +65,8 @@ void SessionsManager::restore()
         return;
     }
 
-    for (const io::path_t& path : projects) {
-        dispatcher()->dispatch("file-open", actions::ActionData::make_arg1<io::path_t>(path));
+    for (const muse::io::path_t& path : projects) {
+        dispatcher()->dispatch("file-open", ActionData::make_arg1<QUrl>(path.toQUrl()));
     }
 }
 
@@ -75,7 +77,7 @@ void SessionsManager::reset()
 
 void SessionsManager::update()
 {
-    io::path_t newProjectPath;
+    muse::io::path_t newProjectPath;
 
     if (auto project = globalContext()->currentProject()) {
         newProjectPath = project->isNewlyCreated() ? projectConfiguration()->newProjectTemporaryPath() : project->path();
@@ -96,7 +98,7 @@ void SessionsManager::update()
     m_lastOpenedProjectPath = newProjectPath;
 }
 
-void SessionsManager::removeProjectFromSession(const io::path_t& projectPath)
+void SessionsManager::removeProjectFromSession(const muse::io::path_t& projectPath)
 {
     io::paths_t projects = configuration()->sessionProjectsPaths();
     if (projects.empty()) {
@@ -107,7 +109,7 @@ void SessionsManager::removeProjectFromSession(const io::path_t& projectPath)
     configuration()->setSessionProjectsPaths(projects);
 }
 
-void SessionsManager::addProjectToSession(const mu::io::path_t& projectPath)
+void SessionsManager::addProjectToSession(const muse::io::path_t& projectPath)
 {
     io::paths_t projects = configuration()->sessionProjectsPaths();
 

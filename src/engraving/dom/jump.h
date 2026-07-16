@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,12 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __JUMP_H__
-#define __JUMP_H__
+#ifndef MU_ENGRAVING_JUMP_H
+#define MU_ENGRAVING_JUMP_H
 
 #include "textbase.h"
 
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 //---------------------------------------------------------
@@ -55,20 +55,18 @@ public:
     Jump* clone() const override { return new Jump(*this); }
 
     int subtype() const override { return int(jumpType()); }
+    TranslatableString subtypeUserName() const override;
 
     Measure* measure() const { return toMeasure(explicitParent()); }
 
-    String jumpTo() const { return _jumpTo; }
-    String playUntil() const { return _playUntil; }
-    String continueAt() const { return _continueAt; }
-    void setJumpTo(const String& s) { _jumpTo = s; }
-    void setPlayUntil(const String& s) { _playUntil = s; }
-    void setContinueAt(const String& s) { _continueAt = s; }
-    void undoSetJumpTo(const String& s);
-    void undoSetPlayUntil(const String& s);
-    void undoSetContinueAt(const String& s);
-    bool playRepeats() const { return _playRepeats; }
-    void setPlayRepeats(bool val) { _playRepeats = val; }
+    String jumpTo() const { return m_jumpTo; }
+    String playUntil() const { return m_playUntil; }
+    String continueAt() const { return m_continueAt; }
+    void setJumpTo(const String& s) { m_jumpTo = s; }
+    void setPlayUntil(const String& s) { m_playUntil = s; }
+    void setContinueAt(const String& s) { m_continueAt = s; }
+    bool playRepeats() const { return m_playRepeats; }
+    void setPlayRepeats(bool val) { m_playRepeats = val; }
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
@@ -78,13 +76,13 @@ public:
     EngravingItem* prevSegmentElement() override;
     String accessibleInfo() const override;
 
-    void setLayoutToParentWidth(bool v) { m_layoutToParentWidth = v; }
+    bool positionRelativeToNoteheadRest() const override { return false; }
 
 private:
-    String _jumpTo;
-    String _playUntil;
-    String _continueAt;
-    bool _playRepeats;
+    String m_jumpTo;
+    String m_playUntil;
+    String m_continueAt;
+    bool m_playRepeats = false;
 };
 
 struct JumpTypeTableItem {

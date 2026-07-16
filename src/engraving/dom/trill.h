@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRILL_H__
-#define __TRILL_H__
+#ifndef MU_ENGRAVING_TRILL_H
+#define MU_ENGRAVING_TRILL_H
 
 #include "line.h"
 
@@ -46,23 +46,23 @@ public:
 
     TrillSegment* clone() const override { return new TrillSegment(*this); }
 
-    void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all) override;
+    void scanElements(std::function<void(EngravingItem*)> func) override;
 
-    EngravingItem* propertyDelegate(Pid) override;
+    EngravingObject* propertyDelegate(Pid) const override;
 
     void remove(EngravingItem*) override;
-    Shape shape() const override;
 
-    const SymIdList& symbols() const { return _symbols; }
-    void setSymbols(const SymIdList& s) { _symbols = s; }
+    const SymIdList& symbols() const { return m_symbols; }
+    void setSymbols(const SymIdList& s) { m_symbols = s; }
 
     void symbolLine(SymId start, SymId fill);
     void symbolLine(SymId start, SymId fill, SymId end);
 
-private:
-    Sid getPropertyStyle(Pid) const override;
+protected:
+    void rebaseAnchors(EditData& ed, Grip grip) override;
 
-    SymIdList _symbols;
+private:
+    SymIdList m_symbols;
 };
 
 //---------------------------------------------------------
@@ -75,24 +75,9 @@ class Trill final : public SLine
     OBJECT_ALLOCATOR(engraving, Trill)
     DECLARE_CLASSOF(ElementType::TRILL)
 
-    Sid getPropertyStyle(Pid) const override;
-
-private:
-    TrillType _trillType = TrillType::TRILL_LINE;
-    Accidental* _accidental = nullptr;
-    Chord* _cueNoteChord = nullptr;
-    OrnamentStyle _ornamentStyle = OrnamentStyle::DEFAULT;   // for use in ornaments such as trill
-    bool _playArticulation = true;
-    Ornament* _ornament = nullptr;
-
 public:
     Trill(EngravingItem* parent);
     Trill(const Trill& t);
-    ~Trill();
-
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
 
     Trill* clone() const override { return new Trill(*this); }
     EngravingItem* linkedClone() override;
@@ -101,18 +86,22 @@ public:
     void remove(EngravingItem*) override;
 
     void setTrack(track_idx_t n) override;
+    void setScore(Score* s) override;
+    void computeStartElement() override;
+    static PointF trillLinePos(const SLine* line, Grip grip, System** system);
+    PointF linePos(Grip grip, System** system) const override;
 
     void setTrillType(TrillType tt);
-    TrillType trillType() const { return _trillType; }
-    void setOrnamentStyle(OrnamentStyle val) { _ornamentStyle = val; }
-    OrnamentStyle ornamentStyle() const { return _ornamentStyle; }
-    void setPlayArticulation(bool val) { _playArticulation = val; }
-    bool playArticulation() const { return _playArticulation; }
+    TrillType trillType() const { return m_trillType; }
+    int subtype() const override { return int(m_trillType); }
+    TranslatableString subtypeUserName() const override;
+    void setOrnamentStyle(OrnamentStyle val) { m_ornamentStyle = val; }
+    OrnamentStyle ornamentStyle() const { return m_ornamentStyle; }
     String trillTypeUserName() const;
-    Accidental* accidental() const { return _accidental; }
-    void setAccidental(Accidental* a) { _accidental = a; }
-    Chord* cueNoteChord() const { return _cueNoteChord; }
-    void setCueNoteChord(Chord* c) { _cueNoteChord = c; }
+    Accidental* accidental() const { return m_accidental; }
+    void setAccidental(Accidental* a) { m_accidental = a; }
+    Chord* cueNoteChord() const { return m_cueNoteChord; }
+    void setCueNoteChord(Chord* c) { m_cueNoteChord = c; }
 
     Segment* segment() const { return (Segment*)explicitParent(); }
 
@@ -122,8 +111,20 @@ public:
 
     String accessibleInfo() const override;
 
-    Ornament* ornament() const { return _ornament; }
-    void setOrnament(Ornament* o) { _ornament = o; }
+    Ornament* ornament() const { return m_ornament; }
+    void setOrnament(Ornament* o) { m_ornament = o; }
+
+    Sid defaultPosSid() const override;
+
+protected:
+    void doComputeEndElement() override;
+
+private:
+    TrillType m_trillType = TrillType::TRILL_LINE;
+    Accidental* m_accidental = nullptr;
+    Chord* m_cueNoteChord = nullptr;
+    OrnamentStyle m_ornamentStyle = OrnamentStyle::DEFAULT;   // for use in ornaments such as trill
+    Ornament* m_ornament = nullptr;
 };
 } // namespace mu::engraving
 

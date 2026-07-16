@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,6 +26,13 @@
 #include <QFont>
 
 #include "engraving/types/types.h"
+
+#define CAPELLA_TRACE_ENABLED 0
+#if CAPELLA_TRACE_ENABLED
+#define CAPELLA_TRACE LOGD
+#else
+#define CAPELLA_TRACE LOGN
+#endif
 
 class QFile;
 
@@ -538,6 +545,7 @@ public:
     BracketObj(Capella* c)
         : LineObj(CapellaType::BRACKET, c) {}
     void read();
+    void readCapx(engraving::XmlReader& e);
 
     char orientation, number;
 };
@@ -574,7 +582,11 @@ public:
     QColor color;
     TIMESTEP t;
     int horizontalShift;
-    int count;                // tuplet
+    int tupletDenominator;           // tuplet type  --  will be used as a count if no separate count is determined
+    bool tupletStart  = false;       // To correctly read Tuplets with mixed durations
+    bool tupletEnd    = false;       // we infer from the Capella file start/stop from the brackets.
+    int tupletCount  = 0;            // Real count of the tuplet notes ...
+    engraving::Fraction tupletTicks; // ... and the ticks of the tuplet, used to calculate the end of the tuplet
     bool tripartite;
     bool isProlonging;
 
@@ -685,7 +697,7 @@ struct CapBracket {
 class Capella
 {
     static const char* errmsg[];
-    int curPos;
+    qint64 curPos;
 
     QFile* f;
     char* author;
@@ -738,7 +750,7 @@ protected:
 public:
     enum class Error : char {
         CAP_NO_ERROR, BAD_SIG, CAP_EOF, BAD_VOICE_SIG,
-        BAD_STAFF_SIG, BAD_SYSTEM_SIG
+        BAD_STAFF_SIG, BAD_SYSTEM_SIG, BAD_FORMAT,
     };
 
     Capella();

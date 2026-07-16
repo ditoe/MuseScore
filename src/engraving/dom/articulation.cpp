@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,11 +35,13 @@
 #include "staff.h"
 #include "stafftype.h"
 #include "system.h"
+#include "note.h"
 
 #include "log.h"
 
 using namespace mu;
 using namespace mu::engraving;
+using namespace muse::draw;
 
 //---------------------------------------------------------
 //   articulationStyle
@@ -47,7 +49,6 @@ using namespace mu::engraving;
 
 static const ElementStyle articulationStyle {
     { Sid::articulationMinDistance, Pid::MIN_DISTANCE },
-//      { Sid::articulationOffset, Pid::OFFSET },
     { Sid::articulationAnchorDefault, Pid::ARTICULATION_ANCHOR },
 };
 
@@ -63,9 +64,6 @@ Articulation::Articulation(ChordRest* parent, ElementType type)
     m_direction     = DirectionV::AUTO;
     m_ornamentStyle = OrnamentStyle::DEFAULT;
     m_playArticulation = true;
-
-    m_font.setFamily(u"FreeSans", draw::Font::Type::Tablature);
-    m_font.setPointSizeF(7.0);
 
     initElementStyle(&articulationStyle);
     setupShowOnTabStyles();
@@ -93,12 +91,33 @@ void Articulation::setTextType(ArticulationTextType textType)
     m_textType = textType;
 }
 
+void Articulation::setSelected(bool f)
+{
+    if (m_text) {
+        m_text->setSelected(f);
+    }
+
+    EngravingItem::setSelected(f);
+}
+
+void Articulation::setVisible(bool f)
+{
+    if (m_text) {
+        m_text->setVisible(f);
+    }
+
+    EngravingItem::setVisible(f);
+}
+
 //---------------------------------------------------------
 //   subtype
 //---------------------------------------------------------
 
 int Articulation::subtype() const
 {
+    if (m_textType != ArticulationTextType::NO_TEXT) {
+        return int(m_textType);
+    }
     String s = String::fromAscii(SymNames::nameForSymId(m_symId).ascii());
     if (s.endsWith(u"Below")) {
         return int(SymNames::symIdByName(s.left(s.size() - 5) + u"Above"));
@@ -115,8 +134,8 @@ int Articulation::subtype() const
 
 void Articulation::setUp(bool val)
 {
-    Articulation::LayoutData* ldata = mutLayoutData();
-    ldata->setUp(val);
+    Articulation::LayoutData* ldata = mutldata();
+    ldata->up = val;
 
     //! NOTE member of Articulation m_symId - this is `given` data
     //! member of LayoutData m_symId - this is layout data
@@ -141,29 +160,33 @@ void Articulation::setUp(bool val)
         }
     }
 
-    ldata->setSymId(m_symId);
+    ldata->symId = m_symId;
 }
 
 //---------------------------------------------------------
 //   typeUserName
 //---------------------------------------------------------
 
-TranslatableString Articulation::typeUserName() const
+muse::TranslatableString Articulation::typeUserName() const
+{
+    if (m_textType != ArticulationTextType::NO_TEXT) {
+        return TranslatableString("engraving", "Articulation text");
+    }
+
+    return TranslatableString("engraving", "Articulation");
+}
+
+//---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString Articulation::subtypeUserName() const
 {
     if (m_textType != ArticulationTextType::NO_TEXT) {
         return TConv::userName(m_textType);
     }
 
-    return TranslatableString("engraving/sym", SymNames::userNameForSymId(symId()));
-}
-
-String Articulation::translatedTypeUserName() const
-{
-    if (m_textType != ArticulationTextType::NO_TEXT) {
-        return TConv::userName(m_textType).translated();
-    }
-
-    return SymNames::translatedUserNameForSymId(symId());
+    return SymNames::userNameForSymId(symId());
 }
 
 //---------------------------------------------------------
@@ -227,7 +250,7 @@ bool Articulation::isHiddenOnTabStaff() const
         return false;
     }
 
-    return stType->isHiddenElementOnTab(style(), m_showOnTabStyles.first, m_showOnTabStyles.second);
+    return stType->isHiddenElementOnTab(m_showOnTabStyles.first, m_showOnTabStyles.second);
 }
 
 //---------------------------------------------------------
@@ -269,7 +292,7 @@ PropertyValue Articulation::getProperty(Pid propertyId) const
     case Pid::DIRECTION:           return PropertyValue::fromValue<DirectionV>(direction());
     case Pid::ARTICULATION_ANCHOR: return int(anchor());
     case Pid::ORNAMENT_STYLE:      return ornamentStyle();
-    case Pid::PLAY:                return bool(playArticulation());
+    case Pid::PLAY:                return playArticulation();
     default:
         return EngravingItem::getProperty(propertyId);
     }
@@ -494,6 +517,10 @@ Sid Articulation::getPropertyStyle(Pid id) const
         return EngravingItem::getPropertyStyle(id);
 
     case Pid::ARTICULATION_ANCHOR: {
+        if (isHandbellsArticulation()) {
+            return Sid::articulationAnchorDefault;
+        }
+
         switch (anchorGroup(m_symId)) {
         case AnchorGroup::ARTICULATION:
             return Sid::articulationAnchorDefault;
@@ -575,6 +602,15 @@ void Articulation::computeCategories()
                          m_symId == SymId::stringsThumbPosition || m_symId == SymId::luteFingeringRHThumb
                          || m_symId == SymId::luteFingeringRHFirst || m_symId == SymId::luteFingeringRHSecond
                          || m_symId == SymId::luteFingeringRHThird);
+    m_categories.setFlag(ArticulationCategory::LAISSEZ_VIB,
+                         m_symId == SymId::articLaissezVibrerAbove || m_symId == SymId::articLaissezVibrerBelow);
+
+    m_categories.setFlag(ArticulationCategory::HANDBELLS,
+                         (static_cast<int>(m_symId) >= static_cast<int>(SymId::handbellsBelltree)
+                          && static_cast<int>(m_symId) <= static_cast<int>(SymId::handbellsTableSingleBell))
+                         || (static_cast<int>(m_textType) >= static_cast<int>(ArticulationTextType::TD)
+                             && static_cast<int>(m_textType) <= static_cast<int>(ArticulationTextType::VIB))
+                         );
 }
 
 bool Articulation::isBasicArticulation() const
@@ -605,7 +641,7 @@ bool Articulation::isBasicArticulation() const
 
 String Articulation::accessibleInfo() const
 {
-    return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), translatedTypeUserName());
+    return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), translatedSubtypeUserName());
 }
 
 void Articulation::setupShowOnTabStyles()
@@ -643,6 +679,10 @@ void Articulation::setupShowOnTabStyles()
 
 void Articulation::styleChanged()
 {
+    if (m_text) {
+        m_text->styleChanged();
+    }
+
     bool isGolpeThumb = m_symId == SymId::guitarGolpe && m_anchor == ArticulationAnchor::BOTTOM;
     EngravingItem::styleChanged();
     if (isGolpeThumb) {
@@ -658,6 +698,15 @@ bool Articulation::isOnCrossBeamSide() const
     }
     Chord* chord = toChord(cr);
     return chord->beam() && (chord->beam()->cross() || chord->staffMove() != 0) && (up() == chord->up());
+}
+
+staff_idx_t Articulation::vStaffIdx() const
+{
+    ChordRest* cr = chordRest();
+    if (!cr) {
+        return staffIdx();
+    }
+    return cr->vStaffIdx();
 }
 
 struct ArticulationGroup
@@ -894,5 +943,19 @@ std::set<SymId> flipArticulations(const std::set<SymId>& articulationSymbolIds, 
     }
 
     return result;
+}
+
+double Articulation::LayoutData::opticalCenter() const
+{
+    switch (symId.value()) {
+    case SymId::handbellsMartellatoLift:
+        return 0.5 * m_item->symWidth(SymId::handbellsMartellato);
+    case SymId::handbellsMalletLft:
+        return 0.5 * m_item->symWidth(SymId::handbellsMalletBellOnTable);
+    case SymId::handbellsPluckLift:
+        return 0.5 * m_item->symWidth(SymId::articStaccatoAbove);
+    default:
+        return 0.5 * bbox().width();
+    }
 }
 }

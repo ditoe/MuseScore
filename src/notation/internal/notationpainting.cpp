@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,10 +33,11 @@
 using namespace mu;
 using namespace mu::notation;
 using namespace mu::engraving;
-using namespace mu::draw;
+using namespace muse::draw;
 
 NotationPainting::NotationPainting(Notation* notation)
-    : m_notation(notation)
+    : muse::Contextable(notation->iocContext())
+    , m_notation(notation)
 {
 }
 
@@ -58,6 +59,7 @@ void NotationPainting::setViewMode(const ViewMode& viewMode)
     score()->setLayoutMode(viewMode);
     score()->doLayout();
 
+    m_viewModeChanged.notify();
     m_notation->notifyAboutNotationChanged();
 }
 
@@ -68,6 +70,11 @@ ViewMode NotationPainting::viewMode() const
     }
 
     return score()->layoutMode();
+}
+
+muse::async::Notification NotationPainting::viewModeChanged() const
+{
+    return m_viewModeChanged;
 }
 
 int NotationPainting::pageCount() const
@@ -104,7 +111,7 @@ bool NotationPainting::isPaintPageBorder() const
     return false;
 }
 
-void NotationPainting::doPaint(draw::Painter* painter, const Options& opt)
+void NotationPainting::doPaint(Painter* painter, const Options& opt)
 {
     TRACEFUNC;
     if (!score()) {
@@ -113,14 +120,18 @@ void NotationPainting::doPaint(draw::Painter* painter, const Options& opt)
 
     Options myopt = opt;
     bool printPageBackground = myopt.printPageBackground;
-    myopt.onPaintPageSheet = [this, printPageBackground](draw::Painter* painter, const Page* page, const RectF& pageRect) {
+    myopt.onPaintPageSheet = [this, printPageBackground](Painter* painter, const Page* page, const RectF& pageRect) {
         paintPageSheet(painter, page, pageRect, printPageBackground);
     };
 
     scoreRenderer()->paintScore(painter, score(), myopt);
 
     if (!myopt.isPrinting) {
-        static_cast<NotationInteraction*>(m_notation->interaction().get())->paint(painter);
+        rendering::PaintOptions eopt;
+        eopt.isPrinting = myopt.isPrinting;
+        eopt.invertColors = myopt.invertColors;
+
+        static_cast<NotationInteraction*>(m_notation->interaction().get())->paint(painter, eopt);
     }
 }
 
@@ -153,18 +164,19 @@ void NotationPainting::paintPageSheet(Painter* painter, const Page* page, const 
         return;
     }
 
+    const double strokeWidth = 0.07 * DPMM;
     painter->setBrush(BrushStyle::NoBrush);
-    painter->setPen(Pen(configuration()->borderColor(), configuration()->borderWidth()));
+    painter->setPen(Pen(configuration()->borderColor(), strokeWidth));
     painter->drawRect(pageRect);
 
     if (!score()->showPageborders()) {
         return;
     }
 
-    RectF pageContentRect = page->layoutData()->bbox().adjusted(page->lm(), page->tm(), -page->rm(), -page->bm());
+    RectF pageContentRect = page->ldata()->bbox().adjusted(page->lm(), page->tm(), -page->rm(), -page->bm());
 
     painter->setBrush(BrushStyle::NoBrush);
-    painter->setPen(engravingConfiguration()->formattingMarksColor());
+    painter->setPen(Pen(engravingConfiguration()->scoreGreyColor(), strokeWidth));
     painter->drawRect(pageContentRect);
 
     if (!page->isOdd()) {
@@ -172,7 +184,7 @@ void NotationPainting::paintPageSheet(Painter* painter, const Page* page, const 
     }
 }
 
-void NotationPainting::paintView(Painter* painter, const RectF& frameRect, bool isPrinting)
+void NotationPainting::paintView(Painter* painter, const RectF& frameRect, bool isPrinting, bool isAutomation)
 {
     Options opt;
     opt.isSetViewport = false;
@@ -180,10 +192,22 @@ void NotationPainting::paintView(Painter* painter, const RectF& frameRect, bool 
     opt.frameRect = frameRect;
     opt.deviceDpi = uiConfiguration()->logicalDpi();
     opt.isPrinting = isPrinting;
+    opt.invertColors = configuration()->shouldInvertScore();
+
+    if (isAutomation) {
+        opt.overrideItemColor = [](const EngravingItem* item, Color defaultColor) {
+            if (item->isDynamic() || item->isHairpinSegment()) {
+                return defaultColor;
+            }
+            defaultColor.setAlpha(defaultColor.alpha() * 0.4f);
+            return defaultColor;
+        };
+    }
+
     doPaint(painter, opt);
 }
 
-void NotationPainting::paintPdf(draw::Painter* painter, const Options& opt)
+void NotationPainting::paintPdf(Painter* painter, const Options& opt)
 {
     Q_ASSERT(opt.deviceDpi > 0);
     Options myopt = opt;
@@ -193,7 +217,7 @@ void NotationPainting::paintPdf(draw::Painter* painter, const Options& opt)
     doPaint(painter, myopt);
 }
 
-void NotationPainting::paintPrint(draw::Painter* painter, const Options& opt)
+void NotationPainting::paintPrint(Painter* painter, const Options& opt)
 {
     Q_ASSERT(opt.deviceDpi > 0);
     Options myopt = opt;

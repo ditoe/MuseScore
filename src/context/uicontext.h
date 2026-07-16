@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,21 +22,26 @@
 #ifndef MU_CONTEXT_UICONTEXT_H
 #define MU_CONTEXT_UICONTEXT_H
 
-#include "ui/uitypes.h"
+#include "ui/uiaction.h"
 
 namespace mu::context {
 //! NOTE Determines where to be, what the user is doing
 
 // common ui (re declared for convenience)
-static constexpr ui::UiContext UiCtxUnknown = ui::UiCtxUnknown;
-static constexpr ui::UiContext UiCtxAny = ui::UiCtxAny;
+static constexpr muse::ui::UiContext UiCtxUnknown = muse::ui::UiCtxUnknown;
+static constexpr muse::ui::UiContext UiCtxAny = muse::ui::UiCtxAny;
 
-// pages
-static constexpr ui::UiContext UiCtxNotationOpened = "UiCtxNotationOpened";
-static constexpr ui::UiContext UiCtxHomeOpened = "UiCtxHomeOpened";
+static constexpr muse::ui::UiContext UiCtxHomeOpened = muse::ui::UiCtxHomeOpened;
+static constexpr muse::ui::UiContext UiCtxProjectOpened = muse::ui::UiCtxProjectOpened;
 
-// notation detail
-static constexpr ui::UiContext UiCtxNotationFocused = "UiCtxNotationFocused";
+static constexpr muse::ui::UiContext UiCtxProjectFocused = muse::ui::UiCtxProjectFocused;
+static constexpr muse::ui::UiContext UiCtxBrailleFocused = muse::ui::UiCtxBrailleFocused;
+
+static constexpr muse::ui::UiContext UiCtxDialogOpened = muse::ui::UiCtxDialogOpened;
+
+// application-specific contexts
+static constexpr muse::ui::UiContext UiCtxPublishOpened = "UiCtxPublishOpened";
+static constexpr muse::ui::UiContext UiCtxDevToolsOpened = "UiCtxDevToolsOpened";
 }
 
 #endif // MU_CONTEXT_UICONTEXT_H

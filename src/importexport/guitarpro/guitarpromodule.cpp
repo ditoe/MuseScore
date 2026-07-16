@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,6 +29,7 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace mu::iex::guitarpro;
 using namespace mu::project;
 
@@ -41,13 +42,13 @@ void GuitarProModule::registerExports()
 {
     m_configuration = std::make_shared<GuitarProConfiguration>();
 
-    modularity::ioc()->registerExport<IGuitarProConfiguration>(moduleName(), m_configuration);
+    globalIoc()->registerExport<IGuitarProConfiguration>(moduleName(), m_configuration);
 }
 
 void GuitarProModule::resolveImports()
 {
-    auto readers = modularity::ioc()->resolve<INotationReadersRegister>(moduleName());
+    auto readers = globalIoc()->resolve<INotationReadersRegister>(moduleName());
     if (readers) {
-        readers->reg({ "gtp", "gp3", "gp4", "gp5", "gpx", "gp", "ptb" }, std::make_shared<GuitarProReader>());
+        readers->reg({ "gtp", "gp3", "gp4", "gp5", "gpx", "gp", "ptb" }, std::make_shared<GuitarProReader>(muse::modularity::globalCtx()));
     }
 }

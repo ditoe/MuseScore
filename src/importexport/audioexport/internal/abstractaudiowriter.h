@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,40 +24,52 @@
 
 #include "async/asyncable.h"
 #include "modularity/ioc.h"
-#include "audio/iplayback.h"
+#include "audio/main/iplayback.h"
+#include "audio/main/istartaudiocontroller.h"
 #include "iaudioexportconfiguration.h"
 #include "context/iglobalcontext.h"
 #include "playback/iplaybackcontroller.h"
+#include "global/iapplication.h"
 
 #include "project/inotationwriter.h"
 
 namespace mu::iex::audioexport {
-class AbstractAudioWriter : public project::INotationWriter, public async::Asyncable
+class AbstractAudioWriter : public project::INotationWriter, public muse::Contextable, public muse::async::Asyncable
 {
-    INJECT(audio::IPlayback, playback)
-    INJECT(IAudioExportConfiguration, configuration)
-    INJECT(context::IGlobalContext, globalContext)
-    INJECT(playback::IPlaybackController, playbackController)
+public:
+    muse::GlobalInject<IAudioExportConfiguration> configuration;
+    muse::GlobalInject<muse::IApplication> application;
+    muse::GlobalInject<muse::audio::IStartAudioController> startAudioController;
 
 public:
+    AbstractAudioWriter(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
+
     std::vector<UnitType> supportedUnitTypes() const override;
     bool supportsUnitType(UnitType unitType) const override;
 
-    Ret write(notation::INotationPtr notation, QIODevice& destinationDevice, const Options& options = Options()) override;
-    Ret writeList(const notation::INotationPtrList& notations, QIODevice& destinationDevice, const Options& options = Options()) override;
+    muse::Ret write(notation::INotationPtr notation, muse::io::IODevice& dstDevice, const Options& options = Options()) override;
+    muse::Ret writeList(const notation::INotationPtrList& notations, muse::io::IODevice& dstDevice,
+                        const Options& options = Options()) override;
 
-    framework::Progress* progress() override;
+    muse::Progress* progress() override;
     void abort() override;
 
 protected:
-    Ret doWriteAndWait(notation::INotationPtr notation, QIODevice& destinationDevice, const audio::SoundTrackFormat& format);
+    muse::Ret doWriteAndWait(notation::INotationPtr notation, muse::io::IODevice& dstDevice, const muse::audio::SoundTrackFormat& format,
+                             const Options& options = Options());
 
 private:
+    void doWrite(muse::io::IODevice& dstDevice, const muse::audio::SoundTrackFormat& format);
+
     UnitType unitTypeFromOptions(const Options& options) const;
 
-    framework::Progress m_progress;
+    muse::modularity::ContextPtr m_iocContext;
+    muse::Progress m_progress;
     bool m_isCompleted = false;
-    Ret m_writeRet;
+    muse::Ret m_writeRet;
+
+    notation::INotationPtr m_notationForRestore;
 };
 }
 

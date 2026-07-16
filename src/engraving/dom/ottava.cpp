@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,6 +22,9 @@
 
 #include "ottava.h"
 
+#include "types/translatablestring.h"
+
+#include "chordrest.h"
 #include "score.h"
 #include "staff.h"
 #include "system.h"
@@ -52,28 +55,45 @@ static const ElementStyle ottavaStyle {
     { Sid::ottavaFontStyle,                    Pid::BEGIN_FONT_STYLE },
     { Sid::ottavaFontStyle,                    Pid::CONTINUE_FONT_STYLE },
     { Sid::ottavaFontStyle,                    Pid::END_FONT_STYLE },
+    { Sid::ottavaMusicalSymbolsScale,          Pid::BEGIN_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::ottavaMusicalSymbolsScale,          Pid::CONTINUE_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::ottavaMusicalSymbolsScale,          Pid::END_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolSize,             Pid::BEGIN_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolSize,             Pid::CONTINUE_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolSize,             Pid::END_TEXT_MUSIC_SYMBOLS_SIZE },
     { Sid::ottavaTextAlignAbove,               Pid::BEGIN_TEXT_ALIGN },
     { Sid::ottavaTextAlignAbove,               Pid::CONTINUE_TEXT_ALIGN },
     { Sid::ottavaTextAlignAbove,               Pid::END_TEXT_ALIGN },
+    { Sid::ottavaPosition,                     Pid::BEGIN_TEXT_POSITION },
+    { Sid::ottavaPosition,                     Pid::CONTINUE_TEXT_POSITION },
+    { Sid::ottavaPosition,                     Pid::END_TEXT_POSITION },
     { Sid::ottavaLineWidth,                    Pid::LINE_WIDTH },
     { Sid::ottavaLineStyle,                    Pid::LINE_STYLE },
     { Sid::ottavaDashLineLen,                  Pid::DASH_LINE_LEN },
     { Sid::ottavaDashGapLen,                   Pid::DASH_GAP_LEN },
-    { Sid::ottavaPosAbove,                     Pid::OFFSET },
     { Sid::ottavaFontSpatiumDependent,         Pid::TEXT_SIZE_SPATIUM_DEPENDENT },
+    { Sid::ottavaEndLineArrowHeight,           Pid::END_LINE_ARROW_HEIGHT },
+    { Sid::ottavaEndLineArrowWidth,            Pid::END_LINE_ARROW_WIDTH },
+    { Sid::ottavaBeginLineArrowHeight,         Pid::BEGIN_LINE_ARROW_HEIGHT },
+    { Sid::ottavaBeginLineArrowWidth,          Pid::BEGIN_LINE_ARROW_WIDTH },
+    { Sid::ottavaEndFilledArrowHeight,         Pid::END_FILLED_ARROW_HEIGHT },
+    { Sid::ottavaEndFilledArrowWidth,          Pid::END_FILLED_ARROW_WIDTH },
+    { Sid::ottavaBeginFilledArrowHeight,       Pid::BEGIN_FILLED_ARROW_HEIGHT },
+    { Sid::ottavaBeginFilledArrowWidth,        Pid::BEGIN_FILLED_ARROW_WIDTH },
 };
 
 OttavaSegment::OttavaSegment(Ottava* sp, System* parent)
     : TextLineBaseSegment(ElementType::OTTAVA_SEGMENT, sp, parent, ElementFlag::MOVABLE | ElementFlag::ON_STAFF)
 {
-    m_text->setTextStyleType(TextStyleType::OTTAVA);
+    m_text->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
+    m_endText->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
 }
 
 //---------------------------------------------------------
 //   propertyDelegate
 //---------------------------------------------------------
 
-EngravingItem* OttavaSegment::propertyDelegate(Pid pid)
+EngravingObject* OttavaSegment::propertyDelegate(Pid pid) const
 {
     if (pid == Pid::OTTAVA_TYPE || pid == Pid::NUMBERS_ONLY) {
         return spanner();
@@ -87,10 +107,10 @@ EngravingItem* OttavaSegment::propertyDelegate(Pid pid)
 
 void Ottava::setOttavaType(OttavaType val)
 {
-    if (_ottavaType == val) {
+    if (m_ottavaType == val) {
         return;
     }
-    _ottavaType = val;
+    m_ottavaType = val;
     styleChanged();
 }
 
@@ -100,7 +120,7 @@ void Ottava::setOttavaType(OttavaType val)
 
 void Ottava::setNumbersOnly(bool val)
 {
-    _numbersOnly = val;
+    m_numbersOnly = val;
 }
 
 //---------------------------------------------------------
@@ -132,20 +152,6 @@ void Ottava::undoChangeProperty(Pid id, const PropertyValue& v, PropertyFlags ps
         styleChanged();       // these properties may change style settings
     } else {
         TextLineBase::undoChangeProperty(id, v, ps);
-    }
-}
-
-//---------------------------------------------------------
-//   getPropertyStyle
-//---------------------------------------------------------
-
-Sid OttavaSegment::getPropertyStyle(Pid pid) const
-{
-    switch (pid) {
-    case Pid::OFFSET:
-        return spanner()->placeAbove() ? Sid::ottavaPosAbove : Sid::ottavaPosBelow;
-    default:
-        return TextLineBaseSegment::getPropertyStyle(pid);
     }
 }
 
@@ -193,10 +199,8 @@ Sid Ottava::getPropertyStyle(Pid pid) const
         Sid::ottava22MBContinueText,
     };
 
-    size_t idx = size_t(_ottavaType) * 3 + (_numbersOnly ? 0 : ss.size() / 2);
+    size_t idx = size_t(m_ottavaType) * 3 + (m_numbersOnly ? 0 : ss.size() / 2);
     switch (pid) {
-    case Pid::OFFSET:
-        return placeAbove() ? Sid::ottavaPosAbove : Sid::ottavaPosBelow;
     case Pid::PLACEMENT:
         return ss[idx];
     case Pid::BEGIN_TEXT:
@@ -205,7 +209,9 @@ Sid Ottava::getPropertyStyle(Pid pid) const
         return ss[idx + 2];               // CONTINUE_TEXT
     case Pid::END_HOOK_HEIGHT:
         if (isStyled(Pid::PLACEMENT)) {
-            return style().styleI(ss[idx]) == int(PlacementV::ABOVE) ? Sid::ottavaHookAbove : Sid::ottavaHookBelow;
+            return style().styleV(ss[idx]).value<PlacementV>() == PlacementV::ABOVE
+                   ? Sid::ottavaHookAbove
+                   : Sid::ottavaHookBelow;
         } else {
             return placeAbove() ? Sid::ottavaHookAbove : Sid::ottavaHookBelow;
         }
@@ -225,13 +231,13 @@ Sid Ottava::getPropertyStyle(Pid pid) const
 Ottava::Ottava(EngravingItem* parent)
     : TextLineBase(ElementType::OTTAVA, parent, ElementFlag::ON_STAFF | ElementFlag::MOVABLE)
 {
-    _ottavaType  = OttavaType::OTTAVA_8VA;
-    _numbersOnly = false;
+    m_ottavaType  = OttavaType::OTTAVA_8VA;
+    m_numbersOnly = false;
     setBeginTextPlace(TextPlace::LEFT);
     setContinueTextPlace(TextPlace::LEFT);
     setEndHookType(HookType::HOOK_90);
     setLineVisible(true);
-    setBeginHookHeight(Spatium(.0));
+    setBeginHookHeight(0_sp);
     setEndText(u"");
 
     initElementStyle(&ottavaStyle);
@@ -240,8 +246,8 @@ Ottava::Ottava(EngravingItem* parent)
 Ottava::Ottava(const Ottava& o)
     : TextLineBase(o)
 {
-    setOttavaType(o._ottavaType);
-    _numbersOnly = o._numbersOnly;
+    setOttavaType(o.m_ottavaType);
+    m_numbersOnly = o.m_numbersOnly;
 }
 
 //---------------------------------------------------------
@@ -250,7 +256,7 @@ Ottava::Ottava(const Ottava& o)
 
 int Ottava::pitchShift() const
 {
-    return ottavaDefault[int(_ottavaType)].shift;
+    return ottavaDefault[int(m_ottavaType)].shift;
 }
 
 //---------------------------------------------------------
@@ -258,7 +264,6 @@ int Ottava::pitchShift() const
 //---------------------------------------------------------
 
 static const ElementStyle ottavaSegmentStyle {
-    { Sid::ottavaPosAbove, Pid::OFFSET },
     { Sid::ottavaMinDistance, Pid::MIN_DISTANCE },
 };
 
@@ -281,7 +286,7 @@ PropertyValue Ottava::getProperty(Pid propertyId) const
         return int(ottavaType());
 
     case Pid::NUMBERS_ONLY:
-        return _numbersOnly;
+        return m_numbersOnly;
 
     case Pid::END_TEXT_PLACE:                         // HACK
         return TextPlace::LEFT;
@@ -299,12 +304,17 @@ PropertyValue Ottava::getProperty(Pid propertyId) const
 bool Ottava::setProperty(Pid propertyId, const PropertyValue& val)
 {
     switch (propertyId) {
+    case Pid::PLAY:
+        setPlaySpanner(val.toBool());
+        staff()->updateOttava();
+        break;
+
     case Pid::OTTAVA_TYPE:
         setOttavaType(OttavaType(val.toInt()));
         break;
 
     case Pid::NUMBERS_ONLY:
-        _numbersOnly = val.toBool();
+        m_numbersOnly = val.toBool();
         break;
 
     case Pid::SPANNER_TICKS:
@@ -351,11 +361,13 @@ PropertyValue Ottava::propertyDefault(Pid pid) const
     case Pid::BEGIN_HOOK_TYPE:
         return HookType::NONE;
     case Pid::BEGIN_HOOK_HEIGHT:
-        return Spatium(.0);
+        return 0_sp;
     case Pid::END_TEXT:
-        return String(u"");
+        return String();
     case Pid::PLACEMENT:
         return styleValue(Pid::PLACEMENT, getPropertyStyle(Pid::PLACEMENT));
+    case Pid::TEXT_STYLE:
+        return TextStyleType::OTTAVA;
 
     default:
         return TextLineBase::propertyDefault(pid);
@@ -372,11 +384,72 @@ String Ottava::accessibleInfo() const
 }
 
 //---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString Ottava::subtypeUserName() const
+{
+    return ottavaDefault[int(ottavaType())].userName;
+}
+
+void OttavaSegment::rebaseOffsetsOnAnchorChanged(Grip grip, const PointF& oldPos, System* sys)
+{
+    if (grip == Grip::MIDDLE || grip == Grip::END) {
+        ottava()->computeEndElement();
+    }
+    LineSegment::rebaseOffsetsOnAnchorChanged(grip, oldPos, sys);
+}
+
+//---------------------------------------------------------
 //   ottavaTypeName
 //---------------------------------------------------------
 
 const char* Ottava::ottavaTypeName(OttavaType type)
 {
     return ottavaDefault[int(type)].name;
+}
+
+PointF Ottava::linePos(Grip grip, System** system) const
+{
+    if (grip == Grip::START) {
+        return TextLineBase::linePos(grip, system);
+    }
+
+    bool extendToEndOfDuration = false; // TODO: style
+    if (extendToEndOfDuration) {
+        return SLine::linePos(grip, system);
+    }
+
+    ChordRest* endCr = endElement() && endElement()->isChordRest() ? toChordRest(endElement()) : nullptr;
+    if (!endCr) {
+        return PointF();
+    }
+
+    Segment* seg = endCr->segment();
+
+    *system = seg->measure()->system();
+
+    // End 1sp after the right edge of the end chord, but don't overlap followig segments
+    Shape staffShape = seg->staffShape(endCr->vStaffIdx());
+    staffShape.remove_if([](ShapeElement& el) { return el.height() == 0; });
+    double x = staffShape.right() + seg->x() + seg->measure()->x() + spatium();
+    Segment* followingCRseg = score()->tick2segment(endCr->endTick(), true, SegmentType::ChordRest);
+    if (followingCRseg && followingCRseg->system() == seg->system()) {
+        x = std::min(x, followingCRseg->x() + followingCRseg->measure()->x());
+    }
+
+    x -= 0.5 * absoluteFromSpatium(lineWidth());
+
+    return PointF(x, 0.0);
+}
+
+void Ottava::doComputeEndElement()
+{
+    setEndElement(score()->findChordRestEndingBeforeTickInStaff(tick2(), track2staff(track())));
+}
+
+Sid Ottava::defaultPosSid() const
+{
+    return placeAbove() ? Sid::ottavaPosAbove : Sid::ottavaPosBelow;
 }
 }

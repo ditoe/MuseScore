@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,21 +22,21 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/chordrest.h"
-#include "dom/instrchange.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/part.h"
-#include "dom/segment.h"
-#include "dom/staff.h"
-#include "dom/undo.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/instrchange.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/segment.h"
+#include "engraving/dom/staff.h"
+#include "engraving/editing/editinstrumentchange.h"
+#include "engraving/editing/editpart.h"
 
 #include "engraving/compat/midi/midipatch.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String INSTRUMENTCHANGE_DATA_DIR("instrumentchange_data/");
@@ -74,7 +74,7 @@ TEST_F(Engraving_InstrumentChangeTests, testAdd)
     ic->setParent(s);
     ic->setTrack(0);
     ic->setXmlText("Instrument");
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Instrument change tests"));
     score->undoAddElement(ic);
     score->endCmd();
     test_post(score, u"add");
@@ -99,7 +99,7 @@ TEST_F(Engraving_InstrumentChangeTests, testChange)
     InstrumentChange* ic = toInstrumentChange(s->annotations()[0]);
     Instrument* ni       = score->staff(1)->part()->instrument();
     ic->setInstrument(new Instrument(*ni));
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Instrument change tests"));
     ic->setXmlText("Instrument Oboe");
     score->undo(new ChangeInstrument(ic, ic->instrument()));
     score->endCmd();
@@ -115,13 +115,13 @@ TEST_F(Engraving_InstrumentChangeTests, testMixer)
     InstrumentChange* ic = static_cast<InstrumentChange*>(s->annotations()[0]);
     int idx = score->staff(0)->channel(s->tick(), 0);
     InstrChannel* c = score->staff(0)->part()->instrument(s->tick())->channel(idx);
-    MidiPatch* mp = new MidiPatch;
-    mp->bank = 0;
-    mp->drum = false;
-    mp->name = "Viola";
-    mp->prog = 41;
-    mp->synti = "Fluid";
-    score->startCmd();
+    MidiPatch mp;
+    mp.bank = 0;
+    mp.drum = false;
+    mp.name = "Viola";
+    mp.prog = 41;
+    mp.synti = "Fluid";
+    score->startCmd(TranslatableString::untranslatable("Instrument change tests"));
     ic->setXmlText("Mixer Viola");
     score->undo(new ChangePatch(score, c, mp));
     score->endCmd();

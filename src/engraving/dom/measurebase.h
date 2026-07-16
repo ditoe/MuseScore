@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __MEASUREBASE_H__
-#define __MEASUREBASE_H__
+#ifndef MU_ENGRAVING_MEASUREBASE_H
+#define MU_ENGRAVING_MEASUREBASE_H
 
 /**
  \file
@@ -35,6 +35,7 @@ class LayoutBreak;
 class Measure;
 class Score;
 class System;
+class RangeLock;
 
 //---------------------------------------------------------
 //   Repeat
@@ -79,12 +80,14 @@ public:
     ~MeasureBase();
 
     System* system() const { return toSystem(explicitParent()); }
+    System* prevNonVBoxSystem() const;
+    System* nextNonVBoxSystem() const;
+    Page* page() const;
+    Page* prevPage() const;
+    Page* nextPage() const;
     void setParent(System* s) { EngravingItem::setParent((EngravingObject*)(s)); }
 
-    // Score Tree functions
-    EngravingObject* scanParent() const override;
-    EngravingObjectList scanChildren() const override;
-    virtual void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
+    virtual void scanElements(std::function<void(EngravingItem*)> func) override;
 
     virtual void setScore(Score* s) override;
 
@@ -96,6 +99,8 @@ public:
     void setPrev(MeasureBase* e) { m_prev = e; }
     MeasureBase* top() const;
 
+    MeasureBase* getInScore(Score* score, bool useNextMeasureFallback = false) const;
+
     Measure* nextMeasure() const;
     Measure* prevMeasure() const;
     Measure* nextMeasureMM() const;
@@ -104,7 +109,7 @@ public:
     ElementList& el() { return m_el; }
     const ElementList& el() const { return m_el; }
 
-    const MeasureBase* findPotentialSectionBreak() const;
+    const MeasureBase* mbWithPrecedingSectionBreak() const;
     LayoutBreak* sectionBreakElement() const;
 
     void undoSetBreak(bool v, LayoutBreakType type);
@@ -132,29 +137,8 @@ public:
 
     double pause() const;
 
-    PropertyValue getProperty(Pid) const override;
-    bool setProperty(Pid, const PropertyValue&) override;
-    PropertyValue propertyDefault(Pid) const override;
-
     void clearElements();
     ElementList takeElements();
-
-    int no() const { return m_no; }
-    void setNo(int n) { m_no = n; }
-    int noOffset() const { return m_noOffset; }
-    void setNoOffset(int n) { m_noOffset = n; }
-
-    bool repeatEnd() const { return flag(ElementFlag::REPEAT_END); }
-    void setRepeatEnd(bool v) { setFlag(ElementFlag::REPEAT_END, v); }
-
-    bool repeatStart() const { return flag(ElementFlag::REPEAT_START); }
-    void setRepeatStart(bool v) { setFlag(ElementFlag::REPEAT_START, v); }
-
-    bool repeatJump() const { return flag(ElementFlag::REPEAT_JUMP); }
-    void setRepeatJump(bool v) { setFlag(ElementFlag::REPEAT_JUMP, v); }
-
-    bool irregular() const { return flag(ElementFlag::IRREGULAR); }
-    void setIrregular(bool v) { setFlag(ElementFlag::IRREGULAR, v); }
 
     bool lineBreak() const { return flag(ElementFlag::LINE_BREAK); }
     void setLineBreak(bool v) { setFlag(ElementFlag::LINE_BREAK, v); }
@@ -168,34 +152,38 @@ public:
     bool noBreak() const { return flag(ElementFlag::NO_BREAK); }
     void setNoBreak(bool v) { setFlag(ElementFlag::NO_BREAK, v); }
 
-    bool hasCourtesyKeySig() const { return flag(ElementFlag::KEYSIG); }
-    void setHasCourtesyKeySig(int v) { setFlag(ElementFlag::KEYSIG, v); }
-
     virtual void computeMinWidth() { }
 
     int index() const;
     int measureIndex() const;
 
-    void setOldWidth(double n) { m_oldWidth = n; }
-    double oldWidth() const { return m_oldWidth; }
+    bool isBefore(const EngravingItem* other) const override;
+    bool isBefore(const MeasureBase* other) const;
+    bool isBeforeOrEqual(const MeasureBase* other) const { return other == this || isBefore(other); }
+    bool isAfter(const MeasureBase* other) const { return !isBeforeOrEqual(other); }
+    bool isAfterOrEqual(const MeasureBase* other) const { return !isBefore(other); }
+
+    const RangeLock* systemLock() const;
+    bool isStartOfSystemLock() const;
+    bool isEndOfSystemLock() const;
+
+    const RangeLock* pageLock() const;
+    bool isStartOfPageLock() const;
+    bool isEndOfPageLock() const;
 
 protected:
-
     MeasureBase(const ElementType& type, System* system = 0);
     MeasureBase(const MeasureBase&);
 
     Fraction m_len  { Fraction(0, 1) };    // actual length of measure
 
+    ElementList m_el;                     // Measure(/tick) relative -elements: with defined start time
+                                          // but outside the staff
 private:
     MeasureBase* m_next = nullptr;
     MeasureBase* m_prev = nullptr;
 
-    ElementList m_el;                     // Measure(/tick) relative -elements: with defined start time
-                                          // but outside the staff
-    Fraction m_tick         { Fraction(0, 1) };
-    int m_no = 0;                         // Measure number, counting from zero
-    int m_noOffset = 0;                   // Offset to measure number
-    double m_oldWidth = 0.0;              // Used to restore layout during recalculations in Score::collectSystem()
+    Fraction m_tick = Fraction(0, 1);
 };
 
 //---------------------------------------------------------
@@ -208,7 +196,7 @@ public:
     MeasureBaseList();
     MeasureBase* first() const { return m_first; }
     MeasureBase* last()  const { return m_last; }
-    void clear() { m_first = m_last = 0; m_size = 0; }
+    void clear();
     void add(MeasureBase*);
     void remove(MeasureBase*);
     void insert(MeasureBase*, MeasureBase*);
@@ -217,13 +205,26 @@ public:
     int size() const { return m_size; }
     bool empty() const { return m_size == 0; }
 
+    void append(MeasureBase*);
+
+    void updateTickIndex();
+
+    Measure* measureByTick(int tick) const;
+    MeasureBase* firstMeasureBaseAtTick(int tick) const;
+    std::vector<MeasureBase*> measureBasesAtTick(int tick) const;
+
 private:
-    void push_back(MeasureBase* e);
-    void push_front(MeasureBase* e);
+    void push_back(MeasureBase* m);
+    void push_front(MeasureBase* m);
 
     int m_size = 0;
     MeasureBase* m_first = nullptr;
     MeasureBase* m_last = nullptr;
+
+    // At a tick there can be any number of MeasureBases
+    // There can only be one Measure
+    // There can be any number of Boxes
+    std::multimap<int, MeasureBase*> m_tickIndex;
 };
 } // namespace mu::engraving
 #endif

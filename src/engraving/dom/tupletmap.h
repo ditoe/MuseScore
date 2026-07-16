@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,10 +20,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TUPLETMAP_H__
-#define __TUPLETMAP_H__
+#pragma once
 
-#include <list>
+#include <vector>
 
 namespace mu::engraving {
 class Tuplet;
@@ -45,12 +44,12 @@ struct Tuplet2 {
 
 class TupletMap
 {
-    std::list<Tuplet2> map;
-
 public:
     TupletMap() {}
     Tuplet* findNew(Tuplet* o);
-    void add(Tuplet* _o, Tuplet* _n) { map.push_back(Tuplet2(_o, _n)); }
+    void add(Tuplet* _o, Tuplet* _n) { m_map.emplace_back(_o, _n); }
+
+private:
+    std::vector<Tuplet2> m_map;
 };
-} // namespace mu::engraving
-#endif
+}

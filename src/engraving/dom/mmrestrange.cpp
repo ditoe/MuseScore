@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -39,7 +39,9 @@ namespace mu::engraving {
 static const ElementStyle mmRestRangeStyle {
     { Sid::mmRestRangeBracketType, Pid::MMREST_RANGE_BRACKET_TYPE },
     { Sid::mmRestRangeVPlacement,  Pid::PLACEMENT },
-    { Sid::mmRestRangeHPlacement,  Pid::HPLACEMENT }
+    { Sid::mmRestRangeHPlacement,  Pid::HPLACEMENT },
+    { Sid::mmRestRangeMinDistance, Pid::MIN_DISTANCE },
+    { Sid::mmRestRangeTextStyle, Pid::TEXT_STYLE }
 };
 
 MMRestRange::MMRestRange(Measure* parent)
@@ -74,25 +76,11 @@ bool MMRestRange::setProperty(Pid id, const PropertyValue& val)
     switch (id) {
     case Pid::MMREST_RANGE_BRACKET_TYPE:
         setBracketType(MMRestRangeBracketType(val.toInt()));
-        mutLayoutData()->layoutInvalid = true;
+        mutldata()->layoutInvalid = true;
         triggerLayout();
         return true;
     default:
         return MeasureNumberBase::setProperty(id, val);
-    }
-}
-
-PropertyValue MMRestRange::propertyDefault(Pid id) const
-{
-    switch (id) {
-    case Pid::TEXT_STYLE:
-        return TextStyleType::MMREST_RANGE;
-    case Pid::PLACEMENT:
-        return style().styleV(Sid::mmRestRangeVPlacement);
-    case Pid::HPLACEMENT:
-        return style().styleV(Sid::mmRestRangeHPlacement);
-    default:
-        return MeasureNumberBase::propertyDefault(id);
     }
 }
 

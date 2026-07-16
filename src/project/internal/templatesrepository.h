@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,16 +33,21 @@
 namespace mu::project {
 class TemplatesRepository : public ITemplatesRepository
 {
-    INJECT(IProjectConfiguration, configuration)
-    INJECT(IMscMetaReader, mscReader)
-    INJECT(io::IFileSystem, fileSystem)
+public:
+    muse::GlobalInject<muse::io::IFileSystem> fileSystem;
+    muse::GlobalInject<IProjectConfiguration> configuration;
+    muse::GlobalInject<IMscMetaReader> mscReader;
 
 public:
-    RetVal<Templates> templates() const override;
+    TemplatesRepository() = default;
+
+    muse::RetVal<Templates> templates() const override;
 
 private:
-    Templates readTemplates(const io::path_t& dirPath) const;
-    Templates readTemplates(const io::paths_t& files, const QString& category, const io::path_t& dirPath = io::path_t()) const;
+    Templates readTemplates(const muse::io::path_t& dirPath) const;
+
+    Templates readTemplates(const muse::io::paths_t& files, const QString& category, bool isCustom,
+                            const muse::io::path_t& dirPath = muse::io::path_t()) const;
 };
 }
 

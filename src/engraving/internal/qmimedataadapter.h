@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_QMIMEDATAADAPTER_H
-#define MU_ENGRAVING_QMIMEDATAADAPTER_H
+#pragma once
 
-#include "infrastructure/imimedata.h"
+#include "engraving/infrastructure/imimedata.h"
 
 class QMimeData;
 
@@ -35,14 +34,12 @@ public:
     std::vector<std::string> formats() const override;
 
     bool hasFormat(const std::string& mimeType) const override;
-    ByteArray data(const std::string& mimeType) const override;
+    muse::ByteArray data(const std::string& mimeType) const override;
 
     bool hasImage() const override;
-    std::shared_ptr<draw::Pixmap> imageData() const override;
+    std::shared_ptr<muse::draw::Pixmap> imageData() const override;
 
 private:
     const QMimeData* m_data = nullptr;
 };
 }
-
-#endif // MU_ENGRAVING_QMIMEDATAADAPTER_H

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,8 +22,10 @@
 
 #include "mmrest.h"
 
+#include "../editing/addremoveelement.h"
+#include "part.h"
 #include "score.h"
-#include "undo.h"
+#include "system.h"
 
 #include "log.h"
 
@@ -31,10 +33,6 @@ using namespace mu;
 using namespace mu::engraving;
 
 namespace mu::engraving {
-static const ElementStyle mmRestStyle {
-    { Sid::mmRestNumberPos, Pid::MMREST_NUMBER_POS },
-};
-
 //---------------------------------------------------------
 //    MMRest
 //--------------------------------------------------------
@@ -43,42 +41,56 @@ MMRest::MMRest(Segment* s)
     : Rest(ElementType::MMREST, s)
 {
     m_numberVisible = true;
-    if (score()) {
-        initElementStyle(&mmRestStyle);
-    }
+    setPlacement(PlacementV::ABOVE);
 }
 
 MMRest::MMRest(const MMRest& r, bool link)
     : Rest(r, link)
 {
-    if (link) {
-        score()->undo(new Link(this, const_cast<MMRest*>(&r)));
-        setAutoplace(true);
-    }
     m_numberVisible = r.m_numberVisible;
 }
 
-//---------------------------------------------------------
-//   numberRect
-///   returns the mmrest number's bounding rectangle
-//---------------------------------------------------------
-
-PointF MMRest::numberPosition(const mu::RectF& numberBbox) const
+bool MMRest::shouldShowNumberByDefault() const
 {
-    double x = (layoutData()->restWidth() - numberBbox.width()) * .5;
-    // -pos().y(): relative to topmost staff line
-    // - 0.5 * r.height(): relative to the baseline of the number symbol
-    // (rather than the center)
-    double y = -pos().y() + m_numberPos * spatium() - 0.5 * numberBbox.height();
+    bool shouldShow = isOldStyle() && ldata()->number == 1 ? style().styleB(Sid::singleMeasureMMRestShowNumber) : true;
 
-    return PointF(x, y);
+    const Part* itemPart = part();
+    const System* system = measure()->system();
+    bool isTopStaffOfPartAndCenteringIsActive = itemPart->nstaves() > 1 && staff() == itemPart->staves().front()
+                                                && (system && system->nextVisibleStaff(staffIdx()) != muse::nidx)
+                                                && style().styleB(Sid::mmRestBetweenStaves);
+
+    return shouldShow && !isTopStaffOfPartAndCenteringIsActive;
+}
+
+bool MMRest::showNumber() const
+{
+    return shouldShowNumberByDefault() && m_numberVisible;
+}
+
+bool MMRest::isOldStyle() const
+{
+    int number = ldata()->number;
+    return (style().styleB(Sid::oldStyleMultiMeasureRests) && number <= style().styleI(Sid::mmRestOldStyleMaxMeasures))
+           || (number == 1 && style().styleB(Sid::singleMeasureMMRestUseNormalRest));
 }
 
 RectF MMRest::numberRect() const
 {
-    RectF r = symBbox(layoutData()->numberSym);
-    r.translate(numberPosition(r));
-    return r;
+    return symBbox(ldata()->numberSym);
+}
+
+PointF MMRest::numberPos() const
+{
+    RectF numBBox = numberRect();
+    double x = 0.5 * (ldata()->restWidth - numBBox.width());
+    double y = -pos().y() + yNumberPos() - 0.5 * numBBox.height();
+    return PointF(x, y);
+}
+
+double MMRest::yNumberPos() const
+{
+    return ldata()->yNumberPos + absoluteFromSpatium(m_numberOffset);
 }
 
 //---------------------------------------------------------
@@ -88,8 +100,8 @@ RectF MMRest::numberRect() const
 PropertyValue MMRest::propertyDefault(Pid propertyId) const
 {
     switch (propertyId) {
-    case Pid::MMREST_NUMBER_POS:
-        return style().styleV(Sid::mmRestNumberPos);
+    case Pid::MMREST_NUMBER_OFFSET:
+        return 0.0_sp;
     case Pid::MMREST_NUMBER_VISIBLE:
         return true;
     default:
@@ -104,8 +116,8 @@ PropertyValue MMRest::propertyDefault(Pid propertyId) const
 PropertyValue MMRest::getProperty(Pid propertyId) const
 {
     switch (propertyId) {
-    case Pid::MMREST_NUMBER_POS:
-        return m_numberPos;
+    case Pid::MMREST_NUMBER_OFFSET:
+        return m_numberOffset;
     case Pid::MMREST_NUMBER_VISIBLE:
         return m_numberVisible;
     default:
@@ -120,8 +132,8 @@ PropertyValue MMRest::getProperty(Pid propertyId) const
 bool MMRest::setProperty(Pid propertyId, const PropertyValue& v)
 {
     switch (propertyId) {
-    case Pid::MMREST_NUMBER_POS:
-        m_numberPos = v.toDouble();
+    case Pid::MMREST_NUMBER_OFFSET:
+        m_numberOffset = v.value<Spatium>();
         triggerLayout();
         break;
     case Pid::MMREST_NUMBER_VISIBLE:
@@ -132,32 +144,5 @@ bool MMRest::setProperty(Pid propertyId, const PropertyValue& v)
         return Rest::setProperty(propertyId, v);
     }
     return true;
-}
-
-//---------------------------------------------------------
-//   shape
-//---------------------------------------------------------
-
-Shape MMRest::shape() const
-{
-    Shape shape;
-    double vStrokeHeight = style().styleMM(Sid::mmRestHBarVStrokeHeight);
-    shape.add(RectF(0.0, -(vStrokeHeight * .5), layoutData()->restWidth(), vStrokeHeight));
-    if (m_numberVisible) {
-        shape.add(numberRect());
-    }
-    return shape;
-}
-
-//---------------------------------------------------------
-//   getPropertyStyle
-//---------------------------------------------------------
-
-Sid MMRest::getPropertyStyle(Pid propertyId) const
-{
-    if (propertyId == Pid::MMREST_NUMBER_POS) {
-        return Sid::mmRestNumberPos;
-    }
-    return Rest::getPropertyStyle(propertyId);
 }
 }

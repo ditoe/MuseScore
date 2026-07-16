@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,20 +19,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
-import MuseScore.InstrumentsScene 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
+import MuseScore.InstrumentsScene
 
 Item {
     id: root
 
     property string preferredScoreCreationMode: ""
 
+    readonly property Item currentPage: pageLoader.item as Item
     property string description: Boolean(currentPage) ? currentPage.description : ""
 
     property NavigationSection navigationSection: null
@@ -43,15 +45,13 @@ Item {
         }
 
         if (bar.currentIndex === 0) {
-            return currentPage.hasSelectedInstruments
+            return (currentPage as ChooseInstrumentsPage).hasSelectedInstruments
         } else if (bar.currentIndex === 1) {
-            return currentPage.hasSelectedTemplate
+            return (currentPage as CreateFromTemplatePage).hasSelectedTemplate
         }
 
         return false
     }
-
-    readonly property var currentPage: pageLoader.item
 
     signal done
 
@@ -60,11 +60,11 @@ Item {
 
         switch(bar.currentIndex) {
         case 0:
-            result["scoreOrder"] = currentPage.currentOrder()
-            result["instruments"] = currentPage.instruments()
+            result["scoreOrder"] = (currentPage as ChooseInstrumentsPage).currentOrder()
+            result["instruments"] = (currentPage as ChooseInstrumentsPage).instruments()
             break
         case 1:
-            result["templatePath"] = currentPage.selectedTemplatePath
+            result["templatePath"] = (currentPage as CreateFromTemplatePage).selectedTemplatePath
             break
         }
 
@@ -72,7 +72,17 @@ Item {
     }
 
     function focusOnSelected() {
-        pageLoader.item.navigation.requestActive()
+        if (pageLoader.item) {
+            pageLoader.item.navigation.requestActive()
+        }
+    }
+
+    Component.onCompleted: {
+        theInstrumentsOnScoreModel.load()
+    }
+
+    InstrumentsOnScoreListModel {
+        id: theInstrumentsOnScoreModel
     }
 
     StyledTabBar {
@@ -168,6 +178,7 @@ Item {
 
         ChooseInstrumentsPage {
             navigationSection: root.navigationSection
+            instrumentsOnScoreModel: theInstrumentsOnScoreModel
         }
     }
 

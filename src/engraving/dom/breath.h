@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __BREATH_H__
-#define __BREATH_H__
+#ifndef MU_ENGRAVING_BREATH_H
+#define MU_ENGRAVING_BREATH_H
 
 #include "engravingitem.h"
 
@@ -33,9 +33,9 @@ class Factory;
 //---------------------------------------------------------
 
 struct BreathType {
-    SymId id;
-    bool isCaesura;
-    double pause;
+    SymId id = SymId::noSym;
+    bool isCaesura = false;
+    double pause = false;
 };
 
 //---------------------------------------------------------
@@ -61,8 +61,6 @@ public:
 
     Segment* segment() const { return (Segment*)explicitParent(); }
 
-    mu::PointF pagePos() const override;
-
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid) const override;
@@ -70,6 +68,9 @@ public:
     EngravingItem* nextSegmentElement() override;
     EngravingItem* prevSegmentElement() override;
     String accessibleInfo() const override;
+
+    int subtype() const override { return int(m_symId); }
+    TranslatableString subtypeUserName() const override;
 
     bool isCaesura() const;
 

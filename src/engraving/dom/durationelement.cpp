@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,7 +26,8 @@
 #include "score.h"
 #include "staff.h"
 #include "tuplet.h"
-#include "undo.h"
+
+#include "editing/transaction/undostack.h"
 
 using namespace mu;
 using namespace mu::engraving;
@@ -46,8 +47,8 @@ DurationElement::DurationElement(const ElementType& type, EngravingItem* parent,
 //   DurationElement
 //---------------------------------------------------------
 
-DurationElement::DurationElement(const DurationElement& e)
-    : EngravingItem(e)
+DurationElement::DurationElement(const DurationElement& e, bool link)
+    : EngravingItem(e, link)
 {
     m_tuplet   = 0;      // e._tuplet;
     m_duration = e.m_duration;
@@ -60,18 +61,6 @@ DurationElement::DurationElement(const DurationElement& e)
 DurationElement::~DurationElement()
 {
     if (m_tuplet) {
-        // Note that this sanity check is different from and unrelated to the next `if` condition.
-        // See tuplet.h for the difference between `_tuplet->contains` (which involves `_tuplet->
-        // _currentElements`) and `tuplet->_allElements`.
-        assert(mu::contains(m_tuplet->m_allElements, this));
-
-        if (m_tuplet->contains(this)) {
-            while (Tuplet* t = topTuplet()) { // delete tuplets from top to bottom
-                delete t;   // Tuplet destructor removes references to the deleted object
-            }
-        }
-        // else, the tuplet is in the UndoStack and will be deleted there
-
         setTuplet(nullptr);
     }
 }
@@ -116,9 +105,15 @@ float DurationElement::timeStretchFactor() const
 //   actualTicks
 //---------------------------------------------------------
 
+Fraction DurationElement::actualTicksAt(const Fraction& tick) const
+{
+    // Use when tick() is unreliable, for example when pasting
+    return globalTicks() / staff()->timeStretch(tick);
+}
+
 Fraction DurationElement::actualTicks() const
 {
-    return globalTicks() / staff()->timeStretch(tick());
+    return actualTicksAt(tick());
 }
 
 //---------------------------------------------------------
@@ -128,7 +123,7 @@ Fraction DurationElement::actualTicks() const
 void DurationElement::readAddTuplet(Tuplet* t)
 {
     setTuplet(t);
-    if (!score()->undoStack()->active()) {     // HACK, also added in Undo::AddElement()
+    if (!score()->undoStack()->hasActiveTransaction()) { // HACK, also added in Undo::AddElement()
         t->add(this);
     }
 }

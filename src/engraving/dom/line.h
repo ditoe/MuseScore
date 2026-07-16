@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __LINE_H__
-#define __LINE_H__
+#pragma once
 
 #include "draw/types/color.h"
 #include "spanner.h"
@@ -44,11 +43,11 @@ class LineSegment : public SpannerSegment
 {
     OBJECT_ALLOCATOR(engraving, LineSegment)
 protected:
-    virtual void editDrag(EditData&) override;
     virtual bool isEditAllowed(EditData&) const override;
     virtual bool edit(EditData&) override;
-    std::vector<mu::LineF> gripAnchorLines(Grip) const override;
-    virtual void startEditDrag(EditData&) override;
+    virtual std::vector<LineF> gripAnchorLines(Grip) const override;
+    virtual void startDragGrip(EditData&) override;
+    virtual void dragGrip(EditData&) override;
     void startDrag(EditData&) override;
 
     LineSegment(const ElementType& type, Spanner* sp, System* parent, ElementFlags f = ElementFlag::NOTHING);
@@ -63,26 +62,35 @@ public:
 
     friend class SLine;
 
-    virtual EngravingItem* propertyDelegate(Pid) override;
+    virtual EngravingObject* propertyDelegate(Pid) const override;
 
     bool needStartEditingAfterSelecting() const override { return true; }
     int gripsCount() const override { return 3; }
     Grip initialEditModeGrip() const override { return Grip::END; }
     Grip defaultGrip() const override { return Grip::MIDDLE; }
-    std::vector<mu::PointF> gripsPositions(const EditData& = EditData()) const override;
+    std::vector<PointF> gripsPositions(const EditData& = EditData()) const override;
 
-    std::vector<mu::LineF> dragAnchorLines() const override;
-    mu::RectF drag(EditData& ed) override;
+    std::vector<LineF> dragAnchorLines() const override;
+    RectF drag(EditData& ed) override;
+
+    Spatium lineWidth() const;
+
+    double absoluteFromSpatium(const Spatium& sp) const override;
+
+protected:
+    virtual void rebaseOffsetsOnAnchorChanged(Grip grip, const PointF& oldPos, System* sys);
+    virtual void rebaseAnchors(EditData&, Grip);
+
 private:
-    mu::PointF leftAnchorPosition(const double& systemPositionY) const;
-    mu::PointF rightAnchorPosition(const double& systemPositionY) const;
+    void undoMoveStartEndAndSnappedItems(EditData& ed, bool moveStart, bool moveEnd, Segment* s1, Segment* s2);
+    PointF leftAnchorPosition(const double& systemPositionY) const;
+    PointF rightAnchorPosition(const double& systemPositionY) const;
 
-    Segment* findSegmentForGrip(Grip grip, mu::PointF pos) const;
-    static mu::PointF deltaRebaseLeft(const Segment* oldSeg, const Segment* newSeg);
-    static mu::PointF deltaRebaseRight(const Segment* oldSeg, const Segment* newSeg, staff_idx_t staffIdx);
+    Segment* findSegmentForGrip(Grip grip, PointF pos) const;
+    static PointF deltaRebaseLeft(const Segment* oldSeg, const Segment* newSeg);
+    static PointF deltaRebaseRight(const Segment* oldSeg, const Segment* newSeg);
     static Fraction lastSegmentEndTick(const Segment* lastSeg, const Spanner* s);
     LineSegment* rebaseAnchor(Grip grip, Segment* newSeg);
-    void rebaseAnchors(EditData&, Grip);
 };
 
 //---------------------------------------------------------
@@ -104,11 +112,11 @@ public:
     bool diagonal() const { return m_diagonal; }
     void setDiagonal(bool v) { m_diagonal = v; }
 
-    Millimetre lineWidth() const { return m_lineWidth; }
-    mu::draw::Color lineColor() const { return m_lineColor; }
+    Spatium lineWidth() const { return m_lineWidth; }
+    Color lineColor() const { return m_lineColor; }
     LineType lineStyle() const { return m_lineStyle; }
-    void setLineWidth(const Millimetre& v) { m_lineWidth = v; }
-    void setLineColor(const mu::draw::Color& v) { m_lineColor = v; }
+    void setLineWidth(const Spatium& v) { m_lineWidth = v; }
+    void setLineColor(const Color& v) { m_lineColor = v; }
     void setLineStyle(LineType v) { m_lineStyle = v; }
 
     double dashLineLen() const { return m_dashLineLen; }
@@ -127,18 +135,23 @@ public:
     bool setProperty(Pid propertyId, const PropertyValue&) override;
     PropertyValue propertyDefault(Pid id) const override;
 
-    virtual mu::PointF linePos(Grip, System** system) const;
+    virtual PointF linePos(Grip grip, System** system) const;
+    virtual bool allowTimeAnchor() const override { return true; }
+
+    void undoMoveStart(Fraction tickDiff);
+    void undoMoveEnd(Fraction tickDiff);
+
+    static Note* guessFinalNote(Note* startNote);
 
 private:
 
     friend class LineSegment;
 
-    Millimetre m_lineWidth;
-    mu::draw::Color m_lineColor { engravingConfiguration()->defaultColor() };
+    Spatium m_lineWidth;
+    Color m_lineColor;
     LineType m_lineStyle = LineType::SOLID;
     double m_dashLineLen = 5.0;
     double m_dashGapLen = 5.0;
     bool m_diagonal = false;
 };
-} // namespace mu::engraving
-#endif
+}

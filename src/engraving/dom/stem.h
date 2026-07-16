@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __STEM_H__
-#define __STEM_H__
+#pragma once
 
 #include "engravingitem.h"
 
 namespace mu::engraving {
 class Chord;
+class Transaction;
 
 class Stem final : public EngravingItem
 {
@@ -40,16 +40,15 @@ public:
 
     Stem* clone() const override { return new Stem(*this); }
 
-    void spatiumChanged(double oldValue, double newValue) override;
     EngravingItem* elementBase() const override;
 
     bool isEditable() const override { return true; }
     void startEdit(EditData&) override;
-    void startEditDrag(EditData&) override;
-    void editDrag(EditData&) override;
+    void startDragGrip(EditData&) override;
+    void dragGrip(EditData&) override;
 
     bool acceptDrop(EditData&) const override;
-    EngravingItem* drop(EditData&) override;
+    EngravingItem* drop(Transaction& tx, EditData&) override;
 
     void reset() override;
     PropertyValue getProperty(Pid propertyId) const override;
@@ -61,18 +60,18 @@ public:
     Chord* chord() const { return toChord(explicitParent()); }
     bool up() const;
 
-    Millimetre baseLength() const { return m_baseLength; }
-    void setBaseLength(Millimetre baseLength);
+    Spatium baseLength() const { return m_baseLength; }
+    void setBaseLength(Spatium baseLength);
 
-    Millimetre userLength() const { return m_userLength; }
-    void setUserLength(Millimetre userLength) { m_userLength = userLength; }
+    Spatium userLength() const { return m_userLength; }
+    void setUserLength(Spatium userLength) { m_userLength = userLength; }
 
-    Millimetre lineWidth() const { return m_lineWidth; }
-    double lineWidthMag() const { return m_lineWidth * mag(); }
-    void setLineWidth(Millimetre lineWidth) { m_lineWidth = lineWidth; }
+    Spatium lineWidth() const { return m_lineWidth; }
+    double lineWidthMag() const;
+    void setLineWidth(Spatium lineWidth) { m_lineWidth = lineWidth; }
 
     PointF flagPosition() const;
-    double length() const { return m_baseLength + m_userLength; }
+    double length() const { return absoluteFromSpatium(m_baseLength + m_userLength); }
 
     bool needStartEditingAfterSelecting() const override { return true; }
     int gripsCount() const override { return 1; }
@@ -82,17 +81,17 @@ public:
 
     struct LayoutData : public EngravingItem::LayoutData {
         LineF line;
+        double beamCorrection = 0.0;
     };
-    DECLARE_LAYOUTDATA_METHODS(Stem);
+    DECLARE_LAYOUTDATA_METHODS(Stem)
 
 private:
     friend class Factory;
     Stem(Chord* parent = 0);
 
-    Millimetre m_baseLength = Millimetre(0.0);
-    Millimetre m_userLength = Millimetre(0.0);
+    Spatium m_baseLength = 0.0_sp;
 
-    Millimetre m_lineWidth = Millimetre(0.0);
+    Spatium m_userLength = 0.0_sp;
+    Spatium m_lineWidth = 0.0_sp;
 };
 }
-#endif

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,7 @@
 #include "translation.h"
 
 using namespace mu::engraving;
-using namespace mu::accessibility;
+using namespace muse::accessibility;
 
 AccessibleRoot::AccessibleRoot(RootItem* e, Role role)
     : AccessibleItem(e, role)
@@ -49,6 +49,10 @@ AccessibleRoot::~AccessibleRoot()
 
 void AccessibleRoot::setFocusedElement(AccessibleItemPtr e, bool voiceStaffInfoChange)
 {
+    if (!m_enabled) {
+        return; // User is outside the score panel (e.g. in the Braille panel).
+    }
+
     AccessibleItemWeakPtr old = m_focusedElement;
     updateStaffInfo(e, old, voiceStaffInfoChange);
 
@@ -72,11 +76,11 @@ void AccessibleRoot::notifyAboutFocusedElementNameChanged()
     m_staffInfo = "";
 
     if (auto focusedElement = m_focusedElement.lock()) {
-        focusedElement->accessiblePropertyChanged().send(accessibility::IAccessible::Property::Name, Val());
+        focusedElement->accessiblePropertyChanged().send(IAccessible::Property::Name, muse::Val());
     }
 }
 
-mu::RectF AccessibleRoot::toScreenRect(const RectF& rect, bool* ok) const
+RectF AccessibleRoot::toScreenRect(const RectF& rect, bool* ok) const
 {
     RectF result;
     if (m_accessibleMapToScreenFunc) {
@@ -102,7 +106,7 @@ IAccessible::Role AccessibleRoot::accessibleRole() const
 
 QString AccessibleRoot::accessibleName() const
 {
-    return qtrc("engraving", "Score") + " " + element()->score()->name();
+    return muse::qtrc("engraving", "Score") + " " + element()->score()->name();
 }
 
 bool AccessibleRoot::enabled() const
@@ -134,11 +138,11 @@ void AccessibleRoot::updateStaffInfo(const AccessibleItemWeakPtr newAccessibleIt
 
     if (newItem && newItem->element()->hasStaff()) {
         staff_idx_t newStaffIdx = newItem->element()->staffIdx();
-        staff_idx_t oldStaffIdx = oldItem ? oldItem->element()->staffIdx() : nidx;
+        staff_idx_t oldStaffIdx = oldItem ? oldItem->element()->staffIdx() : muse::nidx;
 
         if (newStaffIdx != oldStaffIdx) {
             auto element = newItem->element();
-            QString staff = qtrc("engraving", "Staff %1").arg(QString::number(element->staffIdx() + 1));
+            QString staff = muse::qtrc("engraving", "Staff %1").arg(QString::number(element->staffIdx() + 1));
 
             QString staffName = element->staff()->part()->longName(element->tick());
             if (staffName.isEmpty()) {
@@ -151,20 +155,6 @@ void AccessibleRoot::updateStaffInfo(const AccessibleItemWeakPtr newAccessibleIt
                 m_staffInfo = QString("%2 (%3)").arg(staff, staffName);
             }
         }
-    }
-}
-
-QString AccessibleRoot::commandInfo() const
-{
-    return m_commandInfo;
-}
-
-void AccessibleRoot::setCommandInfo(const QString& command)
-{
-    m_commandInfo = command;
-
-    if (!m_commandInfo.isEmpty()) {
-        notifyAboutFocusedElementNameChanged();
     }
 }
 
@@ -208,16 +198,16 @@ QString AccessibleRoot::rangeSelectionInfo()
         Staff* staff1 = score->staff(startStaff);
         Staff* staff2 = score->staff(endStaff);
         if (staff1 && staff2) {
-            staffInstrument1 = qtrc("engraving", "Staff %1 (%2)")
+            staffInstrument1 = muse::qtrc("engraving", "Staff %1 (%2)")
                                .arg(QString::number(startStaff + 1))
                                .arg(staff1 ? staff1->partName().toQString() : "");
-            staffInstrument2 = qtrc("engraving", "Staff %1 (%2)")
+            staffInstrument2 = muse::qtrc("engraving", "Staff %1 (%2)")
                                .arg(QString::number(endStaff + 1))
                                .arg(staff2 ? staff2->partName().toQString() : "");
         }
     }
 
-    return qtrc("engraving", "Range selection starts %1%2 ends %3%4")
+    return muse::qtrc("engraving", "Range selection starts %1%2 ends %3%4")
            .arg(startBarBeat)
            .arg(!staffInstrument1.isEmpty() ? (" " + staffInstrument1) : "")
            .arg(endBarBeat)

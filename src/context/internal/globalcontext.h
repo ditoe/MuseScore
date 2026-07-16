@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,30 +24,39 @@
 
 #include "../iglobalcontext.h"
 
+#include "playbackstate.h"
+
 namespace mu::context {
 class GlobalContext : public IGlobalContext
 {
 public:
 
+    GlobalContext();
+
     void setCurrentProject(const project::INotationProjectPtr& project) override;
     project::INotationProjectPtr currentProject() const override;
-    async::Notification currentProjectChanged() const override;
+    muse::async::Notification currentProjectChanged() const override;
 
     notation::IMasterNotationPtr currentMasterNotation() const override;
-    async::Notification currentMasterNotationChanged() const override;
+    muse::async::Notification currentMasterNotationChanged() const override;
 
     void setCurrentNotation(const notation::INotationPtr& notation) override;
     notation::INotationPtr currentNotation() const override;
-    async::Notification currentNotationChanged() const override;
+    muse::async::Notification currentNotationChanged() const override;
+
+    void setCurrentPlayer(const muse::audio::IPlayerPtr& player) override;
+    IPlaybackStatePtr playbackState() const override;
 
 private:
     void doSetCurrentNotation(const notation::INotationPtr& notation);
 
     project::INotationProjectPtr m_currentProject;
-    async::Notification m_currentProjectChanged;
+    muse::async::Notification m_currentProjectChanged;
 
     notation::INotationPtr m_currentNotation;
-    async::Notification m_currentNotationChanged;
+    muse::async::Notification m_currentNotationChanged;
+
+    std::shared_ptr<PlaybackState> m_playbackState;
 };
 }
 

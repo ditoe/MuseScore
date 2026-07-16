@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,12 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __GROUPS__
-#define __GROUPS__
+#ifndef MU_ENGRAVING_GROUPS_H
+#define MU_ENGRAVING_GROUPS_H
 
+#include <unordered_map>
+
+#include "../types/groupnode.h"
+#include "../types/types.h"
 #include "durationtype.h"
-
-#include "types/groupnode.h"
 
 namespace mu::engraving {
 class ChordRest;
@@ -64,7 +66,9 @@ public:
     void dump(const char*) const;
 
     static const Groups& endings(const Fraction& f);
-    static BeamMode endBeam(const ChordRest* cr, const ChordRest* prev = 0);
+    static BeamMode baseBeamMode(const ChordRest* cr, const ChordRest* prev = 0);
+    static BeamMode actualBeamMode(const ChordRest* cr, const ChordRest* prev);
+    static BeamMode actualBeamMode(const ChordRest* cr, const ChordRest* prev, const std::unordered_map<int, TDuration>* beatSubdivision);
 
 private:
     GroupNodes m_nodes;

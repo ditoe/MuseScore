@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,24 +22,25 @@
 
 #include <gtest/gtest.h>
 
-#include <QApplication>
-#include <QClipboard>
 #include <QMimeData>
 
-#include "internal/qmimedataadapter.h"
+#include "engraving/internal/qmimedataadapter.h"
 
-#include "dom/chord.h"
-#include "dom/chordrest.h"
-#include "dom/durationtype.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/note.h"
-#include "dom/segment.h"
+#include "engraving/dom/chord.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/durationtype.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/segment.h"
+
+#include "engraving/editing/paste.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
+#include "utils/testutils.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String COPYPASTE_DATA_DIR(u"copypaste_data/");
@@ -52,7 +53,6 @@ public:
     void copypastevoice(const char*, int);
     void copypastetuplet(const char*);
     void copypastenote(const String&, Fraction = Fraction(1, 1));
-    void copypastesplit(const String&);
 };
 
 //---------------------------------------------------------
@@ -84,13 +84,13 @@ void Engraving_CopyPasteTests::copypaste(const char* idx)
     QMimeData* mimeData = new QMimeData;
     QByteArray ba = score->selection().mimeData().toQByteArray();
     mimeData->setData(mimeType, ba);
-    QApplication::clipboard()->setMimeData(mimeData);
+
     EXPECT_TRUE(m4->first()->element(0));
     score->select(m4->first()->element(0));
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String(u"copypaste%1.mscx").arg(String::fromUtf8(idx)),
@@ -128,7 +128,7 @@ TEST_F(Engraving_CopyPasteTests, copypaste06)
     copypaste("06");    // tie
 }
 
-TEST_F(Engraving_CopyPasteTests, DISABLED_copypaste07)
+TEST_F(Engraving_CopyPasteTests, copypaste07)
 {
     copypaste("07");    // start ottava
 }
@@ -188,6 +188,11 @@ TEST_F(Engraving_CopyPasteTests, copypaste26)
     copypaste("26");    // Copy chords (#298541)
 }
 
+TEST_F(Engraving_CopyPasteTests, copypaste27)
+{
+    copypaste("27");    // Paste after local time signature (#18940)
+}
+
 //---------------------------------------------------------
 //    copy measure 2 from first staff, paste into staff 2
 //---------------------------------------------------------
@@ -215,14 +220,13 @@ void Engraving_CopyPasteTests::copypastevoice(const char* idx, int voice)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     //paste to second measure
     score->select(m2->first()->element(0));
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String(u"copypaste%1.mscx").arg(String::fromUtf8(idx)),
@@ -252,15 +256,14 @@ TEST_F(Engraving_CopyPasteTests, copypaste2Voice)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     // paste into the second CR of second measure
     Segment* secondCRSeg = m2->first()->next1(SegmentType::ChordRest);
     score->select(secondCRSeg->element(0));
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String(u"copypaste13.mscx"),
@@ -289,19 +292,18 @@ TEST_F(Engraving_CopyPasteTests, copypaste2Voice5)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     score->cmdDeleteSelection();   //cut
 
     //paste to quarter rest
     EngravingItem* dest = m1->first()->next(segTypeCR)->next(segTypeCR)->next(segTypeCR)->element(0);
     EXPECT_TRUE(dest->isRest());
-    EXPECT_EQ(static_cast<ChordRest*>(dest)->durationType(), DurationType::V_QUARTER);
+    EXPECT_EQ(toChordRest(dest)->durationType(), DurationType::V_QUARTER);
     score->select(dest);
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String(u"copypaste17.mscx"),
@@ -330,18 +332,17 @@ TEST_F(Engraving_CopyPasteTests, copypaste2Voice6)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     //paste to 16th rest
     EngravingItem* dest = m1->first(segTypeCR)->next(segTypeCR)->next(segTypeCR)->next(segTypeCR)->next(segTypeCR)->element(0);
 
     EXPECT_TRUE(dest->isRest());
-    EXPECT_EQ(static_cast<ChordRest*>(dest)->durationType(), DurationType::V_16TH);
+    EXPECT_EQ(toChordRest(dest)->durationType(), DurationType::V_16TH);
     score->select(dest);
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste20.mscx"),
@@ -362,23 +363,22 @@ TEST_F(Engraving_CopyPasteTests, copypasteOnlySecondVoice)
 
     score->select(m1, SelectType::RANGE, 0);
 
-    score->selectionFilter().setFiltered(SelectionFilterType::FIRST_VOICE, false);
+    score->selectionFilter().setFiltered(VoicesSelectionFilterTypes::FIRST_VOICE, false);
 
     EXPECT_TRUE(score->selection().canCopy());
     String mimeType = score->selection().mimeType();
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     //paste to second measure
     score->deselectAll();
-    score->selectionFilter().setFiltered(SelectionFilterType::FIRST_VOICE, true);
+    score->selectionFilter().setFiltered(VoicesSelectionFilterTypes::FIRST_VOICE, true);
     score->select(m2, SelectType::RANGE);
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste18.mscx"),
@@ -407,15 +407,14 @@ void Engraving_CopyPasteTests::copypastestaff(const char* idx)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     score->deselectAll();
 
     score->select(m2, SelectType::RANGE, 1);
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste%1.mscx").arg(String::fromUtf8(idx)),
@@ -447,13 +446,12 @@ TEST_F(Engraving_CopyPasteTests, copypastePartial)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     score->select(m1->first(SegmentType::ChordRest)->element(0));
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste_partial_01.mscx"),
@@ -482,13 +480,12 @@ void Engraving_CopyPasteTests::copypastetuplet(const char* idx)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     EngravingItem* dest = m2->first(SegmentType::ChordRest)->element(0);
     score->select(dest);
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste_tuplet_%1.mscx").arg(String::fromUtf8(idx)),
@@ -523,9 +520,9 @@ void Engraving_CopyPasteTests::copypastenote(const String& idx, Fraction scale)
     mimeData.setData(score->selection().mimeType(), score->selection().mimeData().toQByteArray());
     ChordRest* cr = m1->first(SegmentType::ChordRest)->nextChordRest(0);
     score->select(cr->isChord() ? toChord(cr)->upNote() : static_cast<EngravingItem*>(cr));
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(&mimeData);
-    score->cmdPaste(&ma, 0, scale);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0, scale);
     score->endCmd();
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, "copypasteNote" + idx + ".mscx",
                                             COPYPASTE_DATA_DIR + "copypasteNote" + idx + "-ref.mscx"));
@@ -586,6 +583,11 @@ TEST_F(Engraving_CopyPasteTests, copypasteQtrNoteDoubleDuration)
     copypastenote(u"11", Fraction(2, 1));
 }
 
+TEST_F(Engraving_CopyPasteTests, copyPasteNoteDrumStave)
+{
+    copypastenote(u"12");
+}
+
 TEST_F(Engraving_CopyPasteTests, copypasteSplitNoteOverBar)
 {
     // Copy first note m2 to last note m1
@@ -604,9 +606,9 @@ TEST_F(Engraving_CopyPasteTests, copypasteSplitNoteOverBar)
     mimeData.setData(score->selection().mimeType(), score->selection().mimeData().toQByteArray());
     ChordRest* cr = m1->findChordRest(Fraction(7, 8), 0);
     score->select(cr->isChord() ? toChord(cr)->upNote() : static_cast<EngravingItem*>(cr));
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(&mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypasteSplit01.mscx"),
@@ -638,9 +640,9 @@ TEST_F(Engraving_CopyPasteTests, copypasteSplitTiedNoteOverBar)
     ChordRest* cr = m1->findChordRest(Fraction(6, 8), 0);
     EXPECT_TRUE(cr);
     score->select(cr->isChord() ? toChord(cr)->upNote() : static_cast<EngravingItem*>(cr));
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(&mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypasteSplit02.mscx"),
@@ -666,13 +668,40 @@ TEST_F(Engraving_CopyPasteTests, copypasteSplitNoteOverManyBars)
     ChordRest* cr = m2->findChordRest(Fraction(19, 8), 0);
     EXPECT_TRUE(cr);
     score->select(cr->isChord() ? toChord(cr)->upNote() : static_cast<EngravingItem*>(cr));
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(&mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypasteSplit03.mscx"),
                                             COPYPASTE_DATA_DIR + "copypasteSplit03-ref.mscx"));
+}
+
+TEST_F(Engraving_CopyPasteTests, copypasteSplitNoteOverBarDrumStave)
+{
+    // Copy first note m2 to last note m1
+    MasterScore* score = ScoreRW::readScore(COPYPASTE_DATA_DIR + "copypasteSplit04.mscx");
+    EXPECT_TRUE(score);
+
+    Measure* m1 = score->firstMeasure();
+    Measure* m2 = m1->nextMeasure();
+
+    EXPECT_TRUE(m1);
+    EXPECT_TRUE(m2);
+
+    Segment* s = m2->first(SegmentType::ChordRest);
+    score->select(toChord(s->element(0))->notes().at(0));
+    QMimeData mimeData;
+    mimeData.setData(score->selection().mimeType(), score->selection().mimeData().toQByteArray());
+    ChordRest* cr = m1->findChordRest(Fraction(7, 8), 0);
+    score->select(cr->isChord() ? toChord(cr)->upNote() : static_cast<EngravingItem*>(cr));
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
+    QMimeDataAdapter ma(&mimeData);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
+    score->endCmd();
+
+    EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypasteSplit04.mscx"),
+                                            COPYPASTE_DATA_DIR + "copypasteSplit04-ref.mscx"));
 }
 
 //---------------------------------------------------------
@@ -704,14 +733,13 @@ TEST_F(Engraving_CopyPasteTests, DISABLED_copypastetremolo)
     EXPECT_TRUE(!mimeType.isEmpty());
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     //paste to second measure
     score->select(m2->first()->element(0));
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
     QMimeDataAdapter ma(mimeData);
-    score->cmdPaste(&ma, 0);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     // create a range selection on 2nd to 4th beat (voice 0) of first measure
@@ -724,16 +752,177 @@ TEST_F(Engraving_CopyPasteTests, DISABLED_copypastetremolo)
     mimeType = score->selection().mimeType();
     EXPECT_TRUE(!mimeType.isEmpty());
     mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
-    QApplication::clipboard()->setMimeData(mimeData);
 
     //paste to third measure
     score->select(m3->first()->element(0));
 
-    score->startCmd();
-    score->cmdPaste(&ma, 0);
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste_tremolo.mscx"),
                                             COPYPASTE_DATA_DIR + String("copypaste_tremolo-ref.mscx")));
+    delete score;
+}
+
+TEST_F(Engraving_CopyPasteTests, copypasteparts)
+{
+    MasterScore* score = ScoreRW::readScore(COPYPASTE_DATA_DIR + String("copypaste_parts.mscx"));
+    EXPECT_TRUE(score);
+    // create part
+    TestUtils::createPart(score);
+
+    // select measures 1-3
+    Measure* m1 = score->firstMeasure();
+    Measure* m2 = m1->nextMeasure();
+    Measure* m3 = m2->nextMeasure();
+    Measure* m4 = m3->nextMeasure();
+
+    EXPECT_TRUE(m1);
+    EXPECT_TRUE(m2);
+    EXPECT_TRUE(m3);
+    EXPECT_TRUE(m4);
+
+    score->select(m1);
+    score->select(m3, SelectType::RANGE);
+
+    EXPECT_TRUE(score->selection().canCopy());
+
+    // copy
+
+    String mimeType = score->selection().mimeType();
+    EXPECT_TRUE(!mimeType.isEmpty());
+    QMimeData* mimeData = new QMimeData;
+    mimeData->setData(mimeType, score->selection().mimeData().toQByteArray());
+
+    // paste measure 4
+    score->select(m4);
+
+    score->startCmd(TranslatableString::untranslatable("Copy/paste tests"));
+    QMimeDataAdapter ma(mimeData);
+    Paste::paste(score->transactionManager()->currentOrDummyTransaction(), score, &ma, 0);
+    score->endCmd();
+
+    EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste_parts.mscx"),
+                                            COPYPASTE_DATA_DIR + String("copypaste_parts-ref.mscx")));
+}
+
+// Use "repeat list selection" on the first chord in every measure of this score...
+TEST_F(Engraving_CopyPasteTests, repeatListSelection)
+{
+    //! [GIVEN] A score with a variation of ChordRests at the start of each measure...
+    MasterScore* score = ScoreRW::readScore(COPYPASTE_DATA_DIR + String("copypaste_repeatListSelection.mscx"));
+    EXPECT_TRUE(score);
+
+    //! --
+
+    //! 1.0 [GIVEN] A (single note) chord...
+    Measure* m = score->firstMeasure();
+    ChordRest* cr1 = m ? m->firstChordRest(0) : nullptr;
+    EXPECT_TRUE(cr1 && cr1->isChord());
+
+    //! 1.1 [GIVEN] The parenthesized note...
+    std::vector<Note*> notes = toChord(cr1)->notes();
+
+    //! 1.2 [WHEN] The note is selected and repeated...
+    score->deselectAll();
+    score->select({ notes.begin(), notes.end() }, SelectType::ADD); // List selection
+    Paste::repeatListSelection(score->transactionManager()->currentOrDummyTransaction(), score);
+
+    //! --
+
+    //! 2.0 [GIVEN] Chords in two staves...
+    m = m->next() ? toMeasure(m->next()) : nullptr;
+    cr1 = m ? m->firstChordRest(0) : nullptr;
+    ChordRest* cr2 = m ? m->firstChordRest(staff2track(1, 0)) : nullptr; // Staff 2, voice 1
+    EXPECT_TRUE(cr1 && cr1->isChord() && cr2 && cr2->isChord());
+
+    //! 2.1 [GIVEN] All notes from both chords...
+    notes = toChord(cr1)->notes();
+    notes.insert(notes.end(), toChord(cr2)->notes().begin(), toChord(cr2)->notes().end());
+
+    //! 2.2 [WHEN] All notes in both chords are selected and repeated...
+    score->deselectAll();
+    score->select({ notes.begin(), notes.end() }, SelectType::ADD); // List selection
+    Paste::repeatListSelection(score->transactionManager()->currentOrDummyTransaction(), score);
+
+    //! --
+
+    //! 3.0 [GIVEN] Chords in two staves...
+    m = m->next() ? toMeasure(m->next()) : nullptr;
+    cr1 = m ? m->firstChordRest(0) : nullptr;
+    EXPECT_TRUE(cr1 && cr1->isChord());
+
+    //! 3.1 [GIVEN] Some (not all) of the notes from one chord...
+    notes.clear();
+    notes.emplace_back(toChord(cr1)->notes().at(0));
+    notes.emplace_back(toChord(cr1)->notes().at(2));
+
+    //! 3.2 [WHEN] The partial selection is repeated...
+    score->deselectAll();
+    score->select({ notes.begin(), notes.end() }, SelectType::ADD); // List selection
+    Paste::repeatListSelection(score->transactionManager()->currentOrDummyTransaction(), score);
+
+    //! --
+
+    //! 4.0 [GIVEN] A chord with a mixture of parentheses...
+    m = m->next() ? toMeasure(m->next()) : nullptr;
+    cr1 = m ? m->firstChordRest(0) : nullptr;
+    EXPECT_TRUE(cr1 && cr1->isChord());
+
+    //! 4.1 [GIVEN] Some (not all) of the notes the chord...
+    score->deselectAll();
+    notes.emplace_back(toChord(cr1)->notes().at(0));
+    notes.emplace_back(toChord(cr1)->notes().at(1));
+    notes.emplace_back(toChord(cr1)->notes().at(3));
+    notes.emplace_back(toChord(cr1)->notes().at(5));
+
+    //! 4.2 [WHEN] The partial selection is repeated...
+    score->deselectAll();
+    score->select({ notes.begin(), notes.end() }, SelectType::ADD); // List selection
+    Paste::repeatListSelection(score->transactionManager()->currentOrDummyTransaction(), score);
+
+    //! --
+
+    //! 5.0 [GIVEN] Two chords in different voices...
+    m = m->next() ? toMeasure(m->next()) : nullptr;
+    cr1 = m ? m->firstChordRest(0) : nullptr;
+    cr2 = m ? m->firstChordRest(1) : nullptr; // Voice 2
+    EXPECT_TRUE(cr1 && cr1->isChord() && cr2 && cr2->isChord());
+
+    //! 5.1 [GIVEN] All notes from both chords...
+    notes = toChord(cr1)->notes();
+    notes.insert(notes.end(), toChord(cr2)->notes().begin(), toChord(cr2)->notes().end());
+
+    //! 5.2 [WHEN] All notes in both chords are selected and repeated...
+    score->deselectAll();
+    score->select({ notes.begin(), notes.end() }, SelectType::ADD); // List selection
+    Paste::repeatListSelection(score->transactionManager()->currentOrDummyTransaction(), score);
+
+    //! --
+
+    //! 6.0 [GIVEN] A parenthesized note that will require ties when repeating over a barline...
+    m = m->next() ? toMeasure(m->next()) : nullptr;
+
+    // Using the second CR in this measure...
+    Segment* seg = m ? m->first(SegmentType::ChordRest) : nullptr;
+    seg = seg ? seg->next(SegmentType::ChordRest) : nullptr;
+    cr1 = seg ? seg->cr(0) : nullptr;
+    EXPECT_TRUE(cr1 && cr1->isChord());
+
+    //! 6.1 [GIVEN] The parenthesized note...
+    notes = toChord(cr1)->notes();
+
+    //! 6.2 [WHEN] The note is selected and repeated...
+    score->deselectAll();
+    score->select({ notes.begin(), notes.end() }, SelectType::ADD); // List selection
+    Paste::repeatListSelection(score->transactionManager()->currentOrDummyTransaction(), score);
+
+    //! --
+
+    //! [THEN] The result matches our expectations...
+    EXPECT_TRUE(ScoreComp::saveCompareScore(score, String("copypaste_repeatListSelection.mscx"),
+                                            COPYPASTE_DATA_DIR + String("copypaste_repeatListSelection-ref.mscx")));
+
     delete score;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,15 +21,14 @@
  */
 #include "projectmodule.h"
 
-#include <QQmlEngine>
-
 #include "modularity/ioc.h"
 #include "internal/projectcreator.h"
 #include "internal/projectautosaver.h"
 #include "internal/projectactionscontroller.h"
+#include "internal/engravingpluginapihelper.h"
 #include "internal/projectuiactions.h"
 #include "internal/projectconfiguration.h"
-#include "internal/saveprojectscenario.h"
+#include "internal/opensaveprojectscenario.h"
 #include "internal/exportprojectscenario.h"
 #include "internal/mscmetareader.h"
 #include "internal/templatesrepository.h"
@@ -38,21 +37,6 @@
 
 #include "internal/notationreadersregister.h"
 #include "internal/notationwritersregister.h"
-#include "internal/projectrwregister.h"
-
-#include "view/exportdialogmodel.h"
-#include "view/scorespagemodel.h"
-#include "view/recentscoresmodel.h"
-#include "view/cloudscoresmodel.h"
-#include "view/cloudscorestatuswatcher.h"
-#include "view/scorethumbnailloader.h"
-#include "view/pixmapscorethumbnailview.h"
-#include "view/templatesmodel.h"
-#include "view/templatepaintview.h"
-#include "view/newscoremodel.h"
-#include "view/additionalinfomodel.h"
-#include "view/projectpropertiesmodel.h"
-#include "view/audiogenerationsettingsmodel.h"
 
 #ifdef Q_OS_MAC
 #include "internal/platform/macos/macosrecentfilescontroller.h"
@@ -63,26 +47,81 @@
 #endif
 
 #include "ui/iuiactionsregister.h"
-#include "ui/iinteractiveuriregister.h"
+#include "interactive/iinteractiveuriregister.h"
+#include "extensions/iextensionsexecpointsregister.h"
+#include "projectextensionpoints.h"
 
 using namespace mu::project;
-using namespace mu::modularity;
+using namespace muse;
+using namespace muse::modularity;
 
-static void project_init_qrc()
-{
-    Q_INIT_RESOURCE(project);
-}
+static const std::string mname("project");
 
 std::string ProjectModule::moduleName() const
 {
-    return "project";
+    return mname;
 }
 
 void ProjectModule::registerExports()
 {
-    m_configuration = std::make_shared<ProjectConfiguration>();
-    m_actionsController = std::make_shared<ProjectActionsController>();
-    m_projectAutoSaver = std::make_shared<ProjectAutoSaver>();
+    m_configuration = std::make_shared<ProjectConfiguration>(globalCtx());
+
+    globalIoc()->registerExport<IProjectConfiguration>(mname, m_configuration);
+    globalIoc()->registerExport<IProjectCreator>(mname, new ProjectCreator());
+    globalIoc()->registerExport<IMscMetaReader>(mname, new MscMetaReader());
+
+    globalIoc()->registerExport<INotationReadersRegister>(mname, new NotationReadersRegister());
+    globalIoc()->registerExport<INotationWritersRegister>(mname, new NotationWritersRegister());
+}
+
+void ProjectModule::resolveImports()
+{
+    auto ir = globalIoc()->resolve<muse::interactive::IInteractiveUriRegister>(mname);
+    if (ir) {
+        ir->registerQmlUri(Uri("musescore://project/newscore"), "MuseScore.Project", "NewScoreDialog");
+        ir->registerQmlUri(Uri("musescore://project/asksavelocationtype"), "MuseScore.Project", "AskSaveLocationTypeDialog");
+        ir->registerQmlUri(Uri("musescore://project/savetocloud"), "MuseScore.Project", "SaveToCloudDialog");
+        ir->registerQmlUri(Uri("musescore://project/alsoshareaudiocom"), "MuseScore.Project", "AlsoShareAudioComDialog");
+        ir->registerQmlUri(Uri("musescore://project/export"), "MuseScore.Project", "ExportDialog");
+        ir->registerQmlUri(Uri("musescore://project/migration"), "MuseScore.Project", "MigrationDialog");
+        ir->registerQmlUri(Uri("musescore://project/properties"), "MuseScore.Project", "ProjectPropertiesDialog");
+        ir->registerQmlUri(Uri("musescore://project/upload/progress"), "MuseScore.Project", "UploadProgressDialog");
+        ir->registerQmlUri(Uri("musescore://project/upload/success"), "MuseScore.Project", "ProjectUploadedDialog");
+        ir->registerQmlUri(Uri("musescore://project/audiogenerationsettings"), "MuseScore.Project", "AudioGenerationSettingsDialog");
+    }
+
+    auto er = globalIoc()->resolve<muse::extensions::IExtensionsExecPointsRegister>(mname);
+    if (er) {
+        er->reg(mname, { EXEC_ONPOST_PROJECT_CREATED,
+                         TranslatableString::untranslatable("On post project created") });
+        er->reg(mname, { EXEC_ONPOST_PROJECT_OPENED,
+                         TranslatableString::untranslatable("On post project opened") });
+        er->reg(mname, { EXEC_ONPRE_PROJECT_SAVE,
+                         TranslatableString::untranslatable("On pre project save") });
+        er->reg(mname, { EXEC_ONPOST_PROJECT_SAVED,
+                         TranslatableString::untranslatable("On post project saved") });
+    }
+}
+
+void ProjectModule::onInit(const IApplication::RunMode& mode)
+{
+    if (IApplication::RunMode::GuiApp != mode) {
+        return;
+    }
+
+    m_configuration->init();
+}
+
+IContextSetup* ProjectModule::newContext(const muse::modularity::ContextPtr& ctx) const
+{
+    return new ProjectContext(ctx);
+}
+
+void ProjectContext::registerExports()
+{
+    m_actionsController = std::make_shared<ProjectActionsController>(iocContext());
+    m_projectAutoSaver = std::make_shared<ProjectAutoSaver>(iocContext());
+    m_engravingPluginAPIHelper = std::make_shared<EngravingPluginAPIHelper>(iocContext());
 
 #ifdef Q_OS_MAC
     m_recentFilesController = std::make_shared<MacOSRecentFilesController>();
@@ -92,88 +131,31 @@ void ProjectModule::registerExports()
     m_recentFilesController = std::make_shared<RecentFilesController>();
 #endif
 
-    ioc()->registerExport<IProjectConfiguration>(moduleName(), m_configuration);
-    ioc()->registerExport<IProjectCreator>(moduleName(), new ProjectCreator());
-    ioc()->registerExport<IProjectFilesController>(moduleName(), m_actionsController);
-    ioc()->registerExport<ISaveProjectScenario>(moduleName(), new SaveProjectScenario());
-    ioc()->registerExport<IExportProjectScenario>(moduleName(), new ExportProjectScenario());
-    ioc()->registerExport<IRecentFilesController>(moduleName(), m_recentFilesController);
-    ioc()->registerExport<IMscMetaReader>(moduleName(), new MscMetaReader());
-    ioc()->registerExport<ITemplatesRepository>(moduleName(), new TemplatesRepository());
-    ioc()->registerExport<IProjectMigrator>(moduleName(), new ProjectMigrator());
-    ioc()->registerExport<IProjectAutoSaver>(moduleName(), m_projectAutoSaver);
-
-    //! TODO Should be replace INotationReaders/WritersRegister with IProjectRWRegister
-    ioc()->registerExport<INotationReadersRegister>(moduleName(), new NotationReadersRegister());
-    ioc()->registerExport<INotationWritersRegister>(moduleName(), new NotationWritersRegister());
-    ioc()->registerExport<IProjectRWRegister>(moduleName(), new ProjectRWRegister());
+    ioc()->registerExport<IProjectFilesController>(mname, m_actionsController);
+    ioc()->registerExport<mi::IProjectProvider>(mname, m_actionsController);
+    ioc()->registerExport<IOpenSaveProjectScenario>(mname, new OpenSaveProjectScenario(iocContext()));
+    ioc()->registerExport<IExportProjectScenario>(mname, new ExportProjectScenario(iocContext()));
+    ioc()->registerExport<IRecentFilesController>(mname, m_recentFilesController);
+    ioc()->registerExport<ITemplatesRepository>(mname, new TemplatesRepository());
+    ioc()->registerExport<IProjectMigrator>(mname, new ProjectMigrator(iocContext()));
+    ioc()->registerExport<IProjectAutoSaver>(mname, m_projectAutoSaver);
+    ioc()->registerExport<mu::engraving::IEngravingPluginAPIHelper>(mname, m_engravingPluginAPIHelper);
 }
 
-void ProjectModule::resolveImports()
+void ProjectContext::resolveImports()
 {
-    auto ar = ioc()->resolve<ui::IUiActionsRegister>(moduleName());
+    auto ar = ioc()->resolve<muse::ui::IUiActionsRegister>(mname);
     if (ar) {
-        ar->reg(std::make_shared<ProjectUiActions>(m_actionsController));
-    }
-
-    auto ir = ioc()->resolve<ui::IInteractiveUriRegister>(moduleName());
-    if (ir) {
-        ir->registerQmlUri(Uri("musescore://project/newscore"), "MuseScore/Project/NewScoreDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/asksavelocationtype"), "MuseScore/Project/AskSaveLocationTypeDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/savetocloud"), "MuseScore/Project/SaveToCloudDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/shareonaudiocloud"), "MuseScore/Project/ShareOnAudioCloudDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/export"), "MuseScore/Project/ExportDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/migration"), "MuseScore/Project/MigrationDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/properties"), "MuseScore/Project/ProjectPropertiesDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/upload/progress"), "MuseScore/Project/UploadProgressDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/upload/success"), "MuseScore/Project/ProjectUploadedDialog.qml");
-        ir->registerQmlUri(Uri("musescore://project/audiogenerationsettings"), "MuseScore/Project/AudioGenerationSettingsDialog.qml");
+        ar->reg(std::make_shared<ProjectUiActions>(m_actionsController, iocContext()));
     }
 }
 
-void ProjectModule::registerResources()
+void ProjectContext::onInit(const IApplication::RunMode& mode)
 {
-    project_init_qrc();
-}
-
-void ProjectModule::registerUiTypes()
-{
-    qmlRegisterType<ExportDialogModel>("MuseScore.Project", 1, 0, "ExportDialogModel");
-
-    qmlRegisterType<ScoresPageModel>("MuseScore.Project", 1, 0, "ScoresPageModel");
-    qmlRegisterUncreatableType<AbstractScoresModel>("MuseScore.Project", 1, 0, "AbstractScoresModel",
-                                                    "Not creatable as it is an abstract type");
-    qmlRegisterType<RecentScoresModel>("MuseScore.Project", 1, 0, "RecentScoresModel");
-    qmlRegisterType<CloudScoresModel>("MuseScore.Project", 1, 0, "CloudScoresModel");
-    qmlRegisterType<CloudScoreStatusWatcher>("MuseScore.Project", 1, 0, "CloudScoreStatusWatcher");
-    qmlRegisterType<NewScoreModel>("MuseScore.Project", 1, 0, "NewScoreModel");
-    qmlRegisterType<AdditionalInfoModel>("MuseScore.Project", 1, 0, "AdditionalInfoModel");
-    qmlRegisterType<ProjectPropertiesModel>("MuseScore.Project", 1, 0, "ProjectPropertiesModel");
-    qmlRegisterType<AudioGenerationSettingsModel>("MuseScore.Project", 1, 0, "AudioGenerationSettingsModel");
-
-    qmlRegisterType<ScoreThumbnailLoader>("MuseScore.Project", 1, 0, "ScoreThumbnailLoader");
-    qmlRegisterType<PixmapScoreThumbnailView>("MuseScore.Project", 1, 0, "PixmapScoreThumbnailView");
-    qmlRegisterType<TemplatesModel>("MuseScore.Project", 1, 0, "TemplatesModel");
-    qmlRegisterType<TemplatePaintView>("MuseScore.Project", 1, 0, "TemplatePaintView");
-
-    qmlRegisterUncreatableType<QMLSaveLocationType>("MuseScore.Project", 1, 0, "SaveLocationType",
-                                                    "Not creatable as it is an enum type");
-    qmlRegisterUncreatableType<QMLSaveToCloudResponse>("MuseScore.Project", 1, 0, "SaveToCloudResponse",
-                                                       "Not creatable as it is an enum type");
-    qmlRegisterUncreatableType<GenerateAudioTimePeriod>("MuseScore.Project", 1, 0, "GenerateAudioTimePeriodType",
-                                                        "Not creatable as it is an enum type");
-
-    qmlRegisterUncreatableType<Migration>("MuseScore.Project", 1, 0, "MigrationType",
-                                          "Not creatable as it is an enum type");
-}
-
-void ProjectModule::onInit(const framework::IApplication::RunMode& mode)
-{
-    if (framework::IApplication::RunMode::GuiApp != mode) {
+    if (IApplication::RunMode::GuiApp != mode) {
         return;
     }
 
-    m_configuration->init();
     m_actionsController->init();
     m_recentFilesController->init();
     m_projectAutoSaver->init();

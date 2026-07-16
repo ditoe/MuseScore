@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -42,7 +42,7 @@ bool SpannerFilter::isPlayable(const EngravingItem* item, const RenderingContext
     int spannerTo = spannerFrom + spannerDurationTicks;
 
     if (spannerDurationTicks == 0
-        || spannerTo < ctx.nominalPositionStartTick
+        || spannerTo <= ctx.nominalPositionStartTick
         || spannerFrom >= ctx.nominalPositionEndTick) {
         return false;
     }
@@ -52,28 +52,19 @@ bool SpannerFilter::isPlayable(const EngravingItem* item, const RenderingContext
 
 int SpannerFilter::spannerActualDurationTicks(const Spanner* spanner, const int nominalDurationTicks)
 {
-    if (spanner->type() == ElementType::TRILL) {
-        return spanner->endSegment()->tick().ticks() - spanner->tick().ticks() - 1;
-    }
+    const ElementType type = spanner->type();
 
-    if (spanner->type() == ElementType::PEDAL) {
-        const Pedal* pedal = toPedal(spanner);
-        if (pedal->endHookType() == HookType::HOOK_45) {
-            return nominalDurationTicks - Constants::DIVISION / 4;
-        }
-    }
-
-    if (spanner->type() == ElementType::SLUR) {
-        EngravingItem* startItem = spanner->startElement();
-        EngravingItem* endItem = spanner->endElement();
+    if (type == ElementType::SLUR || type == ElementType::HAMMER_ON_PULL_OFF || type == ElementType::TRILL) {
+        const EngravingItem* startItem = spanner->startElement();
+        const EngravingItem* endItem = spanner->endElement();
 
         if (!startItem || !endItem) {
             return nominalDurationTicks;
         }
 
         if (startItem->isChordRest() && endItem->isChordRest()) {
-            ChordRest* startChord = toChordRest(startItem);
-            ChordRest* endChord = toChordRest(endItem);
+            const ChordRest* startChord = toChordRest(startItem);
+            const ChordRest* endChord = toChordRest(endItem);
             return endChord->tick().ticks() + endChord->ticks().ticks() - startChord->tick().ticks();
         }
     }

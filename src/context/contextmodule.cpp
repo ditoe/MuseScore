@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,33 +24,54 @@
 #include "modularity/ioc.h"
 #include "internal/globalcontext.h"
 #include "internal/uicontextresolver.h"
+#include "shortcutcontext.h"
+
+#include "muse_framework_config.h"
+
+#ifdef MUSE_MODULE_SHORTCUTS_V2
+#include "internal/shortcutresolver.h"
+#endif
 
 using namespace mu::context;
+using namespace muse::modularity;
+using namespace muse::shortcuts;
+
+static const std::string mname("context");
 
 std::string ContextModule::moduleName() const
 {
-    return "context";
+    return mname;
 }
 
-void ContextModule::registerExports()
+IContextSetup* ContextModule::newContext(const muse::modularity::ContextPtr& ctx) const
+{
+    return new ContextModuleContext(ctx);
+}
+
+void ContextModuleContext::registerExports()
 {
     m_globalContext = std::make_shared<GlobalContext>();
-    m_uicontextResolver = std::make_shared<UiContextResolver>();
+    m_uicontextResolver = std::make_shared<UiContextResolver>(iocContext());
 
-    modularity::ioc()->registerExport<IGlobalContext>(moduleName(), m_globalContext);
-    modularity::ioc()->registerExport<IUiContextResolver>(moduleName(), m_uicontextResolver);
+    ioc()->registerExport<IGlobalContext>(mname, m_globalContext);
+    ioc()->registerExport<IUiContextResolver>(mname, m_uicontextResolver);
+    ioc()->registerExport<IShortcutContextPriority>(mname, new ShortcutContextPriority());
+
+#ifdef MUSE_MODULE_SHORTCUTS_V2
+    ioc()->registerExport<IShortcutsResolver>(mname, new ShortcutResolver(iocContext()));
+#endif
 }
 
-void ContextModule::onInit(const framework::IApplication::RunMode& mode)
+void ContextModuleContext::onInit(const muse::IApplication::RunMode& mode)
 {
-    if (mode != framework::IApplication::RunMode::GuiApp) {
+    if (mode != muse::IApplication::RunMode::GuiApp) {
         return;
     }
 
     m_uicontextResolver->init();
 }
 
-void ContextModule::onDeinit()
+void ContextModuleContext::onDeinit()
 {
     m_globalContext->setCurrentProject(nullptr);
 }

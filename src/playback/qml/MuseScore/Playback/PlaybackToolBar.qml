@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,37 +19,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
+ 
+import QtQuick
 
-import MuseScore.Playback 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
-import MuseScore.CommonScene 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Playback
 
 import "internal"
 
 Item {
     id: root
 
-    property bool floating: false
-
-    width: content.width
-    height: content.height
+    property alias floating: thePlaybackModel.isToolbarFloating
 
     property NavigationPanel navigationPanel: NavigationPanel {
+        id: navPanel
         name: "PlaybackToolBar"
         enabled: root.enabled && root.visible
         accessible.name: qsTrc("playback", "Playback toolbar")
     }
 
+    property alias navigationPanelSection: navPanel.section
+    property alias navigationPanelOrder: navPanel.order
+
     PlaybackToolBarModel {
-        id: playbackModel
-        isToolbarFloating: root.floating
+        id: thePlaybackModel
     }
 
+    width: content.width + (root.floating ? 12 : 0)
+    height: content.height
+
     Component.onCompleted: {
-        playbackModel.load()
+        thePlaybackModel.load()
     }
 
     Column {
@@ -59,34 +61,51 @@ Item {
 
         width: childrenRect.width
 
-        enabled: playbackModel.isPlayAllowed
+        enabled: thePlaybackModel.isPlayAllowed
 
         PlaybackToolBarActions {
             id: playbackActions
 
-            playbackModel: playbackModel
+            playbackModel: thePlaybackModel
             floating: root.floating
 
             navPanel: root.navigationPanel
         }
 
-        StyledSlider {
-            width: playbackActions.width - 12
-            visible: root.floating
-            value: playbackModel.playPosition
+        Loader {
+            active: root.floating
 
-            onMoved: {
-                playbackModel.playPosition = value
-            }
-        }
+            width: childrenRect.width
 
-        TempoSlider {
-            width: playbackActions.width - 12
-            visible: root.floating
-            value: playbackModel.tempoMultiplier
+            sourceComponent: Column {
+                spacing: 8
 
-            onMoved: function(newValue) {
-                playbackModel.tempoMultiplier = newValue
+                width: childrenRect.width
+
+                StyledSlider {
+                    id: playPositionSlider
+
+                    width: playbackActions.width
+
+                    value: thePlaybackModel.playPosition
+                    stepSize: 0.05
+
+                    navigation.panel: navPanel
+                    navigation.order: playbackActions.navigationOrderEnd + 1
+
+                    onMoved: {
+                        thePlaybackModel.playPosition = value
+                    }
+                }
+
+                PlaybackSpeedSlider {
+                    width: playbackActions.width
+
+                    playbackModel: thePlaybackModel
+
+                    navigationPanel: navPanel
+                    navigationOrderStart: playPositionSlider.navigation.order + 1
+                }
             }
         }
     }

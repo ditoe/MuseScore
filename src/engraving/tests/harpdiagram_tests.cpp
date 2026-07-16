@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,19 +23,18 @@
 #include <gtest/gtest.h>
 
 #include "engraving/compat/scoreaccess.h"
-#include "dom/factory.h"
-#include "dom/harppedaldiagram.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/part.h"
-#include "dom/segment.h"
-#include "dom/undo.h"
-#include "dom/pitchspelling.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/harppedaldiagram.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/pitchspelling.h"
+#include "engraving/dom/segment.h"
+#include "engraving/editing/editharppedaldiagram.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
-
-#include "log.h"
 
 using namespace mu::engraving;
 
@@ -47,7 +46,7 @@ class Engraving_HarpDiagramTests : public ::testing::Test
 
 TEST_F(Engraving_HarpDiagramTests, harpdiagram)
 {
-    MasterScore* score = compat::ScoreAccess::createMasterScore();
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
 
     HarpPedalDiagram* diagram = Factory::createHarpPedalDiagram(score->dummy()->segment());
 
@@ -107,13 +106,13 @@ TEST_F(Engraving_HarpDiagramTests, textdiagrams)
             PedalPosition::NATURAL, PedalPosition::NATURAL };
     diagram1->setIsDiagram(false);
 
-    score->startCmd();
-    EditData dd1(0);
-    dd1.dropElement = diagram1;
-    EngravingItem* e1 = s1->firstElement(0);
-    e1->drop(dd1);
-    score->undo(new ChangeHarpPedalState(diagram1, pedalState));
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Harp diagram tests"), [&](Transaction& tx) {
+        EditData dd1(0);
+        dd1.dropElement = diagram1;
+        EngravingItem* e1 = s1->firstElementForNavigation(0);
+        e1->drop(tx, dd1);
+        tx.push(new ChangeHarpPedalState(diagram1, pedalState));
+    });
 
     String diagramText = diagram1->xmlText();
     String expText
@@ -125,14 +124,14 @@ TEST_F(Engraving_HarpDiagramTests, textdiagrams)
     HarpPedalDiagram* diagram2 = Factory::createHarpPedalDiagram(s2);
     diagram2->setIsDiagram(false);
 
-    score->startCmd();
-    EditData dd2(0);
-    dd2.dropElement = diagram2;
-    EngravingItem* e2 = s2->firstElement(0);
-    e2->drop(dd2);
-    score->undo(new ChangeSingleHarpPedal(diagram2, HarpStringType::C, PedalPosition::SHARP));
-    score->undo(new ChangeSingleHarpPedal(diagram2, HarpStringType::F, PedalPosition::SHARP));
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Harp diagram tests"), [&](Transaction& tx) {
+        EditData dd2(0);
+        dd2.dropElement = diagram2;
+        EngravingItem* e2 = s2->firstElementForNavigation(0);
+        e2->drop(tx, dd2);
+        tx.push(new ChangeSingleHarpPedal(diagram2, HarpStringType::C, PedalPosition::SHARP));
+        tx.push(new ChangeSingleHarpPedal(diagram2, HarpStringType::F, PedalPosition::SHARP));
+    });
 
     diagramText = diagram2->xmlText();
     expText = u"F<sym>csymAccidentalSharp</sym> \nC<sym>csymAccidentalSharp</sym> ";
@@ -142,12 +141,12 @@ TEST_F(Engraving_HarpDiagramTests, textdiagrams)
     HarpPedalDiagram* diagram3 = Factory::createHarpPedalDiagram(s3);
     diagram3->setIsDiagram(false);
 
-    score->startCmd();
-    EditData dd3(0);
-    dd3.dropElement = diagram3;
-    EngravingItem* e3 = s3->firstElement(0);
-    e3->drop(dd3);
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Harp diagram tests"), [&](Transaction& tx) {
+        EditData dd3(0);
+        dd3.dropElement = diagram3;
+        EngravingItem* e3 = s3->firstElementForNavigation(0);
+        e3->drop(tx, dd3);
+    });
 
     diagramText = diagram3->xmlText();
     expText = u"F<sym>csymAccidentalSharp</sym> \nC<sym>csymAccidentalSharp</sym> ";
@@ -157,13 +156,13 @@ TEST_F(Engraving_HarpDiagramTests, textdiagrams)
     HarpPedalDiagram* diagram4 = Factory::createHarpPedalDiagram(s4);
     diagram4->setIsDiagram(false);
 
-    score->startCmd();
-    EditData dd4(0);
-    dd4.dropElement = diagram4;
-    EngravingItem* e4 = s4->firstElement(0);
-    e4->drop(dd4);
-    score->undo(new ChangeSingleHarpPedal(diagram4, HarpStringType::G, PedalPosition::SHARP));
-    score->endCmd();
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Harp diagram tests"), [&](Transaction& tx) {
+        EditData dd4(0);
+        dd4.dropElement = diagram4;
+        EngravingItem* e4 = s4->firstElementForNavigation(0);
+        e4->drop(tx, dd4);
+        tx.push(new ChangeSingleHarpPedal(diagram4, HarpStringType::G, PedalPosition::SHARP));
+    });
 
     diagramText = diagram4->xmlText();
     expText = u"G<sym>csymAccidentalSharp</sym> \n";
@@ -197,16 +196,17 @@ TEST_F(Engraving_HarpDiagramTests, textdiagrams2)
     HarpPedalDiagram* diagram2 = Factory::createHarpPedalDiagram(s2);
     diagram2->setIsDiagram(false);
 
-    score->startCmd();
     EditData dd(0);
     dd.dropElement = diagram2;
-    EngravingItem* e = s2->firstElement(0);
-    e->drop(dd);
-    score->undo(new ChangeHarpPedalState(diagram2,
+
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Harp diagram tests"), [&](Transaction& tx) {
+        EngravingItem* e = s2->firstElementForNavigation(0);
+        e->drop(tx, dd);
+        tx.push(new ChangeHarpPedalState(diagram2,
                                          { PedalPosition::NATURAL, PedalPosition::NATURAL, PedalPosition::NATURAL, PedalPosition::NATURAL,
                                            PedalPosition::NATURAL,
                                            PedalPosition::NATURAL, PedalPosition::NATURAL }));
-    score->endCmd();
+    });
 
     // Check last diagram has updated
     expText
@@ -215,9 +215,7 @@ TEST_F(Engraving_HarpDiagramTests, textdiagrams2)
     EXPECT_EQ(diagram1->xmlText(), expText);
 
     // Test undo
-    score->startCmd();
     score->undoRedo(true, &dd);
-    score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile, initFile));
 }

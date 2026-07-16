@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,6 +24,7 @@
 #include "rw/write/twrite.h"
 
 #include "dom/factory.h"
+#include "dom/box.h"
 #include "dom/measure.h"
 #include "dom/score.h"
 
@@ -62,7 +63,10 @@ void StaffRead::readStaff(Score* score, XmlReader& e, ReadContext& ctx)
                 MeasureRead::readMeasure(measure, e, ctx, staff);
                 measure->checkMeasure(staff);
                 if (!measure->isMMRest()) {
-                    score->measures()->add(measure);
+                    score->measures()->append(measure);
+                    if (m && m->mmRest()) {
+                        m->mmRest()->setNext(measure);
+                    }
                     score->checkSpanner(ctx.tick(), ctx.tick() + measure->ticks(), /*removeOrphans*/ false);
                     ctx.setLastMeasure(measure);
                     ctx.setTick(measure->tick() + measure->ticks());
@@ -74,13 +78,14 @@ void StaffRead::readStaff(Score* score, XmlReader& e, ReadContext& ctx)
                     if (m1) {
                         m1->setMMRest(measure);
                         measure->setTick(m1->tick());
+                        measure->setPrev(m1->prev());
                     }
                 }
             } else if (tag == "HBox" || tag == "VBox" || tag == "TBox" || tag == "FBox") {
                 MeasureBase* mb = toMeasureBase(Factory::createItemByName(tag, ctx.dummy()));
-                TRead::readItem(mb, e, ctx);
                 mb->setTick(ctx.tick());
-                score->measures()->add(mb);
+                score->measures()->append(mb);
+                TRead::readItem(mb, e, ctx);
             } else if (tag == "tick") {
                 ctx.setTick(Fraction::fromTicks(ctx.fileDivision(e.readInt())));
             } else {
@@ -97,7 +102,7 @@ void StaffRead::readStaff(Score* score, XmlReader& e, ReadContext& ctx)
                     LOGD("Score::readStaff(): missing measure!");
                     measure = Factory::createMeasure(ctx.dummy()->system());
                     measure->setTick(ctx.tick());
-                    score->measures()->add(measure);
+                    score->measures()->append(measure);
                 }
                 ctx.setTick(measure->tick());
                 ctx.setCurrentMeasureIndex(measureIdx++);

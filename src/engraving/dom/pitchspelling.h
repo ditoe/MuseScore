@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,17 +20,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __PITCHSPELLING_H__
-#define __PITCHSPELLING_H__
+#pragma once
 
-#include "mscore.h"
+#include "types/string.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
 class MidiNote;
 class Note;
-enum class Key;
+enum class Key : signed char;
 
-const int INVALID_PITCH      = -1;
+static constexpr int INVALID_PITCH = -1;
+static constexpr int MIN_PITCH     = 0;
+static constexpr int MAX_PITCH     = 127;
 
 // a list of tpc's, with legal ranges, not really an enum, so no way to convert into a class
 enum Tpc : signed char {
@@ -46,17 +48,20 @@ enum Tpc : signed char {
     TPC_MAX = TPC_B_SSS
 };
 
-const int TPC_DELTA_SEMITONE      = 7;    // the delta in tpc value to go 1 semitone up or down
-const int TPC_DELTA_ENHARMONIC    = 12;   // the delta in tpc value to reach the next (or prev) enharmonic spelling
-//const int TPC_FIRST_STEP          = 3;  // the step of the first valid tpc (= F = step 3)
-const int PITCH_DELTA_OCTAVE      = 12;   // the delta in pitch value to go 1 octave up or down
-const int STEP_DELTA_OCTAVE       = 7;    // the number of steps in an octave
-//const int STEP_DELTA_TPC          = 4;  // the number of steps in a tpc step (= a fifth = 4 steps)
-const int TPCS_PER_STEP           = (Tpc::TPC_MAX - Tpc::TPC_MIN + 1) / STEP_DELTA_OCTAVE;
+static constexpr int TPC_DELTA_SEMITONE   = 7;    // the delta in tpc value to go 1 semitone up or down
+static constexpr int TPC_DELTA_ENHARMONIC = 12;   // the delta in tpc value to reach the next (or prev) enharmonic spelling
+//static constexpr int TPC_FIRST_STEP       = 3;  // the step of the first valid tpc (= F = step 3)
+static constexpr int PITCH_DELTA_OCTAVE   = 12;   // the delta in pitch value to go 1 octave up or down
+static constexpr int STEP_DELTA_OCTAVE    = 7;    // the number of steps in an octave
+//static constexpr int STEP_DELTA_TPC       = 4;  // the number of steps in a tpc step (= a fifth = 4 steps)
+static constexpr int TPCS_PER_STEP        = (Tpc::TPC_MAX - Tpc::TPC_MIN + 1) / STEP_DELTA_OCTAVE;
+static constexpr int MIN_STEP             = MIN_PITCH * STEP_DELTA_OCTAVE / PITCH_DELTA_OCTAVE;
+static constexpr int MAX_STEP             = MAX_PITCH * STEP_DELTA_OCTAVE / PITCH_DELTA_OCTAVE;
+static constexpr int KEY_TO_TPC_OFFSET = (int)Tpc::TPC_C - (int)Key::C;
 
 //---------------------------------------------------------
 //   pitch2tpc
-//    Returns a default tpc for a given midi pitch.
+//    muse::Returns a default tpc for a given midi pitch.
 //    Midi pitch 60 is middle C.
 //---------------------------------------------------------
 
@@ -65,21 +70,17 @@ const int TPCS_PER_STEP           = (Tpc::TPC_MAX - Tpc::TPC_MIN + 1) / STEP_DEL
 enum class Prefer : char {
     FLATS=8, NEAREST=11, SHARPS=13
 };
-enum class NoteSpellingType : char {
-    STANDARD = 0, GERMAN, GERMAN_PURE, SOLFEGGIO, FRENCH
-};
 enum class NoteCaseType : signed char {
     AUTO = -1, CAPITAL = 0, LOWER, UPPER
 };
 
 extern int pitch2tpc(int pitch, Key, Prefer prefer);
 
-extern int computeWindow(const std::vector<Note*>& notes, int start, int end);
-extern int tpc(int idx, int pitch, int opt);
 extern String tpc2name(int tpc, NoteSpellingType spelling, NoteCaseType noteCase, bool explicitAccidental = false, bool full = false);
 extern void tpc2name(int tpc, NoteSpellingType noteSpelling, NoteCaseType noteCase, String& s, String& acc, bool explicitAccidental = false,
                      bool full = false);
 extern void tpc2name(int tpc, NoteSpellingType noteSpelling, NoteCaseType noteCase, String& s, AccidentalVal& acc);
+extern String tpcUserName(int tpc, int pitch, bool explicitAccidental = false, bool full = false);
 extern int step2tpc(const String& stepName, AccidentalVal alter);
 extern int step2tpc(int step);
 extern int step2tpc(int step, AccidentalVal alter);
@@ -93,7 +94,17 @@ extern int absStep2pitchByKey(int step, Key);
 extern int tpc2degree(int tpc, Key key);
 extern int tpcInterval(int startTpc, int interval, int alter);
 extern int step2pitchInterval(int step, int alter);
+extern String tpc2Function(int tpc, Key key);
+extern void tpc2Function(int tpc, Key key, String& accName, String& stepName);
 extern int function2Tpc(const String& s, Key key);
+extern int function2Tpc(const String& s, Key key, size_t& idx);
+extern int convertNote(const String& s, NoteSpellingType noteSpelling, NoteCaseType& noteCase, size_t& idx);
+extern int clampEnharmonic(int tpc, bool useDoubleSharpsFlats = true);
+extern int clampPitch(int pitch);
+extern int clampPitchOctaved(int pitch);
+extern Key clampKey(Key key, PreferSharpFlat prefer = PreferSharpFlat::NONE);
+extern int key2Tpc(Key key);
+extern Key tpc2Key(int tpc);
 
 //---------------------------------------------------------
 //   tpc2alter
@@ -111,6 +122,5 @@ inline static int playingOctave(int pitch, int tpc)
 
 extern Char tpc2stepName(int tpc);
 extern bool tpcIsValid(int val);
-inline bool pitchIsValid(int pitch) { return pitch >= 0 && pitch <= 127; }
+inline bool pitchIsValid(int pitch) { return pitch >= MIN_PITCH && pitch <= MAX_PITCH; }
 } // namespace mu::engraving
-#endif

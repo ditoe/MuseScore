@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>L_L</eid>
+    <name>Flute</name>
     <Division>480</Division>
     <Style>
-      <Spatium>1.74978</Spatium>
+      <spatium>1.75</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -11,16 +13,19 @@
     <showMargins>0</showMargins>
     <metaTag name="partName">Flute</metaTag>
     <Part id="1">
-      <Staff id="1">
-        <linkedTo>1</linkedTo>
+      <eid>M_M</eid>
+      <Staff>
+        <eid>N_N</eid>
+        <linkedTo>D_D</linkedTo>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Flute</trackName>
       <Instrument id="flute">
-        <longName>Flute</longName>
-        <shortName>Fl.</shortName>
+        <InstrumentLabel>
+          <longName>Flute</longName>
+          <shortName>Fl.</shortName>
+          </InstrumentLabel>
         <trackName>Flute</trackName>
         <minPitchP>59</minPitchP>
         <maxPitchP>98</maxPitchP>
@@ -35,48 +40,44 @@
     <Staff id="1">
       <VBox>
         <height>10</height>
-        <excludeFromParts>0</excludeFromParts>
+        <eid>O_O</eid>
+        <linkedTo>E_E</linkedTo>
         <Text>
+          <eid>P_P</eid>
           <style>instrument_excerpt</style>
           <text>Flute</text>
           </Text>
         </VBox>
       <Measure>
+        <eid>Q_Q</eid>
         <voice>
           <KeySig>
-            <linked>
-              </linked>
+            <eid>R_R</eid>
+            <linkedTo>G_G</linkedTo>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
-            <linked>
-              <indexDiff>-1</indexDiff>
-              </linked>
+            <eid>S_S</eid>
+            <linkedTo>H_H</linkedTo>
             <sigN>4</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Dynamic>
             <subtype>mf</subtype>
             <velocity>80</velocity>
-            <dynamicsSize>1.2</dynamicsSize>
-            <linked>
-              <indexDiff>-2</indexDiff>
-              </linked>
-            <placement>above</placement>
+            <eid>T_T</eid>
+            <linkedTo>I_I</linkedTo>
             <positionLinkedToMaster>0</positionLinkedToMaster>
             <appearanceLinkedToMaster>0</appearanceLinkedToMaster>
-            <placement>above</placement>
-            <dynamicsSize>1.2</dynamicsSize>
+            <musicalSymbolsScale>1.2</musicalSymbolsScale>
             </Dynamic>
           <Chord>
-            <linked>
-              <indexDiff>-3</indexDiff>
-              </linked>
+            <eid>U_U</eid>
+            <linkedTo>J_J</linkedTo>
             <durationType>whole</durationType>
             <Note>
-              <linked>
-                <indexDiff>-4</indexDiff>
-                </linked>
+              <eid>V_V</eid>
+              <linkedTo>K_K</linkedTo>
               <pitch>72</pitch>
               <tpc>14</tpc>
               </Note>
@@ -84,6 +85,5 @@
           </voice>
         </Measure>
       </Staff>
-    <name>Flute</name>
     </Score>
   </museScore>

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,17 +22,13 @@
 #include "scorecallbacks.h"
 
 #include "engraving/dom/engravingitem.h"
-#include "engraving/dom/lyrics.h"
-#include "engraving/dom/system.h"
-
 #include "inotationinteraction.h"
-#include "igetscore.h"
 
 #include "log.h"
 
 using namespace mu::notation;
 
-void ScoreCallbacks::dataChanged(const RectF&)
+void ScoreCallbacks::dataChanged(const muse::RectF&)
 {
     NOT_IMPLEMENTED;
 }
@@ -42,15 +38,9 @@ void ScoreCallbacks::updateAll()
     NOT_IMPLEMENTED;
 }
 
-void ScoreCallbacks::drawBackground(draw::Painter*, const mu::RectF&) const
+void ScoreCallbacks::drawBackground(muse::draw::Painter*, const muse::RectF&) const
 {
     NOT_IMPLEMENTED;
-}
-
-const mu::Rect ScoreCallbacks::geometry() const
-{
-    NOT_IMPLEMENTED;
-    return mu::Rect();
 }
 
 qreal ScoreCallbacks::selectionProximity() const
@@ -63,7 +53,7 @@ void ScoreCallbacks::setSelectionProximity(qreal proximity)
     m_selectionProximity = proximity;
 }
 
-void ScoreCallbacks::setDropTarget(const mu::engraving::EngravingItem* dropTarget)
+void ScoreCallbacks::setDropTarget(mu::engraving::EngravingItem* dropTarget)
 {
     IF_ASSERT_FAILED(m_interaction) {
         return;
@@ -72,7 +62,7 @@ void ScoreCallbacks::setDropTarget(const mu::engraving::EngravingItem* dropTarge
     m_interaction->setDropTarget(dropTarget, false);
 }
 
-void ScoreCallbacks::setDropRectangle(const RectF& rect)
+void ScoreCallbacks::setDropRectangle(const muse::RectF& rect)
 {
     IF_ASSERT_FAILED(m_interaction) {
         return;

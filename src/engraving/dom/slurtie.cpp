@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,8 +23,9 @@
 
 #include "draw/types/pen.h"
 
-#include "chord.h"
-#include "mscoreview.h"
+#include "../editing/elementeditdata.h"
+#include "../editing/mscoreview.h"
+
 #include "note.h"
 #include "page.h"
 #include "score.h"
@@ -33,6 +34,7 @@
 #include "log.h"
 
 using namespace mu;
+using namespace muse::draw;
 using namespace mu::engraving;
 
 namespace mu::engraving {
@@ -53,7 +55,43 @@ SlurTieSegment::SlurTieSegment(const SlurTieSegment& b)
         m_ups[i]   = b.m_ups[i];
         m_ups[i].p = PointF();
     }
-    m_path = b.m_path;
+}
+
+bool SlurTieSegment::isEditAllowed(EditData& ed) const
+{
+    if (ed.key == Key_Home && !(ed.modifiers & ~KeyboardModifier::KeypadModifier) && ed.hasCurrentGrip()) {
+        return true;
+    }
+
+    return false;
+}
+
+//---------------------------------------------------------
+//   edit
+//    return true if event is accepted
+//---------------------------------------------------------
+
+bool SlurTieSegment::edit(EditData& ed)
+{
+    if (!isEditAllowed(ed)) {
+        return false;
+    }
+
+    if (ed.key == Key_Home && !(ed.modifiers & ~KeyboardModifier::KeypadModifier)) {
+        if (ed.hasCurrentGrip()) {
+            startDragGrip(ed);
+            if (ed.curGrip == Grip::SHOULDER) {
+                ups(Grip::BEZIER1).off = PointF();
+                ups(Grip::BEZIER2).off = PointF();
+            } else {
+                ups(ed.curGrip).off = PointF();
+            }
+            renderer()->layoutItem(spanner());
+            endDragGrip(ed);
+        }
+        return true;
+    }
+    return false;
 }
 
 //---------------------------------------------------------
@@ -82,11 +120,11 @@ std::vector<LineF> SlurTieSegment::gripAnchorLines(Grip grip) const
         break;
 
     case SpannerSegmentType::BEGIN:
-        anchorPosition = (grip == Grip::START ? p1 : system()->abbox().topRight());
+        anchorPosition = (grip == Grip::START ? p1 : system()->pageBoundingRect().topRight());
         break;
 
     case SpannerSegmentType::MIDDLE:
-        anchorPosition = (grip == Grip::START ? sp : system()->abbox().topRight());
+        anchorPosition = (grip == Grip::START ? sp : system()->pageBoundingRect().topRight());
         break;
 
     case SpannerSegmentType::END:
@@ -143,86 +181,56 @@ std::vector<PointF> SlurTieSegment::gripsPositions(const EditData&) const
     return grips;
 }
 
+bool SlurTieSegment::isUserModified() const
+{
+    return SpannerSegment::isUserModified() || !(visible() && autoplace()
+                                                 && color() == configuration()->defaultColor()
+                                                 && offset().isNull()
+                                                 && ups(Grip::START).off.isNull()
+                                                 && ups(Grip::BEZIER1).off.isNull()
+                                                 && ups(Grip::BEZIER2).off.isNull()
+                                                 && ups(Grip::END).off.isNull());
+}
+
 //---------------------------------------------------------
-//   startEditDrag
+//   startDragGrip
 //---------------------------------------------------------
 
-void SlurTieSegment::startEditDrag(EditData& ed)
+void SlurTieSegment::startDragGrip(EditData& ed)
 {
     ElementEditDataPtr eed = ed.getData(this);
     IF_ASSERT_FAILED(eed) {
         return;
     }
-    for (auto i : { Pid::SLUR_UOFF1, Pid::SLUR_UOFF2, Pid::SLUR_UOFF3, Pid::SLUR_UOFF4, Pid::OFFSET }) {
+    for (Pid i : { Pid::SLUR_UOFF1, Pid::SLUR_UOFF2, Pid::SLUR_UOFF3, Pid::SLUR_UOFF4, Pid::OFFSET }) {
         eed->pushProperty(i);
     }
 }
 
 //---------------------------------------------------------
-//   endEditDrag
+//   endDragGrip
 //---------------------------------------------------------
 
-void SlurTieSegment::endEditDrag(EditData& ed)
+void SlurTieSegment::endDragGrip(EditData& ed)
 {
-    EngravingItem::endEditDrag(ed);
+    EngravingItem::endDragGrip(ed);
     triggerLayout();
 }
 
 //---------------------------------------------------------
-//   editDrag
+//   propertyDelegate
 //---------------------------------------------------------
 
-void SlurTieSegment::editDrag(EditData& ed)
+EngravingObject* SlurTieSegment::propertyDelegate(Pid pid) const
 {
-    Grip g     = ed.curGrip;
-    ups(g).off += ed.delta;
-
-    PointF delta;
-
-    switch (g) {
-    case Grip::START:
-    case Grip::END:
-        //
-        // move anchor for slurs/ties
-        //
-        if ((g == Grip::START && isSingleBeginType()) || (g == Grip::END && isSingleEndType())) {
-            Spanner* spanner = slurTie();
-            KeyboardModifiers km = ed.modifiers;
-            EngravingItem* e = ed.view()->elementNear(ed.pos);
-            if (e && e->isNote()) {
-                Note* note = toNote(e);
-                Fraction tick = note->chord()->tick();
-                if ((g == Grip::END && tick > slurTie()->tick()) || (g == Grip::START && tick < slurTie()->tick2())) {
-                    if (km != (ShiftModifier | ControlModifier)) {
-                        Chord* c = note->chord();
-                        ed.view()->setDropTarget(note);
-                        if (c->part() == spanner->part() && c != spanner->endCR()) {
-                            changeAnchor(ed, c);
-                        }
-                    }
-                }
-            } else {
-                ed.view()->setDropTarget(0);
-            }
-        }
-        break;
-    case Grip::BEZIER1:
-        break;
-    case Grip::BEZIER2:
-        break;
-    case Grip::SHOULDER:
-        ups(g).off = PointF();
-        delta = ed.delta;
-        break;
-    case Grip::DRAG:
-        ups(g).off = PointF();
-        setOffset(offset() + ed.delta);
-        break;
-    case Grip::NO_GRIP:
-    case Grip::GRIPS:
-        break;
+    switch (pid) {
+    case Pid::SLUR_STYLE_TYPE:
+    case Pid::SLUR_DIRECTION:
+    case Pid::MASK_SLURTIE:
+        return slurTie();
+    default:
+        return SpannerSegment::propertyDelegate(pid);
     }
-    computeBezier(delta);
 }
 
 //---------------------------------------------------------
@@ -231,10 +239,11 @@ void SlurTieSegment::editDrag(EditData& ed)
 
 PropertyValue SlurTieSegment::getProperty(Pid propertyId) const
 {
+    if (EngravingObject* e = const_cast<SlurTieSegment*>(this)->propertyDelegate(propertyId)) {
+        return e->getProperty(propertyId);
+    }
+
     switch (propertyId) {
-    case Pid::SLUR_STYLE_TYPE:
-    case Pid::SLUR_DIRECTION:
-        return slurTie()->getProperty(propertyId);
     case Pid::SLUR_UOFF1:
         return ups(Grip::START).off;
     case Pid::SLUR_UOFF2:
@@ -254,10 +263,11 @@ PropertyValue SlurTieSegment::getProperty(Pid propertyId) const
 
 bool SlurTieSegment::setProperty(Pid propertyId, const PropertyValue& v)
 {
+    if (EngravingObject* e = const_cast<SlurTieSegment*>(this)->propertyDelegate(propertyId)) {
+        return e->setProperty(propertyId, v);
+    }
+
     switch (propertyId) {
-    case Pid::SLUR_STYLE_TYPE:
-    case Pid::SLUR_DIRECTION:
-        return slurTie()->setProperty(propertyId, v);
     case Pid::SLUR_UOFF1:
         ups(Grip::START).off = v.value<PointF>();
         break;
@@ -273,7 +283,7 @@ bool SlurTieSegment::setProperty(Pid propertyId, const PropertyValue& v)
     default:
         return SpannerSegment::setProperty(propertyId, v);
     }
-    triggerLayoutAll();
+    triggerLayout();
     return true;
 }
 
@@ -283,10 +293,11 @@ bool SlurTieSegment::setProperty(Pid propertyId, const PropertyValue& v)
 
 PropertyValue SlurTieSegment::propertyDefault(Pid id) const
 {
+    if (EngravingObject* e = const_cast<SlurTieSegment*>(this)->propertyDelegate(id)) {
+        return e->propertyDefault(id);
+    }
+
     switch (id) {
-    case Pid::SLUR_STYLE_TYPE:
-    case Pid::SLUR_DIRECTION:
-        return slurTie()->propertyDefault(id);
     case Pid::SLUR_UOFF1:
     case Pid::SLUR_UOFF2:
     case Pid::SLUR_UOFF3:
@@ -330,36 +341,6 @@ void SlurTieSegment::undoChangeProperty(Pid pid, const PropertyValue& val, Prope
 }
 
 //---------------------------------------------------------
-//   drawEditMode
-//---------------------------------------------------------
-
-void SlurTieSegment::drawEditMode(mu::draw::Painter* p, EditData& ed, double /*currentViewScaling*/)
-{
-    using namespace mu::draw;
-    PolygonF polygon(7);
-    polygon[0] = PointF(ed.grip[int(Grip::START)].center());
-    polygon[1] = PointF(ed.grip[int(Grip::BEZIER1)].center());
-    polygon[2] = PointF(ed.grip[int(Grip::SHOULDER)].center());
-    polygon[3] = PointF(ed.grip[int(Grip::BEZIER2)].center());
-    polygon[4] = PointF(ed.grip[int(Grip::END)].center());
-    polygon[5] = PointF(ed.grip[int(Grip::DRAG)].center());
-    polygon[6] = PointF(ed.grip[int(Grip::START)].center());
-    p->setPen(Pen(engravingConfiguration()->formattingMarksColor(), 0.0));
-    p->drawPolyline(polygon);
-
-    p->setPen(Pen(engravingConfiguration()->defaultColor(), 0.0));
-    for (int i = 0; i < ed.grips; ++i) {
-        // Can't use ternary operator, because we want different overloads of `setBrush`
-        if (Grip(i) == ed.curGrip) {
-            p->setBrush(engravingConfiguration()->formattingMarksColor());
-        } else {
-            p->setBrush(BrushStyle::NoBrush);
-        }
-        p->drawRect(ed.grip[i]);
-    }
-}
-
-//---------------------------------------------------------
 //   SlurTie
 //---------------------------------------------------------
 
@@ -369,6 +350,7 @@ SlurTie::SlurTie(const ElementType& type, EngravingItem* parent)
     m_slurDirection = DirectionV::AUTO;
     m_up            = true;
     m_styleType     = SlurStyleType::Solid;
+    m_maskSlurTie   = AutoOnOff::AUTO;
 }
 
 SlurTie::SlurTie(const SlurTie& t)
@@ -377,6 +359,7 @@ SlurTie::SlurTie(const SlurTie& t)
     m_up            = t.m_up;
     m_slurDirection = t.m_slurDirection;
     m_styleType     = t.m_styleType;
+    m_maskSlurTie   = t.m_maskSlurTie;
 }
 
 //---------------------------------------------------------
@@ -404,9 +387,11 @@ PropertyValue SlurTie::getProperty(Pid propertyId) const
 {
     switch (propertyId) {
     case Pid::SLUR_STYLE_TYPE:
-        return PropertyValue::fromValue<SlurStyleType>(styleType());
+        return styleType();
     case Pid::SLUR_DIRECTION:
         return PropertyValue::fromValue<DirectionV>(slurDirection());
+    case Pid::MASK_SLURTIE:
+        return maskSlurTie();
     default:
         return Spanner::getProperty(propertyId);
     }
@@ -425,10 +410,13 @@ bool SlurTie::setProperty(Pid propertyId, const PropertyValue& v)
     case Pid::SLUR_DIRECTION:
         setSlurDirection(v.value<DirectionV>());
         break;
+    case Pid::MASK_SLURTIE:
+        setMaskSlurTie(v.value<AutoOnOff>());
+        break;
     default:
         return Spanner::setProperty(propertyId, v);
     }
-    triggerLayoutAll();
+    triggerLayout();
     return true;
 }
 
@@ -440,9 +428,11 @@ PropertyValue SlurTie::propertyDefault(Pid id) const
 {
     switch (id) {
     case Pid::SLUR_STYLE_TYPE:
-        return 0;
+        return SlurStyleType::Solid;
     case Pid::SLUR_DIRECTION:
         return PropertyValue::fromValue<DirectionV>(DirectionV::AUTO);
+    case Pid::MASK_SLURTIE:
+        return AutoOnOff::AUTO;
     default:
         return Spanner::propertyDefault(id);
     }
@@ -466,5 +456,32 @@ void SlurTie::reset()
     EngravingItem::reset();
     undoResetProperty(Pid::SLUR_DIRECTION);
     undoResetProperty(Pid::SLUR_STYLE_TYPE);
+    undoResetProperty(Pid::MASK_SLURTIE);
+}
+
+muse::TranslatableString SlurTie::subtypeUserName() const
+{
+    switch (m_styleType) {
+    case SlurStyleType::Solid:
+        return TranslatableString("engraving/slurstyletype", "Solid");
+    case SlurStyleType::Dotted:
+        return TranslatableString("engraving/slurstyletype", "Dotted");
+    case SlurStyleType::Dashed:
+        return TranslatableString("engraving/slurstyletype", "Dashed");
+    case SlurStyleType::WideDashed:
+        return TranslatableString("engraving/slurstyletype", "Wide dashed");
+    default:
+        return TranslatableString("engraving/slurstyletype", "Undefined");
+    }
+}
+
+int SlurTieSegment::subtype() const
+{
+    return slurTie()->subtype();
+}
+
+muse::TranslatableString SlurTieSegment::subtypeUserName() const
+{
+    return slurTie()->subtypeUserName();
 }
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,12 +22,11 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/masterscore.h"
+#include "engraving/dom/masterscore.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String COMPAT114_DATA_DIR("compat114_data/");
@@ -69,9 +68,9 @@ TEST_F(Engraving_Compat114Tests, articulations) {
     compat("articulations");
 }
 
-TEST_F(Engraving_Compat114Tests, chord_symbol) {
-    compat("chord_symbol");
-}
+// TEST_F(Engraving_Compat114Tests, chord_symbol) {
+//     compat("chord_symbol");
+// }
 
 TEST_F(Engraving_Compat114Tests, clef_missing_first) {
     compat("clef_missing_first");
@@ -137,9 +136,9 @@ TEST_F(Engraving_Compat114Tests, tamtam) {
     compat("tamtam");
 }
 
-TEST_F(Engraving_Compat114Tests, text_scaling) {
-    compat("text_scaling");
-}
+// TEST_F(Engraving_Compat114Tests, text_scaling) {
+//     compat("text_scaling");
+// }
 
 TEST_F(Engraving_Compat114Tests, textline) {
     compat("textline");

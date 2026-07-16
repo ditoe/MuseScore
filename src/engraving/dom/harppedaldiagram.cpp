@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,6 +24,8 @@
 
 #include "translation.h"
 #include "types/typesconv.h"
+
+#include "../editing/editharppedaldiagram.h"
 
 #include "part.h"
 #include "score.h"
@@ -244,6 +246,24 @@ void HarpPedalDiagram::updateDiagramText()
     undoChangeProperty(Pid::TEXT, createDiagramText(), PropertyFlags::STYLED);
 }
 
+void HarpPedalDiagram::undoChangePedalState(std::array<PedalPosition, HARP_STRING_NO> _pedalState)
+{
+    const std::list<EngravingObject*> links = linkList();
+    for (EngravingObject* obj : links) {
+        if (!obj || !obj->isHarpPedalDiagram()) {
+            continue;
+        }
+
+        HarpPedalDiagram* item = toHarpPedalDiagram(obj);
+        Score* linkedScore = item->score();
+        if (!linkedScore) {
+            continue;
+        }
+
+        linkedScore->undo(new ChangeHarpPedalState(item, _pedalState));
+    }
+}
+
 bool HarpPedalDiagram::isTpcPlayable(int tpc)
 {
     return m_playableTpcs.find(tpc) != m_playableTpcs.cend();
@@ -323,13 +343,13 @@ String HarpPedalDiagram::screenReaderInfo() const
         s.append(harpStringTypeToString(HarpStringType(idx)) + u" ");
         switch (m_pedalState.at(idx)) {
         case PedalPosition::FLAT:
-            s.append(mtrc("engraving", TConv::userName(AccidentalVal::FLAT, true)));
+            s.append(muse::mtrc("engraving", TConv::userName(AccidentalVal::FLAT, true)));
             break;
         case PedalPosition::NATURAL:
-            s.append(mtrc("engraving", TConv::userName(AccidentalVal::NATURAL, true)));
+            s.append(muse::mtrc("engraving", TConv::userName(AccidentalVal::NATURAL, true)));
             break;
         case PedalPosition::SHARP:
-            s.append(mtrc("engraving", TConv::userName(AccidentalVal::SHARP, true)));
+            s.append(muse::mtrc("engraving", TConv::userName(AccidentalVal::SHARP, true)));
             break;
         case PedalPosition::UNSET:
             s.append(u" unset ");

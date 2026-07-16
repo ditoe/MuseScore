@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,14 +28,16 @@
 #include "internal/wavewriter.h"
 #include "internal/oggwriter.h"
 #include "internal/flacwriter.h"
+#include "internal/aacwriter.h"
 
 #include "internal/audioexportconfiguration.h"
 
 #include "log.h"
 
+using namespace muse;
+using namespace muse::modularity;
 using namespace mu::iex::audioexport;
 using namespace mu::project;
-using namespace mu::modularity;
 
 std::string AudioExportModule::moduleName() const
 {
@@ -46,25 +48,22 @@ void AudioExportModule::registerExports()
 {
     m_configuration = std::make_shared<AudioExportConfiguration>();
 
-    ioc()->registerExport<AudioExportConfiguration>(moduleName(), m_configuration);
+    globalIoc()->registerExport<AudioExportConfiguration>(moduleName(), m_configuration);
 }
 
 void AudioExportModule::resolveImports()
 {
-    auto writers = ioc()->resolve<INotationWritersRegister>(moduleName());
+    auto writers = globalIoc()->resolve<INotationWritersRegister>(moduleName());
     if (writers) {
-        writers->reg({ "wav" }, std::make_shared<WaveWriter>());
-        writers->reg({ "mp3" }, std::make_shared<Mp3Writer>());
-        writers->reg({ "ogg" }, std::make_shared<OggWriter>());
-        writers->reg({ "flac" }, std::make_shared<FlacWriter>());
+        writers->reg({ "wav" }, std::make_shared<WaveWriter>(globalCtx()));
+        writers->reg({ "mp3" }, std::make_shared<Mp3Writer>(globalCtx()));
+        writers->reg({ "ogg" }, std::make_shared<OggWriter>(globalCtx()));
+        writers->reg({ "flac" }, std::make_shared<FlacWriter>(globalCtx()));
+        writers->reg({ "aac" }, std::make_shared<AacWriter>(globalCtx()));
     }
 }
 
-void AudioExportModule::onInit(const framework::IApplication::RunMode& mode)
+void AudioExportModule::onInit(const IApplication::RunMode&)
 {
-    if (mode == framework::IApplication::RunMode::AudioPluginRegistration) {
-        return;
-    }
-
     m_configuration->init();
 }

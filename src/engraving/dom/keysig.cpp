@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,6 +29,10 @@
 #include "segment.h"
 #include "staff.h"
 #include "part.h"
+
+#include "editing/editkeysig.h"
+#include "editing/transaction/transaction.h"
+#include "editing/transpose.h"
 
 #include "log.h"
 
@@ -61,7 +65,7 @@ KeySig::KeySig(const KeySig& k)
 
 double KeySig::mag() const
 {
-    return staff() ? staff()->staffMag(tick()) : 1.0;
+    return staff() ? staff()->staffMag(this) : 1.0;
 }
 
 //---------------------------------------------------------
@@ -70,17 +74,17 @@ double KeySig::mag() const
 
 bool KeySig::acceptDrop(EditData& data) const
 {
-    return data.dropElement->type() == ElementType::KEYSIG;
+    return data.dropElement->isKeySig();
 }
 
 //---------------------------------------------------------
 //   drop
 //---------------------------------------------------------
 
-EngravingItem* KeySig::drop(EditData& data)
+EngravingItem* KeySig::drop(Transaction& tx, EditData& data)
 {
     KeySig* ks = toKeySig(data.dropElement);
-    if (ks->type() != ElementType::KEYSIG) {
+    if (!ks->isKeySig()) {
         delete ks;
         return 0;
     }
@@ -89,12 +93,12 @@ EngravingItem* KeySig::drop(EditData& data)
     if (data.modifiers & ControlModifier) {
         // apply only to this stave
         if (!(k == keySigEvent())) {
-            score()->undoChangeKeySig(staff(), tick(), k);
+            EditKeySig::undoChangeKeySig(tx, score(), staff(), tick(), k);
         }
     } else {
         // apply to all staves:
         for (Staff* s : score()->masterScore()->staves()) {
-            score()->undoChangeKeySig(s, tick(), k);
+            EditKeySig::undoChangeKeySig(tx, score(), s, tick(), k);
         }
     }
     return this;
@@ -104,16 +108,16 @@ EngravingItem* KeySig::drop(EditData& data)
 //   setKey
 //---------------------------------------------------------
 
-void KeySig::setKey(Key cKey)
+void KeySig::setKey(Key concertKey)
 {
     KeySigEvent e;
-    e.setConcertKey(cKey);
+    e.setConcertKey(concertKey);
     if (staff() && !style().styleB(Sid::concertPitch)) {
         Interval v = staff()->part()->instrument(tick())->transpose();
         if (!v.isZero()) {
             v.flip();
-            Key tKey = transposeKey(cKey, v, staff()->part()->preferSharpFlat());
-            e.setKey(tKey);
+            Key transposedKey = Transpose::transposeKey(concertKey, v, staff()->part()->preferSharpFlat());
+            e.setKey(transposedKey);
         }
     }
     setKeySigEvent(e);
@@ -123,11 +127,11 @@ void KeySig::setKey(Key cKey)
 //   setKey
 //---------------------------------------------------------
 
-void KeySig::setKey(Key cKey, Key tKey)
+void KeySig::setKey(Key concertKey, Key transposedKey)
 {
     KeySigEvent e;
-    e.setConcertKey(cKey);
-    e.setKey(tKey);
+    e.setConcertKey(concertKey);
+    e.setKey(transposedKey);
     setKeySigEvent(e);
 }
 
@@ -152,7 +156,7 @@ bool KeySig::isChange() const
     if (!segment() || segment()->segmentType() != SegmentType::KeySig) {
         return false;
     }
-    Fraction keyTick = tick();
+    const Fraction keyTick = tick();
     return staff()->currentKeyTick(keyTick) == keyTick;
 }
 
@@ -168,22 +172,41 @@ void KeySig::changeKeySigEvent(const KeySigEvent& t)
     setKeySigEvent(t);
 }
 
-//---------------------------------------------------------
-//   undoSetShowCourtesy
-//---------------------------------------------------------
-
-void KeySig::undoSetShowCourtesy(bool v)
+PointF KeySig::staffOffset() const
 {
-    undoChangeProperty(Pid::SHOW_COURTESY, v);
+    const Segment* seg = segment();
+    const Measure* meas = seg ? seg->measure() : nullptr;
+    if (meas && meas->endTick() == tick()) {
+        // Courtesy key sig should be adjusted by the following staffType's offset
+        return EngravingItem::staffOffset();
+    }
+    return PointF(0.0, 0.0);
 }
 
-//---------------------------------------------------------
-//   undoSetMode
-//---------------------------------------------------------
-
-void KeySig::undoSetMode(KeyMode v)
+EngravingObject* KeySig::propertyDelegate(Pid propertyId) const
 {
-    undoChangeProperty(Pid::KEYSIG_MODE, int(v));
+    if (!_isCourtesy) {
+        return nullptr;
+    }
+    switch (propertyId) {
+    case Pid::KEY:
+    case Pid::KEY_CONCERT:
+    case Pid::SHOW_COURTESY:
+    case Pid::KEYSIG_MODE:
+    case Pid::IS_COURTESY:
+    {
+        Segment* thisSeg = segment();
+        Segment* nextKSSeg = thisSeg ? thisSeg->next1(SegmentType::KeySig) : nullptr;
+        if (nextKSSeg && nextKSSeg->tick() == thisSeg->tick()) {
+            return nextKSSeg->element(track());
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    return nullptr;
 }
 
 //---------------------------------------------------------
@@ -192,15 +215,20 @@ void KeySig::undoSetMode(KeyMode v)
 
 PropertyValue KeySig::getProperty(Pid propertyId) const
 {
+    if (EngravingObject* e = propertyDelegate(propertyId)) {
+        return e->getProperty(propertyId);
+    }
     switch (propertyId) {
     case Pid::KEY:
         return int(key());
     case Pid::KEY_CONCERT:
         return int(concertKey());
     case Pid::SHOW_COURTESY:
-        return int(showCourtesy());
+        return showCourtesy();
     case Pid::KEYSIG_MODE:
-        return int(mode());
+        return mode();
+    case Pid::IS_COURTESY:
+        return _isCourtesy;
     default:
         return EngravingItem::getProperty(propertyId);
     }
@@ -212,6 +240,9 @@ PropertyValue KeySig::getProperty(Pid propertyId) const
 
 bool KeySig::setProperty(Pid propertyId, const PropertyValue& v)
 {
+    if (EngravingObject* e = propertyDelegate(propertyId)) {
+        return e->setProperty(propertyId, v);
+    }
     switch (propertyId) {
     case Pid::KEY:
         if (generated()) {
@@ -235,8 +266,11 @@ bool KeySig::setProperty(Pid propertyId, const PropertyValue& v)
         if (generated()) {
             return false;
         }
-        setMode(KeyMode(v.toInt()));
+        setMode(v.value<KeyMode>());
         staff()->setKey(tick(), keySigEvent());
+        break;
+    case Pid::IS_COURTESY:
+        _isCourtesy = v.toBool();
         break;
     default:
         if (!EngravingItem::setProperty(propertyId, v)) {
@@ -263,7 +297,9 @@ PropertyValue KeySig::propertyDefault(Pid id) const
     case Pid::SHOW_COURTESY:
         return true;
     case Pid::KEYSIG_MODE:
-        return int(KeyMode::UNKNOWN);
+        return KeyMode::UNKNOWN;
+    case Pid::IS_COURTESY:
+        return false;
     default:
         return EngravingItem::propertyDefault(id);
     }
@@ -295,5 +331,14 @@ String KeySig::accessibleInfo() const
 {
     String keySigType = TConv::translatedUserName(key(), isAtonal(), isCustom());
     return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), keySigType);
+}
+
+//---------------------------------------------------------
+//   translatedSubtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString KeySig::subtypeUserName() const
+{
+    return TConv::userName(key(), isAtonal(), isCustom());
 }
 }

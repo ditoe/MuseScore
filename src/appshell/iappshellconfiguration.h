@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,18 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_APPSHELL_IAPPSHELLCONFIGURATION_H
-#define MU_APPSHELL_IAPPSHELLCONFIGURATION_H
+
+#pragma once
 
 #include "modularity/imoduleinterface.h"
-#include "types/retval.h"
+#include "types/ret.h"
 
 #include "io/path.h"
 #include "appshelltypes.h"
 #include "async/notification.h"
 
 namespace mu::appshell {
-class IAppShellConfiguration : MODULE_EXPORT_INTERFACE
+class IAppShellConfiguration : MODULE_GLOBAL_INTERFACE
 {
     INTERFACE_ID(IAppshellConfiguration)
 
@@ -40,41 +40,51 @@ public:
     virtual bool hasCompletedFirstLaunchSetup() const = 0;
     virtual void setHasCompletedFirstLaunchSetup(bool has) = 0;
 
+    virtual bool welcomeDialogShowOnStartup() const = 0;
+    virtual void setWelcomeDialogShowOnStartup(bool show) = 0;
+    virtual muse::async::Notification welcomeDialogShowOnStartupChanged() const = 0;
+
+    virtual std::string welcomeDialogLastShownVersion() const = 0;
+    virtual void setWelcomeDialogLastShownVersion(const std::string& version) = 0;
+
+    virtual int welcomeDialogLastShownIndex() const = 0;
+    virtual void setWelcomeDialogLastShownIndex(int index) = 0;
+
     virtual StartupModeType startupModeType() const = 0;
     virtual void setStartupModeType(StartupModeType type) = 0;
+    virtual muse::async::Notification startupModeTypeChanged() const = 0;
 
-    virtual io::path_t startupScorePath() const = 0;
-    virtual void setStartupScorePath(const io::path_t& scorePath) = 0;
-
-    virtual io::path_t userDataPath() const = 0;
+    virtual muse::io::path_t startupScorePath() const = 0;
+    virtual void setStartupScorePath(const muse::io::path_t& scorePath) = 0;
+    virtual muse::async::Notification startupScorePathChanged() const = 0;
 
     virtual std::string handbookUrl() const = 0;
     virtual std::string askForHelpUrl() const = 0;
+    virtual std::string accessibilityStatementUrl() const = 0;
     virtual std::string museScoreUrl() const = 0;
     virtual std::string museScoreForumUrl() const = 0;
     virtual std::string museScoreContributionUrl() const = 0;
+    virtual std::string museHubFreeMuseSoundsUrl() const = 0;
     virtual std::string musicXMLLicenseUrl() const = 0;
     virtual std::string musicXMLLicenseDeedUrl() const = 0;
 
     virtual std::string museScoreVersion() const = 0;
     virtual std::string museScoreRevision() const = 0;
 
-    virtual bool isNotationNavigatorVisible() const = 0;
-    virtual void setIsNotationNavigatorVisible(bool visible) const = 0;
-    virtual async::Notification isNotationNavigatorVisibleChanged() const = 0;
-
     virtual bool needShowSplashScreen() const = 0;
     virtual void setNeedShowSplashScreen(bool show) = 0;
+
+    virtual const QString& preferencesDialogLastOpenedPageId() const = 0;
+    virtual void setPreferencesDialogLastOpenedPageId(const QString& lastOpenedPageId) = 0;
 
     virtual void startEditSettings() = 0;
     virtual void applySettings() = 0;
     virtual void rollbackSettings() = 0;
 
-    virtual void revertToFactorySettings(bool keepDefaultSettings = false, bool notifyAboutChanges = true) const = 0;
+    virtual void revertToFactorySettings(bool keepDefaultSettings = false, bool notifyAboutChanges = true,
+                                         bool notifyOtherInstances = true) const = 0;
 
-    virtual io::paths_t sessionProjectsPaths() const = 0;
-    virtual Ret setSessionProjectsPaths(const io::paths_t& paths) = 0;
+    virtual muse::io::paths_t sessionProjectsPaths() const = 0;
+    virtual muse::Ret setSessionProjectsPaths(const muse::io::paths_t& paths) = 0;
 };
 }
-
-#endif // MU_APPSHELL_IAPPSHELLCONFIGURATION_H

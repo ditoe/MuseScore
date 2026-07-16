@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited and others
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -58,6 +58,7 @@ fi
 
 PNG_REF_LIST=$(ls $REFERENCE_DIR/*.png)
 DIFF_NAME_LIST=""
+DIFF_FOUND=false
 for PNG_REF_FILE in $PNG_REF_LIST ; do
     png_file_name=$(basename $PNG_REF_FILE)
     FILE_NAME=${png_file_name%.png}
@@ -66,11 +67,11 @@ for PNG_REF_FILE in $PNG_REF_LIST ; do
     GIF_DIFF_FILE=$OUTPUT_DIR/${FILE_NAME}.diff.gif
     
     if test -f $PNG_CUR_FILE; then
-        code=$(compare -metric AE -fuzz 0.0% $PNG_REF_FILE $PNG_CUR_FILE $PNG_DIFF_FILE 2>&1)
-        if (( $code > 0 )); then
+        (compare -metric AE -fuzz 0.0% $PNG_REF_FILE $PNG_CUR_FILE $PNG_DIFF_FILE 2>&1)
+        code=$?
+        if (( $code > 0)); then
             echo "Different: ref: $PNG_REF_FILE, current: $PNG_CUR_FILE, code: $code"
-            export VTEST_DIFF_FOUND=true
-            echo "VTEST_DIFF_FOUND=$VTEST_DIFF_FOUND" >> $GITHUB_ENV
+            export DIFF_FOUND=true
             DIFF_NAME_LIST+=" "$FILE_NAME
 
             cp $PNG_REF_FILE $OUTPUT_DIR/$FILE_NAME.ref.png
@@ -87,8 +88,11 @@ for PNG_REF_FILE in $PNG_REF_LIST ; do
     fi
 done
 
+
 # Generate html report
-if [ "$VTEST_DIFF_FOUND" == "true" ]; then
+if [ "$DIFF_FOUND" == "true" ]; then
+    export VTEST_DIFF_FOUND=true
+    echo "VTEST_DIFF_FOUND=$VTEST_DIFF_FOUND" >> $GITHUB_ENV
 
     echo "Generate html report"
     HTML=$OUTPUT_DIR/vtest_compare.html

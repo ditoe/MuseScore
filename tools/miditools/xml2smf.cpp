@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -110,14 +110,14 @@ int main(int argc, char* argv[])
 
     XmlReader e(in);
     while (e.readNextStartElement()) {
-        const QStringRef& tag(e.name());
+        const QStringView tag(e.name());
         if (tag == "SMF") {
             while (e.readNextStartElement()) {
-                const QStringRef& tag(e.name());
+                const QStringView tag(e.name());
                 if (tag == "Track") {
                     MidiTrack* track = new MidiTrack(&mf);
                     while (e.readNextStartElement()) {
-                        const QStringRef& tag(e.name());
+                        const QStringView tag(e.name());
                         if (tag == "NoteOff") {
                             MidiEventType t = MidiEventType::NOTEOFF;
                             int tick        = e.intAttribute("tick");

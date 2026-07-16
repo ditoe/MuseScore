@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -89,12 +89,12 @@ void PageFormat::read206(XmlReader& e)
             e.unknown();
         }
     }
-    double w1        = _size.width() - _oddLeftMargin - _oddRightMargin;
-    double w2        = _size.width() - _evenLeftMargin - _evenRightMargin;
+    double w1 = _size.width() - _oddLeftMargin - _oddRightMargin;
+    double w2 = _size.width() - _evenLeftMargin - _evenRightMargin;
     _printableWidth = std::min(w1, w2);       // silently adjust right margins
 }
 
-static void initPageFormat(MStyle* style, PageFormat* pf)
+void initPageFormat(MStyle* style, PageFormat* pf)
 {
     SizeF sz;
     sz.setWidth(style->value(Sid::pageWidth).toReal());
@@ -110,7 +110,7 @@ static void initPageFormat(MStyle* style, PageFormat* pf)
     pf->setTwosided(style->value(Sid::pageTwosided).toBool());
 }
 
-static void setPageFormat(MStyle* style, const PageFormat& pf)
+void setPageFormat(MStyle* style, const PageFormat& pf)
 {
     style->set(Sid::pageWidth,            pf.size().width());
     style->set(Sid::pageHeight,           pf.size().height());

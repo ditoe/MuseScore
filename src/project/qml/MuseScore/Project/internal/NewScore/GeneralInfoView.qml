@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Project 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Project
 
 Column {
     id: root
@@ -67,10 +68,10 @@ Column {
 
             title: qsTrc("project", "Title")
 
-            info: qsTrc("project", "Untitled score")
+            defaultText: qsTrc("project", "Untitled score")
 
-            navigation.panel: root.navigationPanel
-            navigation.column: 0
+            navigationPanel: root.navigationPanel
+            navigationColumn: 0
         }
         GeneralInfoItem {
             id: composerInfo
@@ -81,10 +82,10 @@ Column {
 
             title: qsTrc("project", "Composer")
 
-            info: qsTrc("project", "Composer / arranger")
+            defaultText: qsTrc("project", "Composer / arranger")
 
-            navigation.panel: root.navigationPanel
-            navigation.column: 1
+            navigationPanel: root.navigationPanel
+            navigationColumn: 1
         }
     }
 
@@ -94,7 +95,7 @@ Column {
 
         height: 60
 
-        property real childWidth: (width - (spacing * 2)) / 3
+        property real childWidth: (width - spacing) / 2
 
         spacing: 20
 
@@ -107,10 +108,8 @@ Column {
 
             title: qsTrc("project", "Subtitle")
 
-            info: qsTrc("project", "Subtitle")
-
-            navigation.panel: root.navigationPanel
-            navigation.column: 2
+            navigationPanel: root.navigationPanel
+            navigationColumn: 2
         }
 
         GeneralInfoItem {
@@ -122,22 +121,23 @@ Column {
 
             title: qsTrc("project", "Lyricist")
 
-            navigation.panel: root.navigationPanel
-            navigation.column: 3
+            navigationPanel: root.navigationPanel
+            navigationColumn: 3
         }
+    }
 
-        GeneralInfoItem {
-            id: copyrightInfo
+    GeneralInfoItem {
+        id: copyrightInfo
 
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: parent.childWidth
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-            //: The caption of a field to specify copyright information
-            title: qsTrc("project", "Copyright")
+        isMultiLineEdit: true
 
-            navigation.panel: root.navigationPanel
-            navigation.column: 4
-        }
+        //: The caption of a field to specify copyright information
+        title: qsTrc("project", "Copyright")
+
+        navigationPanel: root.navigationPanel
+        navigationColumn: 4
     }
 }

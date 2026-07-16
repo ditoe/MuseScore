@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,19 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_MASTERNOTATION_H
-#define MU_NOTATION_MASTERNOTATION_H
+#pragma once
 
 #include <memory>
 
-#include "modularity/ioc.h"
-#include "types/retval.h"
-#include "project/projecttypes.h"
+#include "async/notification.h"
 
 #include "notation.h"
 #include "../imasternotation.h"
 
 namespace mu::engraving {
+class Excerpt;
 class MasterScore;
 }
 
@@ -45,10 +43,12 @@ class MasterNotation : public IMasterNotation, public Notation, public std::enab
 public:
     ~MasterNotation();
 
-    Ret setupNewScore(engraving::MasterScore* score, const ScoreCreateOptions& options) override;
+    project::INotationProject* project() const override;
+
+    muse::Ret setupNewScore(engraving::MasterScore* score, const ScoreCreateOptions& options) override;
     void applyOptions(engraving::MasterScore* score, const ScoreCreateOptions& options, bool createdFromTemplate = false) override;
     engraving::MasterScore* masterScore() const override;
-    void setMasterScore(engraving::MasterScore* masterScore) override;
+    void setMasterScore(engraving::MasterScore* masterScore, bool disablePlayback = false) override;
 
     INotationPtr notation() override;
     int mscVersion() const override;
@@ -56,26 +56,30 @@ public:
     IExcerptNotationPtr createEmptyExcerpt(const QString& name = QString()) const override;
 
     const ExcerptNotationList& excerpts() const override;
-    async::Notification excerptsChanged() const override;
+    muse::async::Notification excerptsChanged() const override;
     const ExcerptNotationList& potentialExcerpts() const override;
 
     void initExcerpts(const ExcerptNotationList& excerpts) override;
     void setExcerpts(const ExcerptNotationList& excerpts) override;
-    void resetExcerpt(IExcerptNotationPtr excerptNotation) override;
+    void resetExcerpt(IExcerptNotationPtr& excerptNotation) override;
     void sortExcerpts(ExcerptNotationList& excerpts) override;
 
     void setExcerptIsOpen(const INotationPtr excerptNotation, bool open) override;
 
     INotationPartsPtr parts() const override;
     bool hasParts() const override;
-    async::Notification hasPartsChanged() const override;
+    muse::async::Notification hasPartsChanged() const override;
 
     INotationPlaybackPtr playback() const override;
+    void initNotationSoloMuteState(const INotationPtr notation) override;
+
+    INotationAutomationPtr automation() const override;
 
 private:
+    friend class project::NotationProject;
+    explicit MasterNotation(project::INotationProject* project, const muse::modularity::ContextPtr& iocCtx);
 
-    friend class NotationCreator;
-    explicit MasterNotation();
+    void initAfterSettingScore(const engraving::MasterScore* score, bool disablePlayback = false);
 
     void initExcerptNotations(const std::vector<engraving::Excerpt*>& excerpts);
     void addExcerptsToMasterScore(const std::vector<engraving::Excerpt*>& excerpts);
@@ -92,10 +96,13 @@ private:
 
     void markScoreAsNeedToSave();
 
+    project::INotationProject* m_project = nullptr;
+
     ExcerptNotationList m_excerpts;
-    async::Notification m_excerptsChanged;
+    muse::async::Notification m_excerptsChanged;
     INotationPlaybackPtr m_notationPlayback = nullptr;
-    async::Notification m_hasPartsChanged;
+    INotationAutomationPtr m_notationAutomation = nullptr;
+    muse::async::Notification m_hasPartsChanged;
 
     mutable ExcerptNotationList m_potentialExcerpts;
 
@@ -108,5 +115,3 @@ private:
 
 using MasterNotationPtr = std::shared_ptr<MasterNotation>;
 }
-
-#endif // MU_NOTATION_MASTERNOTATION_H

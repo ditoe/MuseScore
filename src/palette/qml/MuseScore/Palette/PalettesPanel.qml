@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Layouts
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Palette 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Palette
 
 import "internal"
 
@@ -34,7 +33,7 @@ Item {
     id: root
 
     property NavigationSection navigationSection: null
-    property NavigationPanel navigationPanel: palettesPanelHeader.navigation // first panel
+    property int navigationOrderStart: 1
 
     property alias contextMenuModel: contextMenuModel
 
@@ -93,7 +92,11 @@ Item {
             popupAnchorItem: root
 
             navigation.section: root.navigationSection
-            navigation.order: 2
+            navigation.order: root.navigationOrderStart
+
+            onApplyCurrentPaletteElementRequested: {
+                root.applyCurrentPaletteElement()
+            }
 
             onAddCustomPaletteRequested: function(paletteName) {
                 paletteTree.insertCustomPalette(0, paletteName)
@@ -127,7 +130,7 @@ Item {
             verticalAlignment: Qt.AlignTop
             wrapMode: Text.WordWrap
 
-            visible: !paletteTree.isResultFound
+            visible: !searchHint.visible && !paletteTree.isResultFound
         }
 
         PaletteTree {

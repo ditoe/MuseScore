@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,25 +20,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __NOTELINE_H__
-#define __NOTELINE_H__
+#ifndef MU_ENGRAVING_NOTELINE_H
+#define MU_ENGRAVING_NOTELINE_H
 
 #include "textlinebase.h"
 
 namespace mu::engraving {
-class Note;
+class NoteLineSegment final : public TextLineBaseSegment
+{
+    OBJECT_ALLOCATOR(engraving, NoteLineSegment)
+    DECLARE_CLASSOF(ElementType::NOTELINE_SEGMENT)
 
-//---------------------------------------------------------
-//   @@ NoteLine
-//---------------------------------------------------------
+public:
+    NoteLineSegment(Spanner* sp, System* parent);
+
+    NoteLine* noteLine() const { return toNoteLine(spanner()); }
+
+    NoteLineSegment* clone() const override { return new NoteLineSegment(*this); }
+
+    EngravingObject* propertyDelegate(Pid) const override;
+};
 
 class NoteLine final : public TextLineBase
 {
     OBJECT_ALLOCATOR(engraving, NoteLine)
     DECLARE_CLASSOF(ElementType::NOTELINE)
-
-    Note* _startNote;
-    Note* _endNote;
 
 public:
     NoteLine(EngravingItem* parent);
@@ -47,11 +53,27 @@ public:
 
     NoteLine* clone() const override { return new NoteLine(*this); }
 
-    void setStartNote(Note* n) { _startNote = n; }
-    Note* startNote() const { return _startNote; }
-    void setEndNote(Note* n) { _endNote = n; }
-    Note* endNote() const { return _endNote; }
     LineSegment* createLineSegment(System* parent) override;
+
+    PropertyValue propertyDefault(Pid) const override;
+    PropertyValue getProperty(Pid) const override;
+    bool setProperty(Pid propertyId, const PropertyValue&) override;
+
+    bool allowTimeAnchor() const override { return false; }
+
+    NoteLineEndPlacement lineEndPlacement() { return m_lineEndPlacement; }
+    void setLineEndPlacement(NoteLineEndPlacement v) { m_lineEndPlacement = v; }
+
+    void reset() override;
+
+    bool enforceMinLength() { return m_lineEndPlacement != NoteLineEndPlacement::LEFT_EDGE; }
+
+protected:
+    Sid defaultPosSid() const override;
+    bool isInSpannerMap() const override { return false; }
+
+private:
+    NoteLineEndPlacement m_lineEndPlacement = NoteLineEndPlacement::OFFSET_ENDS;
 };
 } // namespace mu::engraving
 #endif

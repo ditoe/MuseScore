@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -99,9 +99,9 @@ const Measure* MeasureRepeat::referringMeasure(const Measure* measure) const
 ///   returns the measure repeat number's bounding rectangle
 //---------------------------------------------------------
 
-PointF MeasureRepeat::numberPosition(const mu::RectF& numberBbox) const
+PointF MeasureRepeat::numberPosition(const RectF& numberBbox) const
 {
-    double x = (symBbox(layoutData()->symId).width() - numberBbox.width()) * .5;
+    double x = (symBbox(ldata()->symId).width() - numberBbox.width()) * .5;
     // -pos().y(): relative to topmost staff line
     // - 0.5 * r.height(): relative to the baseline of the number symbol
     // (rather than the center)
@@ -110,28 +110,16 @@ PointF MeasureRepeat::numberPosition(const mu::RectF& numberBbox) const
     if (staffType() && staffType()->lines() == 1) {
         staffTop -= 2.0 * spatium();
     }
-    double y = std::min(staffTop, -symBbox(layoutData()->symId).height() / 2) + m_numberPos * spatium() - 0.5 * numberBbox.height();
+    double y = std::min(staffTop, -symBbox(ldata()->symId).height() / 2) + absoluteFromSpatium(m_numberPos) - 0.5 * numberBbox.height();
 
     return PointF(x, y);
 }
 
 RectF MeasureRepeat::numberRect() const
 {
-    RectF r = symBbox(layoutData()->numberSym);
+    RectF r = symBbox(ldata()->numberSym);
     r.translate(numberPosition(r));
     return r;
-}
-
-//---------------------------------------------------------
-//   shape
-//---------------------------------------------------------
-
-Shape MeasureRepeat::shape() const
-{
-    Shape shape;
-    shape.add(numberRect());
-    shape.add(symBbox(layoutData()->symId));
-    return shape;
 }
 
 //---------------------------------------------------------
@@ -175,7 +163,7 @@ bool MeasureRepeat::setProperty(Pid propertyId, const PropertyValue& v)
         setNumMeasures(v.toInt());
         break;
     case Pid::MEASURE_REPEAT_NUMBER_POS:
-        setNumberPos(v.toDouble());
+        setNumberPos(v.value<Spatium>());
         triggerLayout();
         break;
     default:
@@ -202,7 +190,16 @@ Fraction MeasureRepeat::ticks() const
 
 String MeasureRepeat::accessibleInfo() const
 {
-    return mtrc("engraving", "%1; Duration: %n measure(s)", nullptr, numMeasures()).arg(EngravingItem::accessibleInfo());
+    return muse::mtrc("engraving", "%1; Duration: %Ln measure(s)", nullptr, numMeasures()).arg(EngravingItem::accessibleInfo());
+}
+
+//---------------------------------------------------------
+//   subtypeUserName
+//---------------------------------------------------------
+
+muse::TranslatableString MeasureRepeat::subtypeUserName() const
+{
+    return muse::TranslatableString("engraving", "%Ln measure(s)", nullptr, numMeasures());
 }
 
 //---------------------------------------------------------

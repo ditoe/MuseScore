@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,16 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <iostream>
+
 #include <sstream>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <vector>
 
-#include "braille/thirdparty/liblouis/liblouis/internal.h"
-#include "braille/thirdparty/liblouis/liblouis/liblouis.h"
+#include <QString>
+
+#include "internal.h"
+#include "liblouis.h"
 
 #define WIDECHARS_ARE_UCS4
 

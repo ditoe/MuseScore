@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,14 +25,14 @@
 #include <algorithm>
 #include <vector>
 
-#include "types/typesconv.h"
-
-#include "changeMap.h"
+#include "barline.h"
+#include "keysig.h"
 #include "measure.h"
 #include "score.h"
 #include "staff.h"
 #include "system.h"
 #include "tempo.h"
+#include "text.h"
 
 #include "log.h"
 
@@ -53,16 +53,24 @@ static const ElementStyle voltaStyle {
     { Sid::voltaAlign,                         Pid::BEGIN_TEXT_ALIGN },
     { Sid::voltaAlign,                         Pid::CONTINUE_TEXT_ALIGN },
     { Sid::voltaAlign,                         Pid::END_TEXT_ALIGN },
+    { Sid::voltaPosition,                      Pid::BEGIN_TEXT_POSITION },
+    { Sid::voltaPosition,                      Pid::CONTINUE_TEXT_POSITION },
+    { Sid::voltaPosition,                      Pid::END_TEXT_POSITION },
     { Sid::voltaOffset,                        Pid::BEGIN_TEXT_OFFSET },
     { Sid::voltaOffset,                        Pid::CONTINUE_TEXT_OFFSET },
     { Sid::voltaOffset,                        Pid::END_TEXT_OFFSET },
+    { Sid::voltaMusicalSymbolSize,             Pid::BEGIN_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::voltaMusicalSymbolSize,             Pid::CONTINUE_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::voltaMusicalSymbolSize,             Pid::END_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::BEGIN_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::CONTINUE_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::END_TEXT_MUSICAL_SYMBOLS_SCALE },
     { Sid::voltaLineWidth,                     Pid::LINE_WIDTH },
     { Sid::voltaLineStyle,                     Pid::LINE_STYLE },
     { Sid::voltaDashLineLen,                   Pid::DASH_LINE_LEN },
     { Sid::voltaDashGapLen,                    Pid::DASH_GAP_LEN },
     { Sid::voltaHook,                          Pid::BEGIN_HOOK_HEIGHT },
     { Sid::voltaHook,                          Pid::END_HOOK_HEIGHT },
-    { Sid::voltaPosAbove,                      Pid::OFFSET },
     { Sid::voltaFontSpatiumDependent,          Pid::TEXT_SIZE_SPATIUM_DEPENDENT },
 };
 
@@ -73,13 +81,15 @@ static const ElementStyle voltaStyle {
 VoltaSegment::VoltaSegment(Volta* sp, System* parent)
     : TextLineBaseSegment(ElementType::VOLTA_SEGMENT, sp, parent, ElementFlag::MOVABLE | ElementFlag::ON_STAFF | ElementFlag::SYSTEM)
 {
+    m_text->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
+    m_endText->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
 }
 
 //---------------------------------------------------------
 //   propertyDelegate
 //---------------------------------------------------------
 
-EngravingItem* VoltaSegment::propertyDelegate(Pid pid)
+EngravingObject* VoltaSegment::propertyDelegate(Pid pid) const
 {
     if (pid == Pid::BEGIN_HOOK_TYPE || pid == Pid::END_HOOK_TYPE || pid == Pid::VOLTA_ENDING) {
         return spanner();
@@ -117,8 +127,8 @@ Volta::Volta(EngravingItem* parent)
 ///
 void Volta::setEndings(const std::vector<int>& l)
 {
-    _endings = l;
-    std::sort(_endings.begin(), _endings.end());
+    m_endings = l;
+    std::sort(m_endings.begin(), m_endings.end());
 }
 
 //---------------------------------------------------------
@@ -144,7 +154,6 @@ String Volta::text() const
 //---------------------------------------------------------
 
 static const ElementStyle voltaSegmentStyle {
-    { Sid::voltaPosAbove,                      Pid::OFFSET },
     { Sid::voltaMinDistance,                   Pid::MIN_DISTANCE },
 };
 
@@ -176,10 +185,10 @@ bool Volta::hasEnding(int repeat) const
 
 int Volta::firstEnding() const
 {
-    if (_endings.empty()) {
+    if (m_endings.empty()) {
         return 0;
     }
-    return _endings.front();
+    return m_endings.front();
 }
 
 //---------------------------------------------------------
@@ -188,10 +197,10 @@ int Volta::firstEnding() const
 
 int Volta::lastEnding() const
 {
-    if (_endings.empty()) {
+    if (m_endings.empty()) {
         return 0;
     }
-    return _endings.back();
+    return m_endings.back();
 }
 
 //---------------------------------------------------------
@@ -258,31 +267,21 @@ PropertyValue Volta::propertyDefault(Pid propertyId) const
     case Pid::PLACEMENT:
         return PlacementV::ABOVE;
 
+    case Pid::TEXT_STYLE:
+        return TextStyleType::VOLTA;
+
+    case Pid::BEGIN_FILLED_ARROW_HEIGHT:   // No arrow endings for voltas
+    case Pid::BEGIN_FILLED_ARROW_WIDTH:
+    case Pid::END_FILLED_ARROW_HEIGHT:
+    case Pid::END_FILLED_ARROW_WIDTH:
+    case Pid::BEGIN_LINE_ARROW_HEIGHT:
+    case Pid::BEGIN_LINE_ARROW_WIDTH:
+    case Pid::END_LINE_ARROW_HEIGHT:
+    case Pid::END_LINE_ARROW_WIDTH:
+        return 0.0;
+
     default:
         return TextLineBase::propertyDefault(propertyId);
-    }
-}
-
-//---------------------------------------------------------
-//   setVelocity
-//---------------------------------------------------------
-
-void Volta::setVelocity() const
-{
-    Measure* startMeasure = Spanner::startMeasure();
-    Measure* endMeasure = Spanner::endMeasure();
-
-    if (startMeasure && endMeasure) {
-        if (!endMeasure->repeatEnd()) {
-            return;
-        }
-
-        Fraction startTick  = Fraction::fromTicks(startMeasure->tick().ticks() - 1);
-        Fraction endTick    = Fraction::fromTicks((endMeasure->tick() + endMeasure->ticks()).ticks() - 1);
-        Staff* st      = staff();
-        ChangeMap& velo = st->velocities();
-        auto prevVelo  = velo.val(startTick);
-        velo.addFixed(endTick, prevVelo);
     }
 }
 
@@ -300,8 +299,8 @@ void Volta::setChannel() const
             return;
         }
 
-        Fraction startTick = startMeasure->tick() - Fraction::fromTicks(1);
-        Fraction endTick  = endMeasure->endTick() - Fraction::fromTicks(1);
+        Fraction startTick = startMeasure->tick() - Fraction::eps();
+        Fraction endTick  = endMeasure->endTick() - Fraction::eps();
         Staff* st = staff();
         for (voice_idx_t voice = 0; voice < VOICES; ++voice) {
             int channel = st->channel(startTick, voice);
@@ -323,8 +322,8 @@ void Volta::setTempo() const
         if (!endMeasure->repeatEnd()) {
             return;
         }
-        Fraction startTick = startMeasure->tick() - Fraction::fromTicks(1);
-        Fraction endTick  = endMeasure->endTick() - Fraction::fromTicks(1);
+        Fraction startTick = startMeasure->tick() - Fraction::eps();
+        Fraction endTick  = endMeasure->endTick() - Fraction::eps();
         BeatsPerSecond tempoBeforeVolta = score()->tempomap()->tempo(startTick.ticks());
         score()->setTempo(endTick, tempoBeforeVolta);
     }
@@ -337,6 +336,87 @@ void Volta::setTempo() const
 String Volta::accessibleInfo() const
 {
     return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), text());
+}
+
+PointF Volta::linePos(Grip grip, System** system) const
+{
+    bool start = grip == Grip::START;
+
+    Segment* segment = score()->tick2leftSegment(start ? tick() : tick2(), true,
+                                                 SegmentType::ChordRest | SegmentType::StartRepeatBarLine | SegmentType::EndBarLine);
+    if (!segment) {
+        return PointF();
+    }
+
+    const Measure* measure = segment->measure();
+    bool isAtSystemStart = segment->rtick().isZero() && measure && measure->system() && measure->isFirstInSystem();
+    bool searchForPrevBarline = start ? segment->rtick().isZero() && (measure->repeatStart() || !isAtSystemStart) : true;
+
+    SegmentType barlineType = start ? (SegmentType::StartRepeatBarLine | SegmentType::EndBarLine) : SegmentType::EndBarLine;
+
+    if (searchForPrevBarline) {
+        Segment* prev = segment;
+        while (prev && !prev->isType(barlineType) && prev->tick() == segment->tick()) {
+            prev = prev->prev1MMenabled();
+        }
+
+        if (prev && prev->isType(barlineType)) {
+            segment = prev;
+        }
+    }
+
+    if (start && !segment->isType(SegmentType::BarLineTypes) && style().styleB(Sid::voltaAlignStartBeforeKeySig)) {
+        Segment* prev = segment;
+        while (prev && !prev->isType(SegmentType::KeySig) && prev->tick() == segment->tick()) {
+            prev = prev->prev1MMenabled();
+        }
+        if (prev && prev->isType(SegmentType::KeySig)) {
+            segment = prev;
+        }
+    }
+
+    *system = segment->measure()->system();
+    double x = segment->x() + segment->measure()->x();
+
+    if (start) {
+        bool alignLeftOfRepeatBarLine = false;
+        if (segment->isChordRestType()) {
+            x -= style().styleAbsolute(Sid::barNoteDistance);
+        } else if (segment->isKeySigType()) {
+            KeySig* sig = toKeySig(segment->element(track()));
+            if (sig && !sig->ldata()->keySymbols.empty()) {
+                KeySym keySym = sig->ldata()->keySymbols.front();
+                PointF cutoutNW = score()->engravingFont()->smuflAnchor(keySym.sym, SmuflAnchorId::cutOutNW, 1.0);
+                x += cutoutNW.x();
+            }
+        } else if (segment->segmentType() & SegmentType::BarLineTypes && !isAtSystemStart) {
+            x += segment->width();
+            const BarLine* barline = toBarLine(segment->element(track()));
+            alignLeftOfRepeatBarLine = barline && barline->barLineType() == BarLineType::END_REPEAT
+                                       && style().styleB(Sid::voltaAlignEndLeftOfBarline);
+            if (alignLeftOfRepeatBarLine) {
+                x -= style().styleAbsolute(Sid::endBarWidth);
+            }
+        }
+        x += (isAtSystemStart || alignLeftOfRepeatBarLine ? 0.5 : -0.5) * absoluteFromSpatium(lineWidth());
+    } else {
+        if ((*system) && segment->tick() == (*system)->endTick()) {
+            staff_idx_t si = backSegment()->effectiveStaffIdx();
+            if (si == muse::nidx) {
+                return PointF(x, 0.0);
+            }
+            x += segment->staffShape(si).right();
+            x -= 0.5 * absoluteFromSpatium(lineWidth());
+        } else if (segment->segmentType() & SegmentType::BarLineTypes) {
+            BarLine* barLine = toBarLine(segment->element(track()));
+            if (barLine->barLineType() == BarLineType::END_REPEAT || barLine->barLineType() == BarLineType::END_START_REPEAT) {
+                x += symWidth(SymId::repeatDot) + style().styleAbsolute(Sid::repeatBarlineDotSeparation);
+            }
+            x += 0.5 * absoluteFromSpatium(lineWidth());
+        }
+    }
+
+    return PointF(x, 0.0);
 }
 
 //---------------------------------------------------------
@@ -357,5 +437,10 @@ void Volta::setVoltaType(Type val)
 Volta::Type Volta::voltaType() const
 {
     return endHookType() != HookType::NONE ? Type::CLOSED : Type::OPEN;
+}
+
+Sid Volta::defaultPosSid() const
+{
+    return Sid::voltaPosAbove;
 }
 }

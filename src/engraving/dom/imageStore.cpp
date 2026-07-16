@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,8 +22,7 @@
 
 #include "imageStore.h"
 
-#include "io/fileinfo.h"
-#include "io/file.h"
+#include "io/path.h"
 
 #include "image.h"
 #include "score.h"
@@ -31,7 +30,8 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 
 namespace mu::engraving {
 ImageStore imageStore;  // the global image store
@@ -40,9 +40,9 @@ ImageStore imageStore;  // the global image store
 //   ImageStoreItem
 //---------------------------------------------------------
 
-ImageStoreItem::ImageStoreItem(const path_t& p)
+ImageStoreItem::ImageStoreItem(const std::string& type)
+    : m_type(type)
 {
-    setPath(p);
 }
 
 //---------------------------------------------------------
@@ -52,7 +52,7 @@ ImageStoreItem::ImageStoreItem(const path_t& p)
 
 void ImageStoreItem::dereference(Image* image)
 {
-    _references.remove(image);
+    m_references.remove(image);
 }
 
 //---------------------------------------------------------
@@ -62,7 +62,7 @@ void ImageStoreItem::dereference(Image* image)
 
 void ImageStoreItem::reference(Image* image)
 {
-    _references.push_back(image);
+    m_references.push_back(image);
 }
 
 //---------------------------------------------------------
@@ -72,7 +72,7 @@ void ImageStoreItem::reference(Image* image)
 
 bool ImageStoreItem::isUsed(Score* score) const
 {
-    for (Image* image : _references) {
+    for (Image* image : m_references) {
         if (image->score() == score && image->explicitParent()) {
             return true;
         }
@@ -81,49 +81,19 @@ bool ImageStoreItem::isUsed(Score* score) const
 }
 
 //---------------------------------------------------------
-//   load
-//---------------------------------------------------------
-
-void ImageStoreItem::load()
-{
-    if (!_buffer.empty()) {
-        return;
-    }
-    File inFile(_path);
-    if (!inFile.open(IODevice::ReadOnly)) {
-        LOGD("Cannot open picture file");
-        return;
-    }
-    _buffer = inFile.readAll();
-    inFile.close();
-
-    _hash = cryptographicHash()->hash(_buffer, ICryptographicHash::Algorithm::Md4);
-}
-
-//---------------------------------------------------------
 //   hashName
 //---------------------------------------------------------
 
-String ImageStoreItem::hashName() const
+std::string ImageStoreItem::hashName() const
 {
     const char hex[17] = "0123456789abcdef";
     char p[33];
     for (int i = 0; i < 16; ++i) {
-        p[i * 2]     = hex[(_hash[i] >> 4) & 0xf];
-        p[i * 2 + 1] = hex[_hash[i] & 0xf];
+        p[i * 2]     = hex[(m_hash[i] >> 4) & 0xf];
+        p[i * 2 + 1] = hex[m_hash[i] & 0xf];
     }
     p[32] = 0;
-    return String::fromAscii(p) + u"." + _type;
-}
-
-//---------------------------------------------------------
-//   setPath
-//---------------------------------------------------------
-
-void ImageStoreItem::setPath(const path_t& val)
-{
-    _path = val;
-    _type = FileInfo::suffix(_path);
+    return std::string(p) + "." + m_type;
 }
 
 //---------------------------------------------------------
@@ -144,37 +114,29 @@ inline static int toInt(char c)
 
 ImageStore::~ImageStore()
 {
-    DeleteAll(_items);
+    muse::DeleteAll(m_items);
 }
 
 //---------------------------------------------------------
 //   getImage
 //---------------------------------------------------------
 
-ImageStoreItem* ImageStore::getImage(const path_t& path) const
+ImageStoreItem* ImageStore::getImage(std::string name) const
 {
-    String s = FileInfo(path).completeBaseName();
-    if (s.size() != 32) {
-        //
-        // some limited support for backward compatibility
-        //
-        for (ImageStoreItem* item: _items) {
-            if (item->path() == path) {
-                return item;
-            }
-        }
+    name = muse::io::completeBasename(name).toStdString();
+    if (name.size() != 32) {
         return nullptr;
     }
     ByteArray hash(16);
     for (int i = 0; i < 16; ++i) {
-        hash[i] = toInt(s.at(i * 2).toAscii()) * 16 + toInt(s.at(i * 2 + 1).toAscii());
+        hash[i] = toInt(name.at(i * 2)) * 16 + toInt(name.at(i * 2 + 1));
     }
-    for (ImageStoreItem* item : _items) {
+    for (ImageStoreItem* item : m_items) {
         if (item->hash() == hash) {
             return item;
         }
     }
-    LOGW() << "image not found: " << path;
+    LOGW() << "image not found: " << name;
     return nullptr;
 }
 
@@ -182,17 +144,17 @@ ImageStoreItem* ImageStore::getImage(const path_t& path) const
 //   add
 //---------------------------------------------------------
 
-ImageStoreItem* ImageStore::add(const path_t& path, const ByteArray& ba)
+ImageStoreItem* ImageStore::add(const std::string& name, const ByteArray& ba)
 {
     ByteArray hash = cryptographicHash()->hash(ba, ICryptographicHash::Algorithm::Md4);
-    for (ImageStoreItem* item : _items) {
+    for (ImageStoreItem* item : m_items) {
         if (item->hash() == hash) {
             return item;
         }
     }
-    ImageStoreItem* item = new ImageStoreItem(path);
+    ImageStoreItem* item = new ImageStoreItem(muse::io::suffix(name));
     item->set(ba, hash);
-    _items.push_back(item);
+    m_items.push_back(item);
     return item;
 }
 
@@ -202,15 +164,15 @@ ImageStoreItem* ImageStore::add(const path_t& path, const ByteArray& ba)
 
 void ImageStore::clearUnused()
 {
-    _items.erase(
-        std::remove_if(_items.begin(), _items.end(), [](ImageStoreItem* i) {
+    m_items.erase(
+        std::remove_if(m_items.begin(), m_items.end(), [](ImageStoreItem* i) {
         const bool remove = !i->isUsed();
         if (remove) {
             delete i;
         }
         return remove;
     }),
-        _items.end()
+        m_items.end()
         );
 }
 }

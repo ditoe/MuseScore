@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,7 +25,7 @@
 
 //---------------------------------------------------------
 //   SymId
-//    must be in sync with symNames
+//    must be in sync with s_symNames in symnames.cpp
 //---------------------------------------------------------
 enum class SymId {
     noSym,
@@ -2999,6 +2999,89 @@ enum class SymId {
     flag64thUpStraight,
     flag8thDownStraight,
     flag8thUpStraight,
+
+    timeSig0Large,
+    timeSig0Small,
+    timeSig0Narrow,
+    timeSig1Large,
+    timeSig1Small,
+    timeSig1Narrow,
+    timeSig2Large,
+    timeSig2Small,
+    timeSig2Narrow,
+    timeSig3Large,
+    timeSig3Small,
+    timeSig3Narrow,
+    timeSig4Large,
+    timeSig4Small,
+    timeSig4Narrow,
+    timeSig5Large,
+    timeSig5Small,
+    timeSig5Narrow,
+    timeSig6Large,
+    timeSig6Small,
+    timeSig6Narrow,
+    timeSig7Large,
+    timeSig7Small,
+    timeSig7Narrow,
+    timeSig8Large,
+    timeSig8Small,
+    timeSig8Narrow,
+    timeSig9Large,
+    timeSig9Small,
+    timeSig9Narrow,
+    timeSigBracketLeftSmallLarge,
+    timeSigBracketLeftSmallNarrow,
+    timeSigBracketRightSmallLarge,
+    timeSigBracketRightSmallNarrow,
+    timeSigBracketLeftLarge,
+    timeSigBracketLeftNarrow,
+    timeSigBracketRightLarge,
+    timeSigBracketRightNarrow,
+    timeSigCommonLarge,
+    timeSigCommonNarrow,
+    timeSigCutCommonLarge,
+    timeSigCutCommonNarrow,
+    timeSigPlusLarge,
+    timeSigPlusNarrow,
+    timeSigPlusSmallLarge,
+    timeSigPlusSmallNarrow,
+    timeSigFractionalSlashLarge,
+    timeSigFractionalSlashNarrow,
+    timeSigEqualsLarge,
+    timeSigEqualsNarrow,
+    timeSigMinusLarge,
+    timeSigMinusNarrow,
+    timeSigMultiplyLarge,
+    timeSigMultiplyNarrow,
+    timeSigParensLeftSmallLarge,
+    timeSigParensLeftSmallNarrow,
+    timeSigParensRightSmallLarge,
+    timeSigParensRightSmallNarrow,
+    timeSigParensLeftLarge,
+    timeSigParensLeftNarrow,
+    timeSigParensRightLarge,
+    timeSigParensRightNarrow,
+    timeSigCommaEqualsLarge,
+    timeSigCommaEqualsNarrow,
+    timeSigFractionQuarterLarge,
+    timeSigFractionQuarterNarrow,
+    timeSigFractionHalfLarge,
+    timeSigFractionHalfNarrow,
+    timeSigFractionThreeQuartersLarge,
+    timeSigFractionThreeQuartersNarrow,
+    timeSigFractionOneThirdLarge,
+    timeSigFractionOneThirdNarrow,
+    timeSigFractionTwoThirdsLarge,
+    timeSigFractionTwoThirdsNarrow,
+    timeSigXLarge,
+    timeSigXNarrow,
+    timeSigOpenPendereckiLarge,
+    timeSigOpenPendereckiNarrow,
+    timeSigCut2Large,
+    timeSigCut2Narrow,
+    timeSigCut3Large,
+    timeSigCut3Narrow,
 
 //    MuseScore-local symbols, precomposed symbols to mimic some Emmentaler glyphs
 

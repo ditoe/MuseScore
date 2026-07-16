@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,74 +22,114 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/masterscore.h"
-#include "dom/undo.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/editing/transaction/transaction.h"
+#include "engraving/editing/transpose.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String TRANSPOSE_DATA_DIR("transpose_data/");
 
 class Engraving_TransposeTests : public ::testing::Test
 {
+public:
+    void undoTransposeTest(String scoreName)
+    {
+        String readFile(TRANSPOSE_DATA_DIR + scoreName + ".mscx");
+        String writeFile1(scoreName + "01-test.mscx");
+        String reference1(TRANSPOSE_DATA_DIR + scoreName + "01-ref.mscx");
+        String writeFile2(scoreName + "02-test.mscx");
+        String reference2(TRANSPOSE_DATA_DIR + scoreName + "02-ref.mscx");
+
+        MasterScore* score = ScoreRW::readScore(readFile);
+
+        // select all
+        score->cmdSelectAll();
+
+        // transpose major second up
+        score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving transpose tests"), [&](auto& tx) {
+            Transpose::transpose(tx, score, TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4,
+                                 true, true, true);
+        });
+        EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
+
+        // undo
+        EditData ed;
+        score->transactionManager()->undoRedo(true, &ed);
+        EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile2, reference2));
+
+        delete score;
+    }
+
+    void undoDiatonicTransposeTest(String scoreName)
+    {
+        String readFile(TRANSPOSE_DATA_DIR + scoreName + ".mscx");
+        String writeFile1(scoreName + "01-test.mscx");
+        String reference1(TRANSPOSE_DATA_DIR + scoreName + "01-ref.mscx");
+        String writeFile2(scoreName + "02-test.mscx");
+        String reference2(TRANSPOSE_DATA_DIR + scoreName + "02-ref.mscx");
+
+        MasterScore* score = ScoreRW::readScore(readFile);
+        score->doLayout();
+
+        // select all
+        score->cmdSelectAll();
+
+        // transpose diatonic fourth down
+        score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving transpose tests"), [&](auto& tx) {
+            Transpose::transpose(tx, score, TransposeMode::DIATONICALLY, TransposeDirection::DOWN, Key::C, 3,
+                                 true, false, false);
+        });
+        EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
+
+        // undo
+        EditData ed;
+        score->transactionManager()->undoRedo(true, &ed);
+        EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile2, reference2));
+
+        delete score;
+    }
 };
 
 TEST_F(Engraving_TransposeTests, undoTranspose)
 {
-    String readFile(TRANSPOSE_DATA_DIR + "undoTranspose.mscx");
-    String writeFile1("undoTranspose01-test.mscx");
-    String reference1(TRANSPOSE_DATA_DIR + "undoTranspose01-ref.mscx");
-    String writeFile2("undoTranspose02-test.mscx");
-    String reference2(TRANSPOSE_DATA_DIR + "undoTranspose02-ref.mscx");
+    undoTransposeTest(u"undoTranspose");
+}
 
-    MasterScore* score = ScoreRW::readScore(readFile);
+TEST_F(Engraving_TransposeTests, undoTransposeChordSymbols)
+{
+    undoTransposeTest(u"undoTransposeChordSymbols");
+}
 
-    // select all
-    score->cmdSelectAll();
+TEST_F(Engraving_TransposeTests, undoTransposeFretDiagramsChordSymbols)
+{
+    undoTransposeTest(u"undoTransposeFretDiagramsChordSymbols");
+}
 
-    // transpose major second up
-    score->startCmd();
-    score->transpose(TransposeMode::BY_INTERVAL, TransposeDirection::UP, Key::C, 4,
-                     true, true, true);
-    score->endCmd();
-    EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
+TEST_F(Engraving_TransposeTests, undoTransposeFretDiagrams)
+{
+    undoTransposeTest(u"undoTransposeFretDiagrams");
+}
 
-    // undo
-    EditData ed;
-    score->undoStack()->undo(&ed);
-    EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile2, reference2));
+TEST_F(Engraving_TransposeTests, undoDiatonicTransposeChordSymbols)
+{
+    undoDiatonicTransposeTest(u"undoDiatonicTransposeChordSymbols");
+}
 
-    delete score;
+TEST_F(Engraving_TransposeTests, undoDiatonicTransposeFretDiagramsChordSymbols)
+{
+    undoTransposeTest(u"undoDiatonicTransposeFretDiagramsChordSymbols");
+}
+
+TEST_F(Engraving_TransposeTests, undoDiatonicTransposeFretDiagrams)
+{
+    undoTransposeTest(u"undoDiatonicTransposeFretDiagrams");
 }
 
 TEST_F(Engraving_TransposeTests, undoDiatonicTranspose)
 {
-    String readFile(TRANSPOSE_DATA_DIR + "undoDiatonicTranspose.mscx");
-    String writeFile1("undoDiatonicTranspose01-test.mscx");
-    String reference1(TRANSPOSE_DATA_DIR + "undoDiatonicTranspose01-ref.mscx");
-    String writeFile2("undoDiatonicTranspose02-test.mscx");
-    String reference2(TRANSPOSE_DATA_DIR + "undoDiatonicTranspose02-ref.mscx");
-
-    MasterScore* score = ScoreRW::readScore(readFile);
-    score->doLayout();
-
-    // select all
-    score->cmdSelectAll();
-
-    // transpose diatonic fourth down
-    score->startCmd();
-    score->transpose(TransposeMode::DIATONICALLY, TransposeDirection::DOWN, Key::C, 3,
-                     true, false, false);
-    score->endCmd();
-    EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
-
-    // undo
-    EditData ed;
-    score->undoStack()->undo(&ed);
-    EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile2, reference2));
-
-    delete score;
+    undoDiatonicTransposeTest(u"undoDiatonicTranspose");
 }

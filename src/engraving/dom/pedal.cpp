@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,10 +22,14 @@
 
 #include "pedal.h"
 
+#include "chord.h"
 #include "chordrest.h"
 #include "measure.h"
+#include "note.h"
 #include "score.h"
 #include "system.h"
+#include "text.h"
+#include "rest.h"
 
 #include "log.h"
 
@@ -35,7 +39,7 @@ namespace mu::engraving {
 static const ElementStyle pedalStyle {
     { Sid::pedalText,                          Pid::BEGIN_TEXT },
     { Sid::pedalContinueText,                  Pid::CONTINUE_TEXT },
-    { Sid::pedalEndText,                       Pid::END_TEXT },
+    { Sid::pedalRosetteEndText,                Pid::END_TEXT },
     { Sid::pedalFontFace,                      Pid::BEGIN_FONT_FACE },
     { Sid::pedalFontFace,                      Pid::CONTINUE_FONT_FACE },
     { Sid::pedalFontFace,                      Pid::END_FONT_FACE },
@@ -45,9 +49,18 @@ static const ElementStyle pedalStyle {
     { Sid::pedalFontStyle,                     Pid::BEGIN_FONT_STYLE },
     { Sid::pedalFontStyle,                     Pid::CONTINUE_FONT_STYLE },
     { Sid::pedalFontStyle,                     Pid::END_FONT_STYLE },
+    { Sid::pedalMusicalSymbolsScale,           Pid::BEGIN_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::pedalMusicalSymbolsScale,           Pid::CONTINUE_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::pedalMusicalSymbolsScale,           Pid::END_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolSize,             Pid::BEGIN_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolSize,             Pid::CONTINUE_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolSize,             Pid::END_TEXT_MUSIC_SYMBOLS_SIZE },
     { Sid::pedalTextAlign,                     Pid::BEGIN_TEXT_ALIGN },
     { Sid::pedalTextAlign,                     Pid::CONTINUE_TEXT_ALIGN },
     { Sid::pedalTextAlign,                     Pid::END_TEXT_ALIGN },
+    { Sid::pedalPosition,                      Pid::BEGIN_TEXT_POSITION },
+    { Sid::pedalPosition,                      Pid::CONTINUE_TEXT_POSITION },
+    { Sid::pedalPosition,                      Pid::END_TEXT_POSITION },
     { Sid::pedalHookHeight,                    Pid::BEGIN_HOOK_HEIGHT },
     { Sid::pedalHookHeight,                    Pid::END_HOOK_HEIGHT },
     { Sid::pedalLineWidth,                     Pid::LINE_WIDTH },
@@ -55,8 +68,15 @@ static const ElementStyle pedalStyle {
     { Sid::pedalDashGapLen,                    Pid::DASH_GAP_LEN },
     { Sid::pedalPlacement,                     Pid::PLACEMENT },
     { Sid::pedalLineStyle,                     Pid::LINE_STYLE },
-    { Sid::pedalPosBelow,                      Pid::OFFSET },
-    { Sid::pedalFontSpatiumDependent,          Pid::TEXT_SIZE_SPATIUM_DEPENDENT }
+    { Sid::pedalFontSpatiumDependent,          Pid::TEXT_SIZE_SPATIUM_DEPENDENT },
+    { Sid::pedalEndLineArrowHeight,            Pid::END_LINE_ARROW_HEIGHT },
+    { Sid::pedalEndLineArrowWidth,             Pid::END_LINE_ARROW_WIDTH },
+    { Sid::pedalBeginLineArrowHeight,          Pid::BEGIN_LINE_ARROW_HEIGHT },
+    { Sid::pedalBeginLineArrowWidth,           Pid::BEGIN_LINE_ARROW_WIDTH },
+    { Sid::pedalEndFilledArrowHeight,          Pid::END_FILLED_ARROW_HEIGHT },
+    { Sid::pedalEndFilledArrowWidth,           Pid::END_FILLED_ARROW_WIDTH },
+    { Sid::pedalBeginFilledArrowHeight,        Pid::BEGIN_FILLED_ARROW_HEIGHT },
+    { Sid::pedalBeginFilledArrowWidth,         Pid::BEGIN_FILLED_ARROW_WIDTH },
 };
 
 const String Pedal::PEDAL_SYMBOL = u"<sym>keyboardPedalPed</sym>";
@@ -65,26 +85,22 @@ const String Pedal::STAR_SYMBOL = u"<sym>keyboardPedalUp</sym>";
 PedalSegment::PedalSegment(Pedal* sp, System* parent)
     : TextLineBaseSegment(ElementType::PEDAL_SEGMENT, sp, parent, ElementFlag::MOVABLE | ElementFlag::ON_STAFF)
 {
-}
-
-//---------------------------------------------------------
-//   getPropertyStyle
-//---------------------------------------------------------
-
-Sid PedalSegment::getPropertyStyle(Pid pid) const
-{
-    if (pid == Pid::OFFSET) {
-        return spanner()->placeAbove() ? Sid::pedalPosAbove : Sid::pedalPosBelow;
-    }
-    return TextLineBaseSegment::getPropertyStyle(pid);
+    m_text->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
+    m_endText->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
 }
 
 Sid Pedal::getPropertyStyle(Pid pid) const
 {
-    if (pid == Pid::OFFSET) {
-        return placeAbove() ? Sid::pedalPosAbove : Sid::pedalPosBelow;
+    switch (pid) {
+    case Pid::END_TEXT:
+        return lineVisible() ? Sid::pedalEndText : Sid::pedalRosetteEndText;
+    case Pid::BEGIN_TEXT:
+        return beginHookType() == HookType::NONE ? Sid::pedalText : Sid::pedalHookText;
+    case Pid::CONTINUE_TEXT:
+        return beginHookType() == HookType::NONE ? Sid::pedalContinueText : Sid:: pedalContinueHookText;
+    default:
+        return TextLineBase::getPropertyStyle(pid);
     }
-    return TextLineBase::getPropertyStyle(pid);
 }
 
 //---------------------------------------------------------
@@ -105,6 +121,7 @@ Pedal::Pedal(EngravingItem* parent)
 
     resetProperty(Pid::BEGIN_TEXT_PLACE);
     resetProperty(Pid::LINE_VISIBLE);
+    resetProperty(Pid::END_TEXT);
 }
 
 //---------------------------------------------------------
@@ -112,7 +129,6 @@ Pedal::Pedal(EngravingItem* parent)
 //---------------------------------------------------------
 
 static const ElementStyle pedalSegmentStyle {
-    { Sid::pedalPosBelow, Pid::OFFSET },
     { Sid::pedalMinDistance, Pid::MIN_DISTANCE },
 };
 
@@ -132,19 +148,15 @@ engraving::PropertyValue Pedal::propertyDefault(Pid propertyId) const
 {
     switch (propertyId) {
     case Pid::LINE_WIDTH:
-        return style().styleMM(Sid::pedalLineWidth);              // return point, not spatium
+        return style().styleS(Sid::pedalLineWidth);              // return point, not spatium
 
     case Pid::LINE_STYLE:
         return style().styleV(Sid::pedalLineStyle);
 
     case Pid::BEGIN_TEXT:
-        return style().styleV(Sid::pedalText);
-
     case Pid::CONTINUE_TEXT:
-        return style().styleV(Sid::pedalContinueText);
-
     case Pid::END_TEXT:
-        return style().styleV(Sid::pedalEndText);
+        return style().styleV(getPropertyStyle(propertyId));
 
     case Pid::BEGIN_TEXT_PLACE:
     case Pid::CONTINUE_TEXT_PLACE:
@@ -166,9 +178,62 @@ engraving::PropertyValue Pedal::propertyDefault(Pid propertyId) const
     case Pid::PLACEMENT:
         return style().styleV(Sid::pedalPlacement);
 
+    case Pid::TEXT_STYLE:
+        return TextStyleType::PEDAL;
+
     default:
         return TextLineBase::propertyDefault(propertyId);
     }
+}
+
+bool Pedal::setProperty(Pid propertyId, const PropertyValue& v)
+{
+    // Update style flag for text
+    if (propertyId == Pid::BEGIN_HOOK_TYPE) {
+        setBeginHookType(v.value<HookType>());
+
+        PropertyFlags beginTextStyleFlag = beginText() == propertyDefault(Pid::BEGIN_TEXT).value<String>()
+                                           ? PropertyFlags::STYLED : PropertyFlags::UNSTYLED;
+        setPropertyFlags(Pid::BEGIN_TEXT, beginTextStyleFlag);
+        PropertyFlags continueTextStyleFlag = continueText() == propertyDefault(Pid::CONTINUE_TEXT).value<String>()
+                                              ? PropertyFlags::STYLED : PropertyFlags::UNSTYLED;
+        setPropertyFlags(Pid::CONTINUE_TEXT, continueTextStyleFlag);
+    } else if (propertyId == Pid::LINE_VISIBLE) {
+        setLineVisible(v.toBool());
+        PropertyFlags endTextStyleFlag = endText() == propertyDefault(Pid::END_TEXT).value<String>()
+                                         ? PropertyFlags::STYLED : PropertyFlags::UNSTYLED;
+        setPropertyFlags(Pid::END_TEXT, endTextStyleFlag);
+    } else {
+        return TextLineBase::setProperty(propertyId, v);
+    }
+
+    triggerLayout();
+    return true;
+}
+
+Pedal* Pedal::findNextInStaff() const
+{
+    Fraction endTick = tick2();
+    auto spanners = score()->spannerMap().findOverlapping(endTick.ticks(), score()->endTick().ticks());
+    for (auto element : spanners) {
+        Spanner* spanner = element.value;
+        if (spanner->isPedal() && spanner != this && spanner->staffIdx() == staffIdx() && spanner->tick() == endTick) {
+            return toPedal(spanner);
+        }
+    }
+
+    return nullptr;
+}
+
+bool Pedal::connect45HookToNext() const
+{
+    if (endHookType() != HookType::HOOK_45) {
+        return false;
+    }
+
+    Pedal* nextPedal = findNextInStaff();
+
+    return nextPedal && nextPedal->tick() == tick2() && nextPedal->beginHookType() == HookType::HOOK_45;
 }
 
 //---------------------------------------------------------
@@ -178,87 +243,68 @@ engraving::PropertyValue Pedal::propertyDefault(Pid propertyId) const
 
 PointF Pedal::linePos(Grip grip, System** sys) const
 {
-    double x = 0.0;
-    double nhw = score()->noteHeadWidth();
-    System* s = nullptr;
-    if (grip == Grip::START) {
-        ChordRest* c = toChordRest(startElement());
-        if (c) {
-            s = c->segment()->system();
-            x = c->pos().x() + c->segment()->pos().x() + c->segment()->measure()->pos().x();
-            if (c->type() == ElementType::REST && c->durationType() == DurationType::V_MEASURE) {
-                x -= c->x();
-            }
-            if (beginHookType() == HookType::HOOK_45) {
-                x += nhw * .5;
+    bool start = grip == Grip::START;
+
+    if (start) {
+        Segment* startSeg = startSegment();
+        if (!startSeg) {
+            return PointF();
+        }
+        *sys = startSeg->measure()->system();
+        double x = startSeg->x() + startSeg->measure()->x();
+        if (beginText() == "<sym>keyboardPedalPed</sym>") {
+            x -= 0.5 * spatium();
+        } else if (beginHookType() == HookType::HOOK_90 || beginHookType() == HookType::HOOK_90T) {
+            x += 0.5 * absoluteFromSpatium(lineWidth());
+        } else if (beginHookType() == HookType::HOOK_45) {
+            EngravingItem* item = startElement();
+            if (item && item->isChord()) {
+                Note* downNote = toChord(item)->downNote();
+                x += 0.5 * downNote->headWidth();
+            } else if (item && item->isRest()) {
+                x += toRest(item)->centerX();
             }
         }
-    } else {
-        EngravingItem* e = endElement();
-        ChordRest* c = toChordRest(endElement());
-        if (!e || e == startElement() || (endHookType() == HookType::HOOK_90)) {
-            // pedal marking on single note or ends with non-angled hook:
-            // extend to next note or end of measure
-            Segment* seg = nullptr;
-            if (!e) {
-                seg = startSegment();
-            } else {
-                seg = c->segment();
-            }
-            if (seg) {
-                seg = seg->next();
-                for (; seg; seg = seg->next()) {
-                    if (seg->segmentType() == SegmentType::ChordRest) {
-                        // look for a chord/rest in any voice on this staff
-                        bool crFound = false;
-                        track_idx_t track = staffIdx() * VOICES;
-                        for (voice_idx_t i = 0; i < VOICES; ++i) {
-                            if (seg->element(track + i)) {
-                                crFound = true;
-                                break;
-                            }
-                        }
-                        if (crFound) {
-                            break;
-                        }
-                    } else if (seg->segmentType() == SegmentType::EndBarLine) {
-                        if (!seg->enabled()) {
-                            // disabled barline layout is not reliable
-                            // use width of measure instead
-                            Measure* m = seg->measure();
-                            s = seg->system();
-                            x = m->width() + m->pos().x() - nhw * 2;
-                            seg = nullptr;
-                        }
-                        break;
-                    }
-                }
-            }
-            if (seg) {
-                s = seg->system();
-                x = seg->pos().x() + seg->measure()->pos().x() - nhw * 2;
-            }
-        } else if (c) {
-            s = c->segment()->system();
-            x = c->pos().x() + c->segment()->pos().x() + c->segment()->measure()->pos().x();
-            if (c->type() == ElementType::REST && c->durationType() == DurationType::V_MEASURE) {
-                x -= c->x();
-            }
+        return PointF(x, 0.0);
+    }
+
+    Segment* endSeg = endSegment();
+    if (!endSeg) {
+        return PointF();
+    }
+
+    Pedal* nextPedal = findNextInStaff();
+
+    if (nextPedal && endHookType() == HookType::HOOK_45) {
+        *sys = endSeg->measure()->system();
+        double x = endSeg->x() + endSeg->measure()->x();
+        EngravingItem* item = endElement();
+        if (item && item->isChord()) {
+            Note* downNote = toChord(item)->downNote();
+            x += 0.5 * downNote->headWidth();
+        } else if (item && item->isRest()) {
+            x += toRest(item)->centerX();
         }
-        if (!s) {
-            Fraction t = tick2();
-            Measure* m = score()->tick2measure(t);
-            s = m->system();
-            x = m->tick2pos(t);
-        }
-        if (endHookType() == HookType::HOOK_45) {
-            x += nhw * .5;
-        } else {
-            x += nhw;
+        return PointF(x, 0.0);
+    }
+
+    if (endSeg->rtick() == Fraction(0, 1)) {
+        Segment* prevSeg = endSeg->prev1(SegmentType::EndBarLine);
+        if (prevSeg) {
+            endSeg = prevSeg;
         }
     }
 
-    *sys = s;
-    return PointF(x, 0);
+    *sys = endSeg->measure()->system();
+    double x = endSeg->x() + endSeg->measure()->x();
+
+    x -= (endSeg->isChordRestType() && nextPedal ? 1.25 : 0.75) * spatium();
+
+    return PointF(x, 0.0);
+}
+
+Sid Pedal::defaultPosSid() const
+{
+    return placeAbove() ? Sid::pedalPosAbove : Sid::pedalPosBelow;
 }
 }

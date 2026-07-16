@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -104,6 +104,15 @@ bool Fingering::isEditAllowed(EditData& ed) const
         return false;
     }
 
+    if (ed.key == Key_Left) {
+        return cursor()->column() != 0 || cursor()->hasSelection();
+    }
+
+    if (ed.key == Key_Right) {
+        bool cursorInLastColumn = cursor()->column() == cursor()->curLine().columns();
+        return !cursorInLastColumn || cursor()->hasSelection();
+    }
+
     return TextBase::isEditAllowed(ed);
 }
 
@@ -115,7 +124,7 @@ String Fingering::accessibleInfo() const
 {
     String rez = EngravingItem::accessibleInfo();
     if (textStyleType() == TextStyleType::STRING_NUMBER) {
-        rez += u' ' + mtrc("engraving", "String number");
+        rez += u' ' + muse::mtrc("engraving", "String number");
     }
     return String(u"%1: %2").arg(rez, plainText());
 }

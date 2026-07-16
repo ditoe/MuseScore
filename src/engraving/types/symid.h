@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,11 +20,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_ENGRAVING_SYMID_H
-#define MU_ENGRAVING_SYMID_H
+#pragma once
 
 namespace mu::engraving {
-enum class SmuflAnchorId {
+enum class SmuflAnchorId : unsigned char {
     stemDownNW,
     stemUpSE,
     stemDownSW,
@@ -38,5 +37,3 @@ enum class SmuflAnchorId {
 
 #include "symid_p.h"
 }
-
-#endif // MU_ENGRAVING_SYMID_H

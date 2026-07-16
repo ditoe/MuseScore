@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,22 +22,19 @@
 #ifndef MU_PRINT_IPRINTPROVIDER_H
 #define MU_PRINT_IPRINTPROVIDER_H
 
-#include <functional>
-#include <QSizeF>
-
 #include "modularity/imoduleinterface.h"
 #include "types/ret.h"
 #include "notation/inotation.h"
 
 namespace mu::print {
-class IPrintProvider : MODULE_EXPORT_INTERFACE
+class IPrintProvider : MODULE_CONTEXT_INTERFACE
 {
     INTERFACE_ID(IPrintProvider)
 
 public:
     virtual ~IPrintProvider() = default;
 
-    virtual Ret printNotation(notation::INotationPtr notation) = 0;
+    virtual muse::Ret printNotation(notation::INotationPtr notation) = 0;
 };
 }
 

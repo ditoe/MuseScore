@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,7 +27,7 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::draw;
+using namespace muse::draw;
 using namespace mu::engraving;
 
 //---------------------------------------------------------
@@ -87,15 +87,15 @@ Bend::Bend(Note* parent)
 //   font
 //---------------------------------------------------------
 
-mu::draw::Font Bend::font(double sp) const
+Font Bend::font(double sp) const
 {
-    mu::draw::Font f(m_fontFace, Font::Type::Unknown);
+    Font f(m_fontFace, Font::Type::Unknown);
     f.setBold(m_fontStyle & FontStyle::Bold);
     f.setItalic(m_fontStyle & FontStyle::Italic);
     f.setUnderline(m_fontStyle & FontStyle::Underline);
     f.setStrike(m_fontStyle & FontStyle::Strike);
     double m = m_fontSize;
-    m *= sp / SPATIUM20;
+    m *= sp / defaultSpatium();
 
     f.setPointSizeF(m);
     return f;
@@ -155,7 +155,7 @@ PropertyValue Bend::getProperty(Pid id) const
     case Pid::FONT_STYLE:
         return int(m_fontStyle);
     case Pid::PLAY:
-        return bool(playBend());
+        return playBend();
     case Pid::LINE_WIDTH:
         return m_lineWidth;
     case Pid::BEND_TYPE:
@@ -187,7 +187,7 @@ bool Bend::setProperty(Pid id, const PropertyValue& v)
         setPlayBend(v.toBool());
         break;
     case Pid::LINE_WIDTH:
-        m_lineWidth = v.value<Millimetre>();
+        m_lineWidth = v.value<Spatium>();
         break;
     case Pid::BEND_TYPE:
         updatePointsByBendType(static_cast<BendType>(v.toInt()));

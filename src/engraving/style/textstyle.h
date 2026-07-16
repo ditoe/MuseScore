@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,13 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_TEXTSTYLE_H
-#define MU_ENGRAVING_TEXTSTYLE_H
+#pragma once
 
 #include "styledef.h"
-#include "types/types.h"
+#include "../types/types.h"
 
 namespace mu::engraving {
+struct OffsetSids {
+    Sid above = Sid::NOSTYLE;
+    Sid below = Sid::NOSTYLE;
+};
+
 enum class TextStylePropertyType : char {
     Undefined = 0,
     FontFace,
@@ -41,7 +45,10 @@ enum class TextStylePropertyType : char {
     FrameWidth,
     FrameRound,
     FrameBorderColor,
-    FrameFillColor
+    FrameFillColor,
+    MusicalSymbolsScale,
+    MusicalSymbolsSize,
+    Position
 };
 
 struct TextStyleProperty {
@@ -50,14 +57,27 @@ struct TextStyleProperty {
     Pid pid;
 };
 
-constexpr size_t TEXT_STYLE_SIZE = 14;
+constexpr size_t TEXT_STYLE_SIZE = 16;
 
-typedef std::array<TextStyleProperty, TEXT_STYLE_SIZE> TextStyle;
+struct TextStyle {
+    std::array<TextStyleProperty, TEXT_STYLE_SIZE> properties;
+    OffsetSids offsetSids;
+
+    auto begin() { return properties.begin(); }
+    auto end() { return properties.end(); }
+    auto begin() const { return properties.begin(); }
+    auto end() const { return properties.end(); }
+
+    auto size() const { return properties.size(); }
+
+    auto& operator[](size_t i) { return properties[i]; }
+    const auto& operator[](size_t i) const { return properties[i]; }
+    auto& at(size_t i) { return properties.at(i); }
+    const auto& at(size_t i) const { return properties.at(i); }
+};
 
 const TextStyle* textStyle(TextStyleType);
 const std::vector<TextStyleType>& allTextStyles();
 const std::vector<TextStyleType>& editableTextStyles();
 const std::vector<TextStyleType>& primaryTextStyles();
 }
-
-#endif // MU_ENGRAVING_TEXTSTYLE_H

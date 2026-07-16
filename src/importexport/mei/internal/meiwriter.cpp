@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,10 @@
 #include "engraving/engravingerrors.h"
 #include "engraving/dom/score.h"
 
+#include "notation/inotationelements.h" // IWYU pragma: keep
+
 using namespace mu;
+using namespace muse;
 using namespace mu::iex::mei;
 using namespace mu::project;
 
@@ -45,7 +48,7 @@ bool MeiWriter::supportsUnitType(UnitType unitType) const
     return std::find(unitTypes.cbegin(), unitTypes.cend(), unitType) != unitTypes.cend();
 }
 
-mu::Ret MeiWriter::write(notation::INotationPtr notation, QIODevice& destinationDevice, const Options&)
+Ret MeiWriter::write(notation::INotationPtr notation, io::IODevice& destinationDevice, const Options&)
 {
     IF_ASSERT_FAILED(notation) {
         return make_ret(Ret::Code::UnknownError);
@@ -59,17 +62,15 @@ mu::Ret MeiWriter::write(notation::INotationPtr notation, QIODevice& destination
     MeiExporter exporter(score);
     std::string meiData;
     if (exporter.write(meiData)) {
-        // Still using QTextStream since we have a QIODevice
-        QTextStream out(&destinationDevice);
-        out << String::fromStdString(meiData);
-        out.flush();
-        return make_ok();
+        ByteArray data = ByteArray::fromRawData(meiData.c_str(), meiData.size());
+        destinationDevice.write(data);
+        return muse::make_ok();
     } else {
         return make_ret(Ret::Code::UnknownError);
     }
 }
 
-mu::engraving::Err MeiWriter::writeScore(mu::engraving::Score* score, const io::path_t& path)
+mu::engraving::Err MeiWriter::writeScore(mu::engraving::Score* score, const muse::io::path_t& path)
 {
     MeiExporter exporter(score);
     // Force no layout option in this case
@@ -82,7 +83,7 @@ mu::engraving::Err MeiWriter::writeScore(mu::engraving::Score* score, const io::
     }
 }
 
-mu::Ret MeiWriter::writeList(const notation::INotationPtrList&, QIODevice&, const Options&)
+Ret MeiWriter::writeList(const notation::INotationPtrList&, io::IODevice&, const Options&)
 {
     NOT_SUPPORTED;
     return Ret(Ret::Code::NotSupported);

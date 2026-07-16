@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,15 +22,15 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/breath.h"
-#include "dom/factory.h"
-#include "dom/masterscore.h"
-#include "dom/undo.h"
+#include "engraving/dom/breath.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/editing/transaction/transaction.h"
+#include "engraving/editing/transaction/undostack.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String BREATH_DATA_DIR("breath_data/");
@@ -53,18 +53,18 @@ TEST_F(Engraving_BreathTests, breath)
     score->doLayout();
 
     // do
-    score->startCmd();
-    score->cmdSelectAll();
-    for (EngravingItem* e : score->selection().elements()) {
-        EditData dd(0);
-        Breath* b = Factory::createBreath(score->dummy()->segment());
-        b->setSymId(SymId::breathMarkComma);
-        dd.dropElement = b;
-        if (e->acceptDrop(dd)) {
-            e->drop(dd);
+    score->transactionManager()->transaction(TranslatableString::untranslatable("Engraving breath tests"), [&](Transaction& tx) {
+        score->cmdSelectAll();
+        for (EngravingItem* e : score->selection().elements()) {
+            EditData dd(0);
+            Breath* b = Factory::createBreath(score->dummy()->segment());
+            b->setSymId(SymId::breathMarkComma);
+            dd.dropElement = b;
+            if (e->acceptDrop(dd)) {
+                e->drop(tx, dd);
+            }
         }
-    }
-    score->endCmd();
+    });
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile1, reference1));
 
     // undo

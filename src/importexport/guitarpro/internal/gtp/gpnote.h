@@ -119,8 +119,11 @@ public:
     //! muted = dead note
     bool muted() const { return _muted; }
 
-    void setTapping(bool t) { _tapping = t; }
-    bool tapping() const { return _tapping; }
+    void setRightHandTapping(bool t) { _rightHandTapping = t; }
+    bool rightHandTapping() const { return _rightHandTapping; }
+
+    void setLeftHandTapped(bool v) { _leftHandTapped = v; }
+    bool leftHandTapped() const { return _leftHandTapped; }
 
     void setAccent(const std::bitset<4>& b) { _accent = b; }
     const std::bitset<4>& accents() const { return _accent; }
@@ -128,11 +131,11 @@ public:
     void setSlides(const std::bitset<6>& s) { _slides = s; }
     const std::bitset<6>& slides() const { return _slides; }
 
-    void setLeftFingering(const String& ch) { _leftFingering = ch; }
-    const String& leftFingering() const { return _leftFingering; }
+    void setLeftFingering(const muse::String& ch) { _leftFingering = ch; }
+    const muse::String& leftFingering() const { return _leftFingering; }
 
-    void setRightFingering(const String& ch) { _rightFingering = ch; }
-    const String& rightFingering() const { return _rightFingering; }
+    void setRightFingering(const muse::String& ch) { _rightFingering = ch; }
+    const muse::String& rightFingering() const { return _rightFingering; }
 
     void setShowStringNumber(bool show) { m_showStringNumber = show; }
     bool showStringNumber() const { return m_showStringNumber; }
@@ -146,9 +149,6 @@ public:
 
     void setOrnament(Ornament o) { _ornament = o; }
     Ornament ornament() const { return _ornament; }
-
-    void setLeftHandTapped(bool v) { _leftHandTapped = v; }
-    bool leftHandTapped() const { return _leftHandTapped; }
 
     void setHammerOn(HammerOn h) { _hammer = h; }
     HammerOn hammerOn() const { return _hammer; }
@@ -175,17 +175,17 @@ private:
     bool _palmMuted{ false };
     bool _ghostNote{ false };
     bool _muted{ false };
-    bool _tapping{ false };
     //[0] - staccato, [1] - unknown, [2] - heavily accidental, [3] - accidental
     std::bitset<4> _accent{ 0 };
     //[0] shifSlide, [1] - legatoSlide, [2] - slideDownWard, [3] - slidewUpWard, [4] - slideInFormBelow, [5] - slideInFormAbove,
     std::bitset<6> _slides{ 0 };
-    String _leftFingering;
-    String _rightFingering;
+    muse::String _leftFingering;
+    muse::String _rightFingering;
     VibratoType _vibrato{ VibratoType::None };
     Trill _trill;
     Ornament _ornament{ Ornament::None };
-    bool _leftHandTapped{ false };
+    bool _rightHandTapping = false;
+    bool _leftHandTapped = false;
     HammerOn _hammer{ HammerOn::None };
     PickScrape _pickScrape{ PickScrape::None };
     bool m_showStringNumber = false;

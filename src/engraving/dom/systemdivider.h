@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __SYSTEMDIVIDER_H__
-#define __SYSTEMDIVIDER_H__
+#ifndef MU_ENGRAVING_SYSTEMDIVIDER_H
+#define MU_ENGRAVING_SYSTEMDIVIDER_H
 
 #include "symbol.h"
 
@@ -29,6 +29,9 @@ namespace mu::engraving {
 //---------------------------------------------------------
 //   SystemDivider
 //---------------------------------------------------------
+enum class SystemDividerType : unsigned char {
+    LEFT, RIGHT
+};
 
 class SystemDivider final : public Symbol
 {
@@ -41,20 +44,25 @@ public:
 
     SystemDivider* clone() const override { return new SystemDivider(*this); }
 
-    enum class Type {
-        LEFT, RIGHT
-    };
+    SystemDividerType dividerType() const { return m_dividerType; }
+    void setDividerType(SystemDividerType v);
 
-    Type dividerType() const { return m_dividerType; }
-    void setDividerType(Type v);
-
-    mu::RectF drag(EditData&) override;
+    RectF drag(EditData&) override;
 
     Segment* segment() const override { return nullptr; }
     System* system() const { return (System*)explicitParent(); }
 
+    PropertyValue propertyDefault(Pid id) const override;
+
+    void styleChanged() override;
+    Sid getPropertyStyle(Pid id) const override;
+
+    std::vector<LineF> dragAnchorLines() const override;
+
+    void reset() override;
+
 private:
-    Type m_dividerType = Type::LEFT;
+    SystemDividerType m_dividerType = SystemDividerType::LEFT;
 };
 } // namespace mu::engraving
 

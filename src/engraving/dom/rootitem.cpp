@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,14 +30,16 @@
 using namespace mu::engraving;
 
 RootItem::RootItem(Score* score)
-    : EngravingItem(ElementType::ROOT_ITEM, score), m_score(score)
+    : EngravingItem(ElementType::ROOT_ITEM, score)
 {
     m_dummy = new compat::DummyElement(this);
 }
 
 RootItem::~RootItem()
 {
-    delete m_dummy;
+    compat::DummyElement* d = m_dummy;
+    m_dummy = nullptr;
+    delete d;
 }
 
 compat::DummyElement* RootItem::dummy() const
@@ -53,11 +55,6 @@ void RootItem::init()
 
     m_dummy->setParent(this);
     m_dummy->init();
-}
-
-EngravingObject* RootItem::scanParent() const
-{
-    return m_score->scanParent();
 }
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,8 +23,6 @@
 #include "ledgerline.h"
 
 #include "chord.h"
-#include "measure.h"
-#include "system.h"
 
 #include "log.h"
 
@@ -36,38 +34,14 @@ namespace mu::engraving {
 //---------------------------------------------------------
 
 LedgerLine::LedgerLine(EngravingItem* s)
-    : EngravingItem(ElementType::LEDGER_LINE, s)
+    : EngravingItem(ElementType::LEDGER_LINE, s, ElementFlag::ON_STAFF)
 {
     setSelectable(false);
     m_len        = 0.;
-    m_next       = 0;
 }
 
 LedgerLine::~LedgerLine()
 {
-}
-
-//---------------------------------------------------------
-//   pagePos
-//---------------------------------------------------------
-
-PointF LedgerLine::pagePos() const
-{
-    System* system = chord()->measure()->system();
-    double yp = y() + system->staff(staffIdx())->y() + system->y();
-    return PointF(pageX(), yp);
-}
-
-//---------------------------------------------------------
-//   measureXPos
-//---------------------------------------------------------
-
-double LedgerLine::measureXPos() const
-{
-    double xp = x();                     // chord relative
-    xp += chord()->x();                  // segment relative
-    xp += chord()->segment()->x();       // measure relative
-    return xp;
 }
 
 //---------------------------------------------------------
@@ -77,6 +51,5 @@ double LedgerLine::measureXPos() const
 void LedgerLine::spatiumChanged(double oldValue, double newValue)
 {
     m_len   = (m_len / oldValue) * newValue;
-    renderer()->layoutItem(this);
 }
 }

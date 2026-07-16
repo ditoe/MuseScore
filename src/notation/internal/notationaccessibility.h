@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,30 +20,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_NOTATION_NOTATIONACCESSIBILITY_H
-#define MU_NOTATION_NOTATIONACCESSIBILITY_H
+#pragma once
 
 #include "inotationaccessibility.h"
-#include "notationtypes.h"
 
 #include "async/asyncable.h"
-#include "async/notification.h"
+
+namespace mu::engraving {
+class Score;
+class Selection;
+}
 
 namespace mu::notation {
 class IGetScore;
 class Notation;
-class NotationAccessibility : public INotationAccessibility, public async::Asyncable
+class NotationAccessibility : public INotationAccessibility, public muse::async::Asyncable
 {
 public:
     NotationAccessibility(const Notation* notation);
 
-    ValCh<std::string> accessibilityInfo() const override;
+    muse::ValCh<std::string> accessibilityInfo() const override;
 
     void setMapToScreenFunc(const mu::engraving::AccessibleMapToScreenFunc& func) override;
 
     void setEnabled(bool enabled) override;
-
-    void setTriggeredCommand(const std::string& command) override;
 
 private:
     const engraving::Score* score() const;
@@ -57,8 +57,6 @@ private:
     QString singleElementAccessibilityInfo() const;
 
     const IGetScore* m_getScore = nullptr;
-    ValCh<std::string> m_accessibilityInfo;
+    muse::ValCh<std::string> m_accessibilityInfo;
 };
 }
-
-#endif // MU_NOTATION_NOTATIONACCESSIBILITY_H

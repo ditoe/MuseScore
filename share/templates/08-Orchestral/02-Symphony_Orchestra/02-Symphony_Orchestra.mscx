@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <programVersion>3.6.0</programVersion>
   <programRevision></programRevision>
   <Score>
@@ -16,7 +16,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -399,11 +398,11 @@
         <bracket type="2" span="2" col="1"/>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>B♭ Clarinet 1</trackName>
+      <trackName>Clarinet in B♭ 1</trackName>
       <Instrument id="bb-clarinet">
-        <longName>B♭ Clarinet 1</longName>
-        <shortName>B♭ Cl. 1</shortName>
-        <trackName>B♭ Clarinet</trackName>
+        <longName>Clarinet in B♭ 1</longName>
+        <shortName>Cl. in B♭ 1</shortName>
+        <trackName>Clarinet</trackName>
         <minPitchP>50</minPitchP>
         <maxPitchP>94</maxPitchP>
         <minPitchA>50</minPitchA>
@@ -468,11 +467,11 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>B♭ Clarinet 2</trackName>
+      <trackName>Clarinet in B♭ 2</trackName>
       <Instrument id="bb-clarinet">
-        <longName>B♭ Clarinet 2</longName>
-        <shortName>B♭ Cl. 2</shortName>
-        <trackName>B♭ Clarinet</trackName>
+        <longName>Clarinet in B♭ 2</longName>
+        <shortName>Cl. in B♭ 2</shortName>
+        <trackName>Clarinet</trackName>
         <minPitchP>50</minPitchP>
         <maxPitchP>94</maxPitchP>
         <minPitchA>50</minPitchA>
@@ -677,11 +676,11 @@
         <bracket type="2" span="2" col="1"/>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>F Horn 1 &amp; 3</trackName>
+      <trackName>Horn in F 1 &amp; 3</trackName>
       <Instrument id="horn">
-        <longName>F Horn 1 &amp; 3</longName>
-        <shortName>F Hn. 1 3</shortName>
-        <trackName>Horn in F</trackName>
+        <longName>Horn in F 1 &amp; 3</longName>
+        <shortName>Hn. in F 1 3</shortName>
+        <trackName>Horn</trackName>
         <minPitchP>31</minPitchP>
         <maxPitchP>77</maxPitchP>
         <minPitchA>41</minPitchA>
@@ -752,11 +751,11 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>F Horn 2 &amp; 4</trackName>
+      <trackName>Horn in F 2 &amp; 4</trackName>
       <Instrument id="horn">
-        <longName>F Horn 2 &amp; 4</longName>
-        <shortName>F Hn. 2 4</shortName>
-        <trackName>Horn in F</trackName>
+        <longName>Horn in F 2 &amp; 4</longName>
+        <shortName>Hn. in F 2 4</shortName>
+        <trackName>Horn</trackName>
         <minPitchP>31</minPitchP>
         <maxPitchP>77</maxPitchP>
         <minPitchA>41</minPitchA>
@@ -828,11 +827,11 @@
         <bracket type="2" span="2" col="1"/>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>B♭ Trumpet 1</trackName>
+      <trackName>Trumpet in B♭ 1</trackName>
       <Instrument id="bb-trumpet">
-        <longName>B♭ Trumpet 1</longName>
-        <shortName>B♭ Tpt. 1</shortName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 1</longName>
+        <shortName>Tpt. in B♭ 1</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -905,11 +904,11 @@
           </StaffType>
         <barLineSpan>1</barLineSpan>
         </Staff>
-      <trackName>B♭ Trumpet 2</trackName>
+      <trackName>Trumpet in B♭ 2</trackName>
       <Instrument id="bb-trumpet">
-        <longName>B♭ Trumpet 2</longName>
-        <shortName>B♭ Tpt. 2</shortName>
-        <trackName>B♭ Trumpet</trackName>
+        <longName>Trumpet in B♭ 2</longName>
+        <shortName>Tpt. in B♭ 2</shortName>
+        <trackName>Trumpet</trackName>
         <minPitchP>52</minPitchP>
         <maxPitchP>85</maxPitchP>
         <minPitchA>52</minPitchA>
@@ -995,6 +994,7 @@
         <maxPitchA>71</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1070,6 +1070,7 @@
         <maxPitchA>71</maxPitchA>
         <instrumentId>brass.trombone</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1212,6 +1213,8 @@
         <maxPitchA>60</maxPitchA>
         <instrumentId>drum.timpani</instrumentId>
         <clef>F</clef>
+        <singleNoteDynamics>0</singleNoteDynamics>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1274,7 +1277,7 @@
       <trackName>Snare Drum</trackName>
       <Instrument id="snare-drum">
         <longName>Snare Drum</longName>
-        <shortName>Sn. Dr.</shortName>
+        <shortName>SD</shortName>
         <trackName>Snare Drum</trackName>
         <instrumentId>drum.snare-drum</instrumentId>
         <useDrumset>1</useDrumset>
@@ -1283,18 +1286,23 @@
           <line>0</line>
           <voice>0</voice>
           <name>Side Stick</name>
-          <stem>2</stem>
+          <stem>1</stem>
           <shortcut>A</shortcut>
-          </Drum>
+          <panelRow>0</panelRow>
+          <panelColumn>1</panelColumn>
+        </Drum>
         <Drum pitch="38">
           <head>normal</head>
           <line>0</line>
           <voice>0</voice>
-          <name>Acoustic Snare</name>
-          <stem>2</stem>
+          <name>Snare</name>
+          <stem>1</stem>
           <shortcut>B</shortcut>
-          </Drum>
+          <panelRow>0</panelRow>
+          <panelColumn>0</panelColumn>
+        </Drum>
         <clef>PERC</clef>
+        <singleNoteDynamics>0</singleNoteDynamics>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1358,19 +1366,22 @@
       <trackName>Bass Drum</trackName>
       <Instrument id="bass-drum">
         <longName>Bass Drum</longName>
-        <shortName>B. Dr.</shortName>
+        <shortName>BD</shortName>
         <trackName>Bass Drum</trackName>
         <instrumentId>drum.bass-drum</instrumentId>
         <useDrumset>1</useDrumset>
-        <Drum pitch="35">
+        <Drum pitch="36">
           <head>normal</head>
           <line>0</line>
           <voice>0</voice>
-          <name>Acoustic Bass Drum</name>
-          <stem>2</stem>
+          <name>Concert Bass Drum</name>
+          <stem>1</stem>
           <shortcut>A</shortcut>
+          <panelRow>0</panelRow>
+          <panelColumn>0</panelColumn>
           </Drum>
         <clef>PERC</clef>
+        <singleNoteDynamics>0</singleNoteDynamics>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1430,22 +1441,25 @@
           </StaffType>
         <defaultClef>PERC</defaultClef>
         </Staff>
-      <trackName>Cymbal</trackName>
+      <trackName>Cymbals</trackName>
       <Instrument id="cymbal">
-        <longName>Cymbal</longName>
+        <longName>Cymbals</longName>
         <shortName>Cym.</shortName>
-        <trackName>Cymbal</trackName>
+        <trackName>Hand Cymbals</trackName>
         <instrumentId>metal.cymbal.crash</instrumentId>
         <useDrumset>1</useDrumset>
         <Drum pitch="57">
           <head>normal</head>
           <line>0</line>
           <voice>0</voice>
-          <name>Crash Cymbal 2</name>
-          <stem>2</stem>
+          <name>Hand Cymbals</name>
+          <stem>1</stem>
           <shortcut>A</shortcut>
-          </Drum>
+          <panelRow>0</panelRow>
+          <panelColumn>0</panelColumn>
+        </Drum>
         <clef>PERC</clef>
+        <singleNoteDynamics>0</singleNoteDynamics>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1522,6 +1536,8 @@
         <maxPitchA>104</maxPitchA>
         <instrumentId>pluck.harp</instrumentId>
         <clef staff="2">F</clef>
+        <singleNoteDynamics>0</singleNoteDynamics>
+        <glissandoStyle>diatonic</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1595,12 +1611,13 @@
       <Instrument id="violins">
         <longName>Violins 1</longName>
         <shortName>Vlns. 1</shortName>
-        <trackName>Violins</trackName>
+        <trackName>Violins (section)</trackName>
         <minPitchP>55</minPitchP>
         <maxPitchP>103</maxPitchP>
         <minPitchA>55</minPitchA>
         <maxPitchA>88</maxPitchA>
         <instrumentId>strings.group</instrumentId>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1678,12 +1695,13 @@
       <Instrument id="violins">
         <longName>Violins 2</longName>
         <shortName>Vlns. 2</shortName>
-        <trackName>Violins</trackName>
+        <trackName>Violins (section)</trackName>
         <minPitchP>55</minPitchP>
         <maxPitchP>103</maxPitchP>
         <minPitchA>55</minPitchA>
         <maxPitchA>88</maxPitchA>
         <instrumentId>strings.group</instrumentId>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1762,13 +1780,14 @@
       <Instrument id="violas">
         <longName>Violas</longName>
         <shortName>Vlas.</shortName>
-        <trackName>Violas</trackName>
+        <trackName>Violas (section)</trackName>
         <minPitchP>48</minPitchP>
         <maxPitchP>93</maxPitchP>
         <minPitchA>48</minPitchA>
         <maxPitchA>79</maxPitchA>
         <instrumentId>strings.group</instrumentId>
         <clef>C3</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1847,13 +1866,14 @@
       <Instrument id="violoncellos">
         <longName>Violoncellos</longName>
         <shortName>Vcs.</shortName>
-        <trackName>Violoncellos</trackName>
+        <trackName>Violoncellos (section)</trackName>
         <minPitchP>36</minPitchP>
         <maxPitchP>90</maxPitchP>
         <minPitchA>36</minPitchA>
         <maxPitchA>67</maxPitchA>
         <instrumentId>strings.group</instrumentId>
         <clef>F</clef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
@@ -1932,7 +1952,7 @@
       <Instrument id="contrabasses">
         <longName>Contrabasses</longName>
         <shortName>Cbs.</shortName>
-        <trackName>Contrabasses</trackName>
+        <trackName>Contrabasses (section)</trackName>
         <minPitchP>24</minPitchP>
         <maxPitchP>67</maxPitchP>
         <minPitchA>28</minPitchA>
@@ -1942,6 +1962,7 @@
         <instrumentId>strings.group</instrumentId>
         <concertClef>F8vb</concertClef>
         <transposingClef>F</transposingClef>
+        <glissandoStyle>portamento</glissandoStyle>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,18 +22,20 @@
 
 #include "engravingobject.h"
 
-#include <iterator>
-#include <unordered_set>
+#include "global/containers.h"
 
+#include "../editing/addremoveelement.h"
+#include "../editing/editproperty.h"
+#include "../editing/transaction/transaction.h"
+#include "../editing/transaction/undostack.h"
 #include "style/textstyle.h"
-#include "types/translatablestring.h"
 #include "types/typesconv.h"
 
 #include "bracketItem.h"
 #include "linkedobjects.h"
 #include "masterscore.h"
 #include "score.h"
-#include "undo.h"
+#include "staff.h"
 
 #include "log.h"
 
@@ -42,11 +44,6 @@ using namespace mu::engraving;
 
 namespace mu::engraving {
 ElementStyle const EngravingObject::EMPTY_STYLE;
-
-EngravingObject* EngravingObjectList::at(size_t i) const
-{
-    return *std::next(begin(), i);
-}
 
 EngravingObject::EngravingObject(const ElementType& type, EngravingObject* parent)
     : m_type(type)
@@ -68,8 +65,11 @@ EngravingObject::EngravingObject(const ElementType& type, EngravingObject* paren
         m_score = static_cast<Score*>(this);
     }
 
-    if (elementsProvider()) {
-        elementsProvider()->reg(this);
+    // reg to debug
+    if (type != ElementType::SCORE) {
+        if (m_score && m_score->elementsProvider()) {
+            m_score->elementsProvider()->reg(this);
+        }
     }
 }
 
@@ -89,8 +89,11 @@ EngravingObject::EngravingObject(const EngravingObject& se)
     }
     m_links = 0;
 
-    if (elementsProvider()) {
-        elementsProvider()->reg(this);
+    // reg to debug
+    if (m_type != ElementType::SCORE) {
+        if (m_score && m_score->elementsProvider()) {
+            m_score->elementsProvider()->reg(this);
+        }
     }
 }
 
@@ -104,27 +107,30 @@ EngravingObject::~EngravingObject()
         m_parent->removeChild(this);
     }
 
-    if (!this->isType(ElementType::ROOT_ITEM)
-        && !this->isType(ElementType::DUMMY)
-        && !this->isType(ElementType::SCORE)) {
+    {
+        bool isPaletteScore = score()->isPaletteScore();
+        bool canMoveToDummy = !this->isType(ElementType::ROOT_ITEM)
+                              && !this->isType(ElementType::DUMMY)
+                              && !this->isType(ElementType::SCORE)
+                              && score()->rootItem() && score()->rootItem()->dummy();
+
+        // copy because moveToDummy might modify children
         EngravingObjectList children = m_children;
         for (EngravingObject* c : children) {
-            c->m_parent = nullptr;
-            c->moveToDummy();
-        }
-    } else {
-        bool isPaletteScore = score()->isPaletteScore();
-        for (EngravingObject* c : m_children) {
-            c->m_parent = nullptr;
-            if (!isPaletteScore) {
+            if (canMoveToDummy) {
+                c->moveToDummy();
+            } else if (!isPaletteScore) {
                 delete c;
+            } else {
+                c->m_parent = nullptr;
             }
         }
+
         m_children.clear();
     }
 
-    if (elementsProvider()) {
-        elementsProvider()->unreg(this);
+    if (score() && score()->elementsProvider()) {
+        score()->elementsProvider()->unreg(this);
     }
 
     if (m_links) {
@@ -181,6 +187,20 @@ void EngravingObject::moveToDummy()
     }
 }
 
+EngravingItemList EngravingObject::getChildren(bool includeInvisible) const
+{
+    EngravingItemList childrenList;
+    auto collectChildren = [&](EngravingItem* item) {
+        if (item != this && (includeInvisible || item->visible())) {
+            childrenList.push_back(item);
+        }
+    };
+
+    const_cast<EngravingObject*>(this)->scanElements(collectChildren);
+
+    return childrenList;
+}
+
 void EngravingObject::setScore(Score* s)
 {
     doSetScore(s);
@@ -215,7 +235,7 @@ void EngravingObject::removeChild(EngravingObject* o)
         return;
     }
     o->m_parent = nullptr;
-    m_children.remove(o);
+    muse::remove(m_children, o);
 }
 
 EngravingObject* EngravingObject::parent() const
@@ -232,6 +252,11 @@ EngravingObject* EngravingObject::explicitParent() const
 }
 
 void EngravingObject::setParent(EngravingObject* p)
+{
+    setParentInternal(p);
+}
+
+void EngravingObject::setParentInternal(EngravingObject* p)
 {
     IF_ASSERT_FAILED(this != p) {
         return;
@@ -277,19 +302,6 @@ bool EngravingObject::onSameScore(const EngravingObject* other) const
 const MStyle& EngravingObject::style() const
 {
     return score()->style();
-}
-
-//---------------------------------------------------------
-//   scanElements
-/// Recursively apply scanElements to all children.
-/// See also EngravingItem::scanElements.
-//---------------------------------------------------------
-
-void EngravingObject::scanElements(void* data, void (* func)(void*, EngravingItem*), bool all)
-{
-    for (EngravingObject* child : scanChildren()) {
-        child->scanElements(data, func, all);
-    }
 }
 
 //---------------------------------------------------------
@@ -429,24 +441,7 @@ void EngravingObject::undoChangeProperty(Pid id, const PropertyValue& v, Propert
     if ((getProperty(id) == v) && (propertyFlags(id) == ps)) {
         return;
     }
-    if (id == Pid::PLACEMENT || id == Pid::HAIRPIN_TYPE) {
-        // first set property, then set offset for above/below if styled
-        changeProperties(this, id, v, ps);
-
-        if (isStyled(Pid::OFFSET)) {
-            // TODO: maybe it just makes more sense to do this in EngravingItem::undoChangeProperty,
-            // but some of the overrides call ScoreElement explicitly
-            double sp;
-            if (isEngravingItem()) {
-                sp = toEngravingItem(this)->spatium();
-            } else {
-                sp = style().spatium();
-            }
-            setProperty(Pid::OFFSET, style().styleV(getPropertyStyle(Pid::OFFSET)).value<PointF>() * sp);
-            EngravingItem* e = toEngravingItem(this);
-            e->setOffsetChanged(false);
-        }
-    } else if (id == Pid::TEXT_STYLE) {
+    if (id == Pid::TEXT_STYLE) {
         //
         // change a list of properties
         //
@@ -468,12 +463,16 @@ void EngravingObject::undoChangeProperty(Pid id, const PropertyValue& v, Propert
         }
     } else if (id == Pid::EXCLUDE_FROM_OTHER_PARTS) {
         if (isEngravingItem() && getProperty(Pid::EXCLUDE_FROM_OTHER_PARTS) != v) {
-            EngravingItem* delegate = toEngravingItem(this)->propertyDelegate(id);
+            EngravingItem* delegate = toEngravingItem(propertyDelegate(id));
             if (delegate) {
                 delegate->manageExclusionFromParts(v.toBool());
             } else {
                 toEngravingItem(this)->manageExclusionFromParts(v.toBool());
             }
+        }
+    } else if (id == Pid::VOICE_ASSIGNMENT) {
+        if (v.value<VoiceAssignment>() != VoiceAssignment::CURRENT_VOICE_ONLY) {
+            changeProperties(this, Pid::VOICE, voice_idx_t(0), ps);
         }
     }
     changeProperties(this, id, v, ps);
@@ -489,7 +488,9 @@ void EngravingObject::undoChangeProperty(Pid id, const PropertyValue& v, Propert
 void EngravingObject::undoPushProperty(Pid id)
 {
     PropertyValue val = getProperty(id);
-    score()->undoStack()->push1(new ChangeProperty(this, id, val));
+
+    Transaction& tx = masterScore()->transactionManager()->currentOrDummyTransaction();
+    tx.pushWithoutPerforming(new ChangeProperty(this, id, val));
 }
 
 //---------------------------------------------------------
@@ -516,11 +517,7 @@ void EngravingObject::linkTo(EngravingObject* element)
         setLinks(element->m_links);
         assert(m_links->contains(element));
     } else {
-        if (isStaff()) {
-            setLinks(new LinkedObjects(score(), -1));       // don’t use lid
-        } else {
-            setLinks(new LinkedObjects(score()));
-        }
+        setLinks(new LinkedObjects());
         m_links->push_back(element);
         element->setLinks(m_links);
     }
@@ -623,6 +620,10 @@ int EngravingObject::getPropertyFlagsIdx(Pid id) const
 
 PropertyFlags EngravingObject::propertyFlags(Pid id) const
 {
+    if (EngravingObject* e = propertyDelegate(id)) {
+        return e->propertyFlags(id);
+    }
+
     static PropertyFlags f = PropertyFlags::NOSTYLE;
 
     int i = getPropertyFlagsIdx(id);
@@ -638,6 +639,11 @@ PropertyFlags EngravingObject::propertyFlags(Pid id) const
 
 void EngravingObject::setPropertyFlags(Pid id, PropertyFlags f)
 {
+    if (EngravingObject* e = propertyDelegate(id)) {
+        e->setPropertyFlags(id, f);
+        return;
+    }
+
     int i = getPropertyFlagsIdx(id);
     if (i == -1) {
         return;
@@ -680,12 +686,27 @@ const char* EngravingObject::typeName() const
 
 TranslatableString EngravingObject::typeUserName() const
 {
-    return TConv::userName(type());
+    return TConv::capitalizedUserName(type());
 }
 
 String EngravingObject::translatedTypeUserName() const
 {
     return typeUserName().translated();
+}
+
+EID EngravingObject::eid() const
+{
+    return masterScore()->eidRegister()->EIDFromItem(this);
+}
+
+void EngravingObject::setEID(EID id) const
+{
+    masterScore()->eidRegister()->registerItemEID(id, this);
+}
+
+EID EngravingObject::assignNewEID() const
+{
+    return masterScore()->eidRegister()->newEIDForItem(this);
 }
 
 //---------------------------------------------------------
@@ -697,7 +718,7 @@ bool EngravingObject::isSLineSegment() const
     return isHairpinSegment() || isOttavaSegment() || isPedalSegment()
            || isTrillSegment() || isVoltaSegment() || isTextLineSegment()
            || isGlissandoSegment() || isLetRingSegment() || isVibratoSegment() || isPalmMuteSegment()
-           || isGradualTempoChangeSegment();
+           || isGradualTempoChangeSegment() || isWhammyBarSegment();
 }
 
 //---------------------------------------------------------
@@ -706,29 +727,7 @@ bool EngravingObject::isSLineSegment() const
 
 bool EngravingObject::isTextBase() const
 {
-    return type() == ElementType::TEXT
-           || type() == ElementType::LYRICS
-           || type() == ElementType::DYNAMIC
-           || type() == ElementType::EXPRESSION
-           || type() == ElementType::FINGERING
-           || type() == ElementType::HARMONY
-           || type() == ElementType::MARKER
-           || type() == ElementType::JUMP
-           || type() == ElementType::STAFF_TEXT
-           || type() == ElementType::SYSTEM_TEXT
-           || type() == ElementType::TRIPLET_FEEL
-           || type() == ElementType::PLAYTECH_ANNOTATION
-           || type() == ElementType::CAPO
-           || type() == ElementType::REHEARSAL_MARK
-           || type() == ElementType::INSTRUMENT_CHANGE
-           || type() == ElementType::FIGURED_BASS
-           || type() == ElementType::TEMPO_TEXT
-           || type() == ElementType::INSTRUMENT_NAME
-           || type() == ElementType::MEASURE_NUMBER
-           || type() == ElementType::MMREST_RANGE
-           || type() == ElementType::STICKING
-           || type() == ElementType::HARP_DIAGRAM
-    ;
+    return muse::contains(TEXTBASE_TYPES, type());
 }
 
 //---------------------------------------------------------
@@ -738,8 +737,8 @@ bool EngravingObject::isTextBase() const
 PropertyValue EngravingObject::styleValue(Pid pid, Sid sid) const
 {
     switch (propertyType(pid)) {
-    case P_TYPE::MILLIMETRE:
-        return style().styleMM(sid);
+    case P_TYPE::ABSOLUTE:
+        return style().styleAbsolute(sid);
     case P_TYPE::POINT: {
         PointF val = style().styleV(sid).value<PointF>();
         if (offsetIsSpatiumDependent()) {

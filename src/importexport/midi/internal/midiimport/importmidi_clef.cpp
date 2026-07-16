@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,20 +23,22 @@
 #include <set>
 
 #include "importmidi_clef.h"
-#include "engraving/dom/factory.h"
-#include "engraving/dom/staff.h"
-#include "engraving/dom/measure.h"
-#include "engraving/dom/segment.h"
-#include "engraving/dom/clef.h"
-#include "engraving/dom/chordrest.h"
 #include "engraving/dom/chord.h"
-#include "engraving/dom/note.h"
+#include "engraving/dom/chordrest.h"
+#include "engraving/dom/clef.h"
 #include "engraving/dom/engravingitem.h"
-#include "importmidi_tie.h"
-#include "importmidi_meter.h"
-#include "importmidi_fraction.h"
-#include "importmidi_operations.h"
+#include "engraving/dom/factory.h"
 #include "engraving/dom/instrtemplate.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/score.h"
+#include "engraving/dom/segment.h"
+#include "engraving/dom/sig.h"
+#include "engraving/dom/staff.h"
+#include "importmidi_fraction.h"
+#include "importmidi_meter.h"
+#include "importmidi_operations.h"
+#include "importmidi_tie.h"
 
 #include "log.h"
 
@@ -124,7 +126,7 @@ static void createClef(ClefType clefType, Staff* staff, int tick, bool isSmall =
         const track_idx_t track = staff->idx() * VOICES;
         clef->setTrack(track);
         clef->setGenerated(false);
-        clef->mutLayoutData()->setMag(staff->staffMag(Fraction::fromTicks(tick)));
+        clef->mutldata()->setMag(staff->staffMag(Fraction::fromTicks(tick)));
         clef->setSmall(isSmall);
         seg->add(clef);
     }
@@ -134,7 +136,7 @@ static AveragePitch findAverageSegPitch(const Segment* seg, track_idx_t strack)
 {
     AveragePitch averagePitch;
     for (size_t voice = 0; voice < VOICES; ++voice) {
-        ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+        ChordRest* cr = toChordRest(seg->element(strack + voice));
         if (cr && cr->isChord()) {
             Chord* chord = toChord(cr);
             const auto& notes = chord->notes();
@@ -150,7 +152,7 @@ static MinMaxPitch findMinMaxSegPitch(const Segment* seg, track_idx_t strack)
 {
     MinMaxPitch minMaxPitch;
     for (size_t voice = 0; voice < VOICES; ++voice) {
-        ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+        ChordRest* cr = toChordRest(seg->element(strack + voice));
         if (cr && cr->isChord()) {
             Chord* chord = toChord(cr);
             const auto& notes = chord->notes();
@@ -181,7 +183,7 @@ static bool doesClefBreakTie(const Staff* staff)
             } else if (seg->segmentType() == SegmentType::Clef && seg->element(strack)) {
                 if (currentTie) {
                     LOGD() << "Clef breaks tie; measure number (from 1):"
-                           << seg->measure()->no() + 1
+                           << seg->measure()->measureNumber() + 1
                            << ", staff index (from 0):" << staff->idx();
                     return true;
                 }
@@ -239,7 +241,7 @@ static std::pair<ElementType, ReducedFraction> findChordRest(const Segment* seg,
     ElementType elType = ElementType::INVALID;
     ReducedFraction newRestLen(0, 1);
     for (size_t voice = 0; voice < VOICES; ++voice) {
-        ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+        ChordRest* cr = toChordRest(seg->element(strack + voice));
         if (!cr) {
             continue;
         }
@@ -437,7 +439,7 @@ bool hasGFclefs(const InstrumentTemplate* templ)
     bool hasG = false;
     bool hasF = false;
     for (staff_idx_t i = 0; i != staveCount; ++i) {
-        switch (templ->clefTypes[i]._concertClef) {
+        switch (templ->clefTypes[i].concertClef) {
         case ClefType::G:
             hasG = true;
             break;

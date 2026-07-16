@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -86,14 +86,21 @@ RectF StaffLines::hitBBox() const
 {
     double clickablePadding = spatium();
     if (m_lines.size() <= 1) {
-        return layoutData()->bbox().adjusted(0.0, -clickablePadding, 0.0, clickablePadding);
+        return ldata()->bbox().adjusted(0.0, -clickablePadding, 0.0, clickablePadding);
     }
-    return layoutData()->bbox();
+    return ldata()->bbox();
 }
 
 Shape StaffLines::hitShape() const
 {
     return Shape(hitBBox(), this);
+}
+
+bool StaffLines::collectForDrawing() const
+{
+    staff_idx_t idx = staffIdx();
+    return EngravingItem::collectForDrawing() && (measure()->visible(idx) || measure()->isCutawayClef(idx))
+           && score()->staff(idx)->show();
 }
 
 //---------------------------------------------------------
@@ -106,17 +113,6 @@ double StaffLines::y1() const
 /*      if (system == 0 || staffIdx() >= system->staves()->size())
             return 0.0;
       */
-    return system->staff(staffIdx())->y() + layoutData()->pos().y();
-}
-
-//---------------------------------------------------------
-//   scanElements
-//---------------------------------------------------------
-
-void StaffLines::scanElements(void* data, void (* func)(void*, EngravingItem*), bool all)
-{
-    if (all || (measure()->visible(staffIdx()) && score()->staff(staffIdx())->show())) {
-        func(data, this);
-    }
+    return system->staff(staffIdx())->y() + ldata()->pos().y();
 }
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,9 +23,7 @@
 #ifndef MU_PLAYBACK_SOUNDPROFILESREPOSITORY_H
 #define MU_PLAYBACK_SOUNDPROFILESREPOSITORY_H
 
-#include <map>
-
-#include "audio/iplayback.h"
+#include "audio/main/iplayback.h"
 #include "async/asyncable.h"
 #include "modularity/ioc.h"
 
@@ -33,17 +31,23 @@
 #include "iplaybackconfiguration.h"
 
 namespace mu::playback {
-class SoundProfilesRepository : public ISoundProfilesRepository, public async::Asyncable
+class SoundProfilesRepository : public ISoundProfilesRepository, public muse::async::Asyncable, public muse::Contextable
 {
-    INJECT_STATIC(audio::IPlayback, playback)
-    INJECT_STATIC(IPlaybackConfiguration, config)
+    muse::GlobalInject<IPlaybackConfiguration> config;
+    muse::ContextInject<muse::audio::IPlayback> playback = { this };
+
 public:
-    SoundProfilesRepository() = default;
+    SoundProfilesRepository(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx) {}
+
+    void init();
 
     void refresh() override;
 
     const SoundProfile& profile(const SoundProfileName& name) const override;
+    bool containsProfile(const SoundProfileName& name) const override;
     const SoundProfilesMap& availableProfiles() const override;
+
     void addProfile(const SoundProfile& profile) override;
     void removeProfile(const SoundProfileName& name) override;
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -49,7 +49,7 @@ void addElementToTuplet(int voice,
 
 #ifdef QT_DEBUG
     if (foundTuplets.size() > 1) {
-        LOGD() << "Measure number (from 1):" << el->measure()->no() + 1
+        LOGD() << "Measure number (from 1):" << el->measure()->measureNumber() + 1
                << ", staff index (from 0):" << el->staff()->idx();
 
         Q_ASSERT_X(false, "MidiTuplet::addElementToTuplet",
@@ -86,7 +86,7 @@ void createTupletNotes(
         tuplet->setBaseLen(baseLen);
 
         tuplet->setTrack(track);
-//            tuplet->setTick(tupletData.onTime.ticks());
+        tuplet->setTick(tupletData.onTime.fraction());
         tuplet->setVoice(tupletData.voice);
         tuplet->setParent(measure);
 
@@ -113,25 +113,25 @@ bool haveTupletsEnoughElements(const Staff* staff)
     for (voice_idx_t voice = 0; voice < VOICES; ++voice) {
         for (Segment* seg = staff->score()->firstSegment(SegmentType::All); seg; seg = seg->next1()) {
             if (seg->segmentType() == SegmentType::ChordRest) {
-                const ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+                const ChordRest* cr = toChordRest(seg->element(strack + voice));
                 if (!cr) {
                     continue;
                 }
                 const Tuplet* tuplet = cr->tuplet();
                 if (tuplet) {
                     if (tuplet->elements().size() <= 1) {
-                        printInvalidTupletLocation(seg->measure()->no(), staff->idx());
+                        printInvalidTupletLocation(seg->measure()->measureNumber(), staff->idx());
                         return false;
                     }
                     int chordCount = 0;
                     for (const auto& e: tuplet->elements()) {
-                        const ChordRest* cr1 = static_cast<ChordRest*>(e);
+                        const ChordRest* cr1 = toChordRest(e);
                         if (cr1 && cr1->isChord()) {
                             ++chordCount;
                         }
                     }
                     if (chordCount == 0) {
-                        printInvalidTupletLocation(seg->measure()->no(), staff->idx());
+                        printInvalidTupletLocation(seg->measure()->measureNumber(), staff->idx());
                         return false;
                     }
                 }

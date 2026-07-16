@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -477,6 +477,8 @@ TDuration& TDuration::operator+=(const TDuration& t)
 
 //---------------------------------------------------------
 //   toDurationList
+//    - l is in local time
+//    - returned durations are in local time
 //---------------------------------------------------------
 
 std::vector<TDuration> toDurationList(Fraction l, bool useDots, int maxDots, bool printRestRemains)
@@ -502,17 +504,24 @@ std::vector<TDuration> toDurationList(Fraction l, bool useDots, int maxDots, boo
 
 //---------------------------------------------------------
 //   toRhythmicDurationList
+//    - l and rtickStart are in local (stretched) time
+//    - returned durations are in local time
 //---------------------------------------------------------
 
 std::vector<TDuration> toRhythmicDurationList(const Fraction& l, bool isRest, Fraction rtickStart,
-                                              const TimeSigFrac& nominal, Measure* msr, int maxDots)
+                                              const TimeSigFrac& nominal, Measure* msr, int maxDots,
+                                              const Fraction& timeStretch)
 {
+    IF_ASSERT_FAILED(l > Fraction(0, 1)) {
+        return {};
+    }
+
     std::vector<TDuration> dList;
     dList.reserve(8);
 
     if (msr->isAnacrusis()) {
-        rtickStart = Fraction::fromTicks(nominal.ticksPerMeasure()) - rtickStart;
-    } else if (isRest && l == msr->ticks()) {
+        rtickStart += msr->anacrusisOffset() * timeStretch;
+    } else if (isRest && l == msr->ticks() * timeStretch) {
         TDuration d = TDuration(DurationType::V_MEASURE);
         dList.push_back(d);
         return dList;
@@ -595,8 +604,15 @@ void populateRhythmicList(std::vector<TDuration>* dList, const Fraction& l, bool
         // no single TDuration fits so must split anyway
     }
 
+    // Prevent infinite recursion if there is no splitting point other than the start and end ticks
+    IF_ASSERT_FAILED(rtickStart.ticks() < rtickSplit && rtickSplit < rtickEnd.ticks()) {
+        std::vector<TDuration> dList2 = toDurationList(l, maxDots > 0, maxDots, false);
+        dList->insert(dList->end(), dList2.begin(), dList2.end());
+        return;
+    }
+
     // Split on the strongest beat or subbeat crossed
-    Fraction leftSplit   = Fraction::fromTicks(rtickSplit) - rtickStart;
+    Fraction leftSplit = Fraction::fromTicks(rtickSplit) - rtickStart;
     Fraction rightSplit = l - leftSplit;
 
     // Recurse to see if we need to split further before adding to list

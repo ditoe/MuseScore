@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,10 +23,12 @@
 #ifndef MU_PROJECT_INOTATIONWRITER_H
 #define MU_PROJECT_INOTATIONWRITER_H
 
-#include "types/ret.h"
-#include "types/val.h"
+#include <map>
 
-#include "async/channel.h"
+#include "global/types/ret.h"
+#include "global/types/val.h"
+#include "global/io/iodevice.h"
+#include "global/async/channel.h"
 #include "global/progress.h"
 #include "notation/inotation.h"
 
@@ -47,18 +49,25 @@ public:
         UNIT_TYPE,
         PAGE_NUMBER,
         TRANSPARENT_BACKGROUND,
-        BEATS_COLORS
+        BEATS_COLORS,
+        WAIT_FOR_COMPLETION,
+
+        WITH_AUDIO,
+
+        LEADING_SILENCE_SEC,
+        TRAILING_SILENCE_SEC,
     };
 
-    using Options = QMap<OptionKey, Val>;
+    using Options = std::map<OptionKey, muse::Val>;
 
     virtual std::vector<UnitType> supportedUnitTypes() const = 0;
     virtual bool supportsUnitType(UnitType unitType) const = 0;
 
-    virtual Ret write(notation::INotationPtr notation, QIODevice& device, const Options& options = Options()) = 0;
-    virtual Ret writeList(const notation::INotationPtrList& notations, QIODevice& device, const Options& options = Options()) = 0;
+    virtual muse::Ret write(notation::INotationPtr notation, muse::io::IODevice& device, const Options& options = Options()) = 0;
+    virtual muse::Ret writeList(const notation::INotationPtrList& notations, muse::io::IODevice& device,
+                                const Options& options = Options()) = 0;
 
-    virtual framework::Progress* progress() { return nullptr; }
+    virtual muse::Progress* progress() { return nullptr; }
     virtual void abort() {}
 };
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -48,7 +48,7 @@ class PalmMute;
 namespace mu::iex::guitarpro {
 class PowerTab
 {
-    mu::io::IODevice* _file = nullptr;
+    muse::io::IODevice* _file = nullptr;
     mu::engraving::MasterScore* score = nullptr;
 
     bool              readBoolean();
@@ -396,7 +396,7 @@ class PowerTab
     void addPalmMute(mu::engraving::Chord*);
 
 public:
-    PowerTab(mu::io::IODevice* f, mu::engraving::MasterScore* s)
+    PowerTab(muse::io::IODevice* f, mu::engraving::MasterScore* s)
         : _file(f), score(s) {}
     mu::engraving::Err read();
 };

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,10 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+pragma ComponentBehavior: Bound
+
+import QtQuick
+
+import Muse.Ui
+import Muse.UiComponents
 
 Item {
     id: root
@@ -36,7 +39,7 @@ Item {
     property alias searchText: searchField.searchText
     property alias searching: searchField.hasText
 
-    property alias navigationPanel: navPanel
+    property alias navigationPanel: view.navigation
 
     signal titleClicked(var index)
 
@@ -44,25 +47,6 @@ Item {
 
     function clearSearch() {
         searchField.clear()
-    }
-
-    QtObject {
-        id: prv
-
-        property var currentItemNavigationIndex: []
-    }
-
-    NavigationPanel {
-        id: navPanel
-        name: "TitleListView"
-        direction: NavigationPanel.Vertical
-        enabled: root.enabled && root.visible
-
-        onNavigationEvent: function(event) {
-            if (event.type === NavigationEvent.AboutActive) {
-                event.setData("controlIndex", prv.currentItemNavigationIndex)
-            }
-        }
     }
 
     StyledTextLabel {
@@ -80,7 +64,7 @@ Item {
         anchors.topMargin: 16
 
         navigation.name: "Search"
-        navigation.panel: navPanel
+        navigation.panel: view.navigation
         navigation.row: 1
 
         width: parent.width
@@ -89,7 +73,7 @@ Item {
     StyledListView {
         id: view
 
-        anchors.top: searchEnabled ? searchField.bottom : title.bottom
+        anchors.top: root.searchEnabled ? searchField.bottom : title.bottom
         anchors.topMargin: 16
         anchors.bottom: parent.bottom
 
@@ -98,19 +82,21 @@ Item {
 
         currentIndex: 0
 
+        accessible.name: title.text
+
         delegate: ListItemBlank {
             id: item
 
-            isSelected: view.currentIndex === model.index
+            required property string modelData
+            required property int index
+
+            isSelected: view.currentIndex === index
 
             navigation.name: modelData
-            navigation.panel: navPanel
-            navigation.row: 2 + model.index
+            navigation.panel: view.navigation
+            navigation.row: 2 + index
             navigation.accessible.name: titleLabel.text
-
-            onNavigationActivated: {
-                prv.currentItemNavigationIndex = [navigation.row, navigation.column]
-            }
+            navigation.accessible.row: index
 
             StyledTextLabel {
                 id: titleLabel
@@ -119,16 +105,16 @@ Item {
                 anchors.leftMargin: 12
 
                 horizontalAlignment: Text.AlignLeft
-                text: modelData
+                text: item.modelData
                 font: ui.theme.bodyBoldFont
             }
 
             onClicked: {
-                root.titleClicked(model.index)
+                root.titleClicked(index)
             }
 
             onDoubleClicked: {
-                root.doubleClicked(model.index)
+                root.doubleClicked(index)
             }
         }
     }

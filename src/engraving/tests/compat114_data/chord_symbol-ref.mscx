@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="4.40">
   <Score>
     <Division>480</Division>
     <Style>
+      <pageWidth>8.26772</pageWidth>
+      <pageHeight>11.6929</pageHeight>
+      <pagePrintableWidth>7.48032</pagePrintableWidth>
+      <pageEvenLeftMargin>0.393701</pageEvenLeftMargin>
+      <pageOddLeftMargin>0.393701</pageOddLeftMargin>
+      <pageEvenTopMargin>0.393701</pageEvenTopMargin>
+      <pageEvenBottomMargin>0.787403</pageEvenBottomMargin>
+      <pageOddTopMargin>0.393701</pageOddTopMargin>
+      <pageOddBottomMargin>0.787403</pageOddBottomMargin>
       <frameSystemDistance>7</frameSystemDistance>
       <voltaPosAbove x="0" y="-2"/>
       <defaultsVersion>114</defaultsVersion>
-      <Spatium>1.764</Spatium>
+      <spatium>1.764</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -18,7 +27,6 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
@@ -27,7 +35,6 @@
       <Staff id="1">
         <StaffType group="pitched">
           </StaffType>
-        <bracket type="-1" span="1" col="0" visible="1"/>
         </Staff>
       <trackName>Flute</trackName>
       <Instrument id="flute">
@@ -97,6 +104,7 @@
           <Harmony>
             <root>16</root>
             <extension>64</extension>
+            <name>7</name>
             </Harmony>
           <Rest>
             <durationType>measure</durationType>
@@ -109,6 +117,7 @@
           <Harmony>
             <root>11</root>
             <extension>16</extension>
+            <name>m</name>
             </Harmony>
           <Rest>
             <durationType>measure</durationType>
@@ -121,6 +130,7 @@
           <Harmony>
             <root>20</root>
             <extension>6</extension>
+            <name>Maj7</name>
             </Harmony>
           <Rest>
             <durationType>measure</durationType>
@@ -135,6 +145,7 @@
           <Harmony>
             <root>15</root>
             <extension>33</extension>
+            <name>dim</name>
             </Harmony>
           <Rest>
             <durationType>measure</durationType>
@@ -149,6 +160,7 @@
           <Harmony>
             <root>17</root>
             <extension>76</extension>
+            <name>7b9</name>
             </Harmony>
           <Rest>
             <durationType>measure</durationType>
@@ -162,7 +174,8 @@
         <voice>
           <Harmony>
             <root>19</root>
-            <name>o</name>
+            <extension>33</extension>
+            <name>dim</name>
             </Harmony>
           <Rest>
             <durationType>measure</durationType>

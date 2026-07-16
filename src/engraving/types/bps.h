@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,7 +32,7 @@ struct BeatsPerMinute // beats per minute
     constexpr BeatsPerMinute(double v)
         : val(v) {}
 
-    inline bool operator ==(const BeatsPerMinute& other) const { return RealIsEqual(val, other.val); }
+    inline bool operator ==(const BeatsPerMinute& other) const { return muse::RealIsEqual(val, other.val); }
     inline bool operator !=(const BeatsPerMinute& other) const { return !operator ==(other); }
     inline bool operator >(const BeatsPerMinute& other) const { return val > other.val; }
 
@@ -49,7 +49,7 @@ struct BeatsPerSecond // beats per second
     constexpr BeatsPerSecond(double v)
         : val(v) {}
 
-    inline bool operator ==(const BeatsPerSecond& other) const { return RealIsEqual(val, other.val); }
+    inline bool operator ==(const BeatsPerSecond& other) const { return muse::RealIsEqual(val, other.val); }
     inline bool operator !=(const BeatsPerSecond& other) const { return !operator ==(other); }
     inline bool operator >(const BeatsPerSecond& other) const { return val > other.val; }
 

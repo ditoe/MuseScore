@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,20 +22,22 @@
 
 #include <gtest/gtest.h>
 
-#include "dom/barline.h"
-#include "dom/bracket.h"
-#include "dom/factory.h"
-#include "dom/layoutbreak.h"
-#include "dom/masterscore.h"
-#include "dom/measure.h"
-#include "dom/system.h"
-#include "dom/timesig.h"
-#include "dom/undo.h"
+#include "engraving/dom/barline.h"
+#include "engraving/dom/bracket.h"
+#include "engraving/dom/factory.h"
+#include "engraving/dom/layoutbreak.h"
+#include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/system.h"
+#include "engraving/dom/timesig.h"
+
+#include "engraving/editing/editproperty.h"
+#include "engraving/editing/edittimesig.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String BARLINE_DATA_DIR(u"barline_data/");
@@ -85,7 +87,7 @@ TEST_F(Engraving_BarlineTests, barline01)
         // check height of the bracket of each system
         // (bracket height is different between first system (3 staves) and other systems (2 staves) )
         Bracket* bracket = sys->brackets().at(0);
-        height      = bracket->layoutData()->bbox().height() / spatium;
+        height      = bracket->ldata()->bbox().height() / spatium;
         heightMin   = (sysNo == 0) ? BRACKET0_HEIGHT_MIN : BRACKET_HEIGHT_MIN;
         heightMax   = (sysNo == 0) ? BRACKET0_HEIGHT_MAX : BRACKET_HEIGHT_MAX;
 
@@ -96,7 +98,7 @@ TEST_F(Engraving_BarlineTests, barline01)
         // (2 measure for each system)
         for (int msrNo=0; msrNo < 2; ++msrNo) {
             Measure* msr = toMeasure(sys->measure(msrNo));
-            Segment* seg = msr->findSegment(SegmentType::EndBarLine, msr->tick() + msr->ticks());
+            Segment* seg = msr->findSegment(SegmentType::EndBarLine, msr->endTick());
             EXPECT_TRUE(seg);
 
             BarLine* bar = toBarLine(seg->element(0));
@@ -123,12 +125,12 @@ TEST_F(Engraving_BarlineTests, barline02)
     TimeSig* ts  = Factory::createTimeSig(score->dummy()->segment());
     ts->setSig(Fraction(3, 4), TimeSigType::NORMAL);
 
-    score->cmdAddTimeSig(msr, 0, ts, false);
+    EditTimeSig::addTimeSig(score->transactionManager()->currentOrDummyTransaction(), score, msr, 0, ts, false);
     score->doLayout();
 
     msr = score->firstMeasure();
     while ((msr = msr->nextMeasure())) {
-        Segment* seg = msr->findSegment(SegmentType::EndBarLine, msr->tick() + msr->ticks());
+        Segment* seg = msr->findSegment(SegmentType::EndBarLine, msr->endTick());
         EXPECT_TRUE(seg);
 
         BarLine* bar = static_cast<BarLine*>(seg->element(0));
@@ -154,8 +156,8 @@ TEST_F(Engraving_BarlineTests, barline03)
     Score* score = ScoreRW::readScore(BARLINE_DATA_DIR + "barline03.mscx");
     EXPECT_TRUE(score);
 
-    score->startCmd();
-    score->undo(new ChangeProperty(score->staff(0), Pid::STAFF_BARLINE_SPAN, 1));
+    score->startCmd(TranslatableString::untranslatable("Engraving barline tests"));
+    score->undo(new ChangeProperty(score->staff(0), Pid::STAFF_BARLINE_SPAN, true));
     score->undo(new ChangeProperty(score->staff(0), Pid::STAFF_BARLINE_SPAN_FROM, 2));
     score->undo(new ChangeProperty(score->staff(0), Pid::STAFF_BARLINE_SPAN_TO, -2));
     score->endCmd();
@@ -189,7 +191,7 @@ TEST_F(Engraving_BarlineTests, barline04)
 
     score->doLayout();
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving barline tests"));
     // 'go' to 5th measure
     Measure* msr = score->firstMeasure();
     for (int i=0; i < 4; i++) {
@@ -202,12 +204,12 @@ TEST_F(Engraving_BarlineTests, barline04)
     BarLine* bar = static_cast<BarLine*>(seg->element(0));
     EXPECT_TRUE(bar);
 
-    bar->undoChangeProperty(Pid::BARLINE_SPAN, 2);
+    bar->undoChangeProperty(Pid::BARLINE_SPAN, true);
     bar->undoChangeProperty(Pid::BARLINE_SPAN_FROM, 2);
     bar->undoChangeProperty(Pid::BARLINE_SPAN_TO, 6);
     score->endCmd();
 
-    EXPECT_GT(bar->spanStaff(), 0);
+    EXPECT_TRUE(bar->spanStaff());
     EXPECT_EQ(bar->spanFrom(), 2);
     EXPECT_EQ(bar->spanTo(), 6);
 
@@ -239,7 +241,7 @@ TEST_F(Engraving_BarlineTests, barline05)
     // create and add a LineBreak element
     LayoutBreak* lb = Factory::createLayoutBreak(msr);
     lb->setLayoutBreakType(LayoutBreakType::LINE);
-    lb->setTrack(mu::nidx);               // system-level element
+    lb->setTrack(0);
     lb->setParent(msr);
     score->undoAddElement(lb);
     score->doLayout();
@@ -321,10 +323,11 @@ void dropNormalBarline(EngravingItem* e)
     BarLine* barLine = Factory::createBarLine(e->score()->dummy()->segment());
     barLine->setBarLineType(BarLineType::NORMAL);
     dropData.dropElement = barLine;
+    dropData.track = 0;
 
-    e->score()->startCmd();
-    e->drop(dropData);
-    e->score()->endCmd();
+    e->score()->transactionManager()->transaction(TranslatableString::untranslatable("Drop normal barline test"), [&](Transaction& tx) {
+        e->drop(tx, dropData);
+    });
 }
 
 //---------------------------------------------------------
@@ -343,33 +346,33 @@ TEST_F(Engraving_BarlineTests, barline179726)
     Measure* m = score->firstMeasure();
 
     // drop NORMAL onto initial START_REPEAT barline will remove that START_REPEAT
-    dropNormalBarline(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->elementAt(0));
+    dropNormalBarline(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->element(0));
     EXPECT_EQ(m->findSegment(SegmentType::StartRepeatBarLine, Fraction(0, 1)), nullptr);
 
     // drop NORMAL onto END_START_REPEAT will turn into NORMAL
-    dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
-    BarLine* bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
+    dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
+    BarLine* bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
     EXPECT_TRUE(bar);
     EXPECT_EQ(bar->barLineType(), BarLineType::NORMAL);
 
     m = m->nextMeasure();
 
     // drop NORMAL onto the END_REPEAT part of an END_START_REPEAT straddling a newline will turn into NORMAL at the end of this meas
-    dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
-    bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
+    dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
+    bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
     EXPECT_TRUE(bar);
     EXPECT_EQ(bar->barLineType(), BarLineType::NORMAL);
 
     m = m->nextMeasure();
 
     // but leave START_REPEAT at the beginning of the newline
-    bar = static_cast<BarLine*>(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->elementAt(0));
+    bar = static_cast<BarLine*>(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->element(0));
     EXPECT_TRUE(bar);
 
     // drop NORMAL onto the meas ending with an END_START_REPEAT straddling a newline will turn into NORMAL at the end of this meas
     // but note I'm not verifying what happens to the START_REPEAT at the beginning of the newline...I'm not sure that behavior is well-defined yet
     dropNormalBarline(m);
-    bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
+    bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
     EXPECT_TRUE(bar);
     EXPECT_EQ(bar->barLineType(), BarLineType::NORMAL);
 
@@ -377,18 +380,18 @@ TEST_F(Engraving_BarlineTests, barline179726)
     m = m->nextMeasure();
 
     // drop NORMAL onto the START_REPEAT part of an END_START_REPEAT straddling a newline will remove the START_REPEAT at the beginning of this measure
-    dropNormalBarline(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->elementAt(0));
+    dropNormalBarline(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->element(0));
     EXPECT_EQ(m->findSegment(SegmentType::StartRepeatBarLine, m->tick()), nullptr);
 
     // but leave END_REPEAT at the end of previous line
-    bar = static_cast<BarLine*>(m->prevMeasure()->findSegment(SegmentType::EndBarLine, m->tick())->elementAt(0));
+    bar = static_cast<BarLine*>(m->prevMeasure()->findSegment(SegmentType::EndBarLine, m->tick())->element(0));
     EXPECT_TRUE(bar);
     EXPECT_EQ(bar->barLineType(), BarLineType::END_REPEAT);
 
     for (int i = 0; i < 4; i++, m = m->nextMeasure()) {
         // drop NORMAL onto END_REPEAT, BROKEN, DOTTED, DOUBLE at the end of this meas will turn into NORMAL
-        dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
-        bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
+        dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
+        bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
         EXPECT_TRUE(bar);
         EXPECT_EQ(bar->barLineType(), BarLineType::NORMAL);
     }
@@ -396,12 +399,12 @@ TEST_F(Engraving_BarlineTests, barline179726)
     m = m->nextMeasure();
 
     // drop NORMAL onto a START_REPEAT in middle of a line will remove the START_REPEAT at the beginning of this measure
-    dropNormalBarline(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->elementAt(0));
+    dropNormalBarline(m->findSegment(SegmentType::StartRepeatBarLine, m->tick())->element(0));
     EXPECT_EQ(m->findSegment(SegmentType::StartRepeatBarLine, m->tick()), nullptr);
 
     // drop NORMAL onto final END_REPEAT at end of score will turn into NORMAL
-    dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
-    bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->elementAt(0));
+    dropNormalBarline(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
+    bar = static_cast<BarLine*>(m->findSegment(SegmentType::EndBarLine, m->endTick())->element(0));
     EXPECT_TRUE(bar);
     EXPECT_EQ(bar->barLineType(), BarLineType::NORMAL);
 
@@ -419,7 +422,7 @@ TEST_F(Engraving_BarlineTests, deleteSkipBarlines)
     Measure* m1 = score->firstMeasure();
     EXPECT_TRUE(m1);
 
-    score->startCmd();
+    score->startCmd(TranslatableString::untranslatable("Engraving barline tests"));
     score->cmdSelectAll();
     score->cmdDeleteSelection();
     score->endCmd();

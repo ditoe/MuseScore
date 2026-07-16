@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,19 +21,15 @@
  */
 #include "scoreorder.h"
 
-#include <iostream>
-
 #include "rw/xmlreader.h"
 #include "rw/xmlwriter.h"
-
-#include "types/translatablestring.h"
 
 #include "dom/bracketItem.h"
 #include "dom/instrtemplate.h"
 #include "dom/part.h"
 #include "dom/score.h"
 #include "dom/staff.h"
-#include "dom/undo.h"
+#include "editing/editbrackets.h"
 
 #include "log.h"
 
@@ -161,7 +157,7 @@ void ScoreOrder::readSection(XmlReader& reader)
             sg.thinBracket = thinBrackets;
             groups.push_back(sg);
         } else if (reader.name() == "unsorted") {
-            String group { reader.attribute("group", String(u"")) };
+            String group { reader.attribute("group", String()) };
 
             if (hasGroup(UNSORTED_ID, group)) {
                 reader.skipCurrentElement();
@@ -237,7 +233,7 @@ String ScoreOrder::getFamilyName(const InstrumentTemplate* instrTemplate, bool s
 
     if (soloist) {
         return String(u"<soloists>");
-    } else if (mu::contains(instrumentMap, instrTemplate->id)) {
+    } else if (muse::contains(instrumentMap, instrTemplate->id)) {
         return instrumentMap.at(instrTemplate->id).id;
     } else if (instrTemplate->family) {
         return instrTemplate->family->id;
@@ -302,7 +298,7 @@ int ScoreOrder::instrumentSortingIndex(const String& instrumentId, bool isSolois
     static const String SoloistsGroup(u"<soloists>");
     static const String UnsortedGroup(u"<unsorted>");
 
-    enum class Priority {
+    enum class Priority : unsigned char {
         Undefined,
         Unsorted,
         UnsortedGroup,
@@ -315,7 +311,7 @@ int ScoreOrder::instrumentSortingIndex(const String& instrumentId, bool isSolois
         return 0;
     }
 
-    String family = mu::contains(instrumentMap, instrumentId) ? instrumentMap.at(instrumentId).id : ii.instrTemplate->familyId();
+    String family = muse::contains(instrumentMap, instrumentId) ? instrumentMap.at(instrumentId).id : ii.instrTemplate->familyId();
 
     size_t index = groups.size();
 
@@ -337,7 +333,8 @@ int ScoreOrder::instrumentSortingIndex(const String& instrumentId, bool isSolois
                    && (sg.unsorted == ii.instrTemplate->groupId)) {
             index = i;
             priority = Priority::UnsortedGroup;
-        } else if ((priority < Priority::Unsorted) && (sg.family == UnsortedGroup)) {
+        } else if ((priority < Priority::Unsorted) && (sg.family == UnsortedGroup)
+                   && (sg.unsorted.empty())) {
             index = i;
             priority = Priority::Unsorted;
         }
@@ -350,7 +347,7 @@ int ScoreOrder::instrumentSortingIndex(const String& instrumentId, bool isSolois
 //   isScoreOrder
 //---------------------------------------------------------
 
-bool ScoreOrder::isScoreOrder(const std::list<int>& indices) const
+bool ScoreOrder::isScoreOrder(const std::vector<int>& indices) const
 {
     if (isCustom()) {
         return true;
@@ -368,7 +365,8 @@ bool ScoreOrder::isScoreOrder(const std::list<int>& indices) const
 
 bool ScoreOrder::isScoreOrder(const Score* score) const
 {
-    std::list<int> indices;
+    std::vector<int> indices;
+    indices.reserve(score->parts().size());
     for (const Part* part : score->parts()) {
         indices.push_back(instrumentSortingIndex(part->instrument()->id(), part->soloist()));
     }
@@ -414,6 +412,9 @@ void ScoreOrder::setBracketsAndBarlines(Score* score)
             std::vector<BracketItem*> brackets = staff->brackets();
 
             for (BracketItem* bi : brackets) {
+                if (bi->bracketType() == BracketType::GROUP) {
+                    continue;
+                }
                 if (bi->bracketType() == BracketType::BRACE) {
                     braceSpan = std::max(braceSpan, bi->bracketSpan() - 1);
                 }
@@ -422,12 +423,12 @@ void ScoreOrder::setBracketsAndBarlines(Score* score)
                 }
             }
             if (!braceSpan) {
-                staff->undoChangeProperty(Pid::STAFF_BARLINE_SPAN, 0);
+                staff->undoChangeProperty(Pid::STAFF_BARLINE_SPAN, false);
             } else {
                 --braceSpan;
             }
 
-            if (prvSection.isEmpty() || (sg.section != prvSection)) {
+            if ((prvSection.isEmpty() || (sg.section != prvSection)) && score->parts().size() > 1) {
                 if (thkBracketStaff && (thkBracketSpan > 1)) {
                     score->undoAddBracket(thkBracketStaff, 0, BracketType::NORMAL, thkBracketSpan);
                 }
@@ -461,11 +462,8 @@ void ScoreOrder::setBracketsAndBarlines(Score* score)
                     thnBracketSpan += static_cast<int>(part->nstaves());
                 }
                 if (prvStaff) {
-                    bool oldBarlineSpan = prvStaff->getProperty(Pid::STAFF_BARLINE_SPAN).toBool();
-                    bool newBarlineSpan = prvBarLineSpan && (!prvSection.isEmpty() && (sg.section == prvSection));
-                    if (oldBarlineSpan != newBarlineSpan) {
-                        prvStaff->undoChangeProperty(Pid::STAFF_BARLINE_SPAN, newBarlineSpan);
-                    }
+                    const bool newBarlineSpan = prvBarLineSpan && (!prvSection.isEmpty() && (sg.section == prvSection));
+                    prvStaff->undoChangeProperty(Pid::STAFF_BARLINE_SPAN, newBarlineSpan);
                 }
                 prvStaff = staff;
                 ++staffIdx;
@@ -512,7 +510,7 @@ void ScoreOrder::read(XmlReader& reader)
         } else if (reader.name() == "soloists") {
             readSoloists(reader, sectionId);
         } else if (reader.name() == "unsorted") {
-            String group { reader.attribute("group", String(u"")) };
+            String group { reader.attribute("group", String()) };
 
             if (!hasGroup(UNSORTED_ID, group)) {
                 groups.push_back(newUnsortedGroup(group, sectionId));
@@ -524,7 +522,7 @@ void ScoreOrder::read(XmlReader& reader)
         }
     }
 
-    String group { String(u"") };
+    String group;
     if (!hasGroup(UNSORTED_ID, group)) {
         groups.push_back(newUnsortedGroup(group, id));
     }
@@ -585,17 +583,16 @@ void ScoreOrder::write(XmlWriter& xml) const
 
 void ScoreOrder::updateInstruments(const Score* score)
 {
-    for (Part* part : score->parts()) {
+    for (const Part* part : score->parts()) {
         InstrumentIndex ii = searchTemplateIndexForId(part->instrument()->id());
         if (!ii.instrTemplate || !ii.instrTemplate->family) {
             continue;
         }
 
-        InstrumentFamily* family = ii.instrTemplate->family;
         InstrumentOverwrite io;
-        io.id = family->id;
-        io.name = family->name;
-        instrumentMap.insert({ ii.instrTemplate->id, io });
+        io.id = ii.instrTemplate->family->id;
+        io.name = ii.instrTemplate->family->name;
+        instrumentMap.emplace(ii.instrTemplate->id, std::move(io));
     }
 }
 }

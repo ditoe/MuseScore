@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,9 +22,9 @@
 #include "brailleconfigurationstub.h"
 
 using namespace mu;
-using namespace mu::braille;
 
-async::Notification BrailleConfigurationStub::braillePanelEnabledChanged() const
+namespace mu::braille {
+muse::async::Notification BrailleConfigurationStub::braillePanelEnabledChanged() const
 {
     return {};
 }
@@ -38,7 +38,21 @@ void BrailleConfigurationStub::setBraillePanelEnabled(const bool)
 {
 }
 
-async::Notification BrailleConfigurationStub::brailleTableChanged() const
+muse::async::Notification BrailleConfigurationStub::intervalDirectionChanged() const
+{
+    return {};
+}
+
+BrailleIntervalDirection BrailleConfigurationStub::intervalDirection() const
+{
+    return {};
+}
+
+void BrailleConfigurationStub::setIntervalDirection(const BrailleIntervalDirection)
+{
+}
+
+muse::async::Notification BrailleConfigurationStub::brailleTableChanged() const
 {
     return {};
 }
@@ -48,11 +62,12 @@ QString BrailleConfigurationStub::brailleTable() const
     return {};
 }
 
-void BrailleConfigurationStub::setBrailleTable(const QString)
+void BrailleConfigurationStub::setBrailleTable(const QString&)
 {
 }
 
-QStringList BrailleConfigurationStub::brailleTableList()
+QStringList BrailleConfigurationStub::brailleTableList() const
 {
     return {};
+}
 }

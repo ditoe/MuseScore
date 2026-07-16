@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,21 +19,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_ENGRAVING_COMPATUTILS_H
-#define MU_ENGRAVING_COMPATUTILS_H
+#pragma once
 
 #include <vector>
 #include <set>
 
-#include "dom/articulation.h"
+#include "../../dom/articulation.h"
 
 namespace mu::engraving {
-enum class SymId;
-class Score;
-class MasterScore;
-class Excerpt;
 class Dynamic;
-enum class DynamicType : char;
+class Excerpt;
+class HarmonyInfo;
+class MasterScore;
+class Score;
+enum class DynamicType : unsigned char;
+enum class SymId;
 }
 
 namespace mu::engraving::compat {
@@ -43,9 +43,23 @@ public:
     static void assignInitialPartToExcerpts(const std::vector<Excerpt*>& excerpts);
     static void doCompatibilityConversions(MasterScore* masterScore);
     static ArticulationAnchor translateToNewArticulationAnchor(int anchor);
+    static double convertChordExtModUnits(double val);
+    static void setHarmonyRootTpcFromFunction(HarmonyInfo* info, const Harmony* h, const muse::String& s);
     static const std::set<SymId> ORNAMENT_IDS;
+    static const std::map<Sid, Sid> ALIGN_VALS_TO_CONVERT;
+    static void setPositionStylesFromAlign(MStyle* style, std::vector<Sid> ignoreSids = {});
+    static void setTextLineTextPositionFromAlign(TextLineBase* tl);
+    static void resetHookHeightSign(TextLineBase* tl);
+    static void setMusicSymbolSize470(MStyle& style);
+    static Spatium convertPre470FrameRadius(double frameRadius);
+    static void convertPre470ImageSize(Image* image);
+    static void doMigrateNoteParens(EngravingItem* item);
+    static PointF getAdjustedOffset(EngravingItem* item, PointF offset);
+    static void migrateOffset500(EngravingItem* item, PropertyValue& offset);
+    static void migrateOffsetPre302(EngravingItem* item, int mscVersion);
 
 private:
+    static Sid positionStyleFromAlign(Sid align);
     static void replaceStaffTextWithPlayTechniqueAnnotation(MasterScore* score);
     static void replaceOldWithNewOrnaments(MasterScore* score);
     static void replaceOldWithNewExpressions(MasterScore* score);
@@ -58,6 +72,10 @@ private:
     static void replaceStaffTextWithCapo(MasterScore* masterScore);
     static void addMissingInitKeyForTransposingInstrument(MasterScore* score);
     static void resetFramesExclusionFromParts(MasterScore* masterScore);
+    static void mapHeaderFooterStyles(MasterScore* masterScore);
+    static NoteLine* createNoteLineFromTextLine(TextLine* textLine);
+    static void convertTextLineToNoteAnchoredLine(MasterScore* masterScore);
+    static void convertLaissezVibArticToTie(MasterScore* masterScore);
+    static void removeMMRestElements(MasterScore* masterScore);
 };
 }
-#endif // MU_ENGRAVING_COMPATUTILS_H

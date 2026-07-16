@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,6 +27,7 @@
 #include "dom/spacer.h"
 #include "dom/textlinebase.h"
 
+#include "types/typesconv.h"
 #include "twrite.h"
 
 using namespace mu::engraving;
@@ -38,12 +39,12 @@ void MeasureWrite::writeMeasure(const Measure* measure, XmlWriter& xml, WriteCon
                                 bool forceTimeSig)
 {
     if (MScore::debugMode) {
-        const int mno = measure->no() + 1;
+        const int mno = measure->measureNumber() + 1;
         xml.comment(String(u"Measure %1").arg(mno));
     }
-    if (measure->m_len != measure->m_timesig) {
+    if (measure->ticks() != measure->timesig()) {
         // this is an irregular measure
-        xml.startElement(measure, { { "len", measure->m_len.toString() } });
+        xml.startElement(measure, { { "len", measure->ticks().toString() } });
     } else {
         xml.startElement(measure);
     }
@@ -51,26 +52,36 @@ void MeasureWrite::writeMeasure(const Measure* measure, XmlWriter& xml, WriteCon
     ctx.setCurTick(measure->tick());
     ctx.setCurTrack(staff * VOICES);
 
-    if (measure->m_mmRestCount > 0) {
-        xml.tag("multiMeasureRest", measure->m_mmRestCount);
+    if (measure->mmRestCount() > 0) {
+        xml.tag("multiMeasureRest", measure->mmRestCount());
     }
     if (writeSystemElements) {
+        TWrite::writeItemEid(measure, xml, ctx);
+
+        if (measure->isMMRest()) {
+            Measure* lastMeasure = measure->mmRestLast();
+            EID eidOfLastMeasure = lastMeasure->eid();
+            if (!eidOfLastMeasure.isValid()) {
+                eidOfLastMeasure = lastMeasure->assignNewEID();
+            }
+            xml.tag("mmRestLast", eidOfLastMeasure.toStdString());
+        }
+
         if (measure->repeatStart()) {
             xml.tag("startRepeat");
         }
         if (measure->repeatEnd()) {
-            xml.tag("endRepeat", measure->m_repeatCount);
+            xml.tag("endRepeat", measure->repeatCount());
         }
-        TWrite::writeProperty(measure, xml, Pid::IRREGULAR);
+        TWrite::writeProperty(measure, xml, Pid::EXCLUDE_FROM_NUMBERING);
         TWrite::writeProperty(measure, xml, Pid::BREAK_MMR);
         TWrite::writeProperty(measure, xml, Pid::USER_STRETCH);
-        TWrite::writeProperty(measure, xml, Pid::NO_OFFSET);
+        TWrite::writeProperty(measure, xml, Pid::MEASURE_NUMBER_OFFSET);
         TWrite::writeProperty(measure, xml, Pid::MEASURE_NUMBER_MODE);
     }
-    double _spatium = measure->spatium();
-    MStaff* mstaff = measure->m_mstaves[staff];
-    if (mstaff->noText() && !mstaff->noText()->generated()) {
-        TWrite::write(mstaff->noText(), xml, ctx);
+    MStaff* mstaff = measure->mstaves()[staff];
+    if (mstaff->measureNumber() && !mstaff->measureNumber()->generated()) {
+        TWrite::write(mstaff->measureNumber(), xml, ctx);
     }
 
     if (mstaff->mmRangeText() && !mstaff->mmRangeText()->generated()) {
@@ -78,21 +89,23 @@ void MeasureWrite::writeMeasure(const Measure* measure, XmlWriter& xml, WriteCon
     }
 
     if (mstaff->vspacerUp()) {
-        xml.tag("vspacerUp", mstaff->vspacerUp()->gap().val() / _spatium);
+        xml.tag("vspacerUp", mstaff->vspacerUp()->gap().val());
     }
     if (mstaff->vspacerDown()) {
         if (mstaff->vspacerDown()->spacerType() == SpacerType::FIXED) {
-            xml.tag("vspacerFixed", mstaff->vspacerDown()->gap().val() / _spatium);
+            xml.tag("vspacerFixed", mstaff->vspacerDown()->gap().val());
         } else {
-            xml.tag("vspacerDown", mstaff->vspacerDown()->gap().val() / _spatium);
+            xml.tag("vspacerDown", mstaff->vspacerDown()->gap().val());
         }
     }
     if (!mstaff->visible()) {
         xml.tag("visible", mstaff->visible());
     }
     if (mstaff->stemless()) {
-        xml.tag("slashStyle", mstaff->stemless());     // for backwards compatibility
         xml.tag("stemless", mstaff->stemless());
+    }
+    if (mstaff->hideIfEmpty() != AutoOnOff::AUTO) {
+        xml.tag("hideIfEmpty", TConv::toXml(mstaff->hideIfEmpty()));
     }
     if (mstaff->measureRepeatCount()) {
         xml.tag("measureRepeatCount", mstaff->measureRepeatCount());

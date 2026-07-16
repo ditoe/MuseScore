@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -895,9 +895,9 @@ void addTupletEvents(std::multimap<ReducedFraction, TupletData>& tupletEvents,
                 message += QString::number(tiedTuplet.voice) + ", chord voice = ";
                 message += QString::number(midiChord.voice) + ", bar number (from 1) = ";
                 message += QString::number(midiChord.barIndex + 1);
-#endif
                 Q_ASSERT_X(tiedTuplet.voice == midiChord.voice,
                            "MidiTuplet::addTupletEvents", message.toLatin1().data());
+#endif
 
                 for (int j: tiedTuplet.tiedNoteIndexes) {
                     midiChord.notes[j].tuplet = it;

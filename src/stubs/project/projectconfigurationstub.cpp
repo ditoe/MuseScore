@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,85 +21,84 @@
  */
 #include "projectconfigurationstub.h"
 
-using namespace mu;
 using namespace mu::project;
 
-io::path_t ProjectConfigurationStub::recentFilesJsonPath() const
+muse::io::path_t ProjectConfigurationStub::recentFilesJsonPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-ByteArray ProjectConfigurationStub::compatRecentFilesData() const
+muse::ByteArray ProjectConfigurationStub::compatRecentFilesData() const
 {
-    return ByteArray();
+    return {};
 }
 
-io::path_t ProjectConfigurationStub::myFirstProjectPath() const
+muse::io::path_t ProjectConfigurationStub::myFirstProjectPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-io::paths_t ProjectConfigurationStub::availableTemplateDirs() const
+muse::io::paths_t ProjectConfigurationStub::availableTemplateDirs() const
 {
-    return io::paths_t();
+    return {};
 }
 
-io::path_t ProjectConfigurationStub::templateCategoriesJsonPath(const io::path_t&) const
+muse::io::path_t ProjectConfigurationStub::templateCategoriesJsonPath(const muse::io::path_t&) const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-io::path_t ProjectConfigurationStub::userTemplatesPath() const
+muse::io::path_t ProjectConfigurationStub::userTemplatesPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-void ProjectConfigurationStub::setUserTemplatesPath(const io::path_t&)
+void ProjectConfigurationStub::setUserTemplatesPath(const muse::io::path_t&)
 {
 }
 
-async::Channel<io::path_t> ProjectConfigurationStub::userTemplatesPathChanged() const
+muse::async::Channel<muse::io::path_t> ProjectConfigurationStub::userTemplatesPathChanged() const
 {
-    static async::Channel<io::path_t> ch;
+    static muse::async::Channel<muse::io::path_t> ch;
     return ch;
 }
 
-io::path_t ProjectConfigurationStub::lastOpenedProjectsPath() const
+muse::io::path_t ProjectConfigurationStub::lastOpenedProjectsPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-void ProjectConfigurationStub::setLastOpenedProjectsPath(const io::path_t&)
-{
-}
-
-io::path_t ProjectConfigurationStub::lastSavedProjectsPath() const
-{
-    return io::path_t();
-}
-
-void ProjectConfigurationStub::setLastSavedProjectsPath(const io::path_t&)
+void ProjectConfigurationStub::setLastOpenedProjectsPath(const muse::io::path_t&)
 {
 }
 
-io::path_t ProjectConfigurationStub::userProjectsPath() const
+muse::io::path_t ProjectConfigurationStub::lastSavedProjectsPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
-void ProjectConfigurationStub::setUserProjectsPath(const io::path_t&)
+void ProjectConfigurationStub::setLastSavedProjectsPath(const muse::io::path_t&)
 {
 }
 
-async::Channel<io::path_t> ProjectConfigurationStub::userProjectsPathChanged() const
+muse::io::path_t ProjectConfigurationStub::userProjectsPath() const
 {
-    static async::Channel<io::path_t> ch;
+    return muse::io::path_t();
+}
+
+void ProjectConfigurationStub::setUserProjectsPath(const muse::io::path_t&)
+{
+}
+
+muse::async::Channel<muse::io::path_t> ProjectConfigurationStub::userProjectsPathChanged() const
+{
+    static muse::async::Channel<muse::io::path_t> ch;
     return ch;
 }
 
-io::path_t ProjectConfigurationStub::defaultUserProjectsPath() const
+muse::io::path_t ProjectConfigurationStub::defaultUserProjectsPath() const
 {
-    return io::path_t();
+    return muse::io::path_t();
 }
 
 bool ProjectConfigurationStub::shouldAskSaveLocationType() const
@@ -111,19 +110,34 @@ void ProjectConfigurationStub::setShouldAskSaveLocationType(bool)
 {
 }
 
-bool ProjectConfigurationStub::isCloudProject(const io::path_t&) const
+bool ProjectConfigurationStub::isCloudProject(const muse::io::path_t&) const
 {
     return false;
 }
 
-io::path_t ProjectConfigurationStub::cloudProjectSavingFilePath(const io::path_t&) const
+bool ProjectConfigurationStub::isLegacyCloudProject(const muse::io::path_t&) const
 {
-    return io::path_t();
+    return false;
 }
 
-io::path_t ProjectConfigurationStub::defaultSavingFilePath(INotationProjectPtr, const std::string&, const std::string&) const
+muse::io::path_t ProjectConfigurationStub::cloudProjectPath(int) const
 {
-    return io::path_t();
+    return muse::io::path_t();
+}
+
+int ProjectConfigurationStub::cloudScoreIdFromPath(const muse::io::path_t&) const
+{
+    return 0;
+}
+
+muse::io::path_t ProjectConfigurationStub::cloudProjectSavingPath(int) const
+{
+    return muse::io::path_t();
+}
+
+muse::io::path_t ProjectConfigurationStub::defaultSavingFilePath(INotationProjectPtr, const std::string&, const std::string&) const
+{
+    return muse::io::path_t();
 }
 
 SaveLocationType ProjectConfigurationStub::lastUsedSaveLocationType() const
@@ -153,14 +167,32 @@ void ProjectConfigurationStub::setShouldWarnBeforeSavingPubliclyToCloud(bool)
 {
 }
 
+int ProjectConfigurationStub::homeScoresPageTabIndex() const
+{
+    return 0;
+}
+
+void ProjectConfigurationStub::setHomeScoresPageTabIndex(int)
+{
+}
+
+IProjectConfiguration::HomeScoresPageViewType ProjectConfigurationStub::homeScoresPageViewType() const
+{
+    return IProjectConfiguration::HomeScoresPageViewType::Grid;
+}
+
+void ProjectConfigurationStub::setHomeScoresPageViewType(IProjectConfiguration::HomeScoresPageViewType)
+{
+}
+
 QColor ProjectConfigurationStub::templatePreviewBackgroundColor() const
 {
     return QColor();
 }
 
-async::Notification ProjectConfigurationStub::templatePreviewBackgroundChanged() const
+muse::async::Notification ProjectConfigurationStub::templatePreviewBackgroundChanged() const
 {
-    static async::Notification n;
+    static muse::async::Notification n;
     return n;
 }
 
@@ -191,9 +223,9 @@ void ProjectConfigurationStub::setAutoSaveEnabled(bool)
 {
 }
 
-async::Channel<bool> ProjectConfigurationStub::autoSaveEnabledChanged() const
+muse::async::Channel<bool> ProjectConfigurationStub::autoSaveEnabledChanged() const
 {
-    static async::Channel<bool> ch;
+    static muse::async::Channel<bool> ch;
     return ch;
 }
 
@@ -206,30 +238,48 @@ void ProjectConfigurationStub::setAutoSaveInterval(int)
 {
 }
 
-async::Channel<int> ProjectConfigurationStub::autoSaveIntervalChanged() const
+muse::async::Channel<int> ProjectConfigurationStub::autoSaveIntervalChanged() const
 {
-    static async::Channel<int> ch;
+    static muse::async::Channel<int> ch;
     return ch;
 }
 
-bool ProjectConfigurationStub::promptShareAudioCom() const
+bool ProjectConfigurationStub::alsoShareAudioCom() const
 {
     return false;
 }
 
-void ProjectConfigurationStub::setPromptShareAudioCom(bool prompt)
+void ProjectConfigurationStub::setAlsoShareAudioCom(bool)
 {
 }
 
-async::Channel<bool> ProjectConfigurationStub::promptShareAudioComChanged() const
+muse::async::Channel<bool> ProjectConfigurationStub::alsoShareAudioComChanged() const
 {
-    static async::Channel<bool> ch;
+    static muse::async::Channel<bool> ch;
     return ch;
 }
 
-io::path_t ProjectConfigurationStub::newProjectTemporaryPath() const
+bool ProjectConfigurationStub::showAlsoShareAudioComDialog() const
 {
-    return io::path_t();
+    return false;
+}
+
+void ProjectConfigurationStub::setShowAlsoShareAudioComDialog(bool)
+{
+}
+
+bool ProjectConfigurationStub::hasAskedAlsoShareAudioCom() const
+{
+    return false;
+}
+
+void ProjectConfigurationStub::setHasAskedAlsoShareAudioCom(bool)
+{
+}
+
+muse::io::path_t ProjectConfigurationStub::newProjectTemporaryPath() const
+{
+    return muse::io::path_t();
 }
 
 bool ProjectConfigurationStub::isAccessibleEnabled() const
@@ -247,6 +297,11 @@ void ProjectConfigurationStub::setShouldDestinationFolderBeOpenedOnExport(bool)
 }
 
 QUrl ProjectConfigurationStub::supportForumUrl() const
+{
+    return QUrl();
+}
+
+QUrl ProjectConfigurationStub::dotComBugReportUrl() const
 {
     return QUrl();
 }
@@ -278,6 +333,12 @@ void ProjectConfigurationStub::setGenerateAudioTimePeriodType(GenerateAudioTimeP
 {
 }
 
+muse::async::Channel<int> ProjectConfigurationStub::generateAudioTimePeriodTypeChanged() const
+{
+    static muse::async::Channel<int> ch;
+    return ch;
+}
+
 int ProjectConfigurationStub::numberOfSavesToGenerateAudio() const
 {
     return 1;
@@ -287,14 +348,20 @@ void ProjectConfigurationStub::setNumberOfSavesToGenerateAudio(int)
 {
 }
 
-io::path_t ProjectConfigurationStub::temporaryMp3FilePathTemplate() const
+muse::async::Channel<int> ProjectConfigurationStub::numberOfSavesToGenerateAudioChanged() const
 {
-    return io::path_t();
+    static muse::async::Channel<int> ch;
+    return ch;
 }
 
-io::path_t ProjectConfigurationStub::projectBackupPath(const io::path_t&) const
+muse::io::path_t ProjectConfigurationStub::temporaryMp3FilePathTemplate() const
 {
-    return io::path_t();
+    return muse::io::path_t();
+}
+
+muse::io::path_t ProjectConfigurationStub::projectBackupPath(const muse::io::path_t&) const
+{
+    return muse::io::path_t();
 }
 
 bool ProjectConfigurationStub::showCloudIsNotAvailableWarning() const
@@ -303,5 +370,23 @@ bool ProjectConfigurationStub::showCloudIsNotAvailableWarning() const
 }
 
 void ProjectConfigurationStub::setShowCloudIsNotAvailableWarning(bool)
+{
+}
+
+bool ProjectConfigurationStub::disableVersionChecking() const
+{
+    return false;
+}
+
+void ProjectConfigurationStub::setDisableVersionChecking(bool)
+{
+}
+
+bool ProjectConfigurationStub::createBackupBeforeSaving() const
+{
+    return false;
+}
+
+void ProjectConfigurationStub::setCreateBackupBeforeSaving(bool)
 {
 }

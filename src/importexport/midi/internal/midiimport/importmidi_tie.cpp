@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -43,7 +43,7 @@ namespace MidiTie {
 static bool isTied(const Segment* seg, track_idx_t strack, voice_idx_t voice,
                    mu::engraving::Tie* (Note::* tieFunc)() const)
 {
-    ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+    ChordRest* cr = toChordRest(seg->element(strack + voice));
     if (cr && cr->isChord()) {
         Chord* chord = toChord(cr);
         const auto& notes = chord->notes();
@@ -70,7 +70,7 @@ void TieStateMachine::addSeg(const Segment* seg, track_idx_t strack)
 {
     bool isChord = false;
     for (voice_idx_t voice = 0; voice < VOICES; ++voice) {
-        ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+        ChordRest* cr = toChordRest(seg->element(strack + voice));
         if (!cr || !cr->isChord()) {
             continue;
         }
@@ -121,22 +121,22 @@ bool areTiesConsistent(const Staff* staff)
         bool isTie = false;
         for (Segment* seg = staff->score()->firstSegment(SegmentType::All); seg; seg = seg->next1()) {
             if (seg->segmentType() == SegmentType::ChordRest) {
-                ChordRest* cr = static_cast<ChordRest*>(seg->element(strack + voice));
+                ChordRest* cr = toChordRest(seg->element(strack + voice));
 
                 if (cr && cr->isRest() && isTie) {
-                    printInconsistentTieLocation(seg->measure()->no(), staff->idx());
+                    printInconsistentTieLocation(seg->measure()->measureNumber(), staff->idx());
                     return false;
                 }
                 if (isTiedBack(seg, strack, voice)) {
                     if (!isTie) {
-                        printInconsistentTieLocation(seg->measure()->no(), staff->idx());
+                        printInconsistentTieLocation(seg->measure()->measureNumber(), staff->idx());
                         return false;
                     }
                     isTie = false;
                 }
                 if (isTiedFor(seg, strack, voice)) {
                     if (isTie) {
-                        printInconsistentTieLocation(seg->measure()->no(), staff->idx());
+                        printInconsistentTieLocation(seg->measure()->measureNumber(), staff->idx());
                         return false;
                     }
                     isTie = true;

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="4.20">
+<museScore version="5.00">
   <Score>
+    <eid>B_B</eid>
     <Division>480</Division>
     <Style>
-      <Spatium>1.76389</Spatium>
+      <defaultsVersion>301</defaultsVersion>
+      <spatium>1.76389</spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -15,26 +17,29 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">mops</metaTag>
     <Part id="1">
-      <Staff id="1">
+      <eid>C_C</eid>
+      <Staff>
+        <eid>D_D</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <Staff id="2">
+      <Staff>
+        <eid>E_E</eid>
         <StaffType group="pitched">
           <name>stdNormal</name>
           </StaffType>
         </Staff>
-      <trackName>Voice</trackName>
       <Instrument id="voice">
-        <longName>Voice</longName>
-        <shortName>Vo.</shortName>
+        <InstrumentLabel>
+          <longName>Voice</longName>
+          <shortName>Vo.</shortName>
+          </InstrumentLabel>
         <trackName>Voice</trackName>
         <minPitchP>36</minPitchP>
         <maxPitchP>94</maxPitchP>
@@ -76,23 +81,29 @@
       </Part>
     <Staff id="1">
       <Measure>
+        <eid>F_F</eid>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
             <transposingClefType>G</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>G_G</eid>
             </Clef>
           <TimeSig>
+            <eid>H_H</eid>
             <sigN>3</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>I_I</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
+            <eid>J_J</eid>
             <durationType>16th</durationType>
             </Rest>
           <Chord>
+            <eid>K_K</eid>
             <durationType>16th</durationType>
             <Spanner type="Slur">
               <prev>
@@ -103,19 +114,23 @@
                 </prev>
               </Spanner>
             <Note>
+              <eid>L_L</eid>
               <pitch>60</pitch>
               <tpc>14</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>M_M</eid>
             <durationType>eighth</durationType>
             </Rest>
           <Rest>
+            <eid>N_N</eid>
             <durationType>quarter</durationType>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
             <span>1</span>
+            <eid>O_O</eid>
             </BarLine>
           </voice>
         </Measure>
@@ -127,21 +142,27 @@
             <concertClefType>F</concertClefType>
             <transposingClefType>F</transposingClefType>
             <isHeader>1</isHeader>
+            <eid>P_P</eid>
             </Clef>
           <KeySig>
+            <eid>Q_Q</eid>
             <concertKey>0</concertKey>
             </KeySig>
           <TimeSig>
+            <eid>R_R</eid>
             <sigN>3</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Rest>
+            <eid>S_S</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Chord>
+            <eid>T_T</eid>
             <durationType>16th</durationType>
             <Spanner type="Slur">
               <Slur>
+                <eid>U_U</eid>
                 </Slur>
               <next>
                 <location>
@@ -151,21 +172,26 @@
                 </next>
               </Spanner>
             <Note>
+              <eid>V_V</eid>
               <pitch>59</pitch>
               <tpc>19</tpc>
               </Note>
             </Chord>
           <Rest>
+            <eid>W_W</eid>
             <durationType>16th</durationType>
             </Rest>
           <Rest>
+            <eid>X_X</eid>
             <durationType>eighth</durationType>
             </Rest>
           <Rest>
+            <eid>Y_Y</eid>
             <durationType>quarter</durationType>
             </Rest>
           <BarLine>
             <subtype>end</subtype>
+            <eid>Z_Z</eid>
             </BarLine>
           </voice>
         </Measure>

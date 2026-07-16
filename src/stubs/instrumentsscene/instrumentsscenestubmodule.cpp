@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,49 +22,29 @@
 #include "instrumentsscenestubmodule.h"
 
 #include "modularity/ioc.h"
-#include "ui/iuiengine.h"
 
 #include "selectinstrumentscenariostub.h"
 
-#include "ui/iinteractiveuriregister.h"
-
 using namespace mu::instrumentsscene;
-using namespace mu::modularity;
-using namespace mu::ui;
+using namespace muse::modularity;
 
-static void instrumentsscene_init_qrc()
-{
-    Q_INIT_RESOURCE(instrumentsscene);
-}
+static const std::string mname("instrumentsscene_stub");
 
 std::string InstrumentsSceneModule::moduleName() const
 {
-    return "instrumentsscene";
+    return mname;
 }
 
 void InstrumentsSceneModule::registerExports()
 {
-    ioc()->registerExport<notation::ISelectInstrumentsScenario>(moduleName(), new SelectInstrumentsScenarioStub());
 }
 
-void InstrumentsSceneModule::resolveImports()
+IContextSetup* InstrumentsSceneModule::newContext(const muse::modularity::ContextPtr& ctx) const
 {
-    auto ir = ioc()->resolve<IInteractiveUriRegister>(moduleName());
-    if (ir) {
-        ir->registerUri(Uri("musescore://instruments/select"),
-                        ContainerMeta(ContainerType::QmlDialog, "MuseScore/Instruments/InstrumentsDialog.qml"));
-    }
+    return new InstrumentsSceneContext(ctx);
 }
 
-void InstrumentsSceneModule::registerResources()
+void InstrumentsSceneContext::registerExports()
 {
-    instrumentsscene_init_qrc();
-}
-
-void InstrumentsSceneModule::registerUiTypes()
-{
-    std::shared_ptr<ui::IUiEngine> ui = ioc()->resolve<ui::IUiEngine>(moduleName());
-    if (ui) {
-        ui->addSourceImportPath(instrumentsscene_QML_IMPORT);
-    }
+    ioc()->registerExport<notation::ISelectInstrumentsScenario>(mname, new SelectInstrumentsScenarioStub());
 }

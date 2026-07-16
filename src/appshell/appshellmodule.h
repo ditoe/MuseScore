@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,49 +20,52 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_APPSHELL_APPSHELLMODULE_H
-#define MU_APPSHELL_APPSHELLMODULE_H
+#pragma once
 
 #include <memory>
 
 #include "modularity/imodulesetup.h"
 
 namespace mu::appshell {
-class ApplicationActionController;
-class ApplicationUiActions;
 class AppShellConfiguration;
-class SessionsManager;
-#ifdef Q_OS_MAC
-class MacOSScrollingHook;
- #endif
-class AppShellModule : public modularity::IModuleSetup
+class AppShellModule : public muse::modularity::IModuleSetup
 {
 public:
-    AppShellModule();
 
     std::string moduleName() const override;
 
     void registerExports() override;
     void resolveImports() override;
 
-    void registerResources() override;
-    void registerUiTypes() override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+    void onAllInited(const muse::IApplication::RunMode& mode) override;
 
-    void onPreInit(const framework::IApplication::RunMode& mode) override;
-    void onInit(const framework::IApplication::RunMode& mode) override;
-    void onAllInited(const framework::IApplication::RunMode& mode) override;
+    muse::modularity::IContextSetup* newContext(const muse::modularity::ContextPtr& ctx) const override;
+
+private:
+    std::shared_ptr<AppShellConfiguration> m_appShellConfiguration;
+};
+
+class AppShellState;
+class ApplicationActionController;
+class ApplicationUiActions;
+class SessionsManager;
+class AppShellContext : public muse::modularity::IContextSetup
+{
+public:
+    AppShellContext(const muse::modularity::ContextPtr& ctx)
+        : muse::modularity::IContextSetup(ctx) {}
+
+    void registerExports() override;
+    void resolveImports() override;
+    void onPreInit(const muse::IApplication::RunMode& mode) override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
     void onDeinit() override;
 
 private:
+    std::shared_ptr<AppShellState> m_appshellState;
     std::shared_ptr<ApplicationActionController> m_applicationActionController;
     std::shared_ptr<ApplicationUiActions> m_applicationUiActions;
-    std::shared_ptr<AppShellConfiguration> m_appShellConfiguration;
     std::shared_ptr<SessionsManager> m_sessionsManager;
-
-    #ifdef Q_OS_MAC
-    std::shared_ptr<MacOSScrollingHook> m_scrollingHook;
-    #endif
 };
 }
-
-#endif // MU_APPSHELL_APPSHELLMODULE_H

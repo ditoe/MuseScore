@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.8
-import QtQuick.Controls 2.1
 
-import MuseScore.Palette 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
+import QtQuick
+
+import MuseScore.Palette
+import Muse.UiComponents
+import Muse.Ui
 
 Item {
     id: root
@@ -44,6 +44,14 @@ Item {
 
     property NavigationPanel navigationPanel: null
     property int navigationRow: 0
+
+    function closeContextMenu() {
+        if (!menuButton.isMenuOpened) {
+            return
+        }
+
+        menuButton.toggleMenu(null)
+    }
 
     signal toggleExpandRequested()
     signal enableEditingToggled(bool val)
@@ -80,7 +88,7 @@ Item {
     StyledTextLabel {
         id: textItem
         height: parent.height
-        horizontalAlignment: Text.AlignHLeft
+        horizontalAlignment: Text.AlignLeft
         anchors {
             left: paletteExpandArrow.right; leftMargin: 4;
             right: deleteButton.visible ? deleteButton.left : (menuButton.visible ? menuButton.left : parent.right)
@@ -104,7 +112,6 @@ Item {
         icon: IconCode.DELETE_TANK
         toolTipTitle: deleteButton.text
         visible: root.hidePaletteElementVisible && root.editingEnabled
-        activeFocusOnTab: mainPalette.currentItem === paletteTree.currentTreeItem
         transparent: true
 
         enabled: deleteButton.visible
@@ -113,7 +120,7 @@ Item {
         navigation.column: 2
 
         onClicked: {
-            hideSelectedElementsRequested()
+            root.hideSelectedElementsRequested()
         }
     }
 
@@ -124,7 +131,17 @@ Item {
         acceptedButtons: Qt.RightButton
 
         onClicked: {
-            menuButton.toggleMenu(this, mouseX, mouseY)
+            contextMenuLoader.show(Qt.point(mouseX, mouseY))
+        }
+
+        ContextMenuLoader {
+            id: contextMenuLoader
+
+            items: menuButton.menuModel
+
+            onHandleMenuItem: function(itemId) {
+                menuButton.menuItemClicked(itemId)
+            }
         }
     }
 
@@ -160,6 +177,10 @@ Item {
         ]
 
         onHandleMenuItem: function(itemId) {
+            menuItemClicked(itemId)
+        }
+
+        function menuItemClicked(itemId) {
             switch(itemId) {
             case "hide": root.hidePaletteRequested(); break
             case "new": root.insertNewPaletteRequested(); break

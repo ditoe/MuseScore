@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,13 +21,15 @@
  */
 #include <gtest/gtest.h>
 
-#include "dom/masterscore.h"
-#include "dom/undo.h"
+#include "engraving/dom/masterscore.h"
 
+#include "engraving/editing/reset.h"
+#include "engraving/editing/transaction/transaction.h"
+
+#include "types/translatablestring.h"
 #include "utils/scorerw.h"
 #include "utils/scorecomp.h"
 
-using namespace mu;
 using namespace mu::engraving;
 
 static const String RWUNDORESET_DATA_DIR("readwriteundoreset_data/");
@@ -50,7 +52,9 @@ TEST_F(Engraving_ReadWriteUndoResetTests, testReadWriteResetPositions)
 
         MasterScore* score = ScoreRW::readScore(readFile);
         EXPECT_TRUE(score);
-        score->cmdResetAllPositions();
+        score->transactionManager()->transaction(muse::TranslatableString::untranslatable("Reset all positions"), [&](Transaction& tx) {
+            Reset::resetAllPositions(tx, score);
+        });
         score->undoRedo(/* undo */ true, nullptr);
         EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile, readFile));
 
@@ -79,22 +83,23 @@ TEST_F(Engraving_ReadWriteUndoResetTests, testMMRestLinksRecreateMMRest)
     String recreateMMRestRefFile(RWUNDORESET_DATA_DIR + file + u"-recreate-mmrest-ref.mscx");
 
     MasterScore* score = ScoreRW::readScore(readFile);
-    EXPECT_TRUE(score);
+    ASSERT_TRUE(score);
 
     // Regenerate MM rests from scratch:
     // 1) turn MM rests off
-    score->startCmd();
-    score->undo(new ChangeStyleVal(score, Sid::createMultiMeasureRests, false));
+    score->startCmd(TranslatableString::untranslatable("Read/write/undo/reset tests"));
+    score->undoChangeStyleVal(Sid::createMultiMeasureRests, false);
     score->endCmd();
 
     // 2) save/close/reopen the score
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile, disableMMRestRefFile));
     delete score;
     score = ScoreRW::readScore(writeFile, true);
+    ASSERT_TRUE(score);
 
     // 3) turn MM rests back on
-    score->startCmd();
-    score->undo(new ChangeStyleVal(score, Sid::createMultiMeasureRests, true));
+    score->startCmd(TranslatableString::untranslatable("Read/write/undo/reset tests"));
+    score->undoChangeStyleVal(Sid::createMultiMeasureRests, true);
     score->endCmd();
 
     EXPECT_TRUE(ScoreComp::saveCompareScore(score, writeFile, recreateMMRestRefFile));

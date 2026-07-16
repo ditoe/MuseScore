@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,13 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+pragma ComponentBehavior: Bound
 
-import MuseScore.Palette 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Ui 1.0
+import QtQuick
+import QtQuick.Layouts
+
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Palette
 
 StyledPopupView {
     id: root
@@ -37,8 +38,9 @@ StyledPopupView {
 
     property int popupAvailableWidth: 0
 
-    contentHeight: contentColumn.childrenRect.height
     contentWidth: popupAvailableWidth - 2 * margins
+    contentHeight: Math.min(maxHeight - 2 * margins - 2 * padding - 1, 
+                            contentColumn.implicitHeight)
 
     property NavigationPanel navigationPanel: NavigationPanel {
         name: "AddPalettesPopup"
@@ -53,20 +55,23 @@ StyledPopupView {
 
     signal addCustomPaletteRequested()
 
-    Column {
+    ColumnLayout {
         id: contentColumn
-        width: parent.width
+
+        anchors.fill: parent
         spacing: 12
 
         StyledTextLabel {
             id: header
+            Layout.fillWidth: true
             text: qsTrc("palette", "More palettes")
             font: ui.theme.bodyBoldFont
+            horizontalAlignment: Text.AlignLeft
         }
 
         FlatButton {
             id: createCustomPaletteButton
-            width: parent.width
+            Layout.fillWidth: true
             text: qsTrc("palette", "Create custom palette")
 
             objectName: "CreateCustomPalette"
@@ -80,7 +85,8 @@ StyledPopupView {
         }
 
         StyledTextLabel {
-            width: parent.width
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             visible: palettesList.count <= 0
             text: qsTrc("palette", "All palettes were added")
             wrapMode: Text.WordWrap
@@ -88,11 +94,13 @@ StyledPopupView {
 
         StyledListView {
             id: palettesList
-            height: Math.min(availableHeight, contentHeight)
-            width: parent.width + root.margins
 
-            readonly property int availableHeight:
-                root.maxHeight - header.height - createCustomPaletteButton.height - 2 * contentColumn.spacing
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.leftMargin: -root.margins
+            Layout.rightMargin: -root.margins
+
+            implicitHeight: contentHeight
 
             scrollBarThickness: 6
 
@@ -102,50 +110,50 @@ StyledPopupView {
             delegate: Item {
                 id: morePalettesDelegate
 
-                width: parent.width - root.margins
-                height: addButton.height
+                required property var model
+                required property int index
+
+                width: ListView.view.width
+                implicitWidth: rowLayout.implicitWidth
+                implicitHeight: rowLayout.implicitHeight
 
                 property bool added: false
                 property bool removed: false
 
                 RowLayout {
+                    id: rowLayout
                     anchors.fill: parent
+                    anchors.leftMargin: root.margins
+                    anchors.rightMargin: root.margins
                     spacing: 8
                     visible: !(morePalettesDelegate.added || morePalettesDelegate.removed)
 
                     StyledTextLabel {
-                        Layout.alignment: Qt.AlignLeft
                         Layout.fillWidth: true
 
-                        height: parent.height
-                        text: model.display
-                        horizontalAlignment: Text.AlignHLeft
-
-                        wrapMode: Text.WordWrap
-                        maximumLineCount: 1
+                        text: morePalettesDelegate.model.display
+                        horizontalAlignment: Text.AlignLeft
                     }
 
                     FlatButton {
                         id: addButton
-                        Layout.alignment: Qt.AlignRight
-                        Layout.preferredWidth: width
 
                         icon: IconCode.PLUS
-                        toolTipTitle: qsTrc("palette", "Add %1 palette").arg(model.display)
+                        toolTipTitle: qsTrc("palette", "Add %1 palette").arg(morePalettesDelegate.model.display)
 
-                        objectName: "Add"+model.display+"Palette"
+                        objectName: "Add"+morePalettesDelegate.model.display+"Palette"
                         navigation.panel: root.navigationPanel
-                        navigation.row: model.index + 1
+                        navigation.row: morePalettesDelegate.index + 1
                         navigation.onActiveChanged: {
                             if (navigation.active) {
-                                palettesList.positionViewAtIndex(model.index, ListView.Contain)
+                                palettesList.positionViewAtIndex(morePalettesDelegate.index, ListView.Contain)
                             }
                         }
 
                         accessible.name: toolTipTitle
 
                         onClicked: {
-                            if (root.paletteProvider.addPalette(model.paletteIndex)) {
+                            if (root.paletteProvider.addPalette(morePalettesDelegate.model.paletteIndex)) {
                                 morePalettesDelegate.added = true
                             }
                         }
@@ -157,8 +165,8 @@ StyledPopupView {
 
                     visible: morePalettesDelegate.added || morePalettesDelegate.removed
                     text: morePalettesDelegate.added
-                          ? qsTrc("palette", "%1 added").arg(model.display)
-                          : (morePalettesDelegate.removed ? qsTrc("palette", "%1 removed").arg(model.display) : "")
+                          ? qsTrc("palette", "%1 added").arg(morePalettesDelegate.model.display)
+                          : (morePalettesDelegate.removed ? qsTrc("palette", "%1 removed").arg(morePalettesDelegate.model.display) : "")
                     elide: Text.ElideMiddle
                     font: ui.theme.bodyBoldFont
                 }

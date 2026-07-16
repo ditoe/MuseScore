@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,43 +19,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "playbackstubmodule.h"
 
 #include "modularity/ioc.h"
-#include "ui/iuiengine.h"
 
 #include "playbackcontrollerstub.h"
 #include "playbackconfigurationstub.h"
 
 using namespace mu::playback;
-using namespace mu::framework;
-using namespace mu::modularity;
+using namespace muse::modularity;
 
-static void playback_init_qrc()
-{
-    Q_INIT_RESOURCE(playback);
-}
+static const std::string mname("playback_stub");
 
 std::string PlaybackModule::moduleName() const
 {
-    return "playback_stub";
+    return mname;
 }
 
 void PlaybackModule::registerExports()
 {
-    ioc()->registerExport<IPlaybackController>(moduleName(), new PlaybackControllerStub());
-    ioc()->registerExport<IPlaybackConfiguration>(moduleName(), new PlaybackConfigurationStub());
+    globalIoc()->registerExport<IPlaybackConfiguration>(moduleName(), new PlaybackConfigurationStub());
 }
 
-void PlaybackModule::registerResources()
+IContextSetup* PlaybackModule::newContext(const muse::modularity::ContextPtr& ctx) const
 {
-    playback_init_qrc();
+    return new PlaybackContext(ctx);
 }
 
-void PlaybackModule::registerUiTypes()
+void PlaybackContext::registerExports()
 {
-    std::shared_ptr<ui::IUiEngine> ui = ioc()->resolve<ui::IUiEngine>(moduleName());
-    if (ui) {
-        ui->addSourceImportPath(playback_QML_IMPORT);
-    }
+    ioc()->registerExport<IPlaybackController>(mname, new PlaybackControllerStub());
 }

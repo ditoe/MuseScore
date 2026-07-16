@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,15 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_INOTATIONPAINTING_H
-#define MU_NOTATION_INOTATIONPAINTING_H
+
+#pragma once
 
 #include <memory>
 
-#include "notationtypes.h"
+#include "async/notification.h"
 
 #include "draw/painter.h"
 #include "engraving/rendering/iscorerenderer.h"
+
+#include "types/viewmode.h"
 
 namespace mu::notation {
 class INotationPainting
@@ -35,22 +37,21 @@ class INotationPainting
 public:
     virtual ~INotationPainting() = default;
 
-    using Options = engraving::rendering::IScoreRenderer::PaintOptions;
+    using Options = engraving::rendering::IScoreRenderer::ScorePaintOptions;
 
     virtual void setViewMode(const ViewMode& vm) = 0;
     virtual ViewMode viewMode() const = 0;
+    virtual muse::async::Notification viewModeChanged() const = 0;
 
     virtual int pageCount() const = 0;
-    virtual SizeF pageSizeInch() const = 0;
-    virtual SizeF pageSizeInch(const Options& opt) const = 0;
+    virtual muse::SizeF pageSizeInch() const = 0;
+    virtual muse::SizeF pageSizeInch(const Options& opt) const = 0;
 
-    virtual void paintView(draw::Painter* painter, const RectF& frameRect, bool isPrinting) = 0;
-    virtual void paintPdf(draw::Painter* painter, const Options& opt) = 0;
-    virtual void paintPrint(draw::Painter* painter, const Options& opt) = 0;
-    virtual void paintPng(draw::Painter* painter, const Options& opt) = 0;
+    virtual void paintView(muse::draw::Painter* painter, const muse::RectF& frameRect, bool isPrinting, bool isAutomation) = 0;
+    virtual void paintPdf(muse::draw::Painter* painter, const Options& opt) = 0;
+    virtual void paintPrint(muse::draw::Painter* painter, const Options& opt) = 0;
+    virtual void paintPng(muse::draw::Painter* painter, const Options& opt) = 0;
 };
 
 using INotationPaintingPtr = std::shared_ptr<INotationPainting>;
 }
-
-#endif // MU_NOTATION_INOTATIONPAINTING_H

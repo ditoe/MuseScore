@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,7 +24,7 @@
 
 #include "notationproject.h"
 
-using namespace mu;
+using namespace muse;
 using namespace mu::project;
 
 ProjectFileInfoProvider::ProjectFileInfoProvider(NotationProject* project)
@@ -32,18 +32,23 @@ ProjectFileInfoProvider::ProjectFileInfoProvider(NotationProject* project)
 {
 }
 
+bool ProjectFileInfoProvider::saved() const
+{
+    return !m_project->needSave().val;
+}
+
 //! TODO: maybe implement this class further for Cloud Projects
-io::path_t ProjectFileInfoProvider::path() const
+muse::io::path_t ProjectFileInfoProvider::path() const
 {
     return m_project->path();
 }
 
-io::path_t ProjectFileInfoProvider::fileName(bool includingExtension) const
+muse::io::path_t ProjectFileInfoProvider::fileName(bool includingExtension) const
 {
     return io::filename(path(), includingExtension);
 }
 
-io::path_t ProjectFileInfoProvider::absoluteDirPath() const
+muse::io::path_t ProjectFileInfoProvider::absoluteDirPath() const
 {
     return io::absoluteDirpath(path());
 }
@@ -61,4 +66,9 @@ DateTime ProjectFileInfoProvider::birthTime() const
 DateTime ProjectFileInfoProvider::lastModified() const
 {
     return filesystem()->lastModified(path());
+}
+
+bool ProjectFileInfoProvider::isNewlyCreated() const
+{
+    return m_project->isNewlyCreated();
 }

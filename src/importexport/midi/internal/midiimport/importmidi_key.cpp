@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,6 +32,7 @@
 #include "engraving/dom/staff.h"
 #include "engraving/dom/masterscore.h"
 #include "engraving/dom/part.h"
+#include "engraving/editing/transpose.h"
 #include "importmidi_operations.h"
 
 // This simple key detection algorithm is from thesis
@@ -89,7 +90,7 @@ void assignKeyListToStaff(const KeyList& kl, Staff* staff)
         ks->setTrack(track);
         ks->setGenerated(false);
         ks->setKey(key);
-        ks->mutLayoutData()->setMag(staff->staffMag(Fraction::fromTicks(tick)));
+        ks->mutldata()->setMag(staff->staffMag(Fraction::fromTicks(tick)));
         seg->add(ks);
     }
 }
@@ -181,7 +182,7 @@ void recognizeMainKeySig(QList<MTrack>& tracks)
             ke.setConcertKey(key);
             if (!v.isZero() && !score->style().styleB(Sid::concertPitch)) {
                 v.flip();
-                ke.setKey(transposeKey(key, v));
+                ke.setKey(Transpose::transposeKey(key, v));
             }
 
             KeyList& staffKeyList = *track.staff->keyList();

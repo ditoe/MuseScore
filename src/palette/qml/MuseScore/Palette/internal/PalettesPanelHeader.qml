@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
-import MuseScore.Palette 1.0
+import Muse.Ui
+import Muse.UiComponents
+import MuseScore.Palette
 
 Item {
     id: root
@@ -35,11 +35,12 @@ Item {
     readonly property bool isSearchFieldFocused: searchField.activeFocus
     readonly property string searchText: searchField.searchText
 
-    property alias popupMaxHeight: addPalettesPopup.maxHeight
+    property int popupMaxHeight: 400
     property var popupAnchorItem: null
 
     property alias navigation: navPanel
 
+    signal applyCurrentPaletteElementRequested()
     signal addCustomPaletteRequested(var paletteName)
 
     implicitHeight: childrenRect.height
@@ -67,46 +68,7 @@ Item {
         }
     }
 
-    QtObject {
-        id: prv
-
-        property var openedPopup: null
-        property bool isPopupOpened: Boolean(openedPopup) && openedPopup.isOpened
-
-        function openPopup(popup, model) {
-            if (isPopupOpened) {
-                if (openedPopup === popup) {
-                    resetOpenedPopup()
-                    return
-                }
-
-                resetOpenedPopup()
-            }
-
-            if (Boolean(popup)) {
-                openedPopup = popup
-
-                if (Boolean(model)) {
-                    popup.model = model
-                }
-
-                popup.open()
-            }
-        }
-
-        function closeOpenedPopup() {
-            if (isPopupOpened) {
-                resetOpenedPopup()
-            }
-        }
-
-        function resetOpenedPopup() {
-            openedPopup.close()
-            openedPopup = null
-        }
-    }
-
-    FlatButton {
+    PopupButton {
         id: addPalettesButton
         objectName: "AddPalettesBtn"
 
@@ -121,30 +83,31 @@ Item {
         visible: !root.isSearchOpened
         enabled: visible
 
-        onClicked: {
-            prv.openPopup(addPalettesPopup, paletteProvider.availableExtraPalettesModel())
-        }
+        popupAnchorItem: root.popupAnchorItem
 
-        AddPalettesPopup {
-            id: addPalettesPopup
+        popupComponent: AddPalettesPopup {
             paletteProvider: root.paletteProvider
-
-            popupAvailableWidth: root ? root.width : 0
-            anchorItem: root.popupAnchorItem
+            model: root.paletteProvider ? root.paletteProvider.availableExtraPalettesModel() : null
+            popupAvailableWidth: root.width
+            maxHeight: root.popupMaxHeight
 
             onAddCustomPaletteRequested: {
-                prv.openPopup(createCustomPalettePopup)
+                addPalettesButton.close()
+                createCustomPalettePopupLoader.toggleOpened()
             }
         }
 
-        CreateCustomPalettePopup {
-            id: createCustomPalettePopup
+        StyledPopupLoader {
+            id: createCustomPalettePopupLoader
 
-            popupAvailableWidth: root ? root.width : 0
-            anchorItem: root.popupAnchorItem
+            popupAnchorItem: root.popupAnchorItem
 
-            onAddCustomPaletteRequested: function(paletteName) {
-                root.addCustomPaletteRequested(paletteName)
+            sourceComponent: CreateCustomPalettePopup {
+                popupAvailableWidth: root.width
+
+                onAddCustomPaletteRequested: function(paletteName) {
+                    root.addCustomPaletteRequested(paletteName)
+                }
             }
         }
     }
@@ -164,7 +127,8 @@ Item {
         enabled: visible
 
         onClicked: {
-            prv.closeOpenedPopup()
+            addPalettesButton.close()
+            createCustomPalettePopupLoader.close()
             root.startSearch()
         }
     }
@@ -191,6 +155,6 @@ Item {
 
         Keys.onEscapePressed: root.endSearch()
 
-        onAccepted: applyCurrentPaletteElement()
+        onAccepted: root.applyCurrentPaletteElementRequested()
     }
 }

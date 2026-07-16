@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -39,13 +39,13 @@ Lasso::Lasso(Score* s)
 }
 
 //---------------------------------------------------------
-//   editDrag
+//   dragGrip
 //---------------------------------------------------------
 
-void Lasso::editDrag(EditData& ed)
+void Lasso::dragGrip(EditData& ed)
 {
     //Qt::CursorShape cursorShape = Qt::ArrowCursor;
-    Lasso::LayoutData* ldata = mutLayoutData();
+    Lasso::LayoutData* ldata = mutldata();
     RectF bbox = ldata->bbox();
     switch (int(ed.curGrip)) {
     case 0:
@@ -91,9 +91,9 @@ void Lasso::editDrag(EditData& ed)
 //   gripsPositions
 //---------------------------------------------------------
 
-std::vector<mu::PointF> Lasso::gripsPositions(const EditData&) const
+std::vector<PointF> Lasso::gripsPositions(const EditData&) const
 {
-    const auto box(layoutData()->bbox());
+    const auto box(ldata()->bbox());
     return {
         box.topLeft(),
         box.topRight(),

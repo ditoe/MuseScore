@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,28 +25,32 @@
 #include "iprojectmigrator.h"
 
 #include "modularity/ioc.h"
-#include "iinteractive.h"
+#include "interactive/iinteractive.h"
 #include "iprojectconfiguration.h"
 
 namespace mu::project {
-class ProjectMigrator : public IProjectMigrator
+class ProjectMigrator : public IProjectMigrator, public muse::Contextable
 {
-    INJECT(IProjectConfiguration, configuration)
-    INJECT(framework::IInteractive, interactive)
+    muse::GlobalInject<IProjectConfiguration> configuration;
+    muse::ContextInject<muse::IInteractive> interactive = { this };
 public:
-    ProjectMigrator() = default;
+    ProjectMigrator(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Contextable(iocCtx)
+    {
+    }
 
-    Ret migrateEngravingProjectIfNeed(engraving::EngravingProjectPtr project) override;
+    muse::Ret migrateEngravingProjectIfNeed(engraving::EngravingProjectPtr project) override;
 
 private:
 
-    Ret askAboutMigration(MigrationOptions& out, const QString& appVersion, MigrationType migrationType);
+    muse::Ret askAboutMigration(MigrationOptions& out, const QString& appVersion, MigrationType migrationType);
 
-    Ret migrateProject(engraving::EngravingProjectPtr project, const MigrationOptions& opt);
+    muse::Ret migrateProject(engraving::EngravingProjectPtr project, const MigrationOptions& opt);
 
     bool applyLelandStyle(mu::engraving::MasterScore* score);
     bool applyEdwinStyle(mu::engraving::MasterScore* score);
     bool resetAllElementsPositions(mu::engraving::MasterScore* score);
+    bool resetCrossBeams(mu::engraving::MasterScore* score);
     void resetStyleSettings(mu::engraving::MasterScore* score);
 
     bool m_resetStyleSettings{ false };

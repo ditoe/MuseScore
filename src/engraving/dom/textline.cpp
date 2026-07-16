@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,9 +23,8 @@
 
 #include "score.h"
 #include "system.h"
-#include "undo.h"
-
-#include "log.h"
+#include "text.h"
+#include "../editing/editproperty.h"
 
 using namespace mu;
 
@@ -35,7 +34,6 @@ namespace mu::engraving {
 //---------------------------------------------------------
 
 static const ElementStyle textLineSegmentStyle {
-    { Sid::textLinePosAbove,      Pid::OFFSET },
     { Sid::textLineMinDistance,   Pid::MIN_DISTANCE },
 };
 
@@ -44,7 +42,6 @@ static const ElementStyle textLineSegmentStyle {
 //---------------------------------------------------------
 
 static const ElementStyle systemTextLineSegmentStyle {
-    { Sid::systemTextLinePosAbove,      Pid::OFFSET },
     { Sid::systemTextLineMinDistance,   Pid::MIN_DISTANCE },
 };
 
@@ -53,7 +50,6 @@ static const ElementStyle systemTextLineSegmentStyle {
 //---------------------------------------------------------
 
 static const ElementStyle textLineStyle {
-//       { Sid::textLineSystemFlag,                 Pid::SYSTEM_FLAG             },
     { Sid::textLineFontFace,                   Pid::BEGIN_FONT_FACE },
     { Sid::textLineFontFace,                   Pid::CONTINUE_FONT_FACE },
     { Sid::textLineFontFace,                   Pid::END_FONT_FACE },
@@ -66,9 +62,31 @@ static const ElementStyle textLineStyle {
     { Sid::textLineTextAlign,                  Pid::BEGIN_TEXT_ALIGN },
     { Sid::textLineTextAlign,                  Pid::CONTINUE_TEXT_ALIGN },
     { Sid::textLineTextAlign,                  Pid::END_TEXT_ALIGN },
+    { Sid::textLinePosition,                   Pid::BEGIN_TEXT_POSITION },
+    { Sid::textLinePosition,                   Pid::CONTINUE_TEXT_POSITION },
+    { Sid::textLinePosition,                   Pid::END_TEXT_POSITION },
+    { Sid::textLineHookHeight,                 Pid::BEGIN_HOOK_HEIGHT },
+    { Sid::textLineHookHeight,                 Pid::END_HOOK_HEIGHT },
+    { Sid::textLineLineWidth,                  Pid::LINE_WIDTH },
+    { Sid::textLineDashLineLen,                Pid::DASH_LINE_LEN },
+    { Sid::textLineDashGapLen,                 Pid::DASH_GAP_LEN },
     { Sid::textLinePlacement,                  Pid::PLACEMENT },
-    { Sid::textLinePosAbove,                   Pid::OFFSET },
+    { Sid::textLineLineStyle,                  Pid::LINE_STYLE },
     { Sid::textLineFontSpatiumDependent,       Pid::TEXT_SIZE_SPATIUM_DEPENDENT },
+    { Sid::textLineEndLineArrowHeight,         Pid::END_LINE_ARROW_HEIGHT },
+    { Sid::textLineEndLineArrowWidth,          Pid::END_LINE_ARROW_WIDTH },
+    { Sid::textLineBeginLineArrowHeight,       Pid::BEGIN_LINE_ARROW_HEIGHT },
+    { Sid::textLineBeginLineArrowWidth,        Pid::BEGIN_LINE_ARROW_WIDTH },
+    { Sid::textLineEndFilledArrowHeight,       Pid::END_FILLED_ARROW_HEIGHT },
+    { Sid::textLineEndFilledArrowWidth,        Pid::END_FILLED_ARROW_WIDTH },
+    { Sid::textLineBeginFilledArrowHeight,     Pid::BEGIN_FILLED_ARROW_HEIGHT },
+    { Sid::textLineBeginFilledArrowWidth,      Pid::BEGIN_FILLED_ARROW_WIDTH },
+    { Sid::textLineMusicalSymbolSize,          Pid::BEGIN_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::textLineMusicalSymbolSize,          Pid::CONTINUE_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::textLineMusicalSymbolSize,          Pid::END_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::BEGIN_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::CONTINUE_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::END_TEXT_MUSICAL_SYMBOLS_SCALE },
 };
 
 //---------------------------------------------------------
@@ -76,7 +94,6 @@ static const ElementStyle textLineStyle {
 //---------------------------------------------------------
 
 static const ElementStyle systemTextLineStyle {
-//       { Sid::systemTextLineSystemFlag,           Pid::SYSTEM_FLAG             },
     { Sid::systemTextLineFontFace,             Pid::BEGIN_FONT_FACE },
     { Sid::systemTextLineFontFace,             Pid::CONTINUE_FONT_FACE },
     { Sid::systemTextLineFontFace,             Pid::END_FONT_FACE },
@@ -89,8 +106,19 @@ static const ElementStyle systemTextLineStyle {
     { Sid::systemTextLineTextAlign,            Pid::BEGIN_TEXT_ALIGN },
     { Sid::systemTextLineTextAlign,            Pid::CONTINUE_TEXT_ALIGN },
     { Sid::systemTextLineTextAlign,            Pid::END_TEXT_ALIGN },
+    { Sid::systemTextLineHookHeight,           Pid::BEGIN_HOOK_HEIGHT },
+    { Sid::systemTextLineHookHeight,           Pid::END_HOOK_HEIGHT },
+    { Sid::systemTextLineLineWidth,            Pid::LINE_WIDTH },
+    { Sid::systemTextLineDashLineLen,          Pid::DASH_LINE_LEN },
+    { Sid::systemTextLineDashGapLen,           Pid::DASH_GAP_LEN },
     { Sid::systemTextLinePlacement,            Pid::PLACEMENT },
-    { Sid::systemTextLinePosAbove,             Pid::OFFSET },
+    { Sid::systemTextLineLineStyle,            Pid::LINE_STYLE },
+    { Sid::systemTextLineMusicalSymbolSize,    Pid::BEGIN_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::systemTextLineMusicalSymbolSize,    Pid::CONTINUE_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::systemTextLineMusicalSymbolSize,    Pid::END_TEXT_MUSIC_SYMBOLS_SIZE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::BEGIN_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::CONTINUE_TEXT_MUSICAL_SYMBOLS_SCALE },
+    { Sid::dummyMusicalSymbolsScale,           Pid::END_TEXT_MUSICAL_SYMBOLS_SCALE },
 };
 
 //---------------------------------------------------------
@@ -101,18 +129,17 @@ TextLineSegment::TextLineSegment(Spanner* sp, System* parent, bool system)
     : TextLineBaseSegment(ElementType::TEXTLINE_SEGMENT, sp, parent, ElementFlag::MOVABLE | ElementFlag::ON_STAFF)
 {
     setSystemFlag(system);
-    if (systemFlag()) {
-        initElementStyle(&systemTextLineSegmentStyle);
-    } else {
-        initElementStyle(&textLineSegmentStyle);
-    }
+    initStyle();
+
+    m_text->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
+    m_endText->setTextStyleType(propertyDefault(Pid::TEXT_STYLE).value<TextStyleType>());
 }
 
 //---------------------------------------------------------
 //   propertyDelegate
 //---------------------------------------------------------
 
-EngravingItem* TextLineSegment::propertyDelegate(Pid pid)
+EngravingObject* TextLineSegment::propertyDelegate(Pid pid) const
 {
     if (pid == Pid::SYSTEM_FLAG) {
         return static_cast<TextLine*>(spanner());
@@ -141,11 +168,19 @@ TextLine::TextLine(EngravingItem* parent, bool system)
 
     setBeginHookType(HookType::NONE);
     setEndHookType(HookType::NONE);
-    setBeginHookHeight(Spatium(1.5));
-    setEndHookHeight(Spatium(1.5));
-    setGapBetweenTextAndLine(Spatium(0.5));
+    setBeginHookHeight(1.5_sp);
+    setEndHookHeight(1.5_sp);
+    setGapBetweenTextAndLine(0.5_sp);
 
-    initElementStyle(&textLineStyle);
+    setBeginFilledArrowHeight(1.0_sp);
+    setBeginFilledArrowWidth(0.85_sp);
+    setEndFilledArrowHeight(1.0_sp);
+    setEndFilledArrowWidth(0.85_sp);
+
+    setBeginLineArrowHeight(1.0_sp);
+    setBeginLineArrowWidth(0.5_sp);
+    setEndLineArrowHeight(1.0_sp);
+    setEndLineArrowWidth(0.5_sp);
 
     resetProperty(Pid::BEGIN_TEXT_PLACE);
     resetProperty(Pid::CONTINUE_TEXT_PLACE);
@@ -170,6 +205,15 @@ void TextLine::initStyle()
     }
 }
 
+void TextLineSegment::initStyle()
+{
+    if (systemFlag()) {
+        initElementStyle(&systemTextLineSegmentStyle);
+    } else {
+        initElementStyle(&textLineSegmentStyle);
+    }
+}
+
 //---------------------------------------------------------
 //   createLineSegment
 //---------------------------------------------------------
@@ -182,79 +226,18 @@ LineSegment* TextLine::createLineSegment(System* parent)
     if (anchor() == Spanner::Anchor::NOTE) {
         seg->setFlag(ElementFlag::ON_STAFF, false);
     }
-
-    if (systemFlag()) {
-        seg->initElementStyle(&systemTextLineSegmentStyle);
-    } else {
-        seg->initElementStyle(&textLineSegmentStyle);
-    }
+    seg->initStyle();
 
     return seg;
-}
-
-//---------------------------------------------------------
-//   getTextLinePos
-//---------------------------------------------------------
-
-Sid TextLineSegment::getTextLinePos(bool above) const
-{
-    if (systemFlag()) {
-        return above ? Sid::systemTextLinePosAbove : Sid::systemTextLinePosBelow;
-    } else {
-        return above ? Sid::textLinePosAbove : Sid::textLinePosBelow;
-    }
-}
-
-Sid TextLine::getTextLinePos(bool above) const
-{
-    if (systemFlag()) {
-        return above ? Sid::systemTextLinePosAbove : Sid::systemTextLinePosBelow;
-    } else {
-        return above ? Sid::textLinePosAbove : Sid::textLinePosBelow;
-    }
-}
-
-//---------------------------------------------------------
-//   getPropertyStyle
-//---------------------------------------------------------
-
-Sid TextLineSegment::getPropertyStyle(Pid pid) const
-{
-    if (pid == Pid::OFFSET) {
-        if (spanner()->anchor() == Spanner::Anchor::NOTE) {
-            return Sid::NOSTYLE;
-        } else {
-            return getTextLinePos(spanner()->placeAbove());
-        }
-    }
-    return TextLineBaseSegment::getPropertyStyle(pid);
-}
-
-Sid TextLine::getPropertyStyle(Pid pid) const
-{
-    if (pid == Pid::OFFSET) {
-        if (anchor() == Spanner::Anchor::NOTE) {
-            return Sid::NOSTYLE;
-        } else {
-            return getTextLinePos(placeAbove());
-        }
-    }
-    return TextLineBase::getPropertyStyle(pid);
 }
 
 //---------------------------------------------------------
 //   propertyDefault
 //---------------------------------------------------------
 
-engraving::PropertyValue TextLine::propertyDefault(Pid propertyId) const
+PropertyValue TextLine::propertyDefault(Pid propertyId) const
 {
     switch (propertyId) {
-    case Pid::PLACEMENT:
-        if (systemFlag()) {
-            return style().styleV(Sid::textLinePlacement);
-        } else {
-            return style().styleV(Sid::systemTextLinePlacement);
-        }
     case Pid::BEGIN_TEXT:
     case Pid::CONTINUE_TEXT:
     case Pid::END_TEXT:
@@ -272,12 +255,19 @@ engraving::PropertyValue TextLine::propertyDefault(Pid propertyId) const
     case Pid::CONTINUE_TEXT_PLACE:
     case Pid::END_TEXT_PLACE:
         return TextPlace::LEFT;
-    case Pid::BEGIN_HOOK_HEIGHT:
-    case Pid::END_HOOK_HEIGHT:
-        return Spatium(1.5);
+    case Pid::TEXT_STYLE:
+        return systemFlag() ? TextStyleType::SYSTEM_TEXTLINE : TextStyleType::TEXTLINE;
     default:
         return TextLineBase::propertyDefault(propertyId);
     }
+}
+
+//---------------------------------------------------------
+//   allowTimeAnchor
+//---------------------------------------------------------
+bool TextLine::allowTimeAnchor() const
+{
+    return !(anchor() == Spanner::Anchor::NOTE);
 }
 
 //---------------------------------------------------------
@@ -287,6 +277,8 @@ engraving::PropertyValue TextLine::propertyDefault(Pid propertyId) const
 bool TextLine::setProperty(Pid id, const engraving::PropertyValue& v)
 {
     switch (id) {
+    case Pid::PLAY:
+        break;
     case Pid::PLACEMENT:
         setPlacement(v.value<PlacementV>());
         break;
@@ -295,6 +287,21 @@ bool TextLine::setProperty(Pid id, const engraving::PropertyValue& v)
     }
     triggerLayout();
     return true;
+}
+
+//---------------------------------------------------------
+//   getProperty
+//---------------------------------------------------------
+
+PropertyValue TextLine::getProperty(Pid id) const
+{
+    switch (id) {
+    case Pid::PLAY:
+        return PropertyValue();
+    default:
+        break;
+    }
+    return TextLineBase::getProperty(id);
 }
 
 //---------------------------------------------------------
@@ -312,5 +319,13 @@ void TextLine::undoChangeProperty(Pid id, const engraving::PropertyValue& v, Pro
         return;
     }
     TextLineBase::undoChangeProperty(id, v, ps);
+}
+
+Sid TextLine::defaultPosSid() const
+{
+    if (systemFlag()) {
+        return placeAbove() ? Sid::systemTextLinePosAbove : Sid::systemTextLinePosBelow;
+    }
+    return placeAbove() ? Sid::textLinePosAbove : Sid::textLinePosBelow;
 }
 } // namespace mu::engraving

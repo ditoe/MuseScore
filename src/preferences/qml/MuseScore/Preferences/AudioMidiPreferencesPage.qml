@@ -1,0 +1,150 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * MuseScore-Studio-CLA-applies
+ *
+ * MuseScore Studio
+ * Music Composition & Notation
+ *
+ * Copyright (C) 2021 MuseScore Limited and others
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+import QtQuick
+
+import Muse.UiComponents
+import MuseScore.Preferences
+
+import "internal"
+
+PreferencesPage {
+    id: root
+
+    AudioMidiPreferencesModel {
+        id: audioMidiModel
+    }
+
+    Component.onCompleted: {
+        audioMidiModel.init()
+    }
+
+    Column {
+        width: parent.width
+        spacing: root.sectionsSpacing
+
+        AudioDriverSection {
+            currentAudioDriverIndex: audioMidiModel.currentAudioDriverIndex
+            audioDrivers: audioMidiModel.audioDrivers()
+
+            navigation.section: root.navigationSection
+            navigation.order: root.navigationOrderStart + 1
+
+            onCurrentAudioDriverIndexChangeRequested: function(newIndex) {
+                audioMidiModel.currentAudioDriverIndex = newIndex
+            }
+        }
+
+        SeparatorLine {}
+
+        MidiDevicesSection {
+            inputDeviceId: audioMidiModel.midiInputDeviceId
+            outputDeviceId: audioMidiModel.midiOutputDeviceId
+            inputDevices: audioMidiModel.midiInputDevices
+            outputDevices: audioMidiModel.midiOutputDevices
+
+            isMIDI20OutputSupported: audioMidiModel.isMIDI20OutputSupported
+            useMIDI20Output: audioMidiModel.useMIDI20Output
+
+            navigation.section: root.navigationSection
+            navigation.order: root.navigationOrderStart + 2
+
+            onInputDeviceIdChangeRequested: function(newId) {
+                audioMidiModel.inputDeviceSelected(newId)
+            }
+
+            onOutputDeviceIdChangeRequested: function(newId) {
+                audioMidiModel.outputDeviceSelected(newId)
+            }
+
+            onUseMIDI20OutputChangeRequested: function(use) {
+                audioMidiModel.useMIDI20Output = use
+            }
+        }
+
+        SeparatorLine {}
+
+        PlaybackQualitySection {
+            useSoundFontLowPassFilter: audioMidiModel.useSoundFontLowPassFilter
+
+            navigation.section: root.navigationSection
+            navigation.order: root.navigationOrderStart + 3
+
+            onUseSoundFontLowPassFilterChangeRequested: function(use) {
+                audioMidiModel.useSoundFontLowPassFilter = use
+            }
+        }
+
+        SeparatorLine {}
+
+        MixerSection {
+            muteHiddenInstruments: audioMidiModel.muteHiddenInstruments
+
+            navigation.section: root.navigationSection
+            navigation.order: root.navigationOrderStart + 4
+
+            onMuteHiddenInstrumentsChangeRequested: function(mute) {
+                audioMidiModel.muteHiddenInstruments = mute
+            }
+        }
+
+        SeparatorLine { visible: onlineSoundsSection.visible }
+
+        OnlineSoundsSection {
+            id: onlineSoundsSection
+
+            visible: audioMidiModel.onlineSoundsSectionVisible()
+
+            showErrorDialog: audioMidiModel.shouldShowOnlineSoundsProcessingError
+            autoProcessOnlineSoundsInBackground: audioMidiModel.autoProcessOnlineSoundsInBackground
+            progressBarMode: audioMidiModel.onlineSoundsShowProgressBarMode
+
+            navigation.section: root.navigationSection
+            navigation.order: root.navigationOrderStart + 5
+
+            onShowErrorDialogChangeRequested: function(value) {
+                audioMidiModel.shouldShowOnlineSoundsProcessingError = value
+            }
+
+            onAutoProcessOnlineSoundsInBackgroundChangeRequested: function(value) {
+                audioMidiModel.autoProcessOnlineSoundsInBackground = value
+            }
+
+            onProgressBarModeChangeRequired: function(mode) {
+                audioMidiModel.onlineSoundsShowProgressBarMode = mode
+            }
+        }
+
+        /*
+         * TODO: https://github.com/musescore/MuseScore/issues/9807
+        SeparatorLine {}
+
+        AudioEngineSection {
+            navigation.section: root.navigationSection
+            navigation.order: root.navigationOrderStart + 3
+
+            onRestartAudioAndMidiDevicesRequested: {
+                ioModel.restartAudioAndMidiDevices()
+            }
+        }
+         */
+    }
+}

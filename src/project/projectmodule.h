@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_PROJECT_PROJECTMODULE_H
-#define MU_PROJECT_PROJECTMODULE_H
+
+#pragma once
 
 #include <memory>
 
@@ -31,23 +31,36 @@ class ProjectConfiguration;
 class ProjectActionsController;
 class RecentFilesController;
 class ProjectAutoSaver;
-class ProjectModule : public modularity::IModuleSetup
+class EngravingPluginAPIHelper;
+class ProjectModule : public muse::modularity::IModuleSetup
 {
 public:
 
     std::string moduleName() const override;
     void registerExports() override;
     void resolveImports() override;
-    void registerResources() override;
-    void registerUiTypes() override;
-    void onInit(const framework::IApplication::RunMode& mode) override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+
+    muse::modularity::IContextSetup* newContext(const muse::modularity::ContextPtr& ctx) const override;
 
 private:
     std::shared_ptr<ProjectConfiguration> m_configuration;
+};
+
+class ProjectContext : public muse::modularity::IContextSetup
+{
+public:
+    ProjectContext(const muse::modularity::ContextPtr& ctx)
+        : muse::modularity::IContextSetup(ctx) {}
+
+    void registerExports() override;
+    void resolveImports() override;
+    void onInit(const muse::IApplication::RunMode& mode) override;
+
+private:
     std::shared_ptr<ProjectActionsController> m_actionsController;
     std::shared_ptr<RecentFilesController> m_recentFilesController;
     std::shared_ptr<ProjectAutoSaver> m_projectAutoSaver;
+    std::shared_ptr<EngravingPluginAPIHelper> m_engravingPluginAPIHelper;
 };
 }
-
-#endif // MU_PROJECT_PROJECTMODULE_H

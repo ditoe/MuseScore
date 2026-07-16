@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,18 +26,18 @@
 
 #include "palettecell.h"
 
+#include "modularity/ioc.h"
+#include "../ipaletteconfiguration.h"
+#include "interactive/iinteractive.h"
 #include "engraving/rendering/isinglerenderer.h"
+#include "engraving/ipalettescoreprovider.h"
 #include "engraving/dom/engravingitem.h"
 
 #include "types/translatablestring.h"
 #include "actions/actiontypes.h"
 
-#include "modularity/ioc.h"
-#include "../ipaletteconfiguration.h"
-#include "iinteractive.h"
-
 namespace mu::engraving {
-enum class ActionIconType;
+enum class ActionIconType : signed char;
 class XmlWriter;
 class XMLReader;
 }
@@ -46,14 +46,15 @@ namespace mu::palette {
 class Palette;
 using PalettePtr = std::shared_ptr<Palette>;
 
-class Palette : public QObject
+class Palette : public QObject, public muse::Contextable
 {
     Q_GADGET
 
-    INJECT_STATIC(IPaletteConfiguration, configuration)
-    INJECT_STATIC(ui::IUiActionsRegister, actionsRegister)
-    INJECT_STATIC(engraving::rendering::ISingleRenderer, engravingRender)
-    INJECT(framework::IInteractive, interactive)
+    muse::GlobalInject<IPaletteConfiguration> configuration;
+    muse::GlobalInject<engraving::rendering::ISingleRenderer> engravingRender;
+    muse::ContextInject<muse::ui::IUiActionsRegister> actionsRegister = { this };
+    muse::ContextInject<muse::IInteractive> interactive = { this };
+    muse::ContextInject<engraving::IPaletteScoreProvider> paletteScoreProvider = { this };
 
 public:
     enum class Type {
@@ -86,11 +87,14 @@ public:
         Keyboard,
         Pitch,
         Harp,
+        StringTunings,
+        Playback,
+        Handbells,
         Custom
     };
     Q_ENUM(Type)
 
-    explicit Palette(Type t = Type::Custom, QObject* parent = nullptr);
+    explicit Palette(const muse::modularity::ContextPtr& iocCtx, Type t = Type::Custom, QObject* parent = nullptr);
     ~Palette();
 
     QString id() const;
@@ -109,17 +113,20 @@ public:
     // TODO: Remove QString overload
     PaletteCellPtr insertElement(size_t idx, engraving::ElementPtr element, const QString& name, qreal mag = 1.0,
                                  const QPointF& offset = QPointF(), const QString& tag = "");
-    PaletteCellPtr insertElement(size_t idx, engraving::ElementPtr element, const TranslatableString& name, qreal mag = 1.0,
+    PaletteCellPtr insertElement(size_t idx, engraving::ElementPtr element, const muse::TranslatableString& name, qreal mag = 1.0,
                                  const QPointF& offset = QPointF(), const QString& tag = "");
+    PaletteCellPtr insertActionIcon(size_t idx, engraving::ActionIconType type, muse::actions::ActionCode code, double mag = 1.0);
     // TODO: Remove QString overload
     PaletteCellPtr appendElement(engraving::ElementPtr element, const QString& name, qreal mag = 1.0,
                                  const QPointF& offset = QPointF(), const QString& tag = "");
-    PaletteCellPtr appendElement(engraving::ElementPtr element, const TranslatableString& name, qreal mag = 1.0,
+    PaletteCellPtr appendElement(engraving::ElementPtr element, const muse::TranslatableString& name, qreal mag = 1.0,
                                  const QPointF& offset = QPointF(), const QString& tag = "");
-    PaletteCellPtr appendActionIcon(engraving::ActionIconType type, actions::ActionCode code);
+    PaletteCellPtr appendActionIcon(engraving::ActionIconType type, muse::actions::ActionCode code, double mag = 1.0);
 
     bool insertCell(size_t idx, PaletteCellPtr cell);
     bool insertCells(size_t idx, std::vector<PaletteCellPtr> cells);
+    bool removeCell(PaletteCellPtr cell);
+    bool removeCells(std::vector<PaletteCellPtr> cells);
 
     const std::vector<PaletteCellPtr>& cells() const { return m_cells; }
     int cellsCount() const { return int(m_cells.size()); }
@@ -164,7 +171,7 @@ public:
 
     bool read(engraving::XmlReader&, bool pasteMode);
     void write(engraving::XmlWriter&, bool pasteMode) const;
-    static PalettePtr fromMimeData(const QByteArray& data);
+    static PalettePtr fromMimeData(const QByteArray& data, const muse::modularity::ContextPtr& iocCtx);
     QByteArray toMimeData() const;
 
     bool readFromFile(const QString& path);

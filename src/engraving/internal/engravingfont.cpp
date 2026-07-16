@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -21,33 +21,36 @@
  */
 #include "engravingfont.h"
 
+#include "engraving/dom/mscore.h"
 #include "serialization/json.h"
 #include "io/file.h"
-#include "io/fileinfo.h"
 #include "draw/painter.h"
 #include "types/symnames.h"
 
 #include "dom/mscore.h"
-#include "dom/shape.h"
+#include "../style/styledef.h"
 
 #include "smufl.h"
 
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
-using namespace mu::draw;
+using namespace muse;
+using namespace muse::io;
+using namespace muse::draw;
 using namespace mu::engraving;
 
 // =============================================
 // ScoreFont
 // =============================================
 
-EngravingFont::EngravingFont(const std::string& name, const std::string& family, const path_t& filePath)
+EngravingFont::EngravingFont(const std::string& name, const std::string& family,
+                             const path_t& filePath, const path_t& metadataPath)
     : m_symbols(static_cast<size_t>(SymId::lastSym) + 1),
     m_name(name),
     m_family(family),
-    m_fontPath(filePath)
+    m_fontPath(filePath),
+    m_metadataPath(metadataPath)
 {
 }
 
@@ -58,6 +61,7 @@ EngravingFont::EngravingFont(const EngravingFont& other)
     m_name     = other.m_name;
     m_family   = other.m_family;
     m_fontPath = other.m_fontPath;
+    m_metadataPath = other.m_metadataPath;
 }
 
 // =============================================
@@ -99,11 +103,13 @@ void EngravingFont::ensureLoad()
         return;
     }
 
-    m_font.setWeight(mu::draw::Font::Normal);
+    m_font.setWeight(Font::Normal);
     m_font.setItalic(false);
     m_font.setFamily(String::fromStdString(m_family), Font::Type::MusicSymbol);
     m_font.setNoFontMerging(true);
-    m_font.setHinting(mu::draw::Font::Hinting::PreferVerticalHinting);
+    m_font.setHinting(Font::Hinting::PreferVerticalHinting);
+
+    m_font.setPointSizeF(StyleDef::DEFAULT_SMUFL_POINT_SIZE());
 
     for (size_t id = 0; id < m_symbols.size(); ++id) {
         Smufl::Code code = Smufl::code(static_cast<SymId>(id));
@@ -114,16 +120,20 @@ void EngravingFont::ensureLoad()
         computeMetrics(sym, code);
     }
 
-    File metadataFile(io::FileInfo(m_fontPath).path() + u"/metadata.json");
+    File metadataFile(m_metadataPath);
     if (!metadataFile.open(IODevice::ReadOnly)) {
         LOGE() << "Failed to open glyph metadata file: " << metadataFile.filePath();
         return;
     }
 
     std::string error;
-    JsonObject metadataJson = JsonDocument::fromJson(metadataFile.readAll(), &error).rootObject();
+    const JsonObject metadataJson = JsonDocument::fromJson(metadataFile.readAll(), &error).rootObject();
     if (!error.empty()) {
         LOGE() << "Json parse error in " << metadataFile.filePath() << ", error: " << error;
+        return;
+    }
+    if (!metadataJson.isValid()) {
+        LOGE() << "No valid JSON object in " << metadataFile.filePath();
         return;
     }
 
@@ -133,47 +143,6 @@ void EngravingFont::ensureLoad()
     loadEngravingDefaults(metadataJson.value("engravingDefaults").toObject());
 
     m_loaded = true;
-}
-
-void EngravingFont::loadGlyphsWithAnchors(const JsonObject& glyphsWithAnchors)
-{
-    for (const std::string& symName : glyphsWithAnchors.keys()) {
-        SymId symId = SymNames::symIdByName(symName);
-        if (symId == SymId::noSym) {
-            //! NOTE currently, Bravura contains a bunch of entries in glyphsWithAnchors
-            //! for glyph names that will not be found - flag32ndUpStraight, etc.
-            continue;
-        }
-
-        Sym& sym = this->sym(symId);
-        JsonObject anchors = glyphsWithAnchors.value(symName).toObject();
-
-        static const std::unordered_map<std::string, SmuflAnchorId> smuflAnchorIdNames {
-            { "stemDownNW", SmuflAnchorId::stemDownNW },
-            { "stemUpSE", SmuflAnchorId::stemUpSE },
-            { "stemDownSW", SmuflAnchorId::stemDownSW },
-            { "stemUpNW", SmuflAnchorId::stemUpNW },
-            { "cutOutNE", SmuflAnchorId::cutOutNE },
-            { "cutOutNW", SmuflAnchorId::cutOutNW },
-            { "cutOutSE", SmuflAnchorId::cutOutSE },
-            { "cutOutSW", SmuflAnchorId::cutOutSW },
-            { "opticalCenter", SmuflAnchorId::opticalCenter },
-        };
-
-        for (const std::string& anchorId : anchors.keys()) {
-            auto search = smuflAnchorIdNames.find(anchorId);
-            if (search == smuflAnchorIdNames.cend()) {
-                //LOGD() << "Unhandled SMuFL anchorId: " << anchorId;
-                continue;
-            }
-
-            JsonArray arr = anchors.value(anchorId).toArray();
-            double x = arr.at(0).toDouble();
-            double y = arr.at(1).toDouble();
-
-            sym.smuflAnchors[search->second] = PointF(x, -y) * SPATIUM20;
-        }
-    }
 }
 
 void EngravingFont::loadComposedGlyphs()
@@ -237,145 +206,458 @@ void EngravingFont::loadComposedGlyphs()
     }
 }
 
+static const struct GlyphWithAlternates {
+    const std::string key;
+    const std::string alternateKey;
+    const SymId alternateSymId;
+} GLYPHS_WITH_ALTERNATES[] = {
+    { std::string("4stringTabClef"),
+      std::string("4stringTabClefSerif"),
+      SymId::fourStringTabClefSerif
+    },
+    { std::string("6stringTabClef"),
+      std::string("6stringTabClefSerif"),
+      SymId::sixStringTabClefSerif
+    },
+    { std::string("cClef"),
+      std::string("cClefFrench"),
+      SymId::cClefFrench
+    },
+    { std::string("cClef"),
+      std::string("cClefFrench20C"),
+      SymId::cClefFrench20C
+    },
+    { std::string("fClef"),
+      std::string("fClefFrench"),
+      SymId::fClefFrench
+    },
+    { std::string("fClef"),
+      std::string("fClef19thCentury"),
+      SymId::fClef19thCentury
+    },
+    { std::string("noteheadBlack"),
+      std::string("noteheadBlackOversized"),
+      SymId::noteheadBlack
+    },
+    { std::string("noteheadHalf"),
+      std::string("noteheadHalfOversized"),
+      SymId::noteheadHalf
+    },
+    { std::string("noteheadWhole"),
+      std::string("noteheadWholeOversized"),
+      SymId::noteheadWhole
+    },
+    { std::string("noteheadDoubleWhole"),
+      std::string("noteheadDoubleWholeOversized"),
+      SymId::noteheadDoubleWhole
+    },
+    { std::string("noteheadDoubleWholeSquare"),
+      std::string("noteheadDoubleWholeSquareOversized"),
+      SymId::noteheadDoubleWholeSquare
+    },
+    { std::string("noteheadDoubleWhole"),
+      std::string("noteheadDoubleWholeAlt"),
+      SymId::noteheadDoubleWholeAlt
+    },
+    { std::string("brace"),
+      std::string("braceSmall"),
+      SymId::braceSmall
+    },
+    { std::string("brace"),
+      std::string("braceLarge"),
+      SymId::braceLarge
+    },
+    { std::string("brace"),
+      std::string("braceLarger"),
+      SymId::braceLarger
+    },
+    { std::string("flag1024thDown"),
+      std::string("flag1024thDownStraight"),
+      SymId::flag1024thDownStraight
+    },
+    { std::string("flag1024thUp"),
+      std::string("flag1024thUpStraight"),
+      SymId::flag1024thUpStraight
+    },
+    { std::string("flag128thDown"),
+      std::string("flag128thDownStraight"),
+      SymId::flag128thDownStraight
+    },
+    { std::string("flag128thUp"),
+      std::string("flag128thUpStraight"),
+      SymId::flag128thUpStraight
+    },
+    { std::string("flag16thDown"),
+      std::string("flag16thDownStraight"),
+      SymId::flag16thDownStraight
+    },
+    { std::string("flag16thUp"),
+      std::string("flag16thUpStraight"),
+      SymId::flag16thUpStraight
+    },
+    { std::string("flag256thDown"),
+      std::string("flag256thDownStraight"),
+      SymId::flag256thDownStraight
+    },
+    { std::string("flag256thUp"),
+      std::string("flag256thUpStraight"),
+      SymId::flag256thUpStraight
+    },
+    { std::string("flag32ndDown"),
+      std::string("flag32ndDownStraight"),
+      SymId::flag32ndDownStraight
+    },
+    { std::string("flag32ndUp"),
+      std::string("flag32ndUpStraight"),
+      SymId::flag32ndUpStraight
+    },
+    { std::string("flag512thDown"),
+      std::string("flag512thDownStraight"),
+      SymId::flag512thDownStraight
+    },
+    { std::string("flag512thUp"),
+      std::string("flag512thUpStraight"),
+      SymId::flag512thUpStraight
+    },
+    { std::string("flag64thDown"),
+      std::string("flag64thDownStraight"),
+      SymId::flag64thDownStraight
+    },
+    { std::string("flag64thUp"),
+      std::string("flag64thUpStraight"),
+      SymId::flag64thUpStraight
+    },
+    { std::string("flag8thDown"),
+      std::string("flag8thDownStraight"),
+      SymId::flag8thDownStraight
+    },
+    { std::string("flag8thUp"),
+      std::string("flag8thUpStraight"),
+      SymId::flag8thUpStraight
+    },
+    // Time sig variants
+    { std::string("timeSig0"),
+      std::string("timeSig0Large"),
+      SymId::timeSig0Large
+    },
+    { std::string("timeSig0"),
+      std::string("timeSig0Small"),
+      SymId::timeSig0Small
+    },
+    { std::string("timeSig0"),
+      std::string("timeSig0Narrow"),
+      SymId::timeSig0Narrow
+    },
+    { std::string("timeSig1"),
+      std::string("timeSig1Large"),
+      SymId::timeSig1Large
+    },
+    { std::string("timeSig1"),
+      std::string("timeSig1Small"),
+      SymId::timeSig1Small
+    },
+    { std::string("timeSig1"),
+      std::string("timeSig1Narrow"),
+      SymId::timeSig1Narrow
+    },
+    { std::string("timeSig2"),
+      std::string("timeSig2Large"),
+      SymId::timeSig2Large
+    },
+    { std::string("timeSig2"),
+      std::string("timeSig2Small"),
+      SymId::timeSig2Small
+    },
+    { std::string("timeSig2"),
+      std::string("timeSig2Narrow"),
+      SymId::timeSig2Narrow
+    },
+    { std::string("timeSig3"),
+      std::string("timeSig3Large"),
+      SymId::timeSig3Large
+    },
+    { std::string("timeSig3"),
+      std::string("timeSig3Small"),
+      SymId::timeSig3Small
+    },
+    { std::string("timeSig3"),
+      std::string("timeSig3Narrow"),
+      SymId::timeSig3Narrow
+    },
+    { std::string("timeSig4"),
+      std::string("timeSig4Large"),
+      SymId::timeSig4Large
+    },
+    { std::string("timeSig4"),
+      std::string("timeSig4Small"),
+      SymId::timeSig4Small
+    },
+    { std::string("timeSig4"),
+      std::string("timeSig4Narrow"),
+      SymId::timeSig4Narrow
+    },
+    { std::string("timeSig5"),
+      std::string("timeSig5Large"),
+      SymId::timeSig5Large
+    },
+    { std::string("timeSig5"),
+      std::string("timeSig5Small"),
+      SymId::timeSig5Small
+    },
+    { std::string("timeSig5"),
+      std::string("timeSig5Narrow"),
+      SymId::timeSig5Narrow
+    },
+    { std::string("timeSig6"),
+      std::string("timeSig6Large"),
+      SymId::timeSig6Large
+    },
+    { std::string("timeSig6"),
+      std::string("timeSig6Small"),
+      SymId::timeSig6Small
+    },
+    { std::string("timeSig6"),
+      std::string("timeSig6Narrow"),
+      SymId::timeSig6Narrow
+    },
+    { std::string("timeSig7"),
+      std::string("timeSig7Large"),
+      SymId::timeSig7Large
+    },
+    { std::string("timeSig7"),
+      std::string("timeSig7Small"),
+      SymId::timeSig7Small
+    },
+    { std::string("timeSig7"),
+      std::string("timeSig7Narrow"),
+      SymId::timeSig7Narrow
+    },
+    { std::string("timeSig8"),
+      std::string("timeSig8Large"),
+      SymId::timeSig8Large
+    },
+    { std::string("timeSig8"),
+      std::string("timeSig8Small"),
+      SymId::timeSig8Small
+    },
+    { std::string("timeSig8"),
+      std::string("timeSig8Narrow"),
+      SymId::timeSig8Narrow
+    },
+    { std::string("timeSig9"),
+      std::string("timeSig9Large"),
+      SymId::timeSig9Large
+    },
+    { std::string("timeSig9"),
+      std::string("timeSig9Small"),
+      SymId::timeSig9Small
+    },
+    { std::string("timeSig9"),
+      std::string("timeSig9Narrow"),
+      SymId::timeSig9Narrow
+    },
+    { std::string("timeSigBracketLeftSmall"),
+      std::string("timeSigBracketLeftSmallLarge"),
+      SymId::timeSigBracketLeftSmallLarge
+    },
+    { std::string("timeSigBracketLeftSmall"),
+      std::string("timeSigBracketLeftSmallNarrow"),
+      SymId::timeSigBracketLeftSmallNarrow
+    },
+    { std::string("timeSigBracketRightSmall"),
+      std::string("timeSigBracketRightSmallLarge"),
+      SymId::timeSigBracketRightSmallLarge
+    },
+    { std::string("timeSigBracketRightSmall"),
+      std::string("timeSigBracketRightSmallNarrow"),
+      SymId::timeSigBracketRightSmallNarrow
+    },
+    { std::string("timeSigCommon"),
+      std::string("timeSigCommonLarge"),
+      SymId::timeSigCommonLarge
+    },
+    { std::string("timeSigCommon"),
+      std::string("timeSigCommonNarrow"),
+      SymId::timeSigCommonNarrow
+    },
+    { std::string("timeSigCutCommon"),
+      std::string("timeSigCutCommonLarge"),
+      SymId::timeSigCutCommonLarge
+    },
+    { std::string("timeSigCutCommon"),
+      std::string("timeSigCutCommonNarrow"),
+      SymId::timeSigCutCommonNarrow
+    },
+    { std::string("timeSigPlus"),
+      std::string("timeSigPlusLarge"),
+      SymId::timeSigPlusLarge
+    },
+    { std::string("timeSigPlus"),
+      std::string("timeSigPlusNarrow"),
+      SymId::timeSigPlusNarrow
+    },
+    { std::string("timeSigPlusSmall"),
+      std::string("timeSigPlusSmallLarge"),
+      SymId::timeSigPlusSmallLarge
+    },
+    { std::string("timeSigPlusSmall"),
+      std::string("timeSigPlusSmallNarrow"),
+      SymId::timeSigPlusSmallNarrow
+    },
+    { std::string("timeSigFractionalSlash"),
+      std::string("timeSigFractionalSlashLarge"),
+      SymId::timeSigFractionalSlashLarge
+    },
+    { std::string("timeSigFractionalSlash"),
+      std::string("timeSigFractionalSlashNarrow"),
+      SymId::timeSigFractionalSlashNarrow
+    },
+    { std::string("timeSigEquals"),
+      std::string("timeSigEqualsLarge"),
+      SymId::timeSigEqualsLarge
+    },
+    { std::string("timeSigEquals"),
+      std::string("timeSigEqualsNarrow"),
+      SymId::timeSigEqualsNarrow
+    },
+    { std::string("timeSigMinus"),
+      std::string("timeSigMinusLarge"),
+      SymId::timeSigMinusLarge
+    },
+    { std::string("timeSigMinus"),
+      std::string("timeSigMinusNarrow"),
+      SymId::timeSigMinusNarrow
+    },
+    { std::string("timeSigMultiply"),
+      std::string("timeSigMultiplyLarge"),
+      SymId::timeSigMultiplyLarge
+    },
+    { std::string("timeSigMultiply"),
+      std::string("timeSigMultiplyNarrow"),
+      SymId::timeSigMultiplyNarrow
+    },
+    { std::string("timeSigParensLeftSmall"),
+      std::string("timeSigParensLeftSmallLarge"),
+      SymId::timeSigParensLeftSmallLarge
+    },
+    { std::string("timeSigParensLeftSmall"),
+      std::string("timeSigParensLeftSmallNarrow"),
+      SymId::timeSigParensLeftSmallNarrow
+    },
+    { std::string("timeSigParensRightSmall"),
+      std::string("timeSigParensRightSmallLarge"),
+      SymId::timeSigParensRightSmallLarge
+    },
+    { std::string("timeSigParensRightSmall"),
+      std::string("timeSigParensRightSmallNarrow"),
+      SymId::timeSigParensRightSmallNarrow
+    },
+    { std::string("timeSigParensLeft"),
+      std::string("timeSigParensLeftLarge"),
+      SymId::timeSigParensLeftLarge
+    },
+    { std::string("timeSigParensLeft"),
+      std::string("timeSigParensLeftNarrow"),
+      SymId::timeSigParensLeftNarrow
+    },
+    { std::string("timeSigParensRight"),
+      std::string("timeSigParensRightLarge"),
+      SymId::timeSigParensRightLarge
+    },
+    { std::string("timeSigParensRight"),
+      std::string("timeSigParensRightNarrow"),
+      SymId::timeSigParensRightNarrow
+    },
+    { std::string("timeSigCommaEquals"),
+      std::string("timeSigCommaEqualsLarge"),
+      SymId::timeSigCommaEqualsLarge
+    },
+    { std::string("timeSigCommaEquals"),
+      std::string("timeSigCommaEqualsNarrow"),
+      SymId::timeSigCommaEqualsNarrow
+    },
+    { std::string("timeSigFractionQuarter"),
+      std::string("timeSigFractionQuarterLarge"),
+      SymId::timeSigFractionQuarterLarge
+    },
+    { std::string("timeSigFractionQuarter"),
+      std::string("timeSigFractionQuarterNarrow"),
+      SymId::timeSigFractionQuarterNarrow
+    },
+    { std::string("timeSigFractionHalf"),
+      std::string("timeSigFractionHalfLarge"),
+      SymId::timeSigFractionHalfLarge
+    },
+    { std::string("timeSigFractionHalf"),
+      std::string("timeSigFractionHalfNarrow"),
+      SymId::timeSigFractionHalfNarrow
+    },
+    { std::string("timeSigFractionThreeQuarters"),
+      std::string("timeSigFractionThreeQuartersLarge"),
+      SymId::timeSigFractionThreeQuartersLarge
+    },
+    { std::string("timeSigFractionThreeQuarters"),
+      std::string("timeSigFractionThreeQuartersNarrow"),
+      SymId::timeSigFractionThreeQuartersNarrow
+    },
+    { std::string("timeSigFractionOneThird"),
+      std::string("timeSigFractionOneThirdLarge"),
+      SymId::timeSigFractionOneThirdLarge
+    },
+    { std::string("timeSigFractionOneThird"),
+      std::string("timeSigFractionOneThirdNarrow"),
+      SymId::timeSigFractionOneThirdNarrow
+    },
+    { std::string("timeSigFractionTwoThirds"),
+      std::string("timeSigFractionTwoThirdsLarge"),
+      SymId::timeSigFractionTwoThirdsLarge
+    },
+    { std::string("timeSigFractionTwoThirds"),
+      std::string("timeSigFractionTwoThirdsNarrow"),
+      SymId::timeSigFractionTwoThirdsNarrow
+    },
+    { std::string("timeSigX"),
+      std::string("timeSigXLarge"),
+      SymId::timeSigXLarge
+    },
+    { std::string("timeSigX"),
+      std::string("timeSigXNarrow"),
+      SymId::timeSigXNarrow
+    },
+    { std::string("timeSigOpenPenderecki"),
+      std::string("timeSigOpenPendereckiLarge"),
+      SymId::timeSigOpenPendereckiLarge
+    },
+    { std::string("timeSigOpenPenderecki"),
+      std::string("timeSigOpenPendereckiNarrow"),
+      SymId::timeSigOpenPendereckiNarrow
+    },
+    { std::string("timeSigCut2"),
+      std::string("timeSigCut2Large"),
+      SymId::timeSigCut2Large
+    },
+    { std::string("timeSigCut2"),
+      std::string("timeSigCut2Narrow"),
+      SymId::timeSigCut2Narrow
+    },
+    { std::string("timeSigCut3"),
+      std::string("timeSigCut3Large"),
+      SymId::timeSigCut3Large
+    },
+    { std::string("timeSigCut3"),
+      std::string("timeSigCut3Narrow"),
+      SymId::timeSigCut3Narrow
+    },
+};
+
 void EngravingFont::loadStylisticAlternates(const JsonObject& glyphsWithAlternatesObject)
 {
     if (!glyphsWithAlternatesObject.isValid()) {
         return;
     }
 
-    static const struct GlyphWithAlternates {
-        const std::string key;
-        const std::string alternateKey;
-        const SymId alternateSymId;
-    } glyphsWithAlternates[] = {
-        { std::string("4stringTabClef"),
-          std::string("4stringTabClefSerif"),
-          SymId::fourStringTabClefSerif
-        },
-        { std::string("6stringTabClef"),
-          std::string("6stringTabClefSerif"),
-          SymId::sixStringTabClefSerif
-        },
-        { std::string("cClef"),
-          std::string("cClefFrench"),
-          SymId::cClefFrench
-        },
-        { std::string("cClef"),
-          std::string("cClefFrench20C"),
-          SymId::cClefFrench20C
-        },
-        { std::string("fClef"),
-          std::string("fClefFrench"),
-          SymId::fClefFrench
-        },
-        { std::string("fClef"),
-          std::string("fClef19thCentury"),
-          SymId::fClef19thCentury
-        },
-        { std::string("noteheadBlack"),
-          std::string("noteheadBlackOversized"),
-          SymId::noteheadBlack
-        },
-        { std::string("noteheadHalf"),
-          std::string("noteheadHalfOversized"),
-          SymId::noteheadHalf
-        },
-        { std::string("noteheadWhole"),
-          std::string("noteheadWholeOversized"),
-          SymId::noteheadWhole
-        },
-        { std::string("noteheadDoubleWhole"),
-          std::string("noteheadDoubleWholeOversized"),
-          SymId::noteheadDoubleWhole
-        },
-        { std::string("noteheadDoubleWholeSquare"),
-          std::string("noteheadDoubleWholeSquareOversized"),
-          SymId::noteheadDoubleWholeSquare
-        },
-        { std::string("noteheadDoubleWhole"),
-          std::string("noteheadDoubleWholeAlt"),
-          SymId::noteheadDoubleWholeAlt
-        },
-        { std::string("brace"),
-          std::string("braceSmall"),
-          SymId::braceSmall
-        },
-        { std::string("brace"),
-          std::string("braceLarge"),
-          SymId::braceLarge
-        },
-        { std::string("brace"),
-          std::string("braceLarger"),
-          SymId::braceLarger
-        },
-        { std::string("flag1024thDown"),
-          std::string("flag1024thDownStraight"),
-          SymId::flag1024thDownStraight
-        },
-        { std::string("flag1024thUp"),
-          std::string("flag1024thUpStraight"),
-          SymId::flag1024thUpStraight
-        },
-        { std::string("flag128thDown"),
-          std::string("flag128thDownStraight"),
-          SymId::flag128thDownStraight
-        },
-        { std::string("flag128thUp"),
-          std::string("flag128thUpStraight"),
-          SymId::flag128thUpStraight
-        },
-        { std::string("flag16thDown"),
-          std::string("flag16thDownStraight"),
-          SymId::flag16thDownStraight
-        },
-        { std::string("flag16thUp"),
-          std::string("flag16thUpStraight"),
-          SymId::flag16thUpStraight
-        },
-        { std::string("flag256thDown"),
-          std::string("flag256thDownStraight"),
-          SymId::flag256thDownStraight
-        },
-        { std::string("flag256thUp"),
-          std::string("flag256thUpStraight"),
-          SymId::flag256thUpStraight
-        },
-        { std::string("flag32ndDown"),
-          std::string("flag32ndDownStraight"),
-          SymId::flag32ndDownStraight
-        },
-        { std::string("flag32ndUp"),
-          std::string("flag32ndUpStraight"),
-          SymId::flag32ndUpStraight
-        },
-        { std::string("flag512thDown"),
-          std::string("flag512thDownStraight"),
-          SymId::flag512thDownStraight
-        },
-        { std::string("flag512thUp"),
-          std::string("flag512thUpStraight"),
-          SymId::flag512thUpStraight
-        },
-        { std::string("flag64thDown"),
-          std::string("flag64thDownStraight"),
-          SymId::flag64thDownStraight
-        },
-        { std::string("flag64thUp"),
-          std::string("flag64thUpStraight"),
-          SymId::flag64thUpStraight
-        },
-        { std::string("flag8thDown"),
-          std::string("flag8thDownStraight"),
-          SymId::flag8thDownStraight
-        },
-        { std::string("flag8thUp"),
-          std::string("flag8thUpStraight"),
-          SymId::flag8thUpStraight
-        }
-    };
-
     bool ok;
-    for (const GlyphWithAlternates& glyph : glyphsWithAlternates) {
+    for (const GlyphWithAlternates& glyph : GLYPHS_WITH_ALTERNATES) {
         if (glyphsWithAlternatesObject.contains(glyph.key)) {
             const JsonArray alternatesArray = glyphsWithAlternatesObject.value(glyph.key).toObject().value("alternates").toArray();
 
@@ -411,8 +693,70 @@ void EngravingFont::loadStylisticAlternates(const JsonObject& glyphsWithAlternat
     }
 }
 
+void EngravingFont::loadGlyphsWithAnchors(const JsonObject& glyphsWithAnchors)
+{
+    if (!glyphsWithAnchors.isValid()) {
+        return;
+    }
+
+    for (const std::string& symName : glyphsWithAnchors.keys()) {
+        SymId symId = SymNames::symIdByName(symName);
+
+        if (symId == SymId::noSym) {
+            for (auto& alternate : GLYPHS_WITH_ALTERNATES) {
+                if (alternate.alternateKey == symName) {
+                    symId = alternate.alternateSymId;
+                    break;
+                }
+            }
+        }
+
+        if (symId == SymId::noSym) {
+            //! NOTE currently, Bravura contains a bunch of entries in glyphsWithAnchors
+            //! for glyph names that will not be found - flag32ndUpStraight, etc.
+            continue;
+        }
+
+        Sym& sym = this->sym(symId);
+        const JsonObject anchors = glyphsWithAnchors.value(symName).toObject();
+        if (!anchors.isValid()) {
+            continue;
+        }
+
+        static const std::unordered_map<std::string, SmuflAnchorId> smuflAnchorIdNames {
+            { "stemDownNW", SmuflAnchorId::stemDownNW },
+            { "stemUpSE", SmuflAnchorId::stemUpSE },
+            { "stemDownSW", SmuflAnchorId::stemDownSW },
+            { "stemUpNW", SmuflAnchorId::stemUpNW },
+            { "cutOutNE", SmuflAnchorId::cutOutNE },
+            { "cutOutNW", SmuflAnchorId::cutOutNW },
+            { "cutOutSE", SmuflAnchorId::cutOutSE },
+            { "cutOutSW", SmuflAnchorId::cutOutSW },
+            { "opticalCenter", SmuflAnchorId::opticalCenter },
+        };
+
+        for (const std::string& anchorId : anchors.keys()) {
+            const auto search = smuflAnchorIdNames.find(anchorId);
+            if (search == smuflAnchorIdNames.cend()) {
+                //LOGD() << "Unhandled SMuFL anchorId: " << anchorId;
+                continue;
+            }
+
+            const JsonArray arr = anchors.value(anchorId).toArray();
+            const double x = arr.at(0).toDouble();
+            const double y = arr.at(1).toDouble();
+            const double defaultSpatium = StyleDef::styleValues[static_cast<size_t>(Sid::spatium)].defaultValue.toDouble();
+            sym.smuflAnchors[search->second] = PointF(x, -y) * defaultSpatium;
+        }
+    }
+}
+
 void EngravingFont::loadEngravingDefaults(const JsonObject& engravingDefaultsObject)
 {
+    if (!engravingDefaultsObject.isValid()) {
+        return;
+    }
+
     struct EngravingDefault {
         std::vector<Sid> sids;
 
@@ -437,10 +781,10 @@ void EngravingFont::loadEngravingDefaults(const JsonObject& engravingDefaultsObj
         // "beamSpacing" handled separately
         { "legerLineThickness",         { { Sid::ledgerLineWidth } } },
         { "legerLineExtension",         { { Sid::ledgerLineLength } } },
-        { "slurEndpointThickness",      { { Sid::SlurEndWidth } } },
-        { "slurMidpointThickness",      { { Sid::SlurMidWidth } } },
-        // "tieEndpointThickness" not supported
-        // "tieMidpointThickness" not supported
+        { "slurEndpointThickness",      { { Sid::slurEndWidth } } },
+        { "slurMidpointThickness",      { { Sid::slurMidWidth } } },
+        { "tieEndpointThickness",       { { Sid::tieEndWidth } } },
+        { "tieMidpointThickness",       { { Sid::tieMidWidth } } },
         { "thinBarlineThickness",       { { Sid::barWidth, Sid::doubleBarWidth } } },
         { "thickBarlineThickness",      { { Sid::endBarWidth } } },
         // "dashedBarlineThickness" not supported
@@ -494,20 +838,20 @@ void EngravingFont::loadEngravingDefaults(const JsonObject& engravingDefaultsObj
         applyEngravingDefault(key, engravingDefaultsObject.value(key).toDouble());
     }
 
-    m_engravingDefaults.insert({ Sid::MusicalTextFont, String(u"%1 Text").arg(String::fromStdString(m_family)) });
+    m_engravingDefaults.insert({ Sid::musicalTextFont, String(u"%1 Text").arg(String::fromStdString(m_family)) });
 }
 
 void EngravingFont::computeMetrics(EngravingFont::Sym& sym, const Smufl::Code& code)
 {
-    if (fontProvider()->inFontUcs4(m_font, code.smuflCode)) {
+    if (fontProvider()->inFont(m_font, code.smuflCode)) {
         sym.code = code.smuflCode;
-    } else if (fontProvider()->inFontUcs4(m_font, code.musicSymBlockCode)) {
+    } else if (fontProvider()->inFont(m_font, code.musicSymBlockCode)) {
         sym.code = code.musicSymBlockCode;
     }
 
     if (sym.code > 0) {
-        sym.bbox = fontProvider()->symBBox(m_font, sym.code, DPI_F);
-        sym.advance = fontProvider()->symAdvance(m_font, sym.code, DPI_F);
+        sym.bbox = fontProvider()->boundingRect(m_font, sym.code);
+        sym.advance = fontProvider()->horizontalAdvance(m_font, sym.code);
     }
 }
 
@@ -573,8 +917,7 @@ RectF EngravingFont::bbox(SymId id, const SizeF& mag) const
     }
 
     RectF r = sym(id).bbox;
-    return RectF(r.x() * mag.width(), r.y() * mag.height(),
-                 r.width() * mag.width(), r.height() * mag.height());
+    return r.scale(mag);
 }
 
 RectF EngravingFont::bbox(const SymIdList& s, double mag) const
@@ -607,6 +950,95 @@ Shape EngravingFont::shape(const SymIdList& s, const SizeF& mag) const
         pos.rx() += advance(id, mag.width());
     }
     return sh;
+}
+
+Shape EngravingFont::shapeWithCutouts(SymId id, double mag)
+{
+    return shapeWithCutouts(id, SizeF(mag, mag));
+}
+
+Shape EngravingFont::shapeWithCutouts(SymId id, const SizeF& mag)
+{
+    Shape& shape = sym(id).shapeWithCutouts;
+    if (shape.empty()) {
+        constructShapeWithCutouts(shape, id);
+    }
+
+    return shape.scaled(mag);
+}
+
+void EngravingFont::constructShapeWithCutouts(Shape& shape, SymId id)
+{
+    RectF boundingBox = bbox(id, 1.0);
+    double bottom = boundingBox.bottom();
+    double top = boundingBox.top();
+    double left = boundingBox.left();
+    double right = boundingBox.right();
+
+    PointF cutOutNW = smuflAnchor(id, SmuflAnchorId::cutOutNW, 1.0);
+    PointF cutOutNE = smuflAnchor(id, SmuflAnchorId::cutOutNE, 1.0);
+    PointF cutOutSW = smuflAnchor(id, SmuflAnchorId::cutOutSW, 1.0);
+    PointF cutOutSE = smuflAnchor(id, SmuflAnchorId::cutOutSE, 1.0);
+
+    bool nwNull = cutOutNW.isNull();
+    bool neNull = cutOutNE.isNull();
+    bool swNull = cutOutSW.isNull();
+    bool seNull = cutOutSE.isNull();
+
+    if (nwNull && neNull && swNull && seNull) {
+        shape = Shape(bbox(id, 1.0));
+        return;
+    }
+
+    if (nwNull) {
+        cutOutNW = PointF(left, top);
+    }
+    if (neNull) {
+        cutOutNE = PointF(right, top);
+    }
+    if (swNull) {
+        cutOutSW = PointF(left, bottom);
+    }
+    if (seNull) {
+        cutOutSE = PointF(right, bottom);
+    }
+
+    double leftInset = std::max(cutOutNW.x(), cutOutSW.x());
+    double rightInset = std::min(cutOutNE.x(), cutOutSE.x());
+    double topInset = std::max(cutOutNW.y(), cutOutNE.y());
+    double bottomInset = std::min(cutOutSW.y(), cutOutSE.y());
+
+    std::vector<RectF> rects;
+    rects.reserve(6); //at most
+
+    // bottom rect
+    rects.emplace_back(RectF(PointF(cutOutSW.x(), bottom), PointF(cutOutSE.x(), topInset)).normalized());
+    // right rect
+    bool rightRectPlaced = false;
+    if (!seNull) {
+        rects.emplace_back(RectF(PointF(right, cutOutSE.y()), PointF(leftInset, cutOutNE.y())).normalized());
+        rightRectPlaced = true;
+    }
+    // top rect
+    bool topRectPlaced = false;
+    if (!rightRectPlaced || !neNull) {
+        rects.emplace_back(RectF(PointF(cutOutNW.x(), top), PointF(cutOutNE.x(), bottomInset)).normalized());
+        topRectPlaced = true;
+    }
+    // left rect
+    if (!topRectPlaced || !nwNull) {
+        rects.emplace_back(RectF(PointF(left, cutOutSW.y()), PointF(rightInset, cutOutNW.y())).normalized());
+    }
+    // center horizontal rect if needed
+    if (leftInset > rightInset && topInset < bottomInset) {
+        rects.emplace_back(RectF(PointF(left, bottomInset), PointF(right, topInset)).normalized());
+    }
+    // center vertical rect if needed
+    if (leftInset < rightInset && topInset > bottomInset) {
+        rects.emplace_back(RectF(PointF(leftInset, bottom), PointF(rightInset, top)).normalized());
+    }
+
+    shape = Shape(rects);
 }
 
 // =============================================
@@ -643,7 +1075,7 @@ PointF EngravingFont::smuflAnchor(SymId symId, SmuflAnchorId anchorId, double ma
         return engravingFonts()->fallbackFont()->smuflAnchor(symId, anchorId, mag);
     }
 
-    const std::map<SmuflAnchorId, mu::PointF>& smuflAnchors = sym(symId).smuflAnchors;
+    const std::map<SmuflAnchorId, PointF>& smuflAnchors = sym(symId).smuflAnchors;
 
     auto it = smuflAnchors.find(anchorId);
     if (it == smuflAnchors.cend()) {
@@ -657,17 +1089,17 @@ PointF EngravingFont::smuflAnchor(SymId symId, SmuflAnchorId anchorId, double ma
 // Draw
 // =============================================
 
-void EngravingFont::draw(SymId id, Painter* painter, const SizeF& mag, const PointF& pos) const
+void EngravingFont::draw(SymId id, Painter* painter, const SizeF& mag, const PointF& pos, const double angle) const
 {
     const Sym& sym = this->sym(id);
     if (sym.isCompound()) { // is this a compound symbol?
-        draw(sym.subSymbolIds, painter, mag, pos);
+        draw(sym.subSymbolIds, painter, mag, pos, angle);
         return;
     }
 
     if (!sym.isValid()) {
         if (MScore::useFallbackFont && !engravingFonts()->isFallbackFont(this)) {
-            engravingFonts()->fallbackFont()->draw(id, painter, mag, pos);
+            engravingFonts()->fallbackFont()->draw(id, painter, mag, pos, angle);
         } else {
             LOGE() << "invalid sym: " << static_cast<size_t>(id);
         }
@@ -676,33 +1108,39 @@ void EngravingFont::draw(SymId id, Painter* painter, const SizeF& mag, const Poi
     }
 
     painter->save();
-    double size = 20.0 * MScore::pixelRatio;
-    m_font.setPointSizeF(size);
+    m_font.setPointSizeF(StyleDef::DEFAULT_SMUFL_POINT_SIZE());
     painter->scale(mag.width(), mag.height());
     painter->setFont(m_font);
+    if (angle != 0) {
+        const double _width = sym.bbox.width() / 2;
+        const double _height = sym.bbox.height() / 2;
+        painter->translate(_width, -_height);
+        painter->rotate(angle);
+        painter->translate(-_width, _height);
+    }
     painter->drawSymbol(PointF(pos.x() / mag.width(), pos.y() / mag.height()), symCode(id));
     painter->restore();
 }
 
-void EngravingFont::draw(SymId id, Painter* painter, double mag, const PointF& pos) const
+void EngravingFont::draw(SymId id, Painter* painter, double mag, const PointF& pos, const double angle) const
 {
-    draw(id, painter, SizeF(mag, mag), pos);
+    draw(id, painter, SizeF(mag, mag), pos, angle);
 }
 
-void EngravingFont::draw(const SymIdList& ids, Painter* painter, double mag, const PointF& startPos) const
+void EngravingFont::draw(const SymIdList& ids, Painter* painter, double mag, const PointF& startPos, const double angle) const
 {
     PointF pos(startPos);
     for (SymId id : ids) {
-        draw(id, painter, mag, pos);
+        draw(id, painter, mag, pos, angle);
         pos.setX(pos.x() + advance(id, mag));
     }
 }
 
-void EngravingFont::draw(const SymIdList& ids, Painter* painter, const SizeF& mag, const PointF& startPos) const
+void EngravingFont::draw(const SymIdList& ids, Painter* painter, const SizeF& mag, const PointF& startPos, const double angle) const
 {
     PointF pos(startPos);
     for (SymId id : ids) {
-        draw(id, painter, mag, pos);
+        draw(id, painter, mag, pos, angle);
         pos.setX(pos.x() + advance(id, mag.width()));
     }
 }

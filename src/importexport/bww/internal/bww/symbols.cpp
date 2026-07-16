@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited and others
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,7 +29,7 @@
 #include "symbols.h"
 
 namespace Bww {
-static const char* symTable[] =
+static constexpr const char* symTable[] =
 {
     "COMMENT",
     "HEADER",
@@ -51,13 +51,10 @@ static const char* symTable[] =
 
 QString symbolToString(Symbol s)
 {
-    if (s < 0) {
+    if (static_cast<size_t>(s) >= sizeof symTable) {
         return "INVALID";
     }
-    if (static_cast<unsigned>(s) > sizeof symTable) {
-        return "INVALID";
-    } else {
-        return symTable[s];
-    }
+
+    return symTable[s];
 }
 } // namespace Bww
