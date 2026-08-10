@@ -2220,6 +2220,7 @@ const std::array<StyleDef::StyleValue, size_t(Sid::STYLES)> StyleDef::styleValue
     styleDef(cipherTupletSlurThickness,    1.3),
     styleDef(cipherTupletNummerFontSize,   0.6),
     styleDef(cipherTupletNummerFont,       "Cipher"),
+    styleDef(cipherFirstElementPadding,    1.1),
 
 } };
 

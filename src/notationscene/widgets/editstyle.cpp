@@ -723,6 +723,7 @@ EditStyle::EditStyle(QWidget* parent)
         { Sid::cipherTupletSlurThickness,       false, cipherTupletSlurThickness,         resetCipherTupletSlurThickness },
         { Sid::cipherTupletNummerFontSize,      false, cipherTupletNummerFontSize,        resetCipherTupletNummerFontSize },
         { Sid::cipherTupletNummerFont,          false, cipherTupletNummerFont,            resetCipherTupletNummerFont },
+        { Sid::cipherFirstElementPadding,       false, cipherFirstElementPadding,         resetCipherFirstElementPadding },
     };
 
     // ====================================================

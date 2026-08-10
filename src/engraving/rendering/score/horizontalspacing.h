@@ -159,5 +159,8 @@ private:
 
     static void computeHangingLineWidth(const Segment* firstSeg, const Segment* nextSeg, double& width, bool systemHeaderGap,
                                         bool systemEnd);
+    static bool hasVisibleCipherChord(const Segment* segment);
+    static bool isFirstRhythmicSegmentOfMeasure(const Segment* segment);
+    static double cipherFirstElementPadding(const Segment* segment, double spatium);
 };
 }

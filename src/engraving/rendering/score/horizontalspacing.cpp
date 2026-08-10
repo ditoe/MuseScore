@@ -40,6 +40,7 @@
 #include "dom/system.h"
 #include "dom/tie.h"
 #include "dom/timesig.h"
+#include "dom/measure.h"
 
 using namespace mu::engraving;
 using namespace mu::engraving::rendering::score;
@@ -383,6 +384,12 @@ void HorizontalSpacing::spaceAgainstPreviousSegments(Segment* segment, std::vect
             minHorDist = std::max(minHorDist, spaceLyricsAgainstBarlines(prevSeg, segment, ctx));
             double xNonCollision = xPrevSeg + minHorDist;
             x = std::max(x, xNonCollision);
+        }
+        const double cipherPadding =
+            cipherFirstElementPadding(segment, ctx.spatium) * ctx.squeezeFactor;
+
+        if (!muse::RealIsNull(cipherPadding)) {
+            x += cipherPadding;
         }
 
         if (x > ctx.xCur || timeSigAboveBarlineCase) {
@@ -1194,6 +1201,8 @@ double HorizontalSpacing::getFirstSegmentXPos(Segment* segment, HorizontalSpacin
         x = minLeft(segment, leftBarrier);
         x += style.styleMM(segment->hasAccidentals() ? Sid::barAccidentalDistance : Sid::barNoteDistance);
         x = std::max(x, style.styleMM(Sid::systemHeaderMinStartOfSystemDistance).val());
+
+        x += cipherFirstElementPadding(segment, ctx.spatium);
         break;
     }
     case SegmentType::Clef:
@@ -1915,4 +1924,43 @@ void HorizontalSpacing::computeHangingLineWidth(const Segment* firstSeg, const S
             width += minLength - tieLength;
         }
     }
+}
+bool HorizontalSpacing::hasVisibleCipherChord(const Segment* segment)
+{
+    if (!segment) {
+        return false;
+    }
+
+    for (const EngravingItem* element : segment->elist()) {
+        if (element
+            && element->isChord()
+            && element->visible()
+            && element->onCipherStaff()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool HorizontalSpacing::isFirstRhythmicSegmentOfMeasure(const Segment* segment)
+{
+    if (!segment || !segment->isChordRestType() || !segment->measure()) {
+        return false;
+    }
+
+    // Bewusst kein tick() == 0:
+    // Damit bleibt die Behandlung von Auftakten und irregulären Takten
+    // der vorhandenen Measure-Segmentstruktur überlassen.
+    return segment == segment->measure()->first(SegmentType::ChordRest);
+}
+
+double HorizontalSpacing::cipherFirstElementPadding(const Segment* segment, double spatium)
+{
+    if (isFirstRhythmicSegmentOfMeasure(segment)
+        && hasVisibleCipherChord(segment)) {
+        return segment->style().styleD(Sid::cipherFirstElementPadding) * spatium;
+    }
+
+    return 0.0;
 }

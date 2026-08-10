@@ -2239,6 +2239,7 @@ enum class Sid : short {
     cipherTupletSlurThickness,
     cipherTupletNummerFontSize,
     cipherTupletNummerFont,
+    cipherFirstElementPadding,
 
     STYLES
 };
