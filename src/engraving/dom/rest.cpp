@@ -745,6 +745,12 @@ bool Rest::shouldNotBeDrawn() const
         return true;
     }
 
+    if (st && st->isCipherStaff()
+        && voice() == 1
+        && measure()
+        && measure()->hasVoices(staffIdx())) {
+        return true;
+    }
     if (st && st->isTabStaff() && (!st->showRests() || st->genDurations())
         && (!measure() || !measure()->isMMRest())) {
         return true;

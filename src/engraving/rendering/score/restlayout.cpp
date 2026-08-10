@@ -115,6 +115,11 @@ void RestLayout::layoutRest(const Rest* item, Rest::LayoutData* ldata, const Lay
     }
 
     if (item->staff() && item->staff()->isCipherStaff(item->tick())) {
+        if (item->shouldNotBeDrawn()) {
+            ldata->reset();
+            ldata->setIsSkipDraw(true);
+            return;
+        }
 
         ldata->setPos(0.0, 0.0);             // no rest is drawn: reset any position might be set for it
         muse::draw::Font font=item->get_cipherFont();
