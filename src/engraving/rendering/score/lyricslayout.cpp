@@ -33,6 +33,8 @@
 #include "dom/segment.h"
 #include "dom/stafftype.h"
 #include "dom/system.h"
+#include "dom/chord.h"
+#include "dom/note.h"
 
 #include "tlayout.h"
 #include "textlayout.h"
@@ -116,12 +118,31 @@ void LyricsLayout::layout(Lyrics* item, LayoutContext& ctx)
             item->setPosition(item->propertyDefault(Pid::POSITION).value<AlignH>());
         }
     }
+    if (item->onCipherStaff()) {
+        AlignH cipherPosition = item->align().horizontal;
 
+        // JUSTIFY ist keine sinnvolle Ankerposition für eine einzelne
+        // Lyrics-Silbe; in diesem Fall links verwenden.
+        if (cipherPosition == AlignH::JUSTIFY) {
+            cipherPosition = AlignH::LEFT;
+        }
+
+        item->setPosition(cipherPosition);
+    }
     PointF o(item->propertyDefault(Pid::OFFSET).value<PointF>());
 
     // Negate ChordRest offset
     ChordRest* cr = item->chordRest();
     double x = o.x() - cr->x();
+
+    if (item->onCipherStaff() && cr->isChord()) {
+        const Chord* chord = toChord(cr);
+
+        if (!chord->notes().empty()) {
+            const Note* note = chord->notes().front();
+            x += note->pos().x() - note->get_cipherWidth() * 0.5;
+        }
+    }
 
     TextLayout::layoutBaseTextBase1(item, ctx);
     TextLayout::computeTextHighResShape(item, ldata);
