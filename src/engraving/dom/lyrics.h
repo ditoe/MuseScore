@@ -107,6 +107,11 @@ public:
     bool avoidBarlines() const { return m_avoidBarlines; }
     void setAvoidBarlines(bool v) { m_avoidBarlines = v; }
     void layout3();
+    //int targetStaffForLyrics(int shift);
+    int normalizeLyricsStaffShift(int requestedShift, int previousShift);
+    bool isVisibleStaff(const System* system, int staffIdx);
+    bool isValidLyricsStaffShift(int shift);
+    
 
     int m_move_lyrics = 0;  //Move lyrics to a different voice
 private:
