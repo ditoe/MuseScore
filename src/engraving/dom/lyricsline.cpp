@@ -158,21 +158,50 @@ void LyricsLine::doComputeEndElement()
 
 void LyricsLine::layout3()
 {
+    int lyricsShift = 0;
+
+    if (isPartialLyricsLine()) {
+        lyricsShift = toPartialLyricsLine(this)->move_lyrics();
+    }
+    else if (lyrics()) {
+        lyricsShift = lyrics()->move_lyrics();
+    }
+    else {
+        return;
+    }
 
     if (placeBelow()) {
-        int schift = staffIdx() + lyrics()->move_lyrics();
-        if (score()->nstaves() <= schift)
-            schift = score()->nstaves() - 1;
-        qreal y1 = lyrics()->segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
-        qreal y2 = lyrics()->segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+        int shiftStaff = static_cast<int>(staffIdx()) + lyricsShift;
+
+        if (shiftStaff >= static_cast<int>(score()->nstaves())) {
+            shiftStaff = static_cast<int>(score()->nstaves()) - 1;
+        }
+
+        qreal y1 =
+            lyrics()->segment()->measure()->system()
+            ->staff(staffIdx())->get_distanceFirstStaff();
+
+        qreal y2 =
+            lyrics()->segment()->measure()->system()
+            ->staff(shiftStaff)->get_distanceFirstStaff();
+
         mutldata()->moveY(y2 - y1);
     }
     else {
-        int schift = staffIdx() - lyrics()->move_lyrics();
-        if (0 > schift)
-            schift = 0;
-        qreal y1 = lyrics()->segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
-        qreal y2 = lyrics()->segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+        int shiftStaff = static_cast<int>(staffIdx()) - lyricsShift;
+
+        if (shiftStaff < 0) {
+            shiftStaff = 0;
+        }
+
+        qreal y1 =
+            lyrics()->segment()->measure()->system()
+            ->staff(staffIdx())->get_distanceFirstStaff();
+
+        qreal y2 =
+            lyrics()->segment()->measure()->system()
+            ->staff(shiftStaff)->get_distanceFirstStaff();
+
         mutldata()->moveY(y1 - y2);
     }
 }

@@ -428,6 +428,7 @@ bool Lyrics::setProperty(Pid propertyId, const PropertyValue& v)
             if (nextLyrics(this)) {
                 setNeedRemoveInvalidSegments();
             }
+            m_move_lyrics = 0;
             setPlacement(newVal);
         }
     }
@@ -473,16 +474,8 @@ bool Lyrics::setProperty(Pid propertyId, const PropertyValue& v)
     case Pid::VISIBLE:
         setVisible(v.toBool());
         break;
-    case Pid::LYRICS_STAFF_SHIFT:
-        if (placeBelow()) {
-            if ((v.toInt() + staffIdx()) > (score()->nstaves()-1)) m_move_lyrics = score()->nstaves() - staffIdx()-1;
-            else m_move_lyrics = v.toInt();
-        }
-        else {
-            int b = staffIdx() - v.toInt();
-            if (b < 0) m_move_lyrics = staffIdx();
-            else m_move_lyrics = v.toInt();
-        }
+    case Pid::LYRICS_STAFF_SHIFT:    
+        m_move_lyrics = normalizeLyricsStaffShift(v.toInt(), m_move_lyrics);
         break;
     default:
         if (!TextBase::setProperty(propertyId, v)) {
@@ -641,24 +634,139 @@ void Lyrics::removeInvalidSegments()
 
 void Lyrics::layout3()
 {
+    Measure* measure = segment()->measure();
+    System* system = measure ? measure->system() : nullptr;
 
-    if (placeBelow()) {
-        int schift = staffIdx() + m_move_lyrics;
-        if (score()->nstaves() <= schift)
-            schift = score()->nstaves() - 1;
-        qreal y1 = segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
-        qreal y2 = segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
-        mutldata()->moveY(y2 - y1);
+    if (!system) {
+        return;
+    }
+
+    if (!isValidLyricsStaffShift(m_move_lyrics)) {
+        m_move_lyrics = normalizeLyricsStaffShift(m_move_lyrics, m_move_lyrics - 1);
+    }
+
+    const int sourceStaff =
+        static_cast<int>(staffIdx());
+
+    const int targetStaff = placeBelow()
+        ? sourceStaff + m_move_lyrics
+        : sourceStaff - m_move_lyrics;
+
+    if (targetStaff < 0
+        || targetStaff >= static_cast<int>(system->staves().size())) {
+        return;
+    }
+
+    const SysStaff* sourceSysStaff =
+        system->staff(static_cast<size_t>(sourceStaff));
+
+    const SysStaff* targetSysStaff =
+        system->staff(static_cast<size_t>(targetStaff));
+
+    if (!sourceSysStaff || !targetSysStaff
+        || !targetSysStaff->show()) {
+        return;
+    }
+
+    const qreal y1 =
+        sourceSysStaff->get_distanceFirstStaff();
+
+    const qreal y2 =
+        targetSysStaff->get_distanceFirstStaff();
+
+    mutldata()->moveY(placeBelow() ? y2 - y1 : y1 - y2);
+}
+int Lyrics::normalizeLyricsStaffShift(int requestedShift, int previousShift)
+{
+    requestedShift = std::max(requestedShift, 0);
+
+    if (!this || !explicitParent() || !segment() || !measure() || !measure()->system()) {
+        return requestedShift;
+    }
+
+    if (isValidLyricsStaffShift(requestedShift)) {
+        return requestedShift;
+    }
+
+    // Der Benutzer zählt nach oben oder nach unten.
+    const int direction =
+        requestedShift > previousShift ? 1 : -1;
+
+    const int staffCount = static_cast<int>(
+        measure()->system()->staves().size());
+
+    if (direction > 0) {
+        // Beispiel: 1 -> 2 -> 3
+        for (int shift = requestedShift + 1;
+            shift < staffCount;
+            ++shift) {
+            if (isValidLyricsStaffShift(shift)) {
+                return shift;
+            }
+        }
     }
     else {
-        int schift = staffIdx() - m_move_lyrics;
-        if (0 > schift)
-            schift = 0;
-        qreal y1 = segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
-        qreal y2 = segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
-        mutldata()->moveY(-(y1 - y2));
+        // Beispiel: 3 -> 2 -> 1
+        for (int shift = requestedShift - 1;
+            shift >= 0;
+            --shift) {
+            if (isValidLyricsStaffShift(shift)) {
+                return shift;
+            }
+        }
     }
+
+    // Kein Wert in Änderungsrichtung vorhanden:
+    // auf den maximalen gültigen Wert zurückfallen.
+    for (int shift = staffCount - 1;
+        shift >= 0;
+        --shift) {
+        if (isValidLyricsStaffShift(shift)) {
+            return shift;
+        }
+    }
+
+    return 0;
 }
+
+bool Lyrics::isVisibleStaff(const System* system, int staffIdx)
+{
+    if (!system || staffIdx < 0
+        || staffIdx >= static_cast<int>(system->staves().size())) {
+        return false;
+    }
+
+    const SysStaff* sysStaff = system->staff(static_cast<size_t>(staffIdx));
+    return sysStaff && sysStaff->show();
+}
+bool Lyrics::isValidLyricsStaffShift(int shift)
+{
+    if (!this || !measure()
+        || !measure()->system()) {
+        return false;
+    }
+
+    if (shift < 0) {
+        return false;
+    }
+
+    const System* system = measure()->system();
+    const int sourceStaff = static_cast<int>(staffIdx());
+    const int targetStaff = placeBelow()
+        ? sourceStaff + shift
+        : sourceStaff - shift;
+
+    if (targetStaff < 0
+        || targetStaff >= static_cast<int>(system->staves().size())) {
+        return false;
+    }
+
+    const SysStaff* sysStaff =
+        system->staff(static_cast<size_t>(targetStaff));
+
+    return sysStaff && sysStaff->show();
+}
+
 //---------------------------------------------------------
 //   layout3
 //    compute vertical position
@@ -674,22 +782,53 @@ void LyricsLineSegment::layout3()
         mutldata()->setPosY(y);
         return;
     }
+    const LyricsLine* line = lyricsLine();
+
+    int lyricsShift = 0;
+
+    if (line->isPartialLyricsLine()) {
+        lyricsShift = toPartialLyricsLine(line)->move_lyrics();
+    }
+    else {
+        return;
+    }
+
+    System* sys = system();
+
+    if (!sys) {
+        return;
+    }
+
     if (placeBelow()) {
-        int schift = staffIdx() + lyrics()->move_lyrics();
-        if (score()->nstaves() <= schift)
-            schift = score()->nstaves() - 1;
-        qreal y1 = lyrics()->segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
-        qreal y2 = lyrics()->segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+        int shiftStaff = static_cast<int>(staffIdx()) + lyricsShift;
+
+        if (shiftStaff >= static_cast<int>(score()->nstaves())) {
+            shiftStaff = static_cast<int>(score()->nstaves()) - 1;
+        }
+
+        const qreal y1 =
+            sys->staff(staffIdx())->get_distanceFirstStaff();
+
+        const qreal y2 =
+            sys->staff(shiftStaff)->get_distanceFirstStaff();
+
         qreal y = mutldata()->pos().y();
         y += y2 - y1;
         mutldata()->setPosY(y);
     }
     else {
-        int schift = staffIdx() - lyrics()->move_lyrics();
-        if (0 > schift)
-            schift = 0;
-        qreal y1 = lyrics()->segment()->measure()->system()->staff(staffIdx())->get_distanceFirstStaff();
-        qreal y2 = lyrics()->segment()->measure()->system()->staff(schift)->get_distanceFirstStaff();
+        int shiftStaff = static_cast<int>(staffIdx()) - lyricsShift;
+
+        if (shiftStaff < 0) {
+            shiftStaff = 0;
+        }
+
+        const qreal y1 =
+            sys->staff(staffIdx())->get_distanceFirstStaff();
+
+        const qreal y2 =
+            sys->staff(shiftStaff)->get_distanceFirstStaff();
+
         mutldata()->moveY(y1 - y2);
     }
 }

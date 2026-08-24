@@ -121,7 +121,7 @@ void LyricsLayout::layout(Lyrics* item, LayoutContext& ctx)
     if (item->onCipherStaff()) {
         AlignH cipherPosition = item->align().horizontal;
 
-        // JUSTIFY ist keine sinnvolle Ankerposition für eine einzelne
+        // JUSTIFY ist keine sinnvolle Ankerposition fï¿½r eine einzelne
         // Lyrics-Silbe; in diesem Fall links verwenden.
         if (cipherPosition == AlignH::JUSTIFY) {
             cipherPosition = AlignH::LEFT;
@@ -600,13 +600,18 @@ void LyricsLayout::collectLyricsVerses(staff_idx_t staffIdx, System* system, Lyr
             LyricsLineSegment* lyricsLineSegment = toLyricsLineSegment(spannerSegment);
             int lstaffidx = lyricsLineSegment->staffIdx();
             int verse = lyricsLineSegment->verse();
+            const int lyricsStaffShift =
+                lyricsLineSegment->isPartialLyricsLineSegment()
+                ? toPartialLyricsLine(lyricsLineSegment->lyricsLine())->move_lyrics()
+                : lyricsLineSegment->lyrics()->move_lyrics();
+
             if (lyricsLineSegment->lyricsPlaceAbove()) {
-                if (lstaffidx - lyricsLineSegment->lyrics()->move_lyrics() == staffIdx) {
+                if (lstaffidx - lyricsStaffShift == staffIdx) {
                     lyricsVersesAbove[verse].addLine(lyricsLineSegment);
                 }
             }
             else {
-                if (lstaffidx + lyricsLineSegment->lyrics()->move_lyrics() == staffIdx) {
+                if (lstaffidx + lyricsStaffShift == staffIdx) {
                     lyricsVersesBelow[verse].addLine(lyricsLineSegment);
                 }
             }
