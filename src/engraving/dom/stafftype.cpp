@@ -121,7 +121,7 @@ StaffType::StaffType(StaffGroup sg, const String& xml, const String& name, int l
     setShowBarlines(showBarLines);
     setStemless(stemless);
     setGenTimesig(genTimesig);
-    setGenKeysig(sg != StaffGroup::TAB && sg != StaffGroup::CIPHER);
+    setGenKeysig(sg != StaffGroup::TAB);
     setDurationFontName(durFontName);
     setDurationFontSize(durFontSize);
     setDurationFontUserY(durFontUserY);
