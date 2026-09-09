@@ -66,7 +66,7 @@ NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool& error)
 {
     error           = false;
     Segment* s      = pos.segment;
-    int line        = pos.step;
+    int line        = pos.line;
     Fraction tick   = s->tick();
     staff_idx_t staffIdx = pos.staffIdx;
     Staff* st       = staff(staffIdx);
