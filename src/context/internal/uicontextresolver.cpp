@@ -245,8 +245,14 @@ bool UiContextResolver::isShortcutContextAllowed(const std::string& scContext) c
         if (!notation) {
             return false;
         }
+        //! NOTE InputState::staffGroup() also follows the selection outside of note input mode
+        //! (e.g. while editing lyrics on a cipher staff). Only give the cipher note input shortcuts
+        //! precedence while actually in note input mode, otherwise the text editing shortcuts
+        //! (Space, "-", Shift+"-", Up/Down, ...) would be disabled for lyrics on cipher staves.
         auto noteInput = notation->interaction()->noteInput();
-        return notation->interaction()->isTextEditingStarted() && !(noteInput->state().staffGroup() == mu::engraving::StaffGroup::CIPHER);
+        const bool cipherNoteInput = noteInput->isNoteInputMode()
+                                     && noteInput->state().staffGroup() == mu::engraving::StaffGroup::CIPHER;
+        return notation->interaction()->isTextEditingStarted() && !cipherNoteInput;
     } else if (CTX_NOTATION_LIST_SELECTION == scContext) {
         if (!matchWithCurrent(context::UiCtxProjectFocused)) {
             return false;
